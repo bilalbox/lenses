@@ -1,0 +1,1147 @@
+{
+  "id": "quran",
+  "title": "The Quran",
+  "language": "ar",
+  "units": [
+    {
+      "n": 1,
+      "name": "الفاتحة",
+      "phonetic": "Al-Fātiḥah",
+      "title": "The Opening",
+      "rev": "Makkah",
+      "verses": 7,
+      "syntax": 7
+    },
+    {
+      "n": 2,
+      "name": "البقرة",
+      "phonetic": "Al-Baqarah",
+      "title": "The Cow",
+      "rev": "Madinah",
+      "verses": 286,
+      "syntax": 286
+    },
+    {
+      "n": 3,
+      "name": "آل عمران",
+      "phonetic": "Āl ʿim'rān",
+      "title": "The Family of Imrān",
+      "rev": "Madinah",
+      "verses": 200,
+      "syntax": 200
+    },
+    {
+      "n": 4,
+      "name": "النساء",
+      "phonetic": "Al-Nisāa",
+      "title": "The Women",
+      "rev": "Madinah",
+      "verses": 176,
+      "syntax": 176
+    },
+    {
+      "n": 5,
+      "name": "المائدة",
+      "phonetic": "Al-Māidah",
+      "title": "The Table spread with Food",
+      "rev": "Madinah",
+      "verses": 120,
+      "syntax": 120
+    },
+    {
+      "n": 6,
+      "name": "الأنعام",
+      "phonetic": "Al-Anʿām",
+      "title": "The Cattle",
+      "rev": "Makkah",
+      "verses": 165,
+      "syntax": 165
+    },
+    {
+      "n": 7,
+      "name": "الأعراف",
+      "phonetic": "Al-Aʿrāf",
+      "title": "The Heights",
+      "rev": "Makkah",
+      "verses": 206,
+      "syntax": 206
+    },
+    {
+      "n": 8,
+      "name": "الأنفال",
+      "phonetic": "Al-Anfāl",
+      "title": "The Spoils of War",
+      "rev": "Madinah",
+      "verses": 75,
+      "syntax": 75
+    },
+    {
+      "n": 9,
+      "name": "التوبة",
+      "phonetic": "Al-Tawbah",
+      "title": "The Repentance",
+      "rev": "Madinah",
+      "verses": 129,
+      "syntax": 91
+    },
+    {
+      "n": 10,
+      "name": "يونس",
+      "phonetic": "Yūnus",
+      "title": "Jonah",
+      "rev": "Makkah",
+      "verses": 109,
+      "syntax": 0
+    },
+    {
+      "n": 11,
+      "name": "هود",
+      "phonetic": "Hūd",
+      "title": "Hud",
+      "rev": "Makkah",
+      "verses": 123,
+      "syntax": 0
+    },
+    {
+      "n": 12,
+      "name": "يوسف",
+      "phonetic": "Yūsuf",
+      "title": "Joseph",
+      "rev": "Makkah",
+      "verses": 111,
+      "syntax": 0
+    },
+    {
+      "n": 13,
+      "name": "الرعد",
+      "phonetic": "Al-Raʿd",
+      "title": "The Thunder",
+      "rev": "Madinah",
+      "verses": 43,
+      "syntax": 0
+    },
+    {
+      "n": 14,
+      "name": "ابراهيم",
+      "phonetic": "Ib'rāhīm",
+      "title": "Abraham",
+      "rev": "Makkah",
+      "verses": 52,
+      "syntax": 0
+    },
+    {
+      "n": 15,
+      "name": "الحجر",
+      "phonetic": "Al-Ḥij'r",
+      "title": "The Rocky Tract",
+      "rev": "Makkah",
+      "verses": 99,
+      "syntax": 0
+    },
+    {
+      "n": 16,
+      "name": "النحل",
+      "phonetic": "Al-Naḥl",
+      "title": "The Bees",
+      "rev": "Makkah",
+      "verses": 128,
+      "syntax": 0
+    },
+    {
+      "n": 17,
+      "name": "الإسراء",
+      "phonetic": "Al-Isrā",
+      "title": "The Night Journey",
+      "rev": "Makkah",
+      "verses": 111,
+      "syntax": 0
+    },
+    {
+      "n": 18,
+      "name": "الكهف",
+      "phonetic": "Al-Kahf",
+      "title": "The Cave",
+      "rev": "Makkah",
+      "verses": 110,
+      "syntax": 0
+    },
+    {
+      "n": 19,
+      "name": "مريم",
+      "phonetic": "Maryam",
+      "title": "Mary",
+      "rev": "Makkah",
+      "verses": 98,
+      "syntax": 0
+    },
+    {
+      "n": 20,
+      "name": "طه",
+      "phonetic": "Ṭā hā",
+      "title": "Ṭā hā",
+      "rev": "Makkah",
+      "verses": 135,
+      "syntax": 0
+    },
+    {
+      "n": 21,
+      "name": "الأنبياء",
+      "phonetic": "Al-Anbiyāa",
+      "title": "The Prophets",
+      "rev": "Makkah",
+      "verses": 112,
+      "syntax": 0
+    },
+    {
+      "n": 22,
+      "name": "الحج",
+      "phonetic": "Al-Ḥaj",
+      "title": "The Pilgrimage",
+      "rev": "Madinah",
+      "verses": 78,
+      "syntax": 0
+    },
+    {
+      "n": 23,
+      "name": "المؤمنون",
+      "phonetic": "Al-Mu'minūn",
+      "title": "The Believers",
+      "rev": "Makkah",
+      "verses": 118,
+      "syntax": 0
+    },
+    {
+      "n": 24,
+      "name": "النور",
+      "phonetic": "Al-Nūr",
+      "title": "The Light",
+      "rev": "Madinah",
+      "verses": 64,
+      "syntax": 0
+    },
+    {
+      "n": 25,
+      "name": "الفرقان",
+      "phonetic": "Al-Fur'qān",
+      "title": "The Criterion",
+      "rev": "Makkah",
+      "verses": 77,
+      "syntax": 0
+    },
+    {
+      "n": 26,
+      "name": "الشعراء",
+      "phonetic": "Al-Shuʿarā",
+      "title": "The Poets",
+      "rev": "Makkah",
+      "verses": 227,
+      "syntax": 0
+    },
+    {
+      "n": 27,
+      "name": "النمل",
+      "phonetic": "Al-Naml",
+      "title": "The Ants",
+      "rev": "Makkah",
+      "verses": 93,
+      "syntax": 0
+    },
+    {
+      "n": 28,
+      "name": "القصص",
+      "phonetic": "Al-Qaṣaṣ",
+      "title": "The Stories",
+      "rev": "Makkah",
+      "verses": 88,
+      "syntax": 0
+    },
+    {
+      "n": 29,
+      "name": "العنكبوت",
+      "phonetic": "Al-ʿankabūt",
+      "title": "The Spider",
+      "rev": "Makkah",
+      "verses": 69,
+      "syntax": 0
+    },
+    {
+      "n": 30,
+      "name": "الروم",
+      "phonetic": "Al-Rūm",
+      "title": "The Romans",
+      "rev": "Makkah",
+      "verses": 60,
+      "syntax": 0
+    },
+    {
+      "n": 31,
+      "name": "لقمان",
+      "phonetic": "Luq'mān",
+      "title": "Luq'mān",
+      "rev": "Makkah",
+      "verses": 34,
+      "syntax": 0
+    },
+    {
+      "n": 32,
+      "name": "السجدة",
+      "phonetic": "Al-Sajdah",
+      "title": "The Prostration",
+      "rev": "Makkah",
+      "verses": 30,
+      "syntax": 0
+    },
+    {
+      "n": 33,
+      "name": "الأحزاب",
+      "phonetic": "Al-Aḥzāb",
+      "title": "The Combined Forces",
+      "rev": "Madinah",
+      "verses": 73,
+      "syntax": 0
+    },
+    {
+      "n": 34,
+      "name": "سبإ",
+      "phonetic": "Saba",
+      "title": "Sheba",
+      "rev": "Makkah",
+      "verses": 54,
+      "syntax": 0
+    },
+    {
+      "n": 35,
+      "name": "فاطر",
+      "phonetic": "Fāṭir",
+      "title": "The Originator",
+      "rev": "Makkah",
+      "verses": 45,
+      "syntax": 0
+    },
+    {
+      "n": 36,
+      "name": "يس",
+      "phonetic": "Yā sīn",
+      "title": "Yā sīn",
+      "rev": "Makkah",
+      "verses": 83,
+      "syntax": 0
+    },
+    {
+      "n": 37,
+      "name": "الصافات",
+      "phonetic": "Al-Ṣāfāt",
+      "title": "Those Ranges in Ranks",
+      "rev": "Makkah",
+      "verses": 182,
+      "syntax": 0
+    },
+    {
+      "n": 38,
+      "name": "ص",
+      "phonetic": "Ṣād",
+      "title": "Ṣād",
+      "rev": "Makkah",
+      "verses": 88,
+      "syntax": 0
+    },
+    {
+      "n": 39,
+      "name": "الزمر",
+      "phonetic": "Al-Zumar",
+      "title": "The Groups",
+      "rev": "Makkah",
+      "verses": 75,
+      "syntax": 0
+    },
+    {
+      "n": 40,
+      "name": "غافر",
+      "phonetic": "Ghāfir",
+      "title": "The Forgiver God",
+      "rev": "Makkah",
+      "verses": 85,
+      "syntax": 0
+    },
+    {
+      "n": 41,
+      "name": "فصلت",
+      "phonetic": "Fuṣṣilat",
+      "title": "Explained in Detail",
+      "rev": "Makkah",
+      "verses": 54,
+      "syntax": 0
+    },
+    {
+      "n": 42,
+      "name": "الشورى",
+      "phonetic": "Al-Shūrā",
+      "title": "Consultation",
+      "rev": "Makkah",
+      "verses": 53,
+      "syntax": 0
+    },
+    {
+      "n": 43,
+      "name": "الزخرف",
+      "phonetic": "Al-Zukh'ruf",
+      "title": "The Gold Adornment",
+      "rev": "Makkah",
+      "verses": 89,
+      "syntax": 0
+    },
+    {
+      "n": 44,
+      "name": "الدخان",
+      "phonetic": "Al-Dukhān",
+      "title": "The Smoke",
+      "rev": "Makkah",
+      "verses": 59,
+      "syntax": 0
+    },
+    {
+      "n": 45,
+      "name": "الجاثية",
+      "phonetic": "Al-Jāthiyah",
+      "title": "Crouching",
+      "rev": "Makkah",
+      "verses": 37,
+      "syntax": 0
+    },
+    {
+      "n": 46,
+      "name": "الأحقاف",
+      "phonetic": "Al-Aḥqāf",
+      "title": "The Curved Sand-hills",
+      "rev": "Makkah",
+      "verses": 35,
+      "syntax": 0
+    },
+    {
+      "n": 47,
+      "name": "محمد",
+      "phonetic": "Muḥammad",
+      "title": "Muḥammad",
+      "rev": "Madinah",
+      "verses": 38,
+      "syntax": 0
+    },
+    {
+      "n": 48,
+      "name": "الفتح",
+      "phonetic": "Al-Fatḥ",
+      "title": "The Victory",
+      "rev": "Madinah",
+      "verses": 29,
+      "syntax": 0
+    },
+    {
+      "n": 49,
+      "name": "الحجرات",
+      "phonetic": "Al-Ḥujurāt",
+      "title": "The Dwellings",
+      "rev": "Madinah",
+      "verses": 18,
+      "syntax": 0
+    },
+    {
+      "n": 50,
+      "name": "ق",
+      "phonetic": "Qāf",
+      "title": "Qāf",
+      "rev": "Makkah",
+      "verses": 45,
+      "syntax": 0
+    },
+    {
+      "n": 51,
+      "name": "الذاريات",
+      "phonetic": "Al-Dhāriyāt",
+      "title": "The Wind that Scatter",
+      "rev": "Makkah",
+      "verses": 60,
+      "syntax": 0
+    },
+    {
+      "n": 52,
+      "name": "الطور",
+      "phonetic": "Al-Ṭūr",
+      "title": "The Mount",
+      "rev": "Makkah",
+      "verses": 49,
+      "syntax": 0
+    },
+    {
+      "n": 53,
+      "name": "النجم",
+      "phonetic": "Al-Najm",
+      "title": "The Star",
+      "rev": "Makkah",
+      "verses": 62,
+      "syntax": 0
+    },
+    {
+      "n": 54,
+      "name": "القمر",
+      "phonetic": "Al-Qamar",
+      "title": "The Moon",
+      "rev": "Makkah",
+      "verses": 55,
+      "syntax": 0
+    },
+    {
+      "n": 55,
+      "name": "الرحمن",
+      "phonetic": "Al-Raḥmān",
+      "title": "The Most Gracious",
+      "rev": "Madinah",
+      "verses": 78,
+      "syntax": 0
+    },
+    {
+      "n": 56,
+      "name": "الواقعة",
+      "phonetic": "Al-Wāqiʿah",
+      "title": "The Event",
+      "rev": "Makkah",
+      "verses": 96,
+      "syntax": 0
+    },
+    {
+      "n": 57,
+      "name": "الحديد",
+      "phonetic": "Al-Ḥadīd",
+      "title": "The Iron",
+      "rev": "Madinah",
+      "verses": 29,
+      "syntax": 0
+    },
+    {
+      "n": 58,
+      "name": "المجادلة",
+      "phonetic": "Al-Mujādilah",
+      "title": "She That Disputeth",
+      "rev": "Madinah",
+      "verses": 22,
+      "syntax": 0
+    },
+    {
+      "n": 59,
+      "name": "الحشر",
+      "phonetic": "Al-Ḥashr",
+      "title": "The Gathering",
+      "rev": "Madinah",
+      "verses": 24,
+      "syntax": 24
+    },
+    {
+      "n": 60,
+      "name": "الممتحنة",
+      "phonetic": "Al-Mum'taḥanah",
+      "title": "The Woman to be examined",
+      "rev": "Madinah",
+      "verses": 13,
+      "syntax": 13
+    },
+    {
+      "n": 61,
+      "name": "الصف",
+      "phonetic": "Al-Ṣaf",
+      "title": "The Row",
+      "rev": "Madinah",
+      "verses": 14,
+      "syntax": 14
+    },
+    {
+      "n": 62,
+      "name": "الجمعة",
+      "phonetic": "Al-Jumuʿah",
+      "title": "Friday",
+      "rev": "Madinah",
+      "verses": 11,
+      "syntax": 11
+    },
+    {
+      "n": 63,
+      "name": "المنافقون",
+      "phonetic": "Al-Munāfiqūn",
+      "title": "The Hypocrites",
+      "rev": "Madinah",
+      "verses": 11,
+      "syntax": 11
+    },
+    {
+      "n": 64,
+      "name": "التغابن",
+      "phonetic": "Al-Taghābun",
+      "title": "Mutual Loss & Gain",
+      "rev": "Madinah",
+      "verses": 18,
+      "syntax": 18
+    },
+    {
+      "n": 65,
+      "name": "الطلاق",
+      "phonetic": "Al-Ṭalāq",
+      "title": "The Divorce",
+      "rev": "Madinah",
+      "verses": 12,
+      "syntax": 12
+    },
+    {
+      "n": 66,
+      "name": "التحريم",
+      "phonetic": "Al-Taḥrīm",
+      "title": "The Prohibition",
+      "rev": "Madinah",
+      "verses": 12,
+      "syntax": 12
+    },
+    {
+      "n": 67,
+      "name": "الملك",
+      "phonetic": "Al-Mulk",
+      "title": "Dominion",
+      "rev": "Makkah",
+      "verses": 30,
+      "syntax": 30
+    },
+    {
+      "n": 68,
+      "name": "القلم",
+      "phonetic": "Al-Qalam",
+      "title": "The Pen",
+      "rev": "Makkah",
+      "verses": 52,
+      "syntax": 52
+    },
+    {
+      "n": 69,
+      "name": "الحاقة",
+      "phonetic": "Al-Ḥāqah",
+      "title": "The Inevitable",
+      "rev": "Makkah",
+      "verses": 52,
+      "syntax": 52
+    },
+    {
+      "n": 70,
+      "name": "المعارج",
+      "phonetic": "Al-Maʿārij",
+      "title": "The Ways of Ascent",
+      "rev": "Makkah",
+      "verses": 44,
+      "syntax": 44
+    },
+    {
+      "n": 71,
+      "name": "نوح",
+      "phonetic": "Nūḥ",
+      "title": "Nūḥ",
+      "rev": "Makkah",
+      "verses": 28,
+      "syntax": 28
+    },
+    {
+      "n": 72,
+      "name": "الجن",
+      "phonetic": "Al-Jin",
+      "title": "The Jinn",
+      "rev": "Makkah",
+      "verses": 28,
+      "syntax": 28
+    },
+    {
+      "n": 73,
+      "name": "المزمل",
+      "phonetic": "Al-Muzamil",
+      "title": "The One wrapped in Garments",
+      "rev": "Makkah",
+      "verses": 20,
+      "syntax": 20
+    },
+    {
+      "n": 74,
+      "name": "المدثر",
+      "phonetic": "Al-Mudathir",
+      "title": "The One Enveloped",
+      "rev": "Makkah",
+      "verses": 56,
+      "syntax": 56
+    },
+    {
+      "n": 75,
+      "name": "القيامة",
+      "phonetic": "Al-Qiyāmah",
+      "title": "The Resurrection",
+      "rev": "Makkah",
+      "verses": 40,
+      "syntax": 40
+    },
+    {
+      "n": 76,
+      "name": "الانسان",
+      "phonetic": "Al-Insān",
+      "title": "Man",
+      "rev": "Madinah",
+      "verses": 31,
+      "syntax": 31
+    },
+    {
+      "n": 77,
+      "name": "المرسلات",
+      "phonetic": "Al-Mur'salāt",
+      "title": "Those sent forth",
+      "rev": "Makkah",
+      "verses": 50,
+      "syntax": 50
+    },
+    {
+      "n": 78,
+      "name": "النبإ",
+      "phonetic": "Al-Naba",
+      "title": "The Great News",
+      "rev": "Makkah",
+      "verses": 40,
+      "syntax": 40
+    },
+    {
+      "n": 79,
+      "name": "النازعات",
+      "phonetic": "Al-Nāziʿāt",
+      "title": "Those who Pull Out",
+      "rev": "Makkah",
+      "verses": 46,
+      "syntax": 46
+    },
+    {
+      "n": 80,
+      "name": "عبس",
+      "phonetic": "ʿabasa",
+      "title": "He frowned",
+      "rev": "Makkah",
+      "verses": 42,
+      "syntax": 42
+    },
+    {
+      "n": 81,
+      "name": "التكوير",
+      "phonetic": "Al-Takwīr",
+      "title": "The Overthrowing",
+      "rev": "Makkah",
+      "verses": 29,
+      "syntax": 29
+    },
+    {
+      "n": 82,
+      "name": "الإنفطار",
+      "phonetic": "Al-Infiṭār",
+      "title": "The Cleaving",
+      "rev": "Makkah",
+      "verses": 19,
+      "syntax": 19
+    },
+    {
+      "n": 83,
+      "name": "المطففين",
+      "phonetic": "Al-Muṭafifīn",
+      "title": "Those Who Deal in Fraud",
+      "rev": "Makkah",
+      "verses": 36,
+      "syntax": 36
+    },
+    {
+      "n": 84,
+      "name": "الإنشقاق",
+      "phonetic": "Al-Inshiqāq",
+      "title": "The Splitting Asunder",
+      "rev": "Makkah",
+      "verses": 25,
+      "syntax": 25
+    },
+    {
+      "n": 85,
+      "name": "البروج",
+      "phonetic": "Al-Burūj",
+      "title": "The Big Stars",
+      "rev": "Makkah",
+      "verses": 22,
+      "syntax": 22
+    },
+    {
+      "n": 86,
+      "name": "الطارق",
+      "phonetic": "Al-Ṭāriq",
+      "title": "The Night-Comer",
+      "rev": "Makkah",
+      "verses": 17,
+      "syntax": 17
+    },
+    {
+      "n": 87,
+      "name": "الأعلى",
+      "phonetic": "Al-Aʿlā",
+      "title": "The Most High",
+      "rev": "Makkah",
+      "verses": 19,
+      "syntax": 19
+    },
+    {
+      "n": 88,
+      "name": "الغاشية",
+      "phonetic": "Al-Ghāshiyah",
+      "title": "The Overwhelming",
+      "rev": "Makkah",
+      "verses": 26,
+      "syntax": 26
+    },
+    {
+      "n": 89,
+      "name": "الفجر",
+      "phonetic": "Al-Fajr",
+      "title": "The Dawn",
+      "rev": "Makkah",
+      "verses": 30,
+      "syntax": 30
+    },
+    {
+      "n": 90,
+      "name": "البلد",
+      "phonetic": "Al-Balad",
+      "title": "The City",
+      "rev": "Makkah",
+      "verses": 20,
+      "syntax": 20
+    },
+    {
+      "n": 91,
+      "name": "الشمس",
+      "phonetic": "Al-Shams",
+      "title": "The Sun",
+      "rev": "Makkah",
+      "verses": 15,
+      "syntax": 15
+    },
+    {
+      "n": 92,
+      "name": "الليل",
+      "phonetic": "Al-Layl",
+      "title": "The Night",
+      "rev": "Makkah",
+      "verses": 21,
+      "syntax": 21
+    },
+    {
+      "n": 93,
+      "name": "الضحى",
+      "phonetic": "Al-Ḍuḥā",
+      "title": "The Forenoon",
+      "rev": "Makkah",
+      "verses": 11,
+      "syntax": 11
+    },
+    {
+      "n": 94,
+      "name": "الشرح",
+      "phonetic": "Al-Sharḥ",
+      "title": "The Opening Forth",
+      "rev": "Makkah",
+      "verses": 8,
+      "syntax": 8
+    },
+    {
+      "n": 95,
+      "name": "التين",
+      "phonetic": "Al-Tīn",
+      "title": "The Fig",
+      "rev": "Makkah",
+      "verses": 8,
+      "syntax": 8
+    },
+    {
+      "n": 96,
+      "name": "العلق",
+      "phonetic": "Al-ʿalaq",
+      "title": "The Clot",
+      "rev": "Makkah",
+      "verses": 19,
+      "syntax": 19
+    },
+    {
+      "n": 97,
+      "name": "القدر",
+      "phonetic": "Al-Qadr",
+      "title": "The Night of Decree",
+      "rev": "Makkah",
+      "verses": 5,
+      "syntax": 5
+    },
+    {
+      "n": 98,
+      "name": "البينة",
+      "phonetic": "Al-Bayinah",
+      "title": "The Clear Evidence",
+      "rev": "Madinah",
+      "verses": 8,
+      "syntax": 8
+    },
+    {
+      "n": 99,
+      "name": "الزلزلة",
+      "phonetic": "Al-Zalzalah",
+      "title": "The Earthquake",
+      "rev": "Madinah",
+      "verses": 8,
+      "syntax": 8
+    },
+    {
+      "n": 100,
+      "name": "العاديات",
+      "phonetic": "Al-ʿādiyāt",
+      "title": "Those That Run",
+      "rev": "Makkah",
+      "verses": 11,
+      "syntax": 11
+    },
+    {
+      "n": 101,
+      "name": "القارعة",
+      "phonetic": "Al-Qāriʿah",
+      "title": "The Striking Hour",
+      "rev": "Makkah",
+      "verses": 11,
+      "syntax": 11
+    },
+    {
+      "n": 102,
+      "name": "التكاثر",
+      "phonetic": "Al-Takāthur",
+      "title": "The piling Up",
+      "rev": "Makkah",
+      "verses": 8,
+      "syntax": 8
+    },
+    {
+      "n": 103,
+      "name": "العصر",
+      "phonetic": "Al-ʿaṣr",
+      "title": "Time",
+      "rev": "Makkah",
+      "verses": 3,
+      "syntax": 3
+    },
+    {
+      "n": 104,
+      "name": "الهمزة",
+      "phonetic": "Al-Humazah",
+      "title": "The Slanderer",
+      "rev": "Makkah",
+      "verses": 9,
+      "syntax": 9
+    },
+    {
+      "n": 105,
+      "name": "الفيل",
+      "phonetic": "Al-Fīl",
+      "title": "The Elephant",
+      "rev": "Makkah",
+      "verses": 5,
+      "syntax": 5
+    },
+    {
+      "n": 106,
+      "name": "قريش",
+      "phonetic": "Quraysh",
+      "title": "Quraysh",
+      "rev": "Makkah",
+      "verses": 4,
+      "syntax": 4
+    },
+    {
+      "n": 107,
+      "name": "الماعون",
+      "phonetic": "Al-Māʿūn",
+      "title": "Small Kindnesses",
+      "rev": "Makkah",
+      "verses": 7,
+      "syntax": 7
+    },
+    {
+      "n": 108,
+      "name": "الكوثر",
+      "phonetic": "Al-Kawthar",
+      "title": "A River in Paradise",
+      "rev": "Makkah",
+      "verses": 3,
+      "syntax": 3
+    },
+    {
+      "n": 109,
+      "name": "الكافرون",
+      "phonetic": "Al-Kāfirūn",
+      "title": "The Disbelievers",
+      "rev": "Makkah",
+      "verses": 6,
+      "syntax": 6
+    },
+    {
+      "n": 110,
+      "name": "النصر",
+      "phonetic": "Al-Naṣr",
+      "title": "The Help",
+      "rev": "Madinah",
+      "verses": 3,
+      "syntax": 3
+    },
+    {
+      "n": 111,
+      "name": "المسد",
+      "phonetic": "Al-Masad",
+      "title": "The Palm Fibre",
+      "rev": "Makkah",
+      "verses": 5,
+      "syntax": 5
+    },
+    {
+      "n": 112,
+      "name": "الإخلاص",
+      "phonetic": "Al-Ikhlāṣ",
+      "title": "Sincerity",
+      "rev": "Makkah",
+      "verses": 4,
+      "syntax": 4
+    },
+    {
+      "n": 113,
+      "name": "الفلق",
+      "phonetic": "Al-Falaq",
+      "title": "The Daybreak",
+      "rev": "Makkah",
+      "verses": 5,
+      "syntax": 5
+    },
+    {
+      "n": 114,
+      "name": "الناس",
+      "phonetic": "Al-Nās",
+      "title": "Mankind",
+      "rev": "Makkah",
+      "verses": 6,
+      "syntax": 6
+    }
+  ],
+  "stats": {
+    "verses": 6236,
+    "words": 77429,
+    "syntaxVerses": 2436,
+    "syntaxGraphs": 7373,
+    "partialChapters": [
+      {
+        "n": 9,
+        "syntax": 91,
+        "verses": 129
+      }
+    ],
+    "chaptersWithoutSyntax": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58
+    ]
+  },
+  "sources": [
+    {
+      "id": "qac-morphology",
+      "title": "Quranic Arabic Corpus morphology 0.4",
+      "kind": "morphology",
+      "attribution": "Kais Dukes and the Quranic Arabic Corpus",
+      "license": "GPL, with permission to use the annotation in an application if the corpus is credited",
+      "url": "https://corpus.quran.com/download/"
+    },
+    {
+      "id": "qac-syntax",
+      "title": "Quranic Arabic Corpus dependency graphs",
+      "kind": "syntax",
+      "attribution": "Kais Dukes, Quranic Arabic Corpus, published in kaisdukes/quranic-corpus-api",
+      "license": "Distributed with the open corpus project; the API repository has no separate LICENSE file. Treat it under the corpus terms: credit corpus.quran.com.",
+      "url": "https://github.com/kaisdukes/quranic-corpus-api"
+    },
+    {
+      "id": "tanzil",
+      "title": "Tanzil Uthmani Quran text",
+      "kind": "text",
+      "attribution": "Tanzil Project",
+      "license": "CC BY-ND 3.0. The Arabic text is stored verbatim.",
+      "url": "https://tanzil.net/"
+    },
+    {
+      "id": "english-mokhtasar",
+      "title": "Al-Mukhtasar in Interpreting the Noble Quran (English)",
+      "kind": "tafsir",
+      "attribution": "Tafsir Center for Quranic Studies, English text via QuranEnc.com",
+      "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is english_mokhtasar.",
+      "url": "https://quranenc.com/api/v1/translation/sura/english_mokhtasar/1"
+    },
+    {
+      "id": "tafsir-center",
+      "title": "Tafsir Center linguistic analysis",
+      "kind": "classical-irab",
+      "attribution": "Tafsir Center for Quranic Studies",
+      "license": "CC BY 4.0",
+      "url": "https://tafsir.net/"
+    },
+    {
+      "id": "indonesian-mokhtasar",
+      "title": "Al-Mukhtasar in Interpreting the Noble Quran",
+      "kind": "tafsir",
+      "attribution": "Tafsir Center for Quranic Studies, Indonesian text via QuranEnc.com",
+      "license": "QuranEnc republication terms: verbatim text, credit the publisher and QuranEnc.com, and name edition V1.0.0 (23 January 2017).",
+      "url": "https://quranenc.com/en/browse/indonesian_mokhtasar"
+    }
+  ]
+}

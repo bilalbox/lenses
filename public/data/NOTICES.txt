@@ -1,0 +1,144 @@
+Lenses data notices
+==================
+
+This file must stay with the derived data.
+
+# PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK
+#====================================================================
+#
+#  Quranic Arabic Corpus (morphology, version 0.4)
+#  Copyright (C) 2011 Kais Dukes
+#  License: GNU General Public License
+#
+#  The Quranic Arabic Corpus includes syntactic and morphological
+#  annotation of the Quran, and builds on the verified Arabic text
+#  distributed by the Tanzil project.
+#
+#  TERMS OF USE:
+#
+#  - Permission is granted to copy and distribute verbatim copies
+#    of this file, but CHANGING IT IS NOT ALLOWED.
+#
+#  - This annotation can be used in any website or application,
+#    provided its source (the Quranic Arabic Corpus) is clearly
+#    indicated, and a link is made to http://corpus.quran.com to enable
+#    users to keep track of changes.
+#
+#  - This copyright notice shall be included in all verbatim copies
+#    of the text, and shall be reproduced appropriately in all works
+#    derived from or containing substantial portion of this file.
+#
+#  Please check updates at: http://corpus.quran.com/download
+
+# PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK
+#====================================================================
+#
+#  Tanzil Quran Text (Uthmani, version 1.0.2)
+#  Copyright (C) 2008-2009 Tanzil.info
+#  License: Creative Commons BY-ND 3.0 Unported
+#
+#  This copy of quran text is carefully produced, highly
+#  verified and continuously monitored by a group of specialists
+#  at Tanzil project.
+#
+#  TERMS OF USE:
+#
+#  - Permission is granted to copy and distribute verbatim copies
+#    of this text, but CHANGING IT IS NOT ALLOWED.
+#
+#  - This quran text can be used in any website or application,
+#    provided its source (Tanzil.info) is clearly indicated, and
+#    a link is made to http://tanzil.info to enable users to keep
+#    track of changes.
+#
+#  - This copyright notice shall be included in all verbatim copies
+#    of the text, and shall be reproduced appropriately in all files
+#    derived from or containing substantial portion of this text.
+#
+#  Please check updates at: http://tanzil.info/updates/
+#
+#====================================================================
+
+------------------------------------------------------------
+
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+
+# PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK
+#====================================================================
+#
+#  Tanzil Quran Text (Uthmani, version 1.0.2)
+#  Copyright (C) 2008-2009 Tanzil.info
+#  License: Creative Commons BY-ND 3.0 Unported
+#
+#  This copy of quran text is carefully produced, highly 
+#  verified and continuously monitored by a group of specialists 
+#  at Tanzil project.
+#
+#  TERMS OF USE:
+#
+#  - Permission is granted to copy and distribute verbatim copies 
+#    of this text, but CHANGING IT IS NOT ALLOWED.
+#
+#  - This quran text can be used in any website or application, 
+#    provided its source (Tanzil.info) is clearly indicated, and 
+#    a link is made to http://tanzil.info to enable users to keep
+#    track of changes.
+#
+#  - This copyright notice shall be included in all verbatim copies 
+#    of the text, and shall be reproduced appropriately in all files 
+#    derived from or containing substantial portion of this text.
+#
+#  Please check updates at: http://tanzil.info/updates/
+# 
+#====================================================================
+	
+-->
+
+------------------------------------------------------------
+English Al-Mukhtasar
+Title: Al-Mukhtasar in Interpreting the Noble Quran
+Publisher: Tafsir Center for Quranic Studies
+Source: QuranEnc.com, key english_mokhtasar
+https://quranenc.com/api/v1/translation/sura/english_mokhtasar/{sura}
+QuranEnc’s public edition list does not publish a separate version
+number for this key. The text is the edition that endpoint returns,
+stored verbatim. Republication follows the QuranEnc terms listed
+with the Indonesian Al-Mukhtasar below.
+
+------------------------------------------------------------
+Syntactic dependency graphs
+Source file: syntax.txt in https://github.com/kaisdukes/quranic-corpus-api
+Copyright: Kais Dukes / Quranic Arabic Corpus.
+That repository does not include a LICENSE file. The graphs are the
+Quranic Arabic Dependency Treebank (chapters 1-8, part of 9, and 59-114
+in this export). Credit https://corpus.quran.com and do not present
+the annotation as your own.
+
+------------------------------------------------------------
+Tafsir Center linguistic database (quran.db)
+Copyright: Tafsir Center for Quranic Studies (مركز تفسير للدراسات القرآنية)
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Credit: Tafsir Center for Quranic Studies (https://tafsir.net)
+This app uses word-level iʿrāb (irabMushakkal), ṣarf, word meanings,
+and verse-level iʿrāb (irabAyah1). It does not redistribute the tafsir
+book texts stored in the same database.
+Dataset: https://huggingface.co/datasets/tafsircenter/tafsir-mcp-data
+
+------------------------------------------------------------
+Indonesian Al-Mukhtasar
+Title: Al-Mukhtasar in Interpreting the Noble Quran
+Publisher: Tafsir Center for Quranic Studies
+Edition: V1.0.0 (23 January 2017)
+Source: QuranEnc.com, key indonesian_mokhtasar
+https://quranenc.com/en/browse/indonesian_mokhtasar
+Republication terms from QuranEnc:
+1. No modification, addition, or deletion of the content.
+2. Clearly refer to the publisher and the source (QuranEnc.com).
+3. Mention the version number when re-publishing.
+4. Keep the transcript information inside the document.
+5. Notify QuranEnc.com of any note on the translation.
+6. Update the translation to the latest version issued by QuranEnc.com.
+7. Do not include inappropriate advertisements when displaying it.
+This app stores each verse paragraph verbatim and does not add to or trim the text.

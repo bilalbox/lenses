@@ -1,0 +1,5 @@
+allowBuilds:
+  esbuild: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - '@fontsource/source-sans-3@5.3.1'

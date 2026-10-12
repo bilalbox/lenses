@@ -1,0 +1,10 @@
+# Hashed build files. A new deploy changes the filename.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The shell must revalidate so a new service worker can take over.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
