@@ -132,8 +132,6 @@ export function VerseScreen({
             revelation={unit.rev}
             sura={sura}
             verse={verse}
-            syntaxVerses={unit.syntax}
-            verseCount={unit.verses}
             selected={word?.n}
             selectedSegment={segment}
             onSelect={(wordIndex, segmentIndex) => {
@@ -165,8 +163,6 @@ function VerseBody({
   revelation,
   sura,
   verse,
-  syntaxVerses,
-  verseCount,
   selected,
   selectedSegment,
   onSelect,
@@ -177,8 +173,6 @@ function VerseBody({
   revelation: string;
   sura: number;
   verse: Verse;
-  syntaxVerses: number;
-  verseCount: number;
   selected?: number;
   selectedSegment?: number;
   onSelect: (word: number, segment?: number) => void;
@@ -243,7 +237,12 @@ function VerseBody({
         )}
         <span className="ayah-mark">{formatNumber(verse.v)}</span>
       </p>
-      <p className="source-line">{t.verse.arabicTextAttribution}</p>
+      <p className="source-line">
+        {t.common.tanzilSource} ·{" "}
+        <a href="https://tanzil.net/" target="_blank" rel="noreferrer">
+          tanzil.net
+        </a>
+      </p>
 
       {/* Tafsir sections prioritized by active locale */}
       {(() => {
@@ -286,7 +285,17 @@ function VerseBody({
             <details key={m.key} className="mukhtasar" open={locale === m.key}>
               <summary>
                 <span>{m.title}</span>
-                <small>{m.sub}</small>
+                <small>
+                  {m.sub} ·{" "}
+                  <a
+                    href="https://quranenc.com/"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    quranenc.com
+                  </a>
+                </small>
               </summary>
               <p lang={m.lang} dir={m.dir} className={m.className}>
                 {m.text}
@@ -304,7 +313,12 @@ function VerseBody({
       {verse.ir ? (
         <details className="irab-block" open={irabOpen} onToggle={(event) => setIrabOpen(event.currentTarget.open)}>
           <summary>{t.verse.irabTitle}</summary>
-          <p className="source-line">{t.verse.irabAttribution}</p>
+          <p className="source-line">
+            {t.common.tafsirCenterSource} ·{" "}
+            <a href="https://tafsir.net/" target="_blank" rel="noreferrer">
+              tafsir.net
+            </a>
+          </p>
           <div className="prose" dir="rtl" lang="ar">
             {verse.ir}
           </div>
@@ -371,7 +385,6 @@ function VerseBody({
       ) : (
         <div className="banner">
           <strong>{t.verse.noTreeTitle}</strong>
-          <p>{t.verse.noTreeDesc(syntaxVerses, verseCount)}</p>
         </div>
       )}
     </>

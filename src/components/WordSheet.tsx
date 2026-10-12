@@ -78,7 +78,7 @@ export function WordSheet({
       <section>
         <h3>{t.sheet.corpusMorphology}</h3>
         <p className="source-line">
-          Quranic Arabic Corpus 0.4 ·{" "}
+          {t.common.corpusSource} ·{" "}
           <a href="https://corpus.quran.com/" target="_blank" rel="noreferrer">
             corpus.quran.com
           </a>
@@ -144,7 +144,7 @@ export function WordSheet({
         <section>
           <h3>{t.sheet.classicalIrab}</h3>
           <p className="source-line">
-            Tafsir Center for Quranic Studies · CC BY 4.0 ·{" "}
+            {t.common.tafsirCenterSource} ·{" "}
             <a href="https://tafsir.net/" target="_blank" rel="noreferrer">
               tafsir.net
             </a>
@@ -157,7 +157,12 @@ export function WordSheet({
       {word.sf ? (
         <section>
           <h3>{t.sheet.sarf}</h3>
-          <p className="source-line">Traditional morphological description from the same Tafsir Center database.</p>
+          <p className="source-line">
+            {t.common.tafsirCenterSource} ·{" "}
+            <a href="https://tafsir.net/" target="_blank" rel="noreferrer">
+              tafsir.net
+            </a>
+          </p>
           <p className="prose" dir="rtl" lang="ar">
             {word.sf}
           </p>

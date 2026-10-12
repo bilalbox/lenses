@@ -20,6 +20,9 @@ export const en: Translations = {
     chapterAndVerse: "Chapter and verse",
     open: "Open",
     verse: "Verse",
+    tanzilSource: "Tanzil",
+    tafsirCenterSource: "Tafsir Center for Quranic Studies",
+    corpusSource: "Quranic Arabic Corpus",
   },
   settings: {
     title: "Settings",
@@ -36,25 +39,19 @@ export const en: Translations = {
   verse: {
     meccan: "Meccan",
     madinan: "Madinan",
-    arabicTextAttribution: "Arabic text from Tanzil, CC BY-ND 3.0, unchanged.",
     mukhtasarEnTitle: "Al-Mukhtasar",
-    mukhtasarEnSub: "English · Tafsir Center for Quranic Studies · QuranEnc.com",
+    mukhtasarEnSub: "English · QuranEnc",
     mukhtasarIdTitle: "Al-Mukhtasar",
-    mukhtasarIdSub: "Indonesian · Tafsir Center for Quranic Studies · QuranEnc.com · V1.0.0",
+    mukhtasarIdSub: "Indonesian · QuranEnc",
     mukhtasarArTitle: "Al-Mukhtasar",
-    mukhtasarArSub: "Arabic · Tafsir Center for Quranic Studies · QuranEnc.com",
+    mukhtasarArSub: "Arabic · QuranEnc",
     irabTitle: "Sentence Syntax (Iʿrāb)",
-    irabAttribution: "Tafsir Center for Quranic Studies, CC BY 4.0. A second analysis, beside the corpus tree.",
     fitZoom: "Fit",
     zoomInAria: "Zoom in",
     zoomOutAria: "Zoom out",
     clauseCount: (index: number, total: number) => `Clause ${formatNum(index + 1, "en")} of ${formatNum(total, "en")}`,
     clauseNoteContinues: "This clause continues into a neighboring verse.",
     noTreeTitle: "No dependency tree for this verse.",
-    noTreeDesc: (syntaxCount: number, verseCount: number) =>
-      `The Quranic Arabic Corpus treebank in this edition covers ${
-        syntaxCount === 0 ? "none of" : `${formatNum(syntaxCount, "en")} of ${formatNum(verseCount, "en")} verses in`
-      } this surah. Morphology and the classical iʿrāb below are still available. Annotated chapters are 1–8, part of 9, and 59–114.`,
     classicalIrabShort: "Iʿrāb",
   },
   sheet: {
@@ -77,8 +74,6 @@ export const en: Translations = {
   surahs: {
     countEyebrow: (count: number) => `${formatNum(count, "en")} surahs`,
     pageTitle: "Browse the Quran",
-    statsIntro: (syntaxVerses: number, totalVerses: number) =>
-      `${formatNum(syntaxVerses, "en")} of ${formatNum(totalVerses, "en")} verses have a dependency tree. Chapters 10–58 have morphology and classical iʿrāb, and no corpus syntax yet.`,
     coverageTreebank: "Treebank",
     coverageMorphology: "Morphology",
     coverageTrees: (syntax: number, total: number) => `${formatNum(syntax, "en")}/${formatNum(total, "en")} trees`,
@@ -86,7 +81,7 @@ export const en: Translations = {
   examples: {
     eyebrow: "Example search",
     pageTitle: "Find the pattern",
-    lead: "Search the corpus by root, lemma, part of speech, verb form, or the syntactic relation the word fills. Results open the verse, with its tree when the treebank includes it.",
+    lead: "Search the corpus by root, lemma, part of speech, verb form, or the syntactic relation the word fills.",
     presetHal: "Interrogative hal",
     presetAfala: "Form IV of n-z-l",
     presetFaala: "Form II of ʿ-l-m",
@@ -112,10 +107,5 @@ export const en: Translations = {
     coverageHeading: "Coverage",
     coverageBody: (words: number, syntaxVerses: number, partialText: string, chStart: number, chEnd: number) =>
       `Morphology covers all ${formatNum(words, "en")} words. The dependency treebank covers ${formatNum(syntaxVerses, "en")} verses${partialText}. Chapters ${formatNum(chStart, "en")}–${formatNum(chEnd, "en")} have no corpus syntax in this export. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`,
-    tafsirAppHeading: "tafsir.app",
-    tafsirAppBody:
-      "tafsir.app, الباحث القرآني, aggregates many tafsirs and iʿrāb books, including al-Jadwal, al-Daʿās, al-Naḥḥās, and al-Durr al-Maṣūn. No public data repository or open license for that site was found, so this app does not copy it. The extra grammatical source in v1 is the Tafsir Center linguistic database, which is explicitly CC BY 4.0 and includes word-level iʿrāb, ṣarf, and a verse-level iʿrāb. Full tafsir books inside that database are not redistributed.",
-    noticesHint:
-      "The full notices travel with the data in public/data/NOTICES.txt. Application code is MIT. The morphology-derived JSON is a derivative of a GPL file whose own notice also allows use in an application when the Quranic Arabic Corpus is credited.",
   },
 };

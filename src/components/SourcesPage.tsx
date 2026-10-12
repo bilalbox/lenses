@@ -26,25 +26,18 @@ export function SourcesPage({ manifest }: { manifest: Manifest }) {
           )}
         </p>
       </section>
-      <section>
-        <h2>{t.sources.tafsirAppHeading}</h2>
-        <p>{t.sources.tafsirAppBody}</p>
-      </section>
+
       <ul className="source-cards">
         {manifest.sources.map((source) => (
           <li key={source.id}>
             <h3>{source.title}</h3>
             <p>{source.attribution}</p>
-            <p>{source.license}</p>
             <a href={source.url} target="_blank" rel="noreferrer">
               {source.url.replace(/^https:\/\//, "")}
             </a>
           </li>
         ))}
       </ul>
-      <p className="hint">
-        {t.sources.noticesHint}
-      </p>
     </article>
   );
 }

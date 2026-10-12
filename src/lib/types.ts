@@ -102,6 +102,7 @@ export interface SourceMeta {
   title: string;
   kind: string;
   attribution: string;
+  description?: string;
   license: string;
   url: string;
 }

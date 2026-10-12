@@ -1100,6 +1100,7 @@
       "title": "Quranic Arabic Corpus morphology 0.4",
       "kind": "morphology",
       "attribution": "Kais Dukes and the Quranic Arabic Corpus",
+      "description": "Morphological segments, roots, lemmas, and grammatical features for all words.",
       "license": "GPL, with permission to use the annotation in an application if the corpus is credited",
       "url": "https://corpus.quran.com/download/"
     },
@@ -1108,7 +1109,8 @@
       "title": "Quranic Arabic Corpus dependency graphs",
       "kind": "syntax",
       "attribution": "Kais Dukes, Quranic Arabic Corpus, published in kaisdukes/quranic-corpus-api",
-      "license": "Distributed with the open corpus project; the API repository has no separate LICENSE file. Treat it under the corpus terms: credit corpus.quran.com.",
+      "description": "Syntactic dependency graphs from the Quranic Arabic Dependency Treebank.",
+      "license": "Distributed under the corpus terms: credit corpus.quran.com.",
       "url": "https://github.com/kaisdukes/quranic-corpus-api"
     },
     {
@@ -1116,7 +1118,8 @@
       "title": "Tanzil Uthmani Quran text",
       "kind": "text",
       "attribution": "Tanzil Project",
-      "license": "CC BY-ND 3.0. The Arabic text is stored verbatim.",
+      "description": "Arabic text from Tanzil, CC BY-ND 3.0, unchanged.",
+      "license": "CC BY-ND 3.0.",
       "url": "https://tanzil.net/"
     },
     {
@@ -1124,7 +1127,8 @@
       "title": "Al-Mukhtasar in Interpreting the Noble Quran (English)",
       "kind": "tafsir",
       "attribution": "Tafsir Center for Quranic Studies, English text via QuranEnc.com",
-      "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is english_mokhtasar.",
+      "description": "English translation and commentary of Al-Mukhtasar via QuranEnc.com.",
+      "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com.",
       "url": "https://quranenc.com/api/v1/translation/sura/english_mokhtasar/1"
     },
     {
@@ -1132,14 +1136,16 @@
       "title": "Tafsir Center linguistic analysis",
       "kind": "classical-irab",
       "attribution": "Tafsir Center for Quranic Studies",
+      "description": "Traditional morphological description (ṣarf) from the Tafsir Center database, alongside word-level classical iʿrāb and verse-level sentence syntax. A second analysis beside the corpus tree.",
       "license": "CC BY 4.0",
       "url": "https://tafsir.net/"
     },
     {
       "id": "indonesian-mokhtasar",
-      "title": "Al-Mukhtasar in Interpreting the Noble Quran",
+      "title": "Al-Mukhtasar in Interpreting the Noble Quran (Indonesian)",
       "kind": "tafsir",
       "attribution": "Tafsir Center for Quranic Studies, Indonesian text via QuranEnc.com",
+      "description": "Indonesian translation and commentary of Al-Mukhtasar via QuranEnc.com, edition V1.0.0 (23 January 2017).",
       "license": "QuranEnc republication terms: verbatim text, credit the publisher and QuranEnc.com, and name edition V1.0.0 (23 January 2017).",
       "url": "https://quranenc.com/en/browse/indonesian_mokhtasar"
     },
@@ -1148,6 +1154,7 @@
       "title": "Al-Mukhtasar in Interpreting the Noble Quran (Arabic)",
       "kind": "tafsir",
       "attribution": "Tafsir Center for Quranic Studies, Arabic text via QuranEnc.com",
+      "description": "Arabic commentary text of Al-Mukhtasar via QuranEnc.com.",
       "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is arabic_mokhtasar.",
       "url": "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/1"
     }

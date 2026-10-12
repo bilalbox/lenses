@@ -31,6 +31,9 @@ export interface Translations {
     chapterAndVerse: string;
     open: string;
     verse: string;
+    tanzilSource: string;
+    tafsirCenterSource: string;
+    corpusSource: string;
   };
   settings: {
     title: string;
@@ -47,7 +50,6 @@ export interface Translations {
   verse: {
     meccan: string;
     madinan: string;
-    arabicTextAttribution: string;
     mukhtasarEnTitle: string;
     mukhtasarEnSub: string;
     mukhtasarIdTitle: string;
@@ -55,14 +57,12 @@ export interface Translations {
     mukhtasarArTitle: string;
     mukhtasarArSub: string;
     irabTitle: string;
-    irabAttribution: string;
     fitZoom: string;
     zoomInAria: string;
     zoomOutAria: string;
     clauseCount: (index: number, total: number) => string;
     clauseNoteContinues: string;
     noTreeTitle: string;
-    noTreeDesc: (syntaxCount: number, verseCount: number) => string;
     classicalIrabShort: string;
   };
   sheet: {
@@ -85,7 +85,6 @@ export interface Translations {
   surahs: {
     countEyebrow: (count: number) => string;
     pageTitle: string;
-    statsIntro: (syntaxVerses: number, totalVerses: number) => string;
     coverageTreebank: string;
     coverageMorphology: string;
     coverageTrees: (syntax: number, total: number) => string;
@@ -116,8 +115,5 @@ export interface Translations {
     intro: string;
     coverageHeading: string;
     coverageBody: (words: number, syntaxVerses: number, partialText: string, chStart: number, chEnd: number) => string;
-    tafsirAppHeading: string;
-    tafsirAppBody: string;
-    noticesHint: string;
   };
 }

@@ -26,6 +26,9 @@ export const ar: Translations = {
     chapterAndVerse: "السورة والآية",
     open: "فتح",
     verse: "الآية",
+    tanzilSource: "تنزيل",
+    tafsirCenterSource: "مركز تفسير للدراسات القرآنية",
+    corpusSource: "المدونة القرآنية",
   },
   settings: {
     title: "الإعدادات",
@@ -42,25 +45,19 @@ export const ar: Translations = {
   verse: {
     meccan: "مكية",
     madinan: "مدنية",
-    arabicTextAttribution: "النص القرآني من مشروع تنزيل، رخصة CC BY-ND 3.0، دون تغيير.",
     mukhtasarEnTitle: "المختصر في التفسير",
-    mukhtasarEnSub: "الإنجليزية · مركز تفسير للدراسات القرآنية · QuranEnc.com",
+    mukhtasarEnSub: "الإنجليزية · QuranEnc",
     mukhtasarIdTitle: "المختصر في التفسير",
-    mukhtasarIdSub: "الإندونيسية · مركز تفسير للدراسات القرآنية · QuranEnc.com · V1.0.0",
+    mukhtasarIdSub: "الإندونيسية · QuranEnc",
     mukhtasarArTitle: "المختصر في التفسير",
-    mukhtasarArSub: "مركز تفسير للدراسات القرآنية · QuranEnc.com",
+    mukhtasarArSub: "العربية · QuranEnc",
     irabTitle: "إعراب الآية",
-    irabAttribution: "مركز تفسير للدراسات القرآنية، رخصة CC BY 4.0. إعراب كلي موازٍ لشجرة الإعراب.",
     fitZoom: "ملاءمة",
     zoomInAria: "تكبير",
     zoomOutAria: "تصغير",
     clauseCount: (index: number, total: number) => `الجملة ${formatNum(index + 1, "ar")} من ${formatNum(total, "ar")}`,
     clauseNoteContinues: "تتصل هذه الجملة بآية مجاورة.",
     noTreeTitle: "لا توجد شجرة إعراب لهذه الآية.",
-    noTreeDesc: (syntaxCount: number, verseCount: number) =>
-      `تغطي شجرة إعراب المدونة القرآنية في هذه النسخة ${
-        syntaxCount === 0 ? "لا شيء" : `${formatNum(syntaxCount, "ar")} من أصل ${formatNum(verseCount, "ar")} آية`
-      } في هذه السورة. الصرف والإعراب التقليدي متاحان أدناه. السور المحللة شجرياً هي ١–٨، وجزء من ٩، و٥٩–١١٤.`,
     classicalIrabShort: "إعراب",
   },
   sheet: {
@@ -83,8 +80,6 @@ export const ar: Translations = {
   surahs: {
     countEyebrow: (count: number) => `${formatNum(count, "ar")} سورة`,
     pageTitle: "تصفح القرآن الكريم",
-    statsIntro: (syntaxVerses: number, totalVerses: number) =>
-      `${formatNum(syntaxVerses, "ar")} من أصل ${formatNum(totalVerses, "ar")} آية تشتمل على شجرة إعراب نحوية. السور ١٠–٥٨ تحوي الصرف والإعراب الكلاسيكي حالياً.`,
     coverageTreebank: "شجرة النحو",
     coverageMorphology: "الصرف والإعراب",
     coverageTrees: (syntax: number, total: number) => `${formatNum(syntax, "ar")}/${formatNum(total, "ar")} شجرة`,
@@ -92,7 +87,7 @@ export const ar: Translations = {
   examples: {
     eyebrow: "البحث في الأنماط",
     pageTitle: "استكشف الأنماط النحوية",
-    lead: "ابحث في متن المدونة بالجذر، أو اللفظ المعجمي، أو نوع الكلمة، أو الوزن الصرفي، أو العلاقة الإعرابية. النتائج تفتح الآية مع شجرتها الإعرابية.",
+    lead: "ابحث في متن المدونة بالجذر، أو اللفظ المعجمي، أو نوع الكلمة، أو الوزن الصرفي، أو العلاقة الإعرابية.",
     presetHal: "استفهام هل",
     presetAfala: "أَفْعَلَ من نزل",
     presetFaala: "فَعَّلَ من علم",
@@ -121,10 +116,5 @@ export const ar: Translations = {
     coverageHeading: "نطاق التغطية",
     coverageBody: (words: number, syntaxVerses: number, partialText: string, chStart: number, chEnd: number) =>
       `يغطي التحليل الصرفي كامل كلمات القرآن البالغة ${formatNum(words, "ar")} كلمة. وتشمل شجرة الإعراب ${formatNum(syntaxVerses, "ar")} آية${partialText}. السور ${formatNum(chStart, "ar")}–${formatNum(chEnd, "ar")} لم تكتمل شجرتها في هذا التصدير بعد. يتوفر الإعراب والصرف من مركز تفسير لجميع الكلمات.`,
-    tafsirAppHeading: "موقع الباحث القرآني (tafsir.app)",
-    tafsirAppBody:
-      "يجمع الباحث القرآني العديد من التفاسير وكتب الإعراب (مثل الجدول والدعاس والنحاس والدر المصون). لم يتوفر ترخيص مفتوح أو مستودع بيانات عام له، لذا لم يُضمن نصه هنا. المصدر الإضافي المعتمد هو قاعدة بيانات مركز تفسير المرخصة صراحة برخصة CC BY 4.0 والتي تشمل إعراب المفردات والصرف وإعراب الجمل.",
-    noticesHint:
-      "الإشعارات القانونية الكاملة مصاحبة للملفات في public/data/NOTICES.txt. شفرة التطبيق تحت رخصة MIT.",
   },
 };

@@ -13,9 +13,6 @@ export function SurahIndex({ manifest, onOpen }: Props) {
       <header className="page-intro">
         <p className="eyebrow">{t.surahs.countEyebrow(manifest.units.length)}</p>
         <h1>{t.surahs.pageTitle}</h1>
-        <p>
-          {t.surahs.statsIntro(manifest.stats.syntaxVerses, manifest.stats.verses)}
-        </p>
       </header>
       <ol className="surah-grid">
         {manifest.units.map((unit) => {

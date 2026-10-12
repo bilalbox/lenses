@@ -20,6 +20,9 @@ export const id: Translations = {
     chapterAndVerse: "Surah dan ayat",
     open: "Buka",
     verse: "Ayat",
+    tanzilSource: "Tanzil",
+    tafsirCenterSource: "Markaz Tafsir untuk Studi Al-Qur'an",
+    corpusSource: "Quranic Arabic Corpus",
   },
   settings: {
     title: "Pengaturan",
@@ -36,25 +39,19 @@ export const id: Translations = {
   verse: {
     meccan: "Makkiyah",
     madinan: "Madaniyah",
-    arabicTextAttribution: "Teks Arab dari Tanzil, CC BY-ND 3.0, tanpa perubahan.",
     mukhtasarEnTitle: "Al-Mukhtasar",
-    mukhtasarEnSub: "Bahasa Inggris · Markaz Tafsir · QuranEnc.com",
+    mukhtasarEnSub: "Bahasa Inggris · QuranEnc",
     mukhtasarIdTitle: "Al-Mukhtasar",
-    mukhtasarIdSub: "Bahasa Indonesia · Markaz Tafsir · QuranEnc.com · V1.0.0",
+    mukhtasarIdSub: "Bahasa Indonesia · QuranEnc",
     mukhtasarArTitle: "Al-Mukhtasar",
-    mukhtasarArSub: "Bahasa Arab · Markaz Tafsir · QuranEnc.com",
+    mukhtasarArSub: "Bahasa Arab · QuranEnc",
     irabTitle: "I'rab Kalimat",
-    irabAttribution: "Markaz Tafsir untuk Studi Al-Qur'an, CC BY 4.0. Analisis kedua selain pohon korpus.",
     fitZoom: "Sesuaikan",
     zoomInAria: "Perbesar",
     zoomOutAria: "Perkecil",
     clauseCount: (index: number, total: number) => `Klausa ${formatNum(index + 1, "id")} dari ${formatNum(total, "id")}`,
     clauseNoteContinues: "Klausa ini bersambung ke ayat berikutnya.",
     noTreeTitle: "Belum ada pohon ketergantungan untuk ayat ini.",
-    noTreeDesc: (syntaxCount: number, verseCount: number) =>
-      `Pohon ketergantungan Quranic Arabic Corpus dalam edisi ini mencakup ${
-        syntaxCount === 0 ? "belum ada" : `${formatNum(syntaxCount, "id")} dari ${formatNum(verseCount, "id")} ayat di`
-      } surah ini. Morfologi dan i'rab klasik di bawah tetap tersedia. Surah yang dianotasi adalah 1–8, sebagian 9, dan 59–114.`,
     classicalIrabShort: "I'rab",
   },
   sheet: {
@@ -77,8 +74,6 @@ export const id: Translations = {
   surahs: {
     countEyebrow: (count: number) => `${formatNum(count, "id")} surah`,
     pageTitle: "Jelajahi Al-Qur'an",
-    statsIntro: (syntaxVerses: number, totalVerses: number) =>
-      `${formatNum(syntaxVerses, "id")} dari ${formatNum(totalVerses, "id")} ayat memiliki pohon sintaksis. Surah 10–58 memiliki morfologi dan i'rab klasik, namun belum ada sintaksis korpus.`,
     coverageTreebank: "Treebank",
     coverageMorphology: "Morfologi",
     coverageTrees: (syntax: number, total: number) => `${formatNum(syntax, "id")}/${formatNum(total, "id")} pohon`,
@@ -86,7 +81,7 @@ export const id: Translations = {
   examples: {
     eyebrow: "Pencarian contoh",
     pageTitle: "Temukan pola",
-    lead: "Cari dalam korpus berdasarkan akar kata, bentuk dasar, jenis kata, wazan verba, atau relasi sintaksis. Hasil akan membuka ayat beserta pohon sintaksisnya.",
+    lead: "Cari dalam korpus berdasarkan akar kata, bentuk dasar, jenis kata, wazan verba, atau relasi sintaksis.",
     presetHal: "Pertanyaan hal",
     presetAfala: "Af'ala dari n-z-l",
     presetFaala: "Fa''ala dari 'a-l-m",
@@ -112,10 +107,5 @@ export const id: Translations = {
     coverageHeading: "Cakupan",
     coverageBody: (words: number, syntaxVerses: number, partialText: string, chStart: number, chEnd: number) =>
       `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis mencakup ${formatNum(syntaxVerses, "id")} ayat${partialText}. Surah ${formatNum(chStart, "id")}–${formatNum(chEnd, "id")} belum memiliki sintaksis korpus. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`,
-    tafsirAppHeading: "tafsir.app",
-    tafsirAppBody:
-      "tafsir.app (Al-Bahith Al-Qur'ani) mengumpulkan banyak kitab tafsir dan i'rab (seperti Al-Jadwal, Ad-Da'as, An-Nahhas, dan Ad-Durr Al-Masun). Tidak ditemukan repositori publik atau lisensi terbuka untuk situs tersebut, sehingga aplikasi ini tidak menyalinnya. Sumber tambahan di v1 adalah basis data linguistik Markaz Tafsir yang berlisensi CC BY 4.0 mencakup i'rab kata, sharaf, dan i'rab ayat.",
-    noticesHint:
-      "Pemberitahuan lengkap tersimpan dalam data di public/data/NOTICES.txt. Kode aplikasi berlisensi MIT.",
   },
 };

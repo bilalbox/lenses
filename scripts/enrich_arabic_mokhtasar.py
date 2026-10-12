@@ -107,6 +107,7 @@ def main() -> None:
                     "title": "Al-Mukhtasar in Interpreting the Noble Quran (Arabic)",
                     "kind": "tafsir",
                     "attribution": "Tafsir Center for Quranic Studies, Arabic text via QuranEnc.com",
+                    "description": "Arabic commentary text of Al-Mukhtasar via QuranEnc.com.",
                     "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is arabic_mokhtasar.",
                     "url": "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/1",
                 }
