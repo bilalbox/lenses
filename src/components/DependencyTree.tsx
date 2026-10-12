@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { arcIsHot, brightNodes, type CardFocus } from "../lib/focus";
 import { posGloss, relationFamily, relationGloss } from "../lib/glossary";
 import { layoutGraph, type ArcGeom, type LeafFace } from "../lib/layout";
+import { useI18n } from "../lib/i18n/I18nContext";
 import type { GraphNode, SyntaxGraph, Word } from "../lib/types";
 
 interface Props {
@@ -35,6 +36,7 @@ export function DependencyTree({
   onZoom,
   onSelectWord,
 }: Props) {
+  const { locale, t } = useI18n();
   const [fontsReady, setFontsReady] = useState(false);
   const [fit, setFit] = useState(1);
   const rendered = fit * zoom;
@@ -181,7 +183,7 @@ export function DependencyTree({
   };
   const isolating = frozen ? selectedWord !== undefined : focus !== null;
   const focusedEdge = focus?.kind === "edge" ? layout.arcs.find((arc) => arc.source === focus.edge) : undefined;
-  const explanation = focusedEdge ? relationGloss(focusedEdge.rel) : null;
+  const explanation = focusedEdge ? relationGloss(focusedEdge.rel, locale) : null;
   useEffect(() => {
     if (!focusedEdge) return;
     reveal(focusedEdge.x1, focusedEdge.x2);
@@ -203,8 +205,8 @@ export function DependencyTree({
   return (
     <section className={`clause${current ? " is-current" : ""}`} id={`clause-${index}`}>
       <header className="clause-head" dir="rtl">
-        <h3 lang="ar">الجملة {index + 1} من {total}</h3>
-        {graph.x ? <p dir="ltr">This clause continues into a neighboring verse.</p> : null}
+        <h3 lang="ar">{t.verse.clauseCount(index, total)}</h3>
+        {graph.x ? <p dir="auto">{t.verse.clauseNoteContinues}</p> : null}
       </header>
       <div className={`tree-scroll${overflow.left ? " fades-left" : ""}${overflow.right ? " fades-right" : ""}`} ref={scroller}>
         {overflow.left ? <span className="tree-more is-left" aria-hidden="true">‹</span> : null}
@@ -215,7 +217,7 @@ export function DependencyTree({
             width={layout.width * rendered}
             height={layout.height * rendered}
             role="img"
-            aria-label={`Dependency tree, clause ${index + 1}`}
+            aria-label={t.verse.clauseCount(index, total)}
           >
             <defs>
               <marker id={arrowId} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">

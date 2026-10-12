@@ -649,6 +649,7 @@ def main() -> None:
     expected = {surah["n"]: len(surah["verses"]) for surah in surahs}
     english = load_quranenc("english_mokhtasar", "english_mokhtasar", "en", "ef", expected)
     indonesian = load_quranenc("indonesian_mokhtasar", "mokhtasar", "mk", "mf", expected)
+    arabic = load_quranenc("arabic_mokhtasar", "arabic_mokhtasar", "ma", "af", expected)
     graphs = parse_syntax(files["syntax"])
     graphs_by_verse = attach_graphs(graphs, morphology)
 
@@ -768,6 +769,10 @@ def main() -> None:
             built["mk"] = note["mk"]
             if "mf" in note:
                 built["mf"] = note["mf"]
+            ar_note = arabic[(sura, number)]
+            built["ma"] = ar_note["ma"]
+            if "af" in ar_note:
+                built["af"] = ar_note["af"]
             if verse_graphs:
                 built["g"] = verse_graphs
             built_verses.append(built)
@@ -881,6 +886,14 @@ def main() -> None:
                 "license": f"QuranEnc republication terms: verbatim text, credit the publisher and QuranEnc.com, and name edition {MOKHTASAR_VERSION} ({MOKHTASAR_DATE}).",
                 "url": "https://quranenc.com/en/browse/indonesian_mokhtasar",
             },
+            {
+                "id": "arabic-mokhtasar",
+                "title": "Al-Mukhtasar in Interpreting the Noble Quran (Arabic)",
+                "kind": "tafsir",
+                "attribution": "Tafsir Center for Quranic Studies, Arabic text via QuranEnc.com",
+                "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is arabic_mokhtasar.",
+                "url": "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/1",
+            },
         ],
     }
     (OUT / "manifest.json").write_text(
@@ -950,6 +963,14 @@ def main() -> None:
                 "7. Do not include inappropriate advertisements when displaying it.",
                 "This app stores each verse paragraph verbatim and does not add to or trim the text.",
                 "",
+                "------------------------------------------------------------",
+                "Arabic Al-Mukhtasar",
+                "Title: Al-Mukhtasar in Interpreting the Noble Quran",
+                "Publisher: Tafsir Center for Quranic Studies",
+                "Source: QuranEnc.com, key arabic_mokhtasar",
+                "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/{sura}",
+                "License: QuranEnc republication terms: retain verbatim text and attribution.",
+                "",
             ]
         ),
         encoding="utf-8",
@@ -995,6 +1016,8 @@ def verify(out: Path) -> None:
         raise SystemExit("2:31 missing subject edge")
     if not verse["en"].startswith("31. To reveal the position of Adam"):
         raise SystemExit(verse["en"][:120])
+    if not verse.get("ma"):
+        raise SystemExit("2:31 missing Arabic Mukhtasar (ma)")
     if not verse.get("mk"):
         raise SystemExit("2:31 missing mukhtasar")
     fatiha = json.loads((out / "surah" / "001.json").read_text(encoding="utf-8"))

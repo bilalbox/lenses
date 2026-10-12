@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { featureLines, kindGloss, posGloss, relationGloss } from "../lib/glossary";
 import { spaceLetters } from "../lib/arabic";
+import { useI18n } from "../lib/i18n/I18nContext";
 import type { SyntaxGraph, Verse, Word } from "../lib/types";
 
 interface Props {
@@ -24,6 +25,7 @@ export function WordSheet({
   onSearchRoot,
   onSearchLemma,
 }: Props) {
+  const { locale, t, formatNumber } = useI18n();
   const stem = word.s.find((segment) => segment.k === "m") ?? word.s[0];
   const selected =
     word.s.find((_, index) => index === segmentIndex) ?? stem;
@@ -32,11 +34,11 @@ export function WordSheet({
   const touchY = useRef(0);
 
   return (
-    <aside className={`sheet${expanded ? " is-expanded" : ""}`} role="dialog" aria-label={`Analysis of word ${word.n}`}>
+    <aside className={`sheet${expanded ? " is-expanded" : ""}`} role="dialog" aria-label={t.sheet.analysisAria(word.n)}>
       <button
         type="button"
         className="sheet-handle"
-        aria-label={expanded ? "Collapse analysis" : "Expand analysis"}
+        aria-label={expanded ? t.sheet.collapseAria : t.sheet.expandAria}
         onClick={() => setExpanded((value) => !value)}
         onTouchStart={(event) => {
           touchY.current = event.touches[0]?.clientY ?? 0;
@@ -50,9 +52,9 @@ export function WordSheet({
       />
       <header className="sheet-head">
         <p className="eyebrow">
-          {sura}:{verse.v}:{word.n}
+          {formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
         </p>
-        <button type="button" className="icon-button" onClick={onClose} aria-label="Close analysis">
+        <button type="button" className="icon-button" onClick={onClose} aria-label={t.sheet.closeAria}>
           ×
         </button>
       </header>
@@ -68,13 +70,13 @@ export function WordSheet({
             onClick={() => onSelectSegment(index)}
           >
             <b lang="ar">{segment.a}</b>
-            <small lang="ar">{kindGloss(segment.k).name}</small>
+            <small lang="ar">{kindGloss(segment.k, locale).name}</small>
           </button>
         ))}
       </div>
 
       <section>
-        <h3>Corpus morphology</h3>
+        <h3>{t.sheet.corpusMorphology}</h3>
         <p className="source-line">
           Quranic Arabic Corpus 0.4 ·{" "}
           <a href="https://corpus.quran.com/" target="_blank" rel="noreferrer">
@@ -83,47 +85,40 @@ export function WordSheet({
         </p>
         <dl className="facts">
           <div>
-            <dt lang="ar">النوع</dt>
+            <dt>{t.sheet.partOfSpeech}</dt>
             <dd>
-              <strong lang="ar" dir="rtl">{posGloss(selected.p).name}</strong>
-              <span>{posGloss(selected.p).about}</span>
-            </dd>
-          </div>
-          <div>
-            <dt lang="ar">الموضع</dt>
-            <dd>
-              <strong lang="ar" dir="rtl">{kindGloss(selected.k).name}</strong>
-              <span>{kindGloss(selected.k).about}</span>
+              <strong lang="ar" dir="rtl">{posGloss(selected.p, locale).name}</strong>
+              <span>{posGloss(selected.p, locale).about}</span>
             </dd>
           </div>
           {selected.r ? (
             <div>
-            <dt lang="ar">الجذر</dt>
+            <dt>{t.sheet.root}</dt>
             <dd>
               <strong lang="ar">{spaceLetters(selected.ra || selected.r)}</strong>
               <span className="translit">{selected.r}</span>
               <button type="button" className="text-button" onClick={() => onSearchRoot(selected.ra || selected.r || "")}>
-                ابحث عن هذا الجذر
+                {t.sheet.searchThisRoot}
               </button>
             </dd>
             </div>
           ) : null}
           {selected.l ? (
             <div>
-            <dt lang="ar">الأصل المعجمي</dt>
+            <dt>{t.sheet.lemma}</dt>
             <dd>
               <strong lang="ar">{selected.la}</strong>
               {selected.g ? <span>{selected.g}</span> : null}
               <span className="translit">{selected.l}</span>
               <button type="button" className="text-button" onClick={() => onSearchLemma(selected.l || "")}>
-                ابحث عن هذا الأصل
+                {t.sheet.searchThisLemma}
               </button>
             </dd>
             </div>
           ) : null}
-          {featureLines(selected.f ?? {}).map((line) => (
+          {featureLines(selected.f ?? {}, locale).map((line) => (
             <div key={line.key}>
-              <dt lang="ar">{line.label}</dt>
+              <dt>{line.label}</dt>
               <dd>
                 <strong lang="ar" dir="rtl">{line.name}</strong>
                 <span>{line.about}</span>
@@ -132,13 +127,13 @@ export function WordSheet({
           ))}
         </dl>
         {selected.p === "V" && !selected.f?.form ? (
-          <p className="hint">The base pattern <span lang="ar">فَعَلَ</span> is usually left unmarked.</p>
+          <p className="hint">{t.sheet.basePatternHint}</p>
         ) : null}
         {implied.length ? (
           <ul className="implied">
             {implied.map((item, index) => (
               <li key={`${item.rel}-${index}`}>
-                <span lang="ar" dir="rtl">مقدَّر {item.arabic} · {relationGloss(item.rel).name}</span> {relationGloss(item.rel).about}
+                <span lang="ar" dir="rtl">{t.sheet.impliedEstimated} {item.arabic} · {relationGloss(item.rel, locale).name}</span> {relationGloss(item.rel, locale).about}
               </li>
             ))}
           </ul>
@@ -147,7 +142,7 @@ export function WordSheet({
 
       {word.i ? (
         <section>
-          <h3>Classical iʿrāb</h3>
+          <h3>{t.sheet.classicalIrab}</h3>
           <p className="source-line">
             Tafsir Center for Quranic Studies · CC BY 4.0 ·{" "}
             <a href="https://tafsir.net/" target="_blank" rel="noreferrer">
@@ -161,7 +156,7 @@ export function WordSheet({
       ) : null}
       {word.sf ? (
         <section>
-          <h3>Ṣarf</h3>
+          <h3>{t.sheet.sarf}</h3>
           <p className="source-line">Traditional morphological description from the same Tafsir Center database.</p>
           <p className="prose" dir="rtl" lang="ar">
             {word.sf}
@@ -170,7 +165,7 @@ export function WordSheet({
       ) : null}
       {word.m ? (
         <section>
-          <h3>Word meaning</h3>
+          <h3>{t.sheet.wordMeaning}</h3>
           <p className="prose" dir="rtl" lang="ar">
             {word.m}
           </p>

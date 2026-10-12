@@ -5,10 +5,14 @@ import { homePath, homeVerse } from "./lib/home";
 import { startLibrary, watchLibrary, type LibraryProgress } from "./lib/library";
 import { searchVerses, type ExampleQuery, type VerseHit } from "./lib/search";
 import type { Manifest, Route } from "./lib/types";
+import { useI18n } from "./lib/i18n/I18nContext";
+import { normalizeDigits } from "./lib/i18n/format";
 import { ExampleSearch } from "./components/ExampleSearch";
 import { SourcesPage } from "./components/SourcesPage";
 import { SurahIndex } from "./components/SurahIndex";
 import { VerseScreen } from "./components/VerseScreen";
+import { SettingsModal } from "./components/SettingsModal";
+import { GearIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from "./components/Icons";
 
 function parseRoute(hash: string): Route {
   const parts = (hash.replace(/^#/, "") || homePath).split("/").filter(Boolean);
@@ -46,6 +50,7 @@ function go(path: string) {
 }
 
 export function App() {
+  const { t, dir } = useI18n();
   const [route, setRoute] = useState(() => parseRoute(location.hash));
   const [manifest, setManifest] = useState<Manifest | null>(null);
   const [error, setError] = useState("");
@@ -54,6 +59,7 @@ export function App() {
   const [hits, setHits] = useState<VerseHit[]>([]);
   const [hitTotal, setHitTotal] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [seed, setSeed] = useState<Partial<ExampleQuery> | undefined>(undefined);
   const [install, setInstall] = useState<BeforeInstallPromptEvent | null>(null);
   const [library, setLibrary] = useState<LibraryProgress | null>(null);
@@ -128,8 +134,7 @@ export function App() {
     };
   }, [query]);
 
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
+  const selectTheme = (next: "light" | "dark") => {
     document.documentElement.dataset.theme = next;
     localStorage.setItem("lenses-theme", next);
     setTheme(next);
@@ -167,15 +172,15 @@ export function App() {
     <div className="app">
       <header className="topbar">
         <a className="mark" href={`#${homePath}`}>
-          <span className="mark-ar" lang="ar">العدسات</span>
-          <span className="mark-en">Lenses</span>
+          <span className="mark-ar" lang="ar">{t.common.appNameAr}</span>
+          <span className="mark-en">{t.common.appNameEn}</span>
         </a>
         <div className={`finder${searchOpen ? " is-open" : ""}`}>
           <input
             value={query}
             dir="auto"
-            placeholder="سورة:آية، أو كلمة"
-            aria-label="Search verses"
+            placeholder={t.common.searchPlaceholder}
+            aria-label={t.common.searchAria}
             onChange={(event) => {
               setQuery(event.target.value);
               setSearchOpen(true);
@@ -192,9 +197,9 @@ export function App() {
           {searchOpen && query.trim() ? (
             <ul className="finder-results">
               {hits.length ? (
-                <li className="finder-count">{hitTotal} {hitTotal === 1 ? "verse" : "verses"}</li>
+                <li className="finder-count">{t.common.versesCount(hitTotal)}</li>
               ) : (
-                <li className="finder-empty">No verses match.</li>
+                <li className="finder-empty">{t.common.noVersesMatch}</li>
               )}
               {hits.map((hit) => (
                 <li key={`${hit.sura}:${hit.verse}`}>
@@ -214,37 +219,27 @@ export function App() {
         </div>
         <nav>
           <a href="#/surahs" aria-current={route.page === "surahs" ? "page" : undefined}>
-            Surahs
+            {t.common.surahsNav}
           </a>
           <a href="#/search" aria-current={route.page === "search" ? "page" : undefined}>
-            Examples
+            {t.common.examplesNav}
           </a>
-          <a href="#/sources" aria-current={route.page === "sources" ? "page" : undefined}>
-            Sources
-          </a>
-          <button type="button" onClick={toggleTheme}>
-            {theme === "dark" ? "Light" : "Dark"}
+          <button
+            type="button"
+            className="icon-button settings-toggle-button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label={t.settings.buttonAria}
+          >
+            <GearIcon />
           </button>
-          {install ? (
-            <button
-              type="button"
-              className="install"
-              onClick={() => {
-                void install.prompt();
-                setInstall(null);
-              }}
-            >
-              Install
-            </button>
-          ) : null}
         </nav>
       </header>
       <main>
         {library ? (
           <p className="library-status" role="status">
             {library.done >= library.total
-              ? "متاح دون اتصال"
-              : `Saving the Quran offline, ${Math.max(library.done, 1)} of ${library.total}.`}
+              ? t.common.offlineReady
+              : t.common.savingOffline(library.done, library.total)}
           </p>
         ) : null}
         {error ? <p className="banner error">{error}</p> : null}
@@ -272,19 +267,31 @@ export function App() {
         {manifest && route.page === "surahs" ? <SurahIndex manifest={manifest} onOpen={(sura) => go(`/${sura}/1`)} /> : null}
         {manifest && route.page === "sources" ? <SourcesPage manifest={manifest} /> : null}
       </main>
-      <nav className="dock" dir="rtl" aria-label="Verse">
-        <button type="button" onClick={() => stepVerse(-1)}>السابق</button>
+      <nav className="dock" aria-label={t.common.verse}>
+        <button type="button" onClick={() => stepVerse(-1)}>
+          {dir === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          <span>{t.common.previous}</span>
+        </button>
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            const input = (event.currentTarget.elements.namedItem("jump") as HTMLInputElement).value;
-            const match = input.trim().match(/^(\d{1,3})\s*:\s*(\d{1,3})$/);
+            const raw = (event.currentTarget.elements.namedItem("jump") as HTMLInputElement).value;
+            const input = normalizeDigits(raw);
+            const match = input.trim().match(/^(\d{1,3})\s*[:\u061b]\s*(\d{1,3})$/);
             if (match) go(`/${Number(match[1])}/${Number(match[2])}`);
           }}
         >
-          <input name="jump" aria-label="Chapter and verse" defaultValue={`${route.sura}:${route.verse}`} key={`${route.sura}:${route.verse}`} />
+          <input
+            name="jump"
+            aria-label={t.common.chapterAndVerse}
+            defaultValue={`${route.sura}:${route.verse}`}
+            key={`${route.sura}:${route.verse}`}
+          />
         </form>
-        <button type="button" onClick={() => stepVerse(1)}>التالي</button>
+        <button type="button" onClick={() => stepVerse(1)}>
+          <span>{t.common.next}</span>
+          {dir === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </button>
         <button
           type="button"
           onClick={() => {
@@ -293,9 +300,23 @@ export function App() {
             requestAnimationFrame(() => document.querySelector<HTMLInputElement>(".finder input")?.focus());
           }}
         >
-          بحث
+          <SearchIcon />
+          <span>{t.common.search}</span>
         </button>
       </nav>
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        theme={theme}
+        onSelectTheme={selectTheme}
+        canInstall={Boolean(install)}
+        onInstall={() => {
+          if (install) {
+            void install.prompt();
+            setInstall(null);
+          }
+        }}
+      />
     </div>
   );
 }

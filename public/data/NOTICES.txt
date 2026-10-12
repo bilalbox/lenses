@@ -142,3 +142,11 @@ Republication terms from QuranEnc:
 6. Update the translation to the latest version issued by QuranEnc.com.
 7. Do not include inappropriate advertisements when displaying it.
 This app stores each verse paragraph verbatim and does not add to or trim the text.
+
+------------------------------------------------------------
+Arabic Al-Mukhtasar
+Title: Al-Mukhtasar in Interpreting the Noble Quran
+Publisher: Tafsir Center for Quranic Studies
+Source: QuranEnc.com, key arabic_mokhtasar
+https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/{sura}
+License: QuranEnc republication terms: retain verbatim text and attribution.

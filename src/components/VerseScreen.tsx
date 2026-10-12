@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { loadSurah } from "../lib/api";
+import { useI18n } from "../lib/i18n/I18nContext";
+import { normalizeDigits } from "../lib/i18n/format";
 import type { Manifest, SurahFile, Verse } from "../lib/types";
 import { DependencyTree } from "./DependencyTree";
 import { WordSheet } from "./WordSheet";
@@ -23,6 +25,7 @@ export function VerseScreen({
   onSearchRoot,
   onSearchLemma,
 }: Props) {
+  const { t } = useI18n();
   const [file, setFile] = useState<SurahFile | null>(null);
   const [error, setError] = useState("");
   const [jump, setJump] = useState(`${sura}:${verseNumber}`);
@@ -54,7 +57,8 @@ export function VerseScreen({
 
   const goJump = (event: FormEvent) => {
     event.preventDefault();
-    const match = jump.trim().match(/^(\d{1,3})\s*:\s*(\d{1,3})$/);
+    const raw = normalizeDigits(jump).trim();
+    const match = raw.match(/^(\d{1,3})\s*[:\u061b]\s*(\d{1,3})$/);
     if (!match) return;
     onNavigate(Number(match[1]), Number(match[2]));
   };
@@ -92,23 +96,23 @@ export function VerseScreen({
     <div className={`stage${word ? " has-sheet" : ""}`}>
       <div className="reading">
         <div className="verse-toolbar">
-          <button type="button" onClick={() => step(-1)} aria-label="Previous verse">
-            Previous
+          <button type="button" onClick={() => step(-1)} aria-label={t.common.previous}>
+            {t.common.previous}
           </button>
           <form onSubmit={goJump}>
             <label>
-              Verse
+              {t.common.verse}
               <input
                 value={jump}
                 onChange={(event) => setJump(event.target.value)}
                 inputMode="numeric"
-                aria-label="Chapter and verse"
+                aria-label={t.common.chapterAndVerse}
               />
             </label>
-            <button type="submit">Open</button>
+            <button type="submit">{t.common.open}</button>
           </form>
-          <button type="button" onClick={() => step(1)} aria-label="Next verse">
-            Next
+          <button type="button" onClick={() => step(1)} aria-label={t.common.next}>
+            {t.common.next}
           </button>
         </div>
 
@@ -158,7 +162,6 @@ export function VerseScreen({
 function VerseBody({
   unitName,
   phonetic,
-  title,
   revelation,
   sura,
   verse,
@@ -180,19 +183,20 @@ function VerseBody({
   selectedSegment?: number;
   onSelect: (word: number, segment?: number) => void;
 }) {
+  const { locale, t, formatNumber } = useI18n();
   const graphs = verse.g ?? [];
   const frozen = selected !== undefined;
   const narrow = useNarrow();
   const [zoom, setZoom] = useState(1);
   const [clauseIndex, setClauseIndex] = useState(0);
-  const [irabOpen, setIrabOpen] = useState(false);
+  const [irabOpen, setIrabOpen] = useState(locale === "ar");
   const membership = useMemo(() => clauseMembership(graphs, sura, verse.v), [graphs, sura, verse.v]);
   const segments = useMemo(() => groupWords(verse.w, membership), [verse.w, membership]);
   useEffect(() => {
     setClauseIndex(0);
     setZoom(1);
-    setIrabOpen(false);
-  }, [sura, verse.v]);
+    setIrabOpen(locale === "ar");
+  }, [sura, verse.v, locale]);
   const show = narrow ? graphs.filter((_, index) => index === clauseIndex) : graphs;
   const openClause = (index: number) => {
     setClauseIndex(index);
@@ -202,12 +206,12 @@ function VerseBody({
     <>
       <header className="verse-title">
         <p className="eyebrow">
-          {revelation === "Madinah" ? "Madinan" : "Meccan"} · {phonetic}
+          {revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} · {phonetic}
         </p>
         <h1>
           <span lang="ar">{unitName}</span>
           <small>
-            {sura}:{verse.v} · {title}
+            {formatNumber(sura)}:{formatNumber(verse.v)} · {phonetic}
           </small>
         </h1>
       </header>
@@ -237,35 +241,70 @@ function VerseBody({
             </span>
           ),
         )}
-        <span className="ayah-mark">{verse.v}</span>
+        <span className="ayah-mark">{formatNumber(verse.v)}</span>
       </p>
-      <p className="source-line">Arabic text from Tanzil, CC BY-ND 3.0, unchanged.</p>
-      <details className="mukhtasar">
-        <summary>
-          <span>Al-Mukhtasar</span>
-          <small>English · Tafsir Center for Quranic Studies · QuranEnc.com</small>
-        </summary>
-        <p lang="en" dir="ltr">
-          {verse.en}
-        </p>
-        {verse.ef ? <p className="mukhtasar-note" lang="en" dir="ltr">{verse.ef}</p> : null}
-      </details>
-      {verse.mk ? (
-        <details className="mukhtasar">
-          <summary>
-            <span>Al-Mukhtasar</span>
-            <small>الإندونيسية · Tafsir Center for Quranic Studies · QuranEnc.com · V1.0.0</small>
-          </summary>
-          <p lang="id" dir="ltr">
-            {verse.mk}
-          </p>
-          {verse.mf ? <p className="mukhtasar-note" lang="id" dir="ltr">{verse.mf}</p> : null}
-        </details>
-      ) : null}
+      <p className="source-line">{t.verse.arabicTextAttribution}</p>
+
+      {/* Tafsir sections prioritized by active locale */}
+      {(() => {
+        const mukhtasars = [
+          {
+            key: "ar",
+            text: verse.ma,
+            note: verse.af,
+            lang: "ar",
+            dir: "rtl" as const,
+            title: t.verse.mukhtasarArTitle,
+            sub: t.verse.mukhtasarArSub,
+            className: "prose-ar",
+          },
+          {
+            key: "en",
+            text: verse.en,
+            note: verse.ef,
+            lang: "en",
+            dir: "ltr" as const,
+            title: t.verse.mukhtasarEnTitle,
+            sub: t.verse.mukhtasarEnSub,
+          },
+          {
+            key: "id",
+            text: verse.mk,
+            note: verse.mf,
+            lang: "id",
+            dir: "ltr" as const,
+            title: t.verse.mukhtasarIdTitle,
+            sub: t.verse.mukhtasarIdSub,
+          },
+        ];
+        const ordered = [
+          ...mukhtasars.filter((m) => m.key === locale),
+          ...mukhtasars.filter((m) => m.key !== locale),
+        ];
+        return ordered.map((m) =>
+          m.text ? (
+            <details key={m.key} className="mukhtasar" open={locale === m.key}>
+              <summary>
+                <span>{m.title}</span>
+                <small>{m.sub}</small>
+              </summary>
+              <p lang={m.lang} dir={m.dir} className={m.className}>
+                {m.text}
+              </p>
+              {m.note ? (
+                <p className="mukhtasar-note" lang={m.lang} dir={m.dir}>
+                  {m.note}
+                </p>
+              ) : null}
+            </details>
+          ) : null,
+        );
+      })()}
+
       {verse.ir ? (
         <details className="irab-block" open={irabOpen} onToggle={(event) => setIrabOpen(event.currentTarget.open)}>
-          <summary>إعراب الجملة</summary>
-          <p className="source-line">Tafsir Center for Quranic Studies, CC BY 4.0. A second analysis, beside the corpus tree.</p>
+          <summary>{t.verse.irabTitle}</summary>
+          <p className="source-line">{t.verse.irabAttribution}</p>
           <div className="prose" dir="rtl" lang="ar">
             {verse.ir}
           </div>
@@ -279,15 +318,15 @@ function VerseBody({
               <nav className="clause-outline" dir="rtl" aria-label="Clauses">
                 {graphs.map((_, index) => (
                   <button key={index} type="button" className={index === clauseIndex ? "is-on" : ""} onClick={() => openClause(index)}>
-                    {index + 1}
+                    {formatNumber(index + 1)}
                   </button>
                 ))}
               </nav>
             ) : null}
             <div className="zoom-controls" dir="ltr">
-              <button type="button" aria-label="تصغير" onClick={() => setZoom((value) => Math.max(1, value / 1.2))}>−</button>
-              <button type="button" onClick={() => setZoom(1)}>ملاءمة</button>
-              <button type="button" aria-label="تكبير" onClick={() => setZoom((value) => Math.min(4, value * 1.2))}>+</button>
+              <button type="button" aria-label={t.verse.zoomOutAria} onClick={() => setZoom((value) => Math.max(1, value / 1.2))}>−</button>
+              <button type="button" onClick={() => setZoom(1)}>{t.verse.fitZoom}</button>
+              <button type="button" aria-label={t.verse.zoomInAria} onClick={() => setZoom((value) => Math.min(4, value * 1.2))}>+</button>
             </div>
           </div>
           {show.map((graph) => {
@@ -315,27 +354,24 @@ function VerseBody({
             );
           })}
           {narrow && graphs.length > 1 ? (
-            <div className="clause-stepper" dir="rtl">
+            <div className="clause-stepper">
               <button type="button" onClick={() => setClauseIndex((value) => Math.max(0, value - 1))} disabled={clauseIndex === 0}>
-                السابق
+                {t.common.previous}
               </button>
-              <span>الجملة {clauseIndex + 1} من {graphs.length}</span>
+              <span>{t.verse.clauseCount(clauseIndex, graphs.length)}</span>
               <button type="button" onClick={() => setClauseIndex((value) => Math.min(graphs.length - 1, value + 1))} disabled={clauseIndex === graphs.length - 1}>
-                التالي
+                {t.common.next}
               </button>
               {verse.ir ? (
-                <button type="button" onClick={() => setIrabOpen((value) => !value)}>إعراب</button>
+                <button type="button" onClick={() => setIrabOpen((value) => !value)}>{t.verse.classicalIrabShort}</button>
               ) : null}
             </div>
           ) : null}
         </>
       ) : (
         <div className="banner">
-          <strong>No dependency tree for this verse.</strong>
-          <p>
-            The Quranic Arabic Corpus treebank in this edition covers {syntaxVerses === 0 ? "none of" : `${syntaxVerses} of ${verseCount} verses in`} this surah.
-            Morphology and the classical iʿrāb below are still available. Annotated chapters are 1–8, part of 9, and 59–114.
-          </p>
+          <strong>{t.verse.noTreeTitle}</strong>
+          <p>{t.verse.noTreeDesc(syntaxVerses, verseCount)}</p>
         </div>
       )}
     </>

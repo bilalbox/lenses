@@ -1,19 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadVerses, loadWordIndex } from "../lib/api";
 import { stripDiacritics } from "../lib/arabic";
-import { FORMS, POS, RELATIONS, type Gloss, relationGloss } from "../lib/glossary";
+import { FORMS, POS, RELATIONS, relationGloss } from "../lib/glossary";
 import { countExamples, exampleFacets, featureSummary, searchExamples, type ExampleQuery } from "../lib/search";
+import { useI18n } from "../lib/i18n/I18nContext";
 import type { VerseRow, WordIndex } from "../lib/types";
 
 const empty: ExampleQuery = { root: "", lemma: "", pos: "", form: "", relation: "" };
-
-const presets: { label: string; query: ExampleQuery }[] = [
-  { label: "استفهام هل", query: { ...empty, lemma: "hal", pos: "INTG" } },
-  { label: "أَفْعَلَ من نزل", query: { ...empty, root: "نزل", pos: "V", form: "IV" } },
-  { label: "فَعَّلَ من علم", query: { ...empty, root: "علم", pos: "V", form: "II" } },
-  { label: "فاعل", query: { ...empty, relation: "subj" } },
-  { label: "حال", query: { ...empty, relation: "circ" } },
-];
 
 interface Props {
   initial?: Partial<ExampleQuery>;
@@ -21,11 +14,23 @@ interface Props {
 }
 
 export function ExampleSearch({ initial, onOpen }: Props) {
+  const { locale, t, formatNumber } = useI18n();
   const [index, setIndex] = useState<WordIndex | null>(null);
   const [verses, setVerses] = useState<VerseRow[] | null>(null);
   const [error, setError] = useState("");
   const [query, setQuery] = useState<ExampleQuery>({ ...empty, ...initial });
   const [limit, setLimit] = useState(40);
+
+  const presets = useMemo(
+    () => [
+      { label: t.examples.presetHal, query: { ...empty, lemma: "hal", pos: "INTG" } },
+      { label: t.examples.presetAfala, query: { ...empty, root: "نزل", pos: "V", form: "IV" } },
+      { label: t.examples.presetFaala, query: { ...empty, root: "علم", pos: "V", form: "II" } },
+      { label: t.examples.presetFail, query: { ...empty, relation: "subj" } },
+      { label: t.examples.presetHalState, query: { ...empty, relation: "circ" } },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     if (initial) setQuery({ ...empty, ...initial });
@@ -56,11 +61,9 @@ export function ExampleSearch({ initial, onOpen }: Props) {
   return (
     <div className="search-page">
       <header className="page-intro">
-        <p className="eyebrow">Example search</p>
-        <h1>Find the pattern</h1>
-        <p className="search-lead">
-          Search the corpus by root, lemma, part of speech, verb form, or the syntactic relation the word fills. Results open the verse, with its tree when the treebank includes it.
-        </p>
+        <p className="eyebrow">{t.examples.eyebrow}</p>
+        <h1>{t.examples.pageTitle}</h1>
+        <p className="search-lead">{t.examples.lead}</p>
       </header>
       <div className="presets" dir="rtl" lang="ar">
         {presets.map((preset) => (
@@ -76,17 +79,17 @@ export function ExampleSearch({ initial, onOpen }: Props) {
         }}
       >
         <label>
-          Root
+          {t.examples.filterRoot}
           <input value={query.root} onChange={(event) => set({ root: event.target.value })} placeholder="علم or Elm" />
         </label>
         <label>
-          Lemma
+          {t.examples.filterLemma}
           <input value={query.lemma} onChange={(event) => set({ lemma: event.target.value })} placeholder="hal" />
         </label>
         <label>
-          Part of speech
+          {t.examples.filterPos}
           <select dir="rtl" lang="ar" value={query.pos} onChange={(event) => set({ pos: event.target.value })}>
-            <option value="">Any</option>
+            <option value="">{t.examples.anyOption}</option>
             {glossOptions(POS).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.name}
@@ -95,9 +98,9 @@ export function ExampleSearch({ initial, onOpen }: Props) {
           </select>
         </label>
         <label>
-          Verb form
+          {t.examples.filterForm}
           <select dir="rtl" lang="ar" value={query.form} onChange={(event) => set({ form: event.target.value })}>
-            <option value="">Any</option>
+            <option value="">{t.examples.anyOption}</option>
             {Object.entries(FORMS).map(([form, gloss]) => (
               <option key={form} value={form}>
                 {gloss.name}
@@ -106,9 +109,9 @@ export function ExampleSearch({ initial, onOpen }: Props) {
           </select>
         </label>
         <label>
-          Relation
+          {t.examples.filterRelation}
           <select dir="rtl" lang="ar" value={query.relation} onChange={(event) => set({ relation: event.target.value })}>
-            <option value="">Any</option>
+            <option value="">{t.examples.anyOption}</option>
             {glossOptions(RELATIONS).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.name}
@@ -124,30 +127,30 @@ export function ExampleSearch({ initial, onOpen }: Props) {
           <span />
         </div>
       ) : null}
-      {index && !active ? <p className="hint">Choose a root, a lemma, a part of speech, a form, or a relation.</p> : null}
+      {index && !active ? <p className="hint">{t.examples.chooseCriteriaHint}</p> : null}
       {active ? (
         <>
           <p className="result-count">
-            <strong>{total}</strong>
-            <span>{total === 1 ? "word" : "words"}{total > hits.length ? ` · showing ${hits.length}` : ""}</span>
+            <strong>{formatNumber(total)}</strong>
+            <span>{t.examples.wordsFound(total, hits.length)}</span>
           </p>
           {facets.forms.length > 1 || facets.lemmas.length > 1 ? (
             <div className="facets" dir="rtl">
               {facets.forms.map((facet) => (
                 <button key={facet.key} type="button" className={query.form === facet.key ? "is-on" : ""} onClick={() => set({ form: query.form === facet.key ? "" : facet.key })}>
                   <b lang="ar">{FORMS[facet.key]?.name ?? facet.label}</b>
-                  <small>{facet.count}</small>
+                  <small>{formatNumber(facet.count)}</small>
                 </button>
               ))}
               {facets.lemmas.map((facet) => (
                 <button key={facet.key} type="button" className={query.lemma === facet.key ? "is-on" : ""} onClick={() => set({ lemma: query.lemma === facet.key ? "" : facet.key })}>
                   <b lang="ar">{facet.label}</b>
-                  <small>{facet.count}</small>
+                  <small>{formatNumber(facet.count)}</small>
                 </button>
               ))}
             </div>
           ) : null}
-          {total === 0 ? <p className="hint">No words match this combination.</p> : null}
+          {total === 0 ? <p className="hint">{t.examples.noWordsMatch}</p> : null}
           <ol className="results">
             {hits.map((hit) => {
               const snippet = verseOf.get(`${hit.sura}:${hit.verse}`) ?? "";
@@ -156,7 +159,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
                 <li key={`${hit.sura}:${hit.verse}:${hit.word}`}>
                   <button type="button" onClick={() => onOpen(hit.sura, hit.verse, hit.word)}>
                     <span className="loc">
-                      {hit.sura}:{hit.verse}:{hit.word}
+                      {formatNumber(hit.sura)}:{formatNumber(hit.verse)}:{formatNumber(hit.word)}
                     </span>
                     <span className="hit-ar" lang="ar" dir="rtl">
                       {hit.arabic}
@@ -169,7 +172,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
                         {POS[hit.pos]?.name ?? hit.pos}
                         {featureSummary(hit.features) ? ` · ${featureSummary(hit.features)}` : ""}
                         {hit.relations.length
-                          ? ` · ${[...new Set(hit.relations.map((code) => relationGloss(code).name))].join("، ")}`
+                          ? ` · ${[...new Set(hit.relations.map((code) => relationGloss(code, locale).name))].join("، ")}`
                           : ""}
                       </span>
                       {hit.gloss ? ` · ${hit.gloss}` : ""}
@@ -181,7 +184,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
           </ol>
           {hits.length < total ? (
             <button type="button" className="more" onClick={() => setLimit((value) => value + 40)}>
-              Show more
+              {t.examples.showMore}
             </button>
           ) : null}
         </>
@@ -190,7 +193,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
   );
 }
 
-function glossOptions(table: Record<string, Gloss>) {
+function glossOptions(table: Record<string, { name: string }>) {
   const grouped = new Map<string, string[]>();
   for (const [code, gloss] of Object.entries(table)) {
     grouped.set(gloss.name, [...(grouped.get(gloss.name) ?? []), code]);

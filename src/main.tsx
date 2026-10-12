@@ -8,6 +8,7 @@ import "@fontsource/scheherazade-new/arabic-400.css";
 import "@fontsource/scheherazade-new/latin-400.css";
 import "@fontsource/noto-sans-arabic/arabic-400.css";
 import { registerSW } from "virtual:pwa-register";
+import { I18nProvider } from "./lib/i18n/I18nContext";
 import { App } from "./App";
 import "./index.css";
 
@@ -15,6 +16,8 @@ registerSW({ immediate: true });
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <I18nProvider>
+      <App />
+    </I18nProvider>
   </StrictMode>,
 );

@@ -1,4 +1,5 @@
 import type { Manifest } from "../lib/types";
+import { useI18n } from "../lib/i18n/I18nContext";
 
 interface Props {
   manifest: Manifest;
@@ -6,14 +7,14 @@ interface Props {
 }
 
 export function SurahIndex({ manifest, onOpen }: Props) {
+  const { t, formatNumber } = useI18n();
   return (
     <div className="surah-page">
       <header className="page-intro">
-        <p className="eyebrow">114 surahs</p>
-        <h1>Browse the Quran</h1>
+        <p className="eyebrow">{t.surahs.countEyebrow(manifest.units.length)}</p>
+        <h1>{t.surahs.pageTitle}</h1>
         <p>
-          {manifest.stats.syntaxVerses.toLocaleString()} of {manifest.stats.verses.toLocaleString()} verses have a dependency tree.
-          Chapters 10–58 have morphology and classical iʿrāb, and no corpus syntax yet.
+          {t.surahs.statsIntro(manifest.stats.syntaxVerses, manifest.stats.verses)}
         </p>
       </header>
       <ol className="surah-grid">
@@ -23,15 +24,19 @@ export function SurahIndex({ manifest, onOpen }: Props) {
           return (
             <li key={unit.n}>
               <button type="button" onClick={() => onOpen(unit.n)}>
-                <span className="num">{unit.n}</span>
+                <span className="num">{formatNumber(unit.n)}</span>
                 <span className="names">
                   <b lang="ar">{unit.name}</b>
                   <small>
-                    {unit.phonetic} · {unit.title}
+                    {unit.phonetic} · {unit.rev === "Madinah" ? t.verse.madinan : t.verse.meccan}
                   </small>
                 </span>
                 <span className={`coverage ${full ? "full" : none ? "none" : "partial"}`}>
-                  {full ? "Treebank" : none ? "Morphology" : `${unit.syntax}/${unit.verses} trees`}
+                  {full
+                    ? t.surahs.coverageTreebank
+                    : none
+                      ? t.surahs.coverageMorphology
+                      : t.surahs.coverageTrees(unit.syntax, unit.verses)}
                 </span>
               </button>
             </li>

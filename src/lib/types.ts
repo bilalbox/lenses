@@ -71,6 +71,10 @@ export interface Verse {
   mk?: string;
   /** Footnote supplied with that paragraph, when QuranEnc sends one. */
   mf?: string;
+  /** Arabic Al-Mukhtasar paragraph, stored verbatim from QuranEnc. */
+  ma?: string;
+  /** Footnote supplied with the Arabic paragraph, when QuranEnc sends one. */
+  af?: string;
   g?: SyntaxGraph[];
 }
 

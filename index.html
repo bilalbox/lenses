@@ -13,13 +13,25 @@
     <title>العدسات — Lenses</title>
     <script>
       (function () {
-        var stored = localStorage.getItem("lenses-theme") || localStorage.getItem("bayan-theme");
+        var storedTheme = localStorage.getItem("lenses-theme") || localStorage.getItem("bayan-theme");
         var theme =
-          stored ||
+          storedTheme ||
           (window.matchMedia("(prefers-color-scheme: dark)").matches
             ? "dark"
             : "light");
         document.documentElement.dataset.theme = theme;
+
+        var storedLang = localStorage.getItem("lenses-lang");
+        var lang = storedLang;
+        if (!lang || (lang !== "en" && lang !== "ar" && lang !== "id")) {
+          var nav = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+          var prefix = nav.toLowerCase().split("-")[0];
+          if (prefix === "ar") lang = "ar";
+          else if (prefix === "id" || prefix === "in") lang = "id";
+          else lang = "en";
+        }
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
       })();
     </script>
   </head>
