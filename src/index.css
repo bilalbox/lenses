@@ -365,11 +365,12 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
 .chip.is-on { outline: 2px solid var(--teal); }
 .facts { margin: 0; }
 .facts > div { padding: 0.65rem 0; border-top: 1px solid var(--line); }
-.facts dt { color: var(--muted); font-family: var(--arabic-ui); font-size: 0.95rem; font-weight: 400; }
+.facts dt { color: var(--muted); font-family: var(--arabic-ui); font-size: 0.92rem; font-weight: 400; }
 .facts strong[lang="ar"] { font-family: var(--arabic-ui); font-weight: 400; font-size: 1.15rem; }
 .facts dd { margin: 0.15rem 0 0; display: grid; justify-items: start; gap: 0.15rem; }
-.facts dd strong { display: block; }
-.facts dd span, .implied { color: var(--muted); }
+.facts dd strong { display: block; color: var(--ink); font-size: 1.05rem; }
+.facts dd span, .implied { color: color-mix(in srgb, var(--muted) 85%, transparent); }
+.facts dd span:not(.translit) { font-size: 0.88rem; line-height: 1.4; }
 .translit { font-family: ui-monospace, monospace; font-size: 0.85rem; }
 .text-button { display: inline-flex; align-items: center; min-height: 44px; margin-top: 0.15rem; padding: 0; color: var(--teal); }
 .implied { padding-inline-start: 1.1rem; }
@@ -415,6 +416,9 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
     gap: 1rem;
     align-items: start;
   }
+  .sheet-backdrop {
+    display: contents;
+  }
   .sheet { position: sticky; top: 5.2rem; max-height: calc(100vh - 6.2rem); overflow: auto; }
   .sheet-handle { display: none; }
 }
@@ -423,9 +427,21 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
   .finder { grid-column: 1 / -1; order: 3; }
   .topbar nav { justify-content: end; }
   .filters, .results button { grid-template-columns: 1fr; }
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.15s ease-out;
+  }
+  .sheet-backdrop.is-closing {
+    animation: fadeOut 0.2s ease-in forwards;
+    pointer-events: none;
+  }
   .sheet {
     position: fixed;
-    z-index: 40;
+    z-index: 41;
     left: 0;
     right: 0;
     bottom: 0;
@@ -433,9 +449,17 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
     max-height: 45vh;
     overflow: auto;
     border-radius: 22px 22px 0 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 0;
     box-shadow: var(--shadow);
+    animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
   }
   .sheet.is-expanded { height: 88vh; max-height: 88vh; }
+  .sheet.is-closing {
+    animation: slideDown 0.2s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  }
   .sheet-handle { display: flex; }
 }
 .dock, .clause-stepper { display: none; }
@@ -542,15 +566,52 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
 }
 .clause-stepper button { min-height: 48px; border: 0; background: transparent; color: var(--ink); }
 .clause-stepper button:disabled { opacity: 0.35; }
-.sheet-handle { width: 100%; min-height: 48px; height: 48px; border: 0; background: transparent; padding: 0; }
+.sheet-handle {
+  width: 100%;
+  min-height: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: grab;
+  touch-action: pan-y;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .sheet a { min-height: 48px; display: inline-flex; align-items: center; }
-.sheet-handle::before { content: ""; width: 44px; height: 4px; border-radius: 99px; background: var(--line); display: block; margin: 8px auto 0; }
+.sheet-handle::before {
+  content: "";
+  width: 38px;
+  height: 5px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--ink) 25%, transparent);
+  display: block;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.sheet-handle:hover::before {
+  background: color-mix(in srgb, var(--ink) 42%, transparent);
+}
+.sheet-handle:active::before {
+  transform: scaleX(1.1);
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
 .icon-button {
   min-width: 48px;
   min-height: 48px;
   display: inline-grid;
   place-items: center;
   padding: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.icon-button:hover {
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--ink);
+}
+.icon-button:active {
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
 }
 
 /* Settings Modal & Mobile Bottom-sheet */
@@ -564,6 +625,10 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
   place-items: center;
   padding: 1rem;
   animation: fadeIn 0.15s ease-out;
+}
+.settings-backdrop.is-closing {
+  animation: fadeOut 0.2s ease-in forwards;
+  pointer-events: none;
 }
 
 .settings-dialog {
@@ -729,9 +794,23 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
   to { opacity: 1; }
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.settings-dialog.is-closing {
+  animation: fadeOut 0.2s ease-in forwards;
 }
 
 @media (max-width: 720px) {
@@ -748,13 +827,32 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
     border-left: 0;
     border-right: 0;
     animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .settings-dialog.is-closing {
+    animation: slideDown 0.2s cubic-bezier(0.32, 0, 0.67, 0) forwards;
   }
   .settings-sheet-handle {
-    display: block;
+    display: flex;
   }
 }
 
 @media (min-width: 721px) {
   .library-status { bottom: 1.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-backdrop,
+  .settings-backdrop.is-closing,
+  .settings-dialog,
+  .settings-dialog.is-closing,
+  .sheet-backdrop,
+  .sheet-backdrop.is-closing,
+  .sheet,
+  .sheet.is-closing {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 

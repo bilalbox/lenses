@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { LOCALES, type Locale } from "../lib/i18n/types";
 import { BookIcon, CheckIcon, CloseIcon, MoonIcon, SunIcon } from "./Icons";
@@ -24,25 +24,62 @@ export function SettingsModal({
   const touchY = useRef(0);
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const [rendered, setRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+  const prevIsOpen = useRef(isOpen);
+
+  if (prevIsOpen.current !== isOpen) {
+    prevIsOpen.current = isOpen;
+    if (isOpen) {
+      setRendered(true);
+      setIsClosing(false);
+    } else if (rendered && !isClosing) {
+      setIsClosing(true);
+    }
+  }
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (isClosing) {
+      const timer = window.setTimeout(() => {
+        setRendered(false);
+        setIsClosing(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isClosing]);
+
+  useEffect(() => {
+    if (!isOpen && !isClosing) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, isClosing]);
+
+  useEffect(() => {
+    if (!rendered || isClosing) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen, onClose]);
+  }, [rendered, isClosing, onClose]);
 
-  if (!isOpen) return null;
+  if (!rendered) return null;
 
   const handleLanguageChange = (code: Locale) => {
     setLocale(code);
   };
 
   return (
-    <div className="settings-backdrop" onClick={onClose} role="presentation">
+    <div
+      className={`settings-backdrop${isClosing ? " is-closing" : ""}`}
+      onClick={onClose}
+      role="presentation"
+    >
       <div
-        className="settings-dialog"
+        className={`settings-dialog${isClosing ? " is-closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"

@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { featureLines, kindGloss, posGloss, relationGloss } from "../lib/glossary";
 import { spaceLetters } from "../lib/arabic";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type { SyntaxGraph, Verse, Word } from "../lib/types";
+import { CloseIcon } from "./Icons";
 
 interface Props {
   sura: number;
@@ -31,33 +32,109 @@ export function WordSheet({
     word.s.find((_, index) => index === segmentIndex) ?? stem;
   const implied = impliedDependents(verse.g ?? [], sura, verse.v, word.n);
   const [expanded, setExpanded] = useState(false);
+  const [closing, setClosing] = useState(false);
   const touchY = useRef(0);
+  const closingTimerRef = useRef<number | null>(null);
+
+  const handleClose = useCallback(() => {
+    if (closing) return;
+    const isMobile = window.matchMedia("(max-width: 1099px)").matches;
+    if (!isMobile) {
+      onClose();
+      return;
+    }
+    setClosing(true);
+    closingTimerRef.current = window.setTimeout(() => {
+      onClose();
+    }, 200);
+  }, [closing, onClose]);
+
+  useEffect(() => {
+    setClosing(false);
+    if (closingTimerRef.current) {
+      clearTimeout(closingTimerRef.current);
+    }
+  }, [word]);
+
+  useEffect(() => {
+    return () => {
+      if (closingTimerRef.current) {
+        clearTimeout(closingTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Escape key dismiss with exit animation
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown, { capture: true });
+    return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
+  }, [handleClose]);
+
+  // Lock body scroll on mobile
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1099px)");
+    const updateLock = () => {
+      if (media.matches) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+    };
+    updateLock();
+    media.addEventListener("change", updateLock);
+    return () => {
+      document.body.style.overflow = "";
+      media.removeEventListener("change", updateLock);
+    };
+  }, []);
 
   return (
-    <aside className={`sheet${expanded ? " is-expanded" : ""}`} role="dialog" aria-label={t.sheet.analysisAria(word.n)}>
-      <button
-        type="button"
-        className="sheet-handle"
-        aria-label={expanded ? t.sheet.collapseAria : t.sheet.expandAria}
-        onClick={() => setExpanded((value) => !value)}
-        onTouchStart={(event) => {
-          touchY.current = event.touches[0]?.clientY ?? 0;
-        }}
-        onTouchEnd={(event) => {
-          const end = event.changedTouches[0]?.clientY ?? touchY.current;
-          const delta = end - touchY.current;
-          if (delta > 48) onClose();
-          else if (delta < -48) setExpanded(true);
-        }}
-      />
-      <header className="sheet-head">
-        <p className="eyebrow">
-          {formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
-        </p>
-        <button type="button" className="icon-button" onClick={onClose} aria-label={t.sheet.closeAria}>
-          ×
-        </button>
-      </header>
+    <div
+      className={`sheet-backdrop${closing ? " is-closing" : ""}`}
+      onClick={handleClose}
+      role="presentation"
+    >
+      <aside
+        className={`sheet${expanded ? " is-expanded" : ""}${closing ? " is-closing" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t.sheet.analysisAria(word.n)}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="sheet-handle"
+          aria-label={expanded ? t.sheet.collapseAria : t.sheet.expandAria}
+          onClick={() => setExpanded((value) => !value)}
+          onTouchStart={(event) => {
+            touchY.current = event.touches[0]?.clientY ?? 0;
+          }}
+          onTouchEnd={(event) => {
+            const end = event.changedTouches[0]?.clientY ?? touchY.current;
+            const delta = end - touchY.current;
+            if (delta > 48) handleClose();
+            else if (delta < -48) setExpanded(true);
+          }}
+        />
+        <header className="sheet-head">
+          <p className="eyebrow">
+            {formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
+          </p>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={handleClose}
+            aria-label={t.sheet.closeAria}
+          >
+            <CloseIcon />
+          </button>
+        </header>
       <p className="sheet-word" dir="rtl" lang="ar">
         {word.a}
       </p>
@@ -176,7 +253,8 @@ export function WordSheet({
           </p>
         </section>
       ) : null}
-    </aside>
+      </aside>
+    </div>
   );
 }
 
