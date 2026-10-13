@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { arcIsHot, brightNodes, type CardFocus } from "../lib/focus";
 import { posGloss, relationFamily, relationGloss } from "../lib/glossary";
 import { layoutGraph, type ArcGeom, type LeafFace } from "../lib/layout";
@@ -109,7 +109,7 @@ export function DependencyTree({
     });
   };
 
-  const reveal = (x1: number, x2: number) => {
+  const reveal = useCallback((x1: number, x2: number) => {
     const el = scroller.current;
     if (!el) return;
     const left = Math.min(x1, x2) * rendered;
@@ -125,7 +125,7 @@ export function DependencyTree({
         ? left - 16
         : right - el.clientWidth + 16;
     el.scrollTo({ left: Math.max(0, Math.min(max, target)), behavior: "smooth" });
-  };
+  }, [rendered]);
 
   useEffect(() => {
     const el = scroller.current;
@@ -164,7 +164,7 @@ export function DependencyTree({
   useEffect(() => {
     if (!focusedEdge) return;
     reveal(focusedEdge.x1, focusedEdge.x2);
-  }, [focusedEdge]);
+  }, [focusedEdge, reveal]);
   const enterEdge = (source: number) => {
     if (frozen) return;
     setHover({ kind: "edge", edge: source });
@@ -197,8 +197,70 @@ export function DependencyTree({
             aria-label={t.verse.clauseCount(index, total)}
           >
             <defs>
-              <marker id={arrowId} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
-                <path d="M0 0 L8 4 L0 8 Z" fill="context-stroke" />
+              <marker
+                id={`${arrowId}-core`}
+                className="arc-marker family-core"
+                viewBox="0 0 8 8"
+                refX="7"
+                refY="4"
+                markerWidth="8"
+                markerHeight="8"
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M0 0 L8 4 L0 8 Z" className="arc-head" fill="var(--teal)" stroke="var(--teal)" strokeLinejoin="round" />
+              </marker>
+              <marker
+                id={`${arrowId}-nom`}
+                className="arc-marker family-nom"
+                viewBox="0 0 8 8"
+                refX="7"
+                refY="4"
+                markerWidth="8"
+                markerHeight="8"
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M0 0 L8 4 L0 8 Z" className="arc-head" fill="var(--gold)" stroke="var(--gold)" strokeLinejoin="round" />
+              </marker>
+              <marker
+                id={`${arrowId}-clause`}
+                className="arc-marker family-clause"
+                viewBox="0 0 8 8"
+                refX="7"
+                refY="4"
+                markerWidth="8"
+                markerHeight="8"
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M0 0 L8 4 L0 8 Z" className="arc-head" fill="var(--indigo)" stroke="var(--indigo)" strokeLinejoin="round" />
+              </marker>
+              <marker
+                id={`${arrowId}-particle`}
+                className="arc-marker family-particle"
+                viewBox="0 0 8 8"
+                refX="7"
+                refY="4"
+                markerWidth="8"
+                markerHeight="8"
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M0 0 L8 4 L0 8 Z" className="arc-head" fill="var(--rose)" stroke="var(--rose)" strokeLinejoin="round" />
+              </marker>
+              <marker
+                id={arrowId}
+                className="arc-marker"
+                viewBox="0 0 8 8"
+                refX="7"
+                refY="4"
+                markerWidth="8"
+                markerHeight="8"
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M0 0 L8 4 L0 8 Z" className="arc-head" fill="var(--teal)" stroke="var(--teal)" strokeLinejoin="round" />
               </marker>
             </defs>
             {layout.phrases.map((phrase) => (
@@ -219,7 +281,7 @@ export function DependencyTree({
                   className={`arc-group family-${family}${hot ? " is-hot" : ""}${dim ? " is-dim" : ""}`}
                 >
                   <path d={arc.path} className="arc-halo" />
-                  <path d={arc.path} className="arc" markerEnd={`url(#${arrowId})`} />
+                  <path d={arc.path} className="arc" markerEnd={`url(#${arrowId}-${family})`} />
                   <path
                     d={arc.path}
                     className="arc-hit"

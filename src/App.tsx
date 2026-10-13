@@ -138,6 +138,10 @@ export function App() {
     document.documentElement.dataset.theme = next;
     localStorage.setItem("lenses-theme", next);
     setTheme(next);
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute("content", next === "dark" ? "#101311" : "#0f6e66");
+    }
   };
 
   const stepVerse = (delta: number) => {

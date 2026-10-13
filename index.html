@@ -20,6 +20,10 @@
             ? "dark"
             : "light");
         document.documentElement.dataset.theme = theme;
+        var themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+          themeColorMeta.setAttribute("content", theme === "dark" ? "#101311" : "#0f6e66");
+        }
 
         var storedLang = localStorage.getItem("lenses-lang");
         var lang = storedLang;
