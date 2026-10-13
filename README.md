@@ -37,7 +37,7 @@ npm run deploy
 
 - Jump to `chapter:verse`, browse the 114 surahs, or search the Arabic (with or without diacritics) and the English Al-Mukhtasar.
 - Tap a word for its segments, root, lemma, and part of speech. Grammatical terms are in Arabic.
-- Read the dependency tree for that verse. Each morphological segment is its own node. Arcs and the caption under each word are Arabic, the arc points at the head, and both can be tapped. Pinch or use the zoom control. Clauses that continue into the next verse say so.
+- Read the dependency tree for that verse. Each morphological segment is its own node. Arcs and the caption under each word are Arabic, the arc points at the head, and both can be tapped. Clauses that continue into the next verse say so.
 - Search examples by root, lemma, part of speech, verb form, or syntactic relation.
 - Switch between light and dark. Arrow keys move to the next and previous verse.
 

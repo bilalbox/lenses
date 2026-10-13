@@ -57,9 +57,6 @@ export interface Translations {
     mukhtasarArTitle: string;
     mukhtasarArSub: string;
     irabTitle: string;
-    fitZoom: string;
-    zoomInAria: string;
-    zoomOutAria: string;
     clauseCount: (index: number, total: number) => string;
     clauseNoteContinues: string;
     noTreeTitle: string;

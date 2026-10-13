@@ -15,9 +15,7 @@ interface Props {
   selectedWord?: number;
   selectedSegment?: number;
   frozen: boolean;
-  zoom: number;
   current?: boolean;
-  onZoom: (zoom: number) => void;
   onSelectWord: (sura: number, verse: number, word: number, segment?: number) => void;
 }
 
@@ -31,17 +29,13 @@ export function DependencyTree({
   selectedWord,
   selectedSegment,
   frozen,
-  zoom,
   current = false,
-  onZoom,
   onSelectWord,
 }: Props) {
   const { locale, t } = useI18n();
   const [fontsReady, setFontsReady] = useState(false);
   const [fit, setFit] = useState(1);
-  const rendered = fit * zoom;
-  const renderedRef = useRef(rendered);
-  renderedRef.current = rendered;
+  const rendered = fit;
   const [folded, setFolded] = useState<ReadonlySet<number>>(new Set());
   const [hover, setHover] = useState<CardFocus | null>(null);
   const [pinned, setPinned] = useState<number | null>(null);
@@ -95,7 +89,8 @@ export function DependencyTree({
     const apply = () => {
       const available = el.clientWidth;
       if (!available || !layout.width) return;
-      setFit(Math.min(1, Math.max(0.2, (available - 2) / layout.width)));
+      const usable = Math.max(100, available - 16);
+      setFit(Math.max(0.35, Math.min(3.5, usable / layout.width)));
     };
     apply();
     const observer = new ResizeObserver(apply);
@@ -117,8 +112,8 @@ export function DependencyTree({
   const reveal = (x1: number, x2: number) => {
     const el = scroller.current;
     if (!el) return;
-    const left = Math.min(x1, x2) * renderedRef.current;
-    const right = Math.max(x1, x2) * renderedRef.current;
+    const left = Math.min(x1, x2) * rendered;
+    const right = Math.max(x1, x2) * rendered;
     const viewLeft = el.scrollLeft;
     const viewRight = viewLeft + el.clientWidth;
     const max = Math.max(0, el.scrollWidth - el.clientWidth);
@@ -142,29 +137,11 @@ export function DependencyTree({
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
-    let start: { dist: number; scale: number } | null = null;
-    const distance = (touches: TouchList) => {
-      const [a, b] = [touches[0], touches[1]];
-      return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-    };
-    const down = (event: TouchEvent) => {
-      if (event.touches.length === 2) start = { dist: distance(event.touches), scale: renderedRef.current };
-    };
-    const move = (event: TouchEvent) => {
-      if (!start || event.touches.length < 2 || fit <= 0) return;
-      event.preventDefault();
-      const next = Math.min(Math.max(fit, 3), Math.max(fit * 0.85, start.scale * (distance(event.touches) / start.dist)));
-      onZoom(next / fit);
-    };
     el.addEventListener("scroll", updateOverflow, { passive: true });
-    el.addEventListener("touchstart", down, { passive: true });
-    el.addEventListener("touchmove", move, { passive: false });
     return () => {
       el.removeEventListener("scroll", updateOverflow);
-      el.removeEventListener("touchstart", down);
-      el.removeEventListener("touchmove", move);
     };
-  }, [fit, onZoom]);
+  }, []);
 
   const focus: CardFocus | null = frozen ? null : pinned !== null ? { kind: "edge", edge: pinned } : hover;
   const bright = focus ? brightNodes(graph, focus) : null;

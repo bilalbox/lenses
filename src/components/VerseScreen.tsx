@@ -181,14 +181,12 @@ function VerseBody({
   const graphs = verse.g ?? [];
   const frozen = selected !== undefined;
   const narrow = useNarrow();
-  const [zoom, setZoom] = useState(1);
   const [clauseIndex, setClauseIndex] = useState(0);
   const [irabOpen, setIrabOpen] = useState(locale === "ar");
   const membership = useMemo(() => clauseMembership(graphs, sura, verse.v), [graphs, sura, verse.v]);
   const segments = useMemo(() => groupWords(verse.w, membership), [verse.w, membership]);
   useEffect(() => {
     setClauseIndex(0);
-    setZoom(1);
     setIrabOpen(locale === "ar");
   }, [sura, verse.v, locale]);
   const show = narrow ? graphs.filter((_, index) => index === clauseIndex) : graphs;
@@ -327,8 +325,8 @@ function VerseBody({
 
       {graphs.length ? (
         <>
-          <div className="tree-tools">
-            {graphs.length > 1 ? (
+          {graphs.length > 1 ? (
+            <div className="tree-tools">
               <nav className="clause-outline" dir="rtl" aria-label="Clauses">
                 {graphs.map((_, index) => (
                   <button key={index} type="button" className={index === clauseIndex ? "is-on" : ""} onClick={() => openClause(index)}>
@@ -336,13 +334,8 @@ function VerseBody({
                   </button>
                 ))}
               </nav>
-            ) : null}
-            <div className="zoom-controls" dir="ltr">
-              <button type="button" aria-label={t.verse.zoomOutAria} onClick={() => setZoom((value) => Math.max(1, value / 1.2))}>−</button>
-              <button type="button" onClick={() => setZoom(1)}>{t.verse.fitZoom}</button>
-              <button type="button" aria-label={t.verse.zoomInAria} onClick={() => setZoom((value) => Math.min(4, value * 1.2))}>+</button>
             </div>
-          </div>
+          ) : null}
           {show.map((graph) => {
             const index = graphs.indexOf(graph);
             return (
@@ -357,9 +350,7 @@ function VerseBody({
                 selectedWord={selected}
                 selectedSegment={selectedSegment}
                 frozen={frozen}
-                zoom={zoom}
                 current={index === clauseIndex}
-                onZoom={setZoom}
                 onSelectWord={(nextSura, nextVerse, word, segmentIndex) => {
                   if (nextSura === sura && nextVerse === verse.v) onSelect(word, segmentIndex);
                   else window.location.hash = `#/${nextSura}/${nextVerse}/${word}`;

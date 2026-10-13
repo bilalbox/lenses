@@ -140,7 +140,7 @@ code { font-family: ui-monospace, monospace; font-size: 0.92em; }
 }
 .topbar > * { min-width: 0; }
 .topbar nav { display: flex; gap: 0.25rem; align-items: center; min-width: 0; }
-.topbar nav a, .topbar nav button, .verse-toolbar button, .presets button, .zoom-controls button, .more, .icon-button, .text-button {
+.topbar nav a, .topbar nav button, .verse-toolbar button, .presets button, .more, .icon-button, .text-button {
   border: 0;
   background: transparent;
   color: var(--ink);
@@ -261,9 +261,8 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
 .clause-head h3 { margin: 0; font-family: var(--arabic-ui); font-size: 1.2rem; font-weight: 400; }
 .clause-head h3 span, .clause-head p { color: var(--muted); font-weight: 400; font-size: 0.92rem; }
 .clause-head p { margin: 0; }
-.zoom-controls { display: flex; border: 1px solid var(--line); border-radius: 999px; }
 .tree-scroll { overflow: auto; max-width: 100%; padding: 0 0.4rem 0.2rem; touch-action: pan-x pan-y; }
-.tree-scale { margin-inline-start: auto; }
+.tree-scale { margin-inline: auto; }
 .node-box { cursor: pointer; }
 .node-box rect { fill: var(--paper); stroke: var(--line); stroke-width: 1.4; }
 .node-box.is-selected rect { stroke: var(--teal); stroke-width: 2.2; fill: var(--teal-soft); }
@@ -477,7 +476,7 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
 .verse-span.is-current { background: var(--teal-soft); }
 .tree-tools { display: flex; justify-content: space-between; gap: 0.6rem; align-items: center; margin-top: 0.8rem; }
 .clause-outline { display: flex; gap: 0.45rem; overflow: auto; max-width: 100%; }
-.clause-outline button, .zoom-controls button { min-width: 48px; min-height: 48px; border: 0; background: transparent; color: var(--ink); }
+.clause-outline button { min-width: 48px; min-height: 48px; border: 0; background: transparent; color: var(--ink); }
 .clause-outline button.is-on { background: var(--teal-soft); color: var(--teal); border-radius: 999px; }
 .tree-scroll { position: relative; }
 .tree-more {
