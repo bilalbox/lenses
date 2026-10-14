@@ -355,14 +355,11 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
   white-space: pre-wrap;
   margin: 0;
   padding: 0 1.1rem 1rem;
-  max-width: 42ch;
 }
-.mukhtasar p[lang="en"], .mukhtasar p[lang="id"] { max-width: 65ch; }
 .mukhtasar p[lang="ar"] {
   font-family: var(--arabic);
   font-size: 1.35rem;
   line-height: 1.85;
-  max-width: 55ch;
 }
 .irab-block summary {
   cursor: pointer;
