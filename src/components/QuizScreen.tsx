@@ -739,7 +739,6 @@ export function QuizScreen({
                   <div className="quiz-wizard-actions sticky-actions">
                     <button type="button" className="quiz-submit-btn" onClick={handleSubmit}>
                       <span>{t.quiz.submitButton}</span>
-                      <kbd>⌘↵</kbd>
                     </button>
                     <button type="button" className="quiz-secondary-btn" onClick={handleRevealAnswer}>
                       {t.quiz.revealButton}
