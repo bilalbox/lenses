@@ -299,7 +299,7 @@ export function QuizScreen({
   const crumbSignLabel = draft.sign ? getSignMeta(draft.sign).ar : t.quiz.stepSignCrumb;
 
   return (
-    <div className="quiz-wizard-viewport">
+    <div className="quiz-wizard-viewport anim-soft-enter">
       {/* ====================================================================
        * TOP PANE (Top 40% of screen): Pinned Ayah & Progress Context
        * ==================================================================== */}
@@ -430,8 +430,11 @@ export function QuizScreen({
           </div>
         </div>
 
-        {/* Pinned Mushaf Ayah Box — labels live outside the verse flow so Arabic is never covered */}
-        <div className={`quiz-wizard-ayah-box ${effectiveStep === 2 ? "is-picking-governor" : ""}`}>
+        {/* Pinned Mushaf Ayah Box — remount on question change for soft enter (matches step slides) */}
+        <div
+          key={question.id}
+          className={`quiz-wizard-ayah-box anim-soft-enter ${effectiveStep === 2 ? "is-picking-governor" : ""}`}
+        >
           {scopeMode === "ayah" && (
             <div className="quiz-wizard-word-tabs" dir="rtl">
               {ayahQuestions.map((q) => (

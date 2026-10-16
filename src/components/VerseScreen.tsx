@@ -126,20 +126,22 @@ export function VerseScreen({
             <span />
           </div>
         ) : (
-          <VerseBody
-            unitName={unit.name}
-            phonetic={unit.phonetic}
-            title={unit.title}
-            revelation={unit.rev}
-            sura={sura}
-            verse={verse}
-            selected={word?.n}
-            selectedSegment={segment}
-            onSelect={(wordIndex, segmentIndex) => {
-              setSegment(segmentIndex);
-              onNavigate(sura, verse.v, wordIndex);
-            }}
-          />
+          <div key={`${sura}-${verseNumber}`} className="anim-soft-enter">
+            <VerseBody
+              unitName={unit.name}
+              phonetic={unit.phonetic}
+              title={unit.title}
+              revelation={unit.rev}
+              sura={sura}
+              verse={verse}
+              selected={word?.n}
+              selectedSegment={segment}
+              onSelect={(wordIndex, segmentIndex) => {
+                setSegment(segmentIndex);
+                onNavigate(sura, verse.v, wordIndex);
+              }}
+            />
+          </div>
         )}
       </div>
       {verse && word ? (

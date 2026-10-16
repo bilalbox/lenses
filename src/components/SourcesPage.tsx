@@ -8,7 +8,7 @@ export function SourcesPage({ manifest }: { manifest: Manifest }) {
     ? `, including ${formatNumber(partial.syntax)} of ${formatNumber(partial.verses)} verses in surah ${formatNumber(partial.n)}`
     : "";
   return (
-    <article className="sources-page">
+    <article className="sources-page anim-soft-enter">
       <header className="page-intro">
         <p className="eyebrow">{t.sources.eyebrow}</p>
         <h1>{t.sources.pageTitle}</h1>

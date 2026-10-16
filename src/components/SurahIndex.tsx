@@ -9,7 +9,7 @@ interface Props {
 export function SurahIndex({ manifest, onOpen }: Props) {
   const { t, formatNumber } = useI18n();
   return (
-    <div className="surah-page">
+    <div className="surah-page anim-soft-enter">
       <header className="page-intro">
         <p className="eyebrow">{t.surahs.countEyebrow(manifest.units.length)}</p>
         <h1>{t.surahs.pageTitle}</h1>

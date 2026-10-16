@@ -59,7 +59,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
   };
 
   return (
-    <div className="search-page">
+    <div className="search-page anim-soft-enter">
       <header className="page-intro">
         <p className="eyebrow">{t.examples.eyebrow}</p>
         <h1>{t.examples.pageTitle}</h1>
