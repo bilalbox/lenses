@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { loadSurah } from "../lib/api";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { normalizeDigits } from "../lib/i18n/format";
+import { formatIrabText } from "../lib/formatIrab";
 import type { Manifest, SurahFile, Verse } from "../lib/types";
 import { DependencyTree } from "./DependencyTree";
 import { WordSheet } from "./WordSheet";
@@ -317,8 +318,8 @@ function VerseBody({
               tafsir.net
             </a>
           </p>
-          <div className="prose" dir="rtl" lang="ar">
-            {verse.ir}
+          <div className="prose irab-prose" dir="rtl" lang="ar">
+            {formatIrabText(verse.ir)}
           </div>
         </details>
       ) : null}

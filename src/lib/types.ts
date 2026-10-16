@@ -151,7 +151,7 @@ export interface WordIndex {
 export type VerseRow = [number, number, string, string];
 
 export interface Route {
-  page: "verse" | "search" | "surahs" | "sources";
+  page: "verse" | "search" | "surahs" | "sources" | "quiz";
   sura: number;
   verse: number;
   word?: number;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { featureLines, kindGloss, posGloss, relationGloss } from "../lib/glossary";
 import { spaceLetters } from "../lib/arabic";
+import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type { SyntaxGraph, Verse, Word } from "../lib/types";
 import { CloseIcon } from "./Icons";
@@ -226,8 +227,8 @@ export function WordSheet({
               tafsir.net
             </a>
           </p>
-          <p className="prose" dir="rtl" lang="ar">
-            {word.i}
+          <p className="prose irab-prose" dir="rtl" lang="ar">
+            {formatWordIrabText(word.i)}
           </p>
         </section>
       ) : null}
@@ -240,8 +241,8 @@ export function WordSheet({
               tafsir.net
             </a>
           </p>
-          <p className="prose" dir="rtl" lang="ar">
-            {word.sf}
+          <p className="prose irab-prose" dir="rtl" lang="ar">
+            {formatIrabText(word.sf)}
           </p>
         </section>
       ) : null}

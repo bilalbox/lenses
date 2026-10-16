@@ -12,10 +12,13 @@ import { SourcesPage } from "./components/SourcesPage";
 import { SurahIndex } from "./components/SurahIndex";
 import { VerseScreen } from "./components/VerseScreen";
 import { SettingsModal } from "./components/SettingsModal";
+import { QuizScreen } from "./components/QuizScreen";
 import { GearIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from "./components/Icons";
 
 function parseRoute(hash: string): Route {
-  const parts = (hash.replace(/^#/, "") || homePath).split("/").filter(Boolean);
+  const cleanHash = hash.replace(/^#/, "").split("?")[0] || homePath;
+  const parts = cleanHash.split("/").filter(Boolean);
+  if (parts[0] === "quiz") return { page: "quiz", ...homeVerse };
   if (parts[0] === "search") return { page: "search", ...homeVerse };
   if (parts[0] === "surahs") return { page: "surahs", ...homeVerse };
   if (parts[0] === "sources") return { page: "sources", ...homeVerse };
@@ -228,6 +231,9 @@ export function App() {
           <a href="#/search" aria-current={route.page === "search" ? "page" : undefined}>
             {t.common.examplesNav}
           </a>
+          <a href="#/quiz" aria-current={route.page === "quiz" ? "page" : undefined}>
+            {t.common.quizNav}
+          </a>
           <button
             type="button"
             className="icon-button settings-toggle-button"
@@ -270,7 +276,14 @@ export function App() {
         ) : null}
         {manifest && route.page === "surahs" ? <SurahIndex manifest={manifest} onOpen={(sura) => go(`/${sura}/1`)} /> : null}
         {manifest && route.page === "sources" ? <SourcesPage manifest={manifest} /> : null}
+        {manifest && route.page === "quiz" ? (
+          <QuizScreen
+            manifest={manifest}
+            onOpenInReader={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
+          />
+        ) : null}
       </main>
+      {route.page !== "quiz" ? (
       <nav className="dock" aria-label={t.common.verse}>
         <button type="button" onClick={() => stepVerse(-1)}>
           {dir === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -308,6 +321,7 @@ export function App() {
           <span>{t.common.search}</span>
         </button>
       </nav>
+      ) : null}
       <SettingsModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
