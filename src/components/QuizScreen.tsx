@@ -293,7 +293,7 @@ export function QuizScreen({
 
   const crumbRoleLabel = draft.relation ? getRoleMeta(draft.relation).ar : t.quiz.stepRoleCrumb;
   const crumbHeadLabel = selectedHeadWord
-    ? `﴿${selectedHeadWord.a}﴾`
+    ? selectedHeadWord.a
     : activeRoleMeta.governorLabel[locale];
   const crumbCaseLabel = draft.grammaticalCase ? getCaseMeta(draft.grammaticalCase).ar : t.quiz.stepCaseCrumb;
   const crumbSignLabel = draft.sign ? getSignMeta(draft.sign).ar : t.quiz.stepSignCrumb;
@@ -384,7 +384,7 @@ export function QuizScreen({
             >
               <span className="quiz-crumb-num">{formatNumber(2)}</span>
               <span className="quiz-crumb-text" lang={selectedHeadWord ? "ar" : undefined}>
-                {selectedHeadWord ? `﴿${selectedHeadWord.a}﴾` : t.quiz.headBadge}
+                {selectedHeadWord ? selectedHeadWord.a : t.quiz.headBadge}
               </span>
             </button>
 
@@ -509,7 +509,7 @@ export function QuizScreen({
               <span className="quiz-legend-swatch" aria-hidden="true" />
               <span className="quiz-legend-copy">
                 <small>{t.quiz.targetBadge}</small>
-                <strong lang="ar">﴿{question.targetWord.a}﴾</strong>
+                <strong lang="ar">{question.targetWord.a}</strong>
               </span>
             </span>
             {selectedHeadWord ? (
@@ -517,7 +517,7 @@ export function QuizScreen({
                 <span className="quiz-legend-swatch" aria-hidden="true" />
                 <span className="quiz-legend-copy">
                   <small>{activeRoleMeta.governorLabel[locale]}</small>
-                  <strong lang="ar">﴿{selectedHeadWord.a}﴾</strong>
+                  <strong lang="ar">{selectedHeadWord.a}</strong>
                 </span>
               </span>
             ) : null}
@@ -689,9 +689,9 @@ export function QuizScreen({
 
                   {/* Assembled Arabic Formula Card */}
                   <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
-                    <strong className="formula-target">﴿{question.targetWord.a}﴾:</strong>{" "}
+                    <strong className="formula-target">{question.targetWord.a}:</strong>{" "}
                     <span>{draft.relation ? getRoleMeta(draft.relation).ar : "—"}</span>{" "}
-                    <span>{selectedHeadWord ? `لـ ﴿${selectedHeadWord.a}﴾` : "—"}</span>{" "}
+                    <span>{selectedHeadWord ? `لـ ${selectedHeadWord.a}` : "—"}</span>{" "}
                     <span>{draft.grammaticalCase ? getCaseMeta(draft.grammaticalCase).ar : "—"}</span>{" "}
                     <span>وعلامة إعرابه</span>{" "}
                     <span>{draft.sign ? getSignMeta(draft.sign).ar : "—"}</span>.
@@ -763,8 +763,8 @@ export function QuizScreen({
                     </span>
                     <span className={`quiz-verdict-chip ${feedback.headCorrect ? "ok" : "err"}`} lang="ar">
                       {feedback.headCorrect
-                        ? `✓ ﴿${question.headWord.a}﴾`
-                        : `✗ ${getRoleMeta(question.relation).governorLabel.ar}: ﴿${question.headWord.a}﴾`}
+                        ? `✓ ${question.headWord.a}`
+                        : `✗ ${getRoleMeta(question.relation).governorLabel.ar}: ${question.headWord.a}`}
                     </span>
                     <span className={`quiz-verdict-chip ${feedback.caseCorrect ? "ok" : "err"}`} lang="ar">
                       {feedback.caseCorrect
