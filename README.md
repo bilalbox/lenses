@@ -1,4 +1,4 @@
-# العدسات (Lenses)
+# عدسات (Lenses)
 
 Lenses is a small, installable reader for Quranic Arabic grammar. Open a verse, tap a word, and see three layers at once: the Quranic Arabic Corpus morphology, a dependency tree for the clauses the treebank covers, and classical iʿrāb from the Tafsir Center.
 

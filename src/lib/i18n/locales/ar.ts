@@ -3,7 +3,7 @@ import { formatNum } from "../format";
 
 export const ar: Translations = {
   common: {
-    appNameAr: "العدسات",
+    appNameAr: "عدسات",
     appNameEn: "Lenses",
     searchPlaceholder: "سورة:آية، أو كلمة",
     searchAria: "ابحث في الآيات",
@@ -147,7 +147,7 @@ export const ar: Translations = {
     eyebrow: "البيانات والتراخيص",
     pageTitle: "المصادر المعتمدة في هذا الإصدار",
     intro:
-      "تطبيق العدسات هو قارئ تحليلي يجمع دراسات قرآنية منشورة بترخيص مفتوح. النص القرآني محفوظ دون أدنى تبديل. تُنسب كل طبقة إعرابية لمصدرها، ويمكن عرض أكثر من طبقة في آن واحد.",
+      "تطبيق عدسات هو قارئ تحليلي يجمع دراسات قرآنية منشورة بترخيص مفتوح. النص القرآني محفوظ دون أدنى تبديل. تُنسب كل طبقة إعرابية لمصدرها، ويمكن عرض أكثر من طبقة في آن واحد.",
     coverageHeading: "نطاق التغطية",
     coverageBody: (words: number, syntaxVerses: number, partialText: string, chStart: number, chEnd: number) =>
       `يغطي التحليل الصرفي كامل كلمات القرآن البالغة ${formatNum(words, "ar")} كلمة. وتشمل شجرة الإعراب ${formatNum(syntaxVerses, "ar")} آية${partialText}. السور ${formatNum(chStart, "ar")}–${formatNum(chEnd, "ar")} لم تكتمل شجرتها في هذا التصدير بعد. يتوفر الإعراب والصرف من مركز تفسير لجميع الكلمات.`,

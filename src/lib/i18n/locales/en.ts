@@ -3,7 +3,7 @@ import { formatNum } from "../format";
 
 export const en: Translations = {
   common: {
-    appNameAr: "العدسات",
+    appNameAr: "عدسات",
     appNameEn: "Lenses",
     searchPlaceholder: "Surah:verse, or word",
     searchAria: "Search verses",

@@ -1,5 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="16" fill="#0f6e66"/>
-  <path d="M10 40c8-14 14-18 22-18s14 4 22 18" fill="none" stroke="#e0b15a" stroke-width="3" stroke-linecap="round"/>
-  <text x="32" y="36" text-anchor="middle" font-family="serif" font-size="22" fill="#f6f1e7">ب</text>
+  <rect width="64" height="64" fill="#121b18"/>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#6bbba6" stroke-width="3.5"/>
+  <path
+    d="M48.5 18.5a20.5 20.5 0 0 1 0 27"
+    fill="none"
+    stroke="#d6b56f"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+  <text
+    x="32"
+    y="40"
+    text-anchor="middle"
+    font-family="Noto Naskh Arabic, Amiri, Scheherazade New, serif"
+    font-size="30"
+    font-weight="600"
+    fill="#fcf2e0"
+  >ع</text>
 </svg>

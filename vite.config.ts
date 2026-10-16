@@ -7,10 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "icons/icon-192.png", "icons/icon-512.png"],
+      includeAssets: ["favicon.svg", "favicon.png", "icons/icon-192.png", "icons/icon-512.png"],
       manifest: {
-        name: "العدسات — Lenses",
-        short_name: "العدسات",
+        name: "عدسات — Lenses",
+        short_name: "عدسات",
         description:
           "Quranic Arabic word by word: morphology, a dependency tree, and classical iʿrāb.",
         theme_color: "#0f6e66",
