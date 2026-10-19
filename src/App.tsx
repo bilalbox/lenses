@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { stripDiacritics } from "./lib/arabic";
 import { loadManifest, loadVerses } from "./lib/api";
-import { homePath, homeVerse } from "./lib/home";
+import { getOpeningVerse, openingPath, rememberVerse } from "./lib/home";
 import { startLibrary, watchLibrary, type LibraryProgress } from "./lib/library";
 import { searchVerses, type ExampleQuery, type VerseHit } from "./lib/search";
 import type { Manifest, Route } from "./lib/types";
@@ -16,16 +16,17 @@ import { QuizScreen } from "./components/QuizScreen";
 import { GearIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from "./components/Icons";
 
 function parseRoute(hash: string): Route {
-  const cleanHash = hash.replace(/^#/, "").split("?")[0] || homePath;
+  const fallback = getOpeningVerse();
+  const cleanHash = hash.replace(/^#/, "").split("?")[0] || openingPath();
   const parts = cleanHash.split("/").filter(Boolean);
-  if (parts[0] === "quiz") return { page: "quiz", ...homeVerse };
-  if (parts[0] === "search") return { page: "search", ...homeVerse };
-  if (parts[0] === "surahs") return { page: "surahs", ...homeVerse };
-  if (parts[0] === "sources") return { page: "sources", ...homeVerse };
+  if (parts[0] === "quiz") return { page: "quiz", ...fallback };
+  if (parts[0] === "search") return { page: "search", ...fallback };
+  if (parts[0] === "surahs") return { page: "surahs", ...fallback };
+  if (parts[0] === "sources") return { page: "sources", ...fallback };
   const sura = Number(parts[0]);
   const verse = Number(parts[1]);
   const word = parts[2] ? Number(parts[2]) : undefined;
-  if (!sura || !verse) return { page: "verse", ...homeVerse };
+  if (!sura || !verse) return { page: "verse", ...fallback };
   return { page: "verse", sura, verse, word };
 }
 
@@ -68,11 +69,15 @@ export function App() {
   const [library, setLibrary] = useState<LibraryProgress | null>(null);
 
   useEffect(() => {
-    if (!location.hash) location.replace(`#${homePath}`);
+    if (!location.hash) location.replace(`#${openingPath()}`);
     const onHash = () => setRoute(parseRoute(location.hash));
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+
+  useEffect(() => {
+    if (route.page === "verse") rememberVerse(route.sura, route.verse);
+  }, [route.page, route.sura, route.verse]);
 
   useEffect(() => {
     loadManifest()
@@ -178,7 +183,10 @@ export function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <a className="mark" href={`#${homePath}`}>
+        <a
+          className="mark"
+          href={`#${route.page === "verse" ? `/${route.sura}/${route.verse}` : openingPath()}`}
+        >
           <span className="mark-ar" lang="ar">{t.common.appNameAr}</span>
           <span className="mark-en">{t.common.appNameEn}</span>
         </a>
@@ -280,6 +288,7 @@ export function App() {
           <QuizScreen
             manifest={manifest}
             onOpenInReader={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
+            onOpenSearch={openSearch}
           />
         ) : null}
       </main>

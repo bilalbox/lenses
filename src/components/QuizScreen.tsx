@@ -1,92 +1,126 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadSurah } from "../lib/api";
-import { formatWordIrabText } from "../lib/formatIrab";
+import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
 import {
   CURATED_SURAHS,
+  EXTENDED_QUIZ_SURAHS,
   QUIZ_CASES,
   QUIZ_ROLES,
   QUIZ_SIGNS,
+  SARF_CLASSES,
+  SARF_STRUCTURES,
+  extractQuizPools,
   extractQuizQuestionsFromSurah,
   getCaseMeta,
+  getLensLabel,
   getRoleMeta,
   getSignMeta,
+  type ExampleHuntQuestion,
   type QuizCase,
+  type QuizLens,
   type QuizQuestion,
   type QuizRelation,
   type QuizSign,
+  type SarfQuestion,
 } from "../lib/quizEngine";
-import type { Manifest } from "../lib/types";
+import type { ExampleQuery } from "../lib/search";
+import type { Manifest, SurahFile } from "../lib/types";
 
-interface AnswerDraft {
+interface IrabDraft {
   relation: QuizRelation | null;
   headWordNum: number | null;
   grammaticalCase: QuizCase | null;
   sign: QuizSign | null;
 }
 
-interface ValidationFeedback {
-  submitted: boolean;
-  isComplete: boolean;
-  missingFields: string[];
-  relationCorrect: boolean;
-  headCorrect: boolean;
-  caseCorrect: boolean;
-  signCorrect: boolean;
-  allCorrect: boolean;
+interface SarfDraft {
+  root: string | null;
+  wazn: string | null;
+  classCode: string | null;
+  structureCode: string | null;
+}
+
+interface ExamplesDraft {
+  spottedWordNum: number | null;
 }
 
 type WizardStep = 1 | 2 | 3 | 4 | 5;
 
+const LENS_ORDER: QuizLens[] = ["irab", "sarf", "examples"];
+
 export function QuizScreen({
   manifest,
   onOpenInReader,
+  onOpenSearch,
 }: {
   manifest: Manifest;
   onOpenInReader: (sura: number, verse: number, word?: number) => void;
+  onOpenSearch?: (seed: Partial<ExampleQuery>) => void;
 }) {
   const { locale, t, formatNumber } = useI18n();
-  const [pool, setPool] = useState<QuizQuestion[]>([]);
+  const [loadedFiles, setLoadedFiles] = useState<SurahFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [lens, setLens] = useState<QuizLens>("irab");
+  const [irabTier, setIrabTier] = useState<"all" | "advanced">("all");
+  const [sarfFilter, setSarfFilter] = useState<"all" | "verb" | "noun">("all");
   const [scopeMode, setScopeMode] = useState<"word" | "ayah">("word");
-  const [completedWordIds, setCompletedWordIds] = useState<Set<string>>(() => new Set());
+
+  const [indices, setIndices] = useState<Record<QuizLens, number>>({
+    irab: 0,
+    sarf: 0,
+    examples: 0,
+  });
+  const [poolsSeeded, setPoolsSeeded] = useState(false);
+
+  const [completedIds, setCompletedIds] = useState<Set<string>>(() => new Set());
   const [streak, setStreak] = useState(0);
   const [score, setScore] = useState({ solved: 0, attempts: 0 });
 
   const [step, setStep] = useState<WizardStep>(1);
   const [animDir, setAnimDir] = useState<"forward" | "backward">("forward");
-  const [draft, setDraft] = useState<AnswerDraft>({
+
+  const [irabDraft, setIrabDraft] = useState<IrabDraft>({
     relation: null,
     headWordNum: null,
     grammaticalCase: null,
     sign: null,
   });
-  const [feedback, setFeedback] = useState<ValidationFeedback | null>(null);
+  const [sarfDraft, setSarfDraft] = useState<SarfDraft>({
+    root: null,
+    wazn: null,
+    classCode: null,
+    structureCode: null,
+  });
+  const [exDraft, setExDraft] = useState<ExamplesDraft>({
+    spottedWordNum: null,
+  });
+
+  const [submitted, setSubmitted] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
   const targetBtnRef = useRef<HTMLButtonElement | null>(null);
 
+  // Wave 1: Load CURATED_SURAHS immediately for fast initial paint
   useEffect(() => {
     let cancel = false;
     Promise.all(CURATED_SURAHS.map((n) => loadSurah(n)))
       .then((files) => {
         if (cancel) return;
-        const extracted: QuizQuestion[] = [];
-        for (const f of files) {
-          extracted.push(...extractQuizQuestionsFromSurah(f));
-        }
-        const sorted = [...extracted].sort((a, b) => {
-          const aIsHome = a.sura === 59 && a.verse.v === 18 ? -1 : 0;
-          const bIsHome = b.sura === 59 && b.verse.v === 18 ? -1 : 0;
-          if (aIsHome !== bIsHome) return aIsHome - bIsHome;
-          return 0;
-        });
-        const preferredIdx = sorted.findIndex((q) => q.sura === 59 && q.verse.v === 18 && q.relation === "subj");
-        if (preferredIdx > 0) {
-          const [fav] = sorted.splice(preferredIdx, 1);
-          sorted.unshift(fav);
-        }
-        setPool(sorted);
+        setLoadedFiles(files);
         setLoading(false);
+
+        // Wave 2: Load EXTENDED_QUIZ_SURAHS in the background for deeper variety
+        void Promise.all(EXTENDED_QUIZ_SURAHS.map((n) => loadSurah(n).catch(() => null))).then((more) => {
+          if (cancel) return;
+          const validMore = more.filter((f): f is SurahFile => f !== null);
+          if (validMore.length > 0) {
+            setLoadedFiles((prev) => {
+              const seen = new Set(prev.map((p) => p.n));
+              return [...prev, ...validMore.filter((f) => !seen.has(f.n))];
+            });
+          }
+        });
       })
       .catch(() => {
         if (!cancel) setLoading(false);
@@ -96,134 +130,250 @@ export function QuizScreen({
     };
   }, [manifest]);
 
-  const question = pool[currentIndex] ?? null;
+  const rawIrabPool = useMemo(() => {
+    const extracted: QuizQuestion[] = [];
+    for (const f of loadedFiles) {
+      extracted.push(...extractQuizQuestionsFromSurah(f));
+    }
+    return extracted;
+  }, [loadedFiles]);
 
-  const ayahQuestions = useMemo(() => {
-    if (!question) return [];
-    return pool.filter((q) => q.sura === question.sura && q.verse.v === question.verse.v);
-  }, [pool, question]);
-
-  // Keep the highlighted target word scrolled into view inside the pinned ayah container
-  useEffect(() => {
-    targetBtnRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-  }, [question?.id]);
-
-  const resetForQuestion = useCallback(() => {
-    setDraft({
-      relation: null,
-      headWordNum: null,
-      grammaticalCase: null,
-      sign: null,
+  const sarfCacheRef = useRef<Map<string, SarfQuestion>>(new Map());
+  const quizPools = useMemo(() => {
+    const pools = extractQuizPools(loadedFiles);
+    const stableSarf = pools.sarf.map((q) => {
+      const existing = sarfCacheRef.current.get(q.id);
+      if (existing) return existing;
+      sarfCacheRef.current.set(q.id, q);
+      return q;
     });
-    setFeedback(null);
+    return { sarf: stableSarf, examples: pools.examples };
+  }, [loadedFiles]);
+
+  const irabPool = useMemo(() => {
+    if (irabTier === "advanced") {
+      const filtered = rawIrabPool.filter((q) => q.isAdvanced);
+      return filtered.length > 0 ? filtered : rawIrabPool;
+    }
+    return rawIrabPool;
+  }, [irabTier, rawIrabPool]);
+
+  const sarfPool = useMemo(() => {
+    if (sarfFilter === "all") return quizPools.sarf;
+    const filtered = quizPools.sarf.filter((q) => q.kind === sarfFilter);
+    return filtered.length > 0 ? filtered : quizPools.sarf;
+  }, [quizPools.sarf, sarfFilter]);
+
+  const examplesPool = quizPools.examples;
+
+  // Always open quiz on a random verse (once curated pools are ready).
+  useEffect(() => {
+    if (poolsSeeded || loading) return;
+    if (irabPool.length === 0 && sarfPool.length === 0 && examplesPool.length === 0) return;
+    setIndices({
+      irab: irabPool.length ? Math.floor(Math.random() * irabPool.length) : 0,
+      sarf: sarfPool.length ? Math.floor(Math.random() * sarfPool.length) : 0,
+      examples: examplesPool.length ? Math.floor(Math.random() * examplesPool.length) : 0,
+    });
+    setPoolsSeeded(true);
+  }, [examplesPool.length, irabPool.length, loading, poolsSeeded, sarfPool.length]);
+
+  const irabQuestion: QuizQuestion | null = irabPool[indices.irab % Math.max(irabPool.length, 1)] ?? null;
+  const sarfQuestion: SarfQuestion | null = sarfPool[indices.sarf % Math.max(sarfPool.length, 1)] ?? null;
+  const exQuestion: ExampleHuntQuestion | null =
+    examplesPool[indices.examples % Math.max(examplesPool.length, 1)] ?? null;
+
+  const activeQuestion =
+    lens === "irab" ? irabQuestion : lens === "sarf" ? sarfQuestion : exQuestion;
+
+  const resetDrafts = useCallback(() => {
+    setIrabDraft({ relation: null, headWordNum: null, grammaticalCase: null, sign: null });
+    setSarfDraft({ root: null, wazn: null, classCode: null, structureCode: null });
+    setExDraft({ spottedWordNum: null });
+    setSubmitted(false);
+    setMissingFields([]);
     setAnimDir("forward");
     setStep(1);
   }, []);
 
-  const handleUpdateDraft = useCallback((patch: Partial<AnswerDraft>) => {
-    setDraft((prev) => ({ ...prev, ...patch }));
-    setFeedback(null);
-  }, []);
+  const ayahQuestionsForLens = useMemo(() => {
+    if (!activeQuestion) return [];
+    const { sura, verse } = activeQuestion;
+    if (lens === "irab") return irabPool.filter((q) => q.sura === sura && q.verse.v === verse.v);
+    if (lens === "sarf") return sarfPool.filter((q) => q.sura === sura && q.verse.v === verse.v);
+    return examplesPool.filter((q) => q.sura === sura && q.verse.v === verse.v);
+  }, [activeQuestion, examplesPool, irabPool, lens, sarfPool]);
 
-  const handleSelectTargetWord = useCallback(
-    (targetQ: QuizQuestion) => {
-      const idx = pool.findIndex((q) => q.id === targetQ.id);
+  useEffect(() => {
+    targetBtnRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeQuestion?.id, lens]);
+
+  const handleSelectLens = (nextLens: QuizLens) => {
+    if (nextLens === lens) return;
+    setLens(nextLens);
+    resetDrafts();
+  };
+
+  const handleSelectQuestionById = useCallback(
+    (targetId: string) => {
+      const currentPool =
+        lens === "irab" ? irabPool : lens === "sarf" ? sarfPool : examplesPool;
+      const idx = currentPool.findIndex((q) => q.id === targetId);
       if (idx >= 0) {
-        setCurrentIndex(idx);
-        resetForQuestion();
+        setIndices((prev) => ({ ...prev, [lens]: idx }));
+        resetDrafts();
       }
     },
-    [pool, resetForQuestion],
+    [examplesPool, irabPool, lens, resetDrafts, sarfPool],
   );
 
   const handleNextRandom = useCallback(() => {
-    if (pool.length <= 1) return;
-    if (scopeMode === "ayah" && question) {
-      const nextInAyah = ayahQuestions.find((q) => q.id !== question.id && !completedWordIds.has(q.id));
+    const currentPool =
+      lens === "irab" ? irabPool : lens === "sarf" ? sarfPool : examplesPool;
+    if (currentPool.length <= 1 || !activeQuestion) return;
+
+    if (scopeMode === "ayah" && lens !== "examples") {
+      const nextInAyah = ayahQuestionsForLens.find(
+        (q) => q.id !== activeQuestion.id && !completedIds.has(q.id),
+      );
       if (nextInAyah) {
-        handleSelectTargetWord(nextInAyah);
+        handleSelectQuestionById(nextInAyah.id);
         return;
       }
     }
-    const otherAyahPool = pool.filter((q) => !question || q.sura !== question.sura || q.verse.v !== question.verse.v);
-    const source = otherAyahPool.length > 0 ? otherAyahPool : pool;
+
+    const otherAyahPool = currentPool.filter(
+      (q) => q.sura !== activeQuestion.sura || q.verse.v !== activeQuestion.verse.v,
+    );
+    const source = otherAyahPool.length > 0 ? otherAyahPool : currentPool;
     const picked = source[Math.floor(Math.random() * source.length)];
-    const nextIdx = pool.findIndex((q) => q.id === picked.id);
-    setCurrentIndex(nextIdx >= 0 ? nextIdx : 0);
-    resetForQuestion();
-  }, [ayahQuestions, completedWordIds, handleSelectTargetWord, pool, question, resetForQuestion, scopeMode]);
+    const nextIdx = currentPool.findIndex((q) => q.id === picked.id);
+    setIndices((prev) => ({ ...prev, [lens]: nextIdx >= 0 ? nextIdx : 0 }));
+    resetDrafts();
+  }, [
+    activeQuestion,
+    ayahQuestionsForLens,
+    completedIds,
+    examplesPool,
+    handleSelectQuestionById,
+    irabPool,
+    lens,
+    resetDrafts,
+    sarfPool,
+    scopeMode,
+  ]);
 
-  const handleSubmit = useCallback(() => {
-    if (!question) return;
-    const missing: string[] = [];
-    if (!draft.relation) missing.push(t.quiz.stepRoleCrumb);
-    if (!draft.headWordNum) missing.push(getRoleMeta(question.relation).governorLabel[locale]);
-    if (!draft.grammaticalCase) missing.push(t.quiz.stepCaseCrumb);
-    if (!draft.sign) missing.push(t.quiz.stepSignCrumb);
-
-    if (missing.length > 0) {
-      setFeedback({
-        submitted: true,
-        isComplete: false,
-        missingFields: missing,
-        relationCorrect: false,
-        headCorrect: false,
-        caseCorrect: false,
-        signCorrect: false,
-        allCorrect: false,
-      });
-      return;
-    }
-
-    const relationCorrect = draft.relation === question.relation;
-    const headCorrect = draft.headWordNum === question.headWord.n;
-    const caseCorrect = draft.grammaticalCase === question.grammaticalCase;
-    const signCorrect = draft.sign === question.sign;
-    const allCorrect = relationCorrect && headCorrect && caseCorrect && signCorrect;
-
-    setFeedback({
-      submitted: true,
-      isComplete: true,
-      missingFields: [],
-      relationCorrect,
-      headCorrect,
-      caseCorrect,
-      signCorrect,
-      allCorrect,
-    });
-
-    if (allCorrect) {
-      setCompletedWordIds((prev) => new Set(prev).add(question.id));
+  const recordOutcome = useCallback((id: string, isAllCorrect: boolean) => {
+    if (isAllCorrect) {
+      setCompletedIds((prev) => new Set(prev).add(id));
       setStreak((s) => s + 1);
       setScore((prev) => ({ solved: prev.solved + 1, attempts: prev.attempts + 1 }));
     } else {
       setStreak(0);
       setScore((prev) => ({ ...prev, attempts: prev.attempts + 1 }));
     }
-  }, [draft, locale, question, t.quiz]);
+  }, []);
+
+  const handleSubmit = useCallback(() => {
+    if (!activeQuestion) return;
+    if (lens === "irab" && irabQuestion) {
+      const missing: string[] = [];
+      if (!irabDraft.relation) missing.push(t.quiz.stepRoleCrumb);
+      if (!irabDraft.headWordNum) missing.push(getRoleMeta(irabQuestion.relation).governorLabel[locale]);
+      if (!irabDraft.grammaticalCase) missing.push(t.quiz.stepCaseCrumb);
+      if (!irabDraft.sign) missing.push(t.quiz.stepSignCrumb);
+      if (missing.length > 0) {
+        setSubmitted(true);
+        setMissingFields(missing);
+        return;
+      }
+      const allOk =
+        irabDraft.relation === irabQuestion.relation &&
+        irabDraft.headWordNum === irabQuestion.headWord.n &&
+        irabDraft.grammaticalCase === irabQuestion.grammaticalCase &&
+        irabDraft.sign === irabQuestion.sign;
+      setSubmitted(true);
+      setMissingFields([]);
+      recordOutcome(irabQuestion.id, allOk);
+      return;
+    }
+
+    if (lens === "sarf" && sarfQuestion) {
+      const missing: string[] = [];
+      if (!sarfDraft.root) missing.push(locale === "ar" ? "المادة" : "Root");
+      if (!sarfDraft.wazn) missing.push(locale === "ar" ? "الوزن" : "Wazn");
+      if (!sarfDraft.classCode) missing.push(locale === "ar" ? "الباب/المشتق" : "Class");
+      if (!sarfDraft.structureCode) missing.push(locale === "ar" ? "البنية" : "Structure");
+      if (missing.length > 0) {
+        setSubmitted(true);
+        setMissingFields(missing);
+        return;
+      }
+      const allOk =
+        sarfDraft.root === sarfQuestion.rootRaw &&
+        sarfDraft.wazn === sarfQuestion.wazn &&
+        sarfDraft.classCode === sarfQuestion.classCode &&
+        sarfDraft.structureCode === sarfQuestion.structureCode;
+      setSubmitted(true);
+      setMissingFields([]);
+      recordOutcome(sarfQuestion.id, allOk);
+      return;
+    }
+
+    if (lens === "examples" && exQuestion) {
+      const missing: string[] = [];
+      if (!exDraft.spottedWordNum) missing.push(locale === "ar" ? "الشاهد في الآية" : "Word in Ayah");
+      if (missing.length > 0) {
+        setSubmitted(true);
+        setMissingFields(missing);
+        return;
+      }
+      const allOk = exDraft.spottedWordNum === exQuestion.targetWord.n;
+      setSubmitted(true);
+      setMissingFields([]);
+      recordOutcome(exQuestion.id, allOk);
+    }
+  }, [
+    activeQuestion,
+    exDraft,
+    exQuestion,
+    irabDraft,
+    irabQuestion,
+    lens,
+    locale,
+    recordOutcome,
+    sarfDraft,
+    sarfQuestion,
+    t.quiz,
+  ]);
 
   const handleRevealAnswer = useCallback(() => {
-    if (!question) return;
-    setDraft({
-      relation: question.relation,
-      headWordNum: question.headWord.n,
-      grammaticalCase: question.grammaticalCase,
-      sign: question.sign,
-    });
-    setFeedback({
-      submitted: true,
-      isComplete: true,
-      missingFields: [],
-      relationCorrect: true,
-      headCorrect: true,
-      caseCorrect: true,
-      signCorrect: true,
-      allCorrect: true,
-    });
-    setCompletedWordIds((prev) => new Set(prev).add(question.id));
+    if (!activeQuestion) return;
+    if (lens === "irab" && irabQuestion) {
+      setIrabDraft({
+        relation: irabQuestion.relation,
+        headWordNum: irabQuestion.headWord.n,
+        grammaticalCase: irabQuestion.grammaticalCase,
+        sign: irabQuestion.sign,
+      });
+    } else if (lens === "sarf" && sarfQuestion) {
+      setSarfDraft({
+        root: sarfQuestion.rootRaw,
+        wazn: sarfQuestion.wazn,
+        classCode: sarfQuestion.classCode,
+        structureCode: sarfQuestion.structureCode,
+      });
+    } else if (lens === "examples" && exQuestion) {
+      setExDraft({
+        spottedWordNum: exQuestion.targetWord.n,
+      });
+    }
+    setSubmitted(true);
+    setMissingFields([]);
+    setCompletedIds((prev) => new Set(prev).add(activeQuestion.id));
     setAnimDir("forward");
-    setStep(5);
-  }, [question]);
+    setStep(lens === "examples" ? 2 : 5);
+  }, [activeQuestion, exQuestion, irabQuestion, lens, sarfQuestion]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -236,7 +386,7 @@ export function QuizScreen({
     return () => window.removeEventListener("keydown", onKey);
   }, [handleSubmit]);
 
-  if (loading || !question) {
+  if (loading || !poolsSeeded || !activeQuestion) {
     return (
       <div className="skeleton page-skeleton" aria-hidden="true">
         <span />
@@ -246,85 +396,260 @@ export function QuizScreen({
     );
   }
 
-  const activeRoleMeta = draft.relation ? getRoleMeta(draft.relation) : getRoleMeta(question.relation);
-  const effectiveStep: WizardStep = feedback?.submitted && feedback.isComplete ? 5 : step;
+  const maxStep: WizardStep = lens === "examples" ? 2 : 5;
+  const isComplete = submitted && missingFields.length === 0;
+  const effectiveStep: WizardStep = isComplete ? maxStep : step;
 
   const goToStep = (next: WizardStep) => {
     setAnimDir(next >= effectiveStep ? "forward" : "backward");
+    if (isComplete && next < maxStep) {
+      setSubmitted(false);
+    }
     setStep(next);
   };
 
-  // Endowed progress: starts at 20% (Step 1 of 5 anchored)
-  const filledSteps =
-    1 +
-    (draft.relation ? 1 : 0) +
-    (draft.headWordNum ? 1 : 0) +
-    (draft.grammaticalCase ? 1 : 0) +
-    (draft.sign ? 1 : 0);
-  const progressPct = Math.round((filledSteps / 5) * 100);
+  // Compute progress percentage across the active mode's steps
+  let filledSteps = 1;
+  let totalSteps = 5;
+  if (lens === "irab") {
+    filledSteps =
+      1 +
+      (irabDraft.relation ? 1 : 0) +
+      (irabDraft.headWordNum ? 1 : 0) +
+      (irabDraft.grammaticalCase ? 1 : 0) +
+      (irabDraft.sign ? 1 : 0);
+  } else if (lens === "sarf") {
+    filledSteps =
+      1 +
+      (sarfDraft.root ? 1 : 0) +
+      (sarfDraft.wazn ? 1 : 0) +
+      (sarfDraft.classCode ? 1 : 0) +
+      (sarfDraft.structureCode ? 1 : 0);
+  } else {
+    totalSteps = 2;
+    filledSteps = 1 + (exDraft.spottedWordNum ? 1 : 0);
+  }
+  const progressPct = Math.round((filledSteps / totalSteps) * 100);
 
-  const selectedHeadWord = question.verse.w.find((w) => w.n === draft.headWordNum) ?? null;
+  const solvedInAyahCount = ayahQuestionsForLens.filter((q) => completedIds.has(q.id)).length;
+  const activeRoleMeta =
+    lens === "irab" && irabQuestion
+      ? irabDraft.relation
+        ? getRoleMeta(irabDraft.relation)
+        : getRoleMeta(irabQuestion.relation)
+      : QUIZ_ROLES[0];
+  const selectedHeadWord =
+    lens === "irab" && irabQuestion
+      ? irabQuestion.verse.w.find((w) => w.n === irabDraft.headWordNum) ?? null
+      : null;
+  const spottedWord =
+    lens === "examples" && exQuestion
+      ? exQuestion.verse.w.find((w) => w.n === exDraft.spottedWordNum) ?? null
+      : null;
 
-  const selectRelationAndAdvance = (rel: QuizRelation) => {
-    handleUpdateDraft({ relation: rel });
-    setAnimDir("forward");
-    setStep(2);
-  };
+  // Breadcrumb definitions per lens
+  const breadcrumbs: { stepNum: WizardStep; label: string; isAr?: boolean; filled: boolean }[] =
+    lens === "irab"
+      ? [
+          {
+            stepNum: 1,
+            label: irabDraft.relation ? getRoleMeta(irabDraft.relation).ar : t.quiz.stepRoleCrumb,
+            isAr: Boolean(irabDraft.relation),
+            filled: Boolean(irabDraft.relation),
+          },
+          {
+            stepNum: 2,
+            label: selectedHeadWord ? selectedHeadWord.a : t.quiz.headBadge,
+            isAr: Boolean(selectedHeadWord),
+            filled: Boolean(irabDraft.headWordNum),
+          },
+          {
+            stepNum: 3,
+            label: irabDraft.grammaticalCase ? getCaseMeta(irabDraft.grammaticalCase).ar : t.quiz.stepCaseCrumb,
+            isAr: Boolean(irabDraft.grammaticalCase),
+            filled: Boolean(irabDraft.grammaticalCase),
+          },
+          {
+            stepNum: 4,
+            label: irabDraft.sign ? getSignMeta(irabDraft.sign).ar : t.quiz.stepSignCrumb,
+            isAr: Boolean(irabDraft.sign),
+            filled: Boolean(irabDraft.sign),
+          },
+          {
+            stepNum: 5,
+            label: t.quiz.stepCheckCrumb,
+            filled: filledSteps === 5,
+          },
+        ]
+      : lens === "sarf"
+        ? [
+            {
+              stepNum: 1,
+              label: sarfDraft.root ? sarfDraft.root.split("").join(" ") : locale === "ar" ? "المادة" : "Root",
+              isAr: Boolean(sarfDraft.root || locale === "ar"),
+              filled: Boolean(sarfDraft.root),
+            },
+            {
+              stepNum: 2,
+              label: sarfDraft.wazn || (locale === "ar" ? "الوزن" : "Wazn"),
+              isAr: Boolean(sarfDraft.wazn || locale === "ar"),
+              filled: Boolean(sarfDraft.wazn),
+            },
+            {
+              stepNum: 3,
+              label:
+                (sarfDraft.classCode && SARF_CLASSES[sarfDraft.classCode]?.ar) ||
+                sarfDraft.classCode ||
+                (locale === "ar" ? "الباب/المشتق" : "Class"),
+              isAr: Boolean(sarfDraft.classCode || locale === "ar"),
+              filled: Boolean(sarfDraft.classCode),
+            },
+            {
+              stepNum: 4,
+              label:
+                (sarfDraft.structureCode && SARF_STRUCTURES[sarfDraft.structureCode]?.ar) ||
+                sarfDraft.structureCode ||
+                (locale === "ar" ? "البنية" : "Structure"),
+              isAr: Boolean(sarfDraft.structureCode || locale === "ar"),
+              filled: Boolean(sarfDraft.structureCode),
+            },
+            {
+              stepNum: 5,
+              label: t.quiz.stepCheckCrumb,
+              filled: filledSteps === 5,
+            },
+          ]
+        : [
+            {
+              stepNum: 1,
+              label: spottedWord ? spottedWord.a : locale === "ar" ? "الشاهد" : "Spot Word",
+              isAr: Boolean(spottedWord || locale === "ar"),
+              filled: Boolean(exDraft.spottedWordNum),
+            },
+            {
+              stepNum: 2,
+              label: t.quiz.stepCheckCrumb,
+              filled: filledSteps === 2,
+            },
+          ];
 
-  const selectHeadAndAdvance = (headNum: number) => {
-    handleUpdateDraft({ headWordNum: headNum });
-    setAnimDir("forward");
-    setStep(3);
-  };
-
-  const selectCaseAndAdvance = (c: QuizCase) => {
-    handleUpdateDraft({ grammaticalCase: c });
-    setAnimDir("forward");
-    setStep(4);
-  };
-
-  const selectSignAndAdvance = (s: QuizSign) => {
-    handleUpdateDraft({ sign: s });
-    setAnimDir("forward");
-    setStep(5);
-  };
-
-  const solvedInAyahCount = ayahQuestions.filter((q) => completedWordIds.has(q.id)).length;
-
-  const crumbRoleLabel = draft.relation ? getRoleMeta(draft.relation).ar : t.quiz.stepRoleCrumb;
-  const crumbHeadLabel = selectedHeadWord
-    ? selectedHeadWord.a
-    : activeRoleMeta.governorLabel[locale];
-  const crumbCaseLabel = draft.grammaticalCase ? getCaseMeta(draft.grammaticalCase).ar : t.quiz.stepCaseCrumb;
-  const crumbSignLabel = draft.sign ? getSignMeta(draft.sign).ar : t.quiz.stepSignCrumb;
+  const isPickingWordInAyah =
+    (lens === "irab" && effectiveStep === 2) || (lens === "examples" && effectiveStep === 1);
 
   return (
     <div className="quiz-wizard-viewport anim-soft-enter">
       {/* ====================================================================
-       * TOP PANE (Top 40% of screen): Pinned Ayah & Progress Context
+       * TOP PANE: Lens Switcher + Pinned Mushaf Ayah + Progress Strip
        * ==================================================================== */}
       <section className="quiz-wizard-top" aria-label={t.common.verse}>
+        {/* 3-Lens Switcher */}
+        <div className="quiz-lens-switcher" role="tablist" aria-label="Quiz Lenses">
+          {LENS_ORDER.map((l) => {
+            const info = getLensLabel(l, locale);
+            const active = lens === l;
+            return (
+              <button
+                key={l}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                className={`quiz-lens-tab${active ? " is-active" : ""}`}
+                onClick={() => handleSelectLens(l)}
+              >
+                <span className="quiz-lens-badge" lang="ar">
+                  {info.badge}
+                </span>
+                <span className="quiz-lens-title">{info.title}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="quiz-wizard-meta-bar">
           <div className="quiz-wizard-surah-tag">
             <span className="eyebrow quiz-wizard-ref">
-              {question.suraPhonetic} {formatNumber(question.sura)}:{formatNumber(question.verse.v)}
+              {activeQuestion.suraPhonetic} {formatNumber(activeQuestion.sura)}:
+              {formatNumber(activeQuestion.verse.v)}
             </span>
-            <div className="segmented-group quiz-wizard-mode-pill" role="group" aria-label="Quiz scope">
-              <button
-                type="button"
-                className={`segmented-item${scopeMode === "word" ? " is-active" : ""}`}
-                onClick={() => setScopeMode("word")}
-              >
-                {t.quiz.modeSingleWord}
-              </button>
-              <button
-                type="button"
-                className={`segmented-item${scopeMode === "ayah" ? " is-active" : ""}`}
-                onClick={() => setScopeMode("ayah")}
-              >
-                {t.quiz.modeFullAyah(solvedInAyahCount, ayahQuestions.length)}
-              </button>
-            </div>
+
+            {lens !== "examples" && (
+              <div className="segmented-group quiz-wizard-mode-pill" role="group" aria-label="Quiz scope">
+                <button
+                  type="button"
+                  className={`segmented-item${scopeMode === "word" ? " is-active" : ""}`}
+                  onClick={() => setScopeMode("word")}
+                >
+                  {t.quiz.modeSingleWord}
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-item${scopeMode === "ayah" ? " is-active" : ""}`}
+                  onClick={() => setScopeMode("ayah")}
+                >
+                  {t.quiz.modeFullAyah(solvedInAyahCount, ayahQuestionsForLens.length)}
+                </button>
+              </div>
+            )}
+
+            {lens === "irab" && (
+              <div className="segmented-group quiz-wizard-mode-pill" role="group" aria-label="Difficulty tier">
+                <button
+                  type="button"
+                  className={`segmented-item${irabTier === "all" ? " is-active" : ""}`}
+                  onClick={() => {
+                    setIrabTier("all");
+                    resetDrafts();
+                  }}
+                >
+                  {locale === "ar" ? "الكل" : locale === "id" ? "Semua" : "All"}
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-item${irabTier === "advanced" ? " is-active" : ""}`}
+                  onClick={() => {
+                    setIrabTier("advanced");
+                    resetDrafts();
+                  }}
+                >
+                  {locale === "ar" ? "متقدم ★" : locale === "id" ? "Lanjutan ★" : "Advanced ★"}
+                </button>
+              </div>
+            )}
+
+            {lens === "sarf" && (
+              <div className="segmented-group quiz-wizard-mode-pill" role="group" aria-label="Morphology filter">
+                <button
+                  type="button"
+                  className={`segmented-item${sarfFilter === "all" ? " is-active" : ""}`}
+                  onClick={() => {
+                    setSarfFilter("all");
+                    resetDrafts();
+                  }}
+                >
+                  {locale === "ar" ? "الكل" : "All"}
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-item${sarfFilter === "verb" ? " is-active" : ""}`}
+                  onClick={() => {
+                    setSarfFilter("verb");
+                    resetDrafts();
+                  }}
+                >
+                  {locale === "ar" ? "أفعال" : locale === "id" ? "Fi'il" : "Verbs"}
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-item${sarfFilter === "noun" ? " is-active" : ""}`}
+                  onClick={() => {
+                    setSarfFilter("noun");
+                    resetDrafts();
+                  }}
+                >
+                  {locale === "ar" ? "مشتقات وجموع" : locale === "id" ? "Isim" : "Nouns"}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="quiz-wizard-stats">
@@ -344,9 +669,11 @@ export function QuizScreen({
             <button
               type="button"
               className="quiz-wizard-skip quiz-wizard-reader"
-              onClick={() => onOpenInReader(question.sura, question.verse.v, question.targetWord.n)}
+              onClick={() =>
+                onOpenInReader(activeQuestion.sura, activeQuestion.verse.v, activeQuestion.targetWord.n)
+              }
             >
-              {t.quiz.openReader(question.sura, question.verse.v)}
+              {t.quiz.openReader(activeQuestion.sura, activeQuestion.verse.v)}
             </button>
             <button type="button" className="quiz-wizard-skip" onClick={handleNextRandom}>
               {t.quiz.skipButton}
@@ -354,143 +681,130 @@ export function QuizScreen({
           </div>
         </div>
 
-        {/* Endowed Progress Bar + Interactive Step Breadcrumb Pills */}
+        {/* Endowed Progress Bar + Step Breadcrumb Pills */}
         <div className="quiz-wizard-progress-strip">
           <div className="quiz-progress-track" aria-hidden="true">
             <div className="quiz-progress-fill" style={{ width: `${progressPct}%` }} />
           </div>
-          <div className="quiz-wizard-breadcrumbs" role="tablist" aria-label="Quiz steps">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={effectiveStep === 1}
-              title={crumbRoleLabel}
-              className={`quiz-crumb ${effectiveStep === 1 ? "is-active" : ""} ${draft.relation ? "is-filled" : ""}`}
-              onClick={() => goToStep(1)}
-            >
-              <span className="quiz-crumb-num">{formatNumber(1)}</span>
-              <span className="quiz-crumb-text" lang={draft.relation ? "ar" : undefined}>
-                {crumbRoleLabel}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={effectiveStep === 2}
-              title={crumbHeadLabel}
-              className={`quiz-crumb ${effectiveStep === 2 ? "is-active" : ""} ${draft.headWordNum ? "is-filled" : ""}`}
-              onClick={() => goToStep(2)}
-            >
-              <span className="quiz-crumb-num">{formatNumber(2)}</span>
-              <span className="quiz-crumb-text" lang={selectedHeadWord ? "ar" : undefined}>
-                {selectedHeadWord ? selectedHeadWord.a : t.quiz.headBadge}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={effectiveStep === 3}
-              title={crumbCaseLabel}
-              className={`quiz-crumb ${effectiveStep === 3 ? "is-active" : ""} ${draft.grammaticalCase ? "is-filled" : ""}`}
-              onClick={() => goToStep(3)}
-            >
-              <span className="quiz-crumb-num">{formatNumber(3)}</span>
-              <span className="quiz-crumb-text" lang={draft.grammaticalCase ? "ar" : undefined}>
-                {crumbCaseLabel}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={effectiveStep === 4}
-              title={crumbSignLabel}
-              className={`quiz-crumb ${effectiveStep === 4 ? "is-active" : ""} ${draft.sign ? "is-filled" : ""}`}
-              onClick={() => goToStep(4)}
-            >
-              <span className="quiz-crumb-num">{formatNumber(4)}</span>
-              <span className="quiz-crumb-text" lang={draft.sign ? "ar" : undefined}>
-                {crumbSignLabel}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={effectiveStep === 5}
-              title={t.quiz.stepCheckCrumb}
-              className={`quiz-crumb ${effectiveStep === 5 ? "is-active" : ""} ${filledSteps === 5 ? "is-filled" : ""}`}
-              onClick={() => goToStep(5)}
-            >
-              <span className="quiz-crumb-num">✓</span>
-              <span className="quiz-crumb-text">{t.quiz.stepCheckCrumb}</span>
-            </button>
+          <div
+            className={`quiz-wizard-breadcrumbs${lens === "examples" ? " is-two-steps" : ""}`}
+            role="tablist"
+            aria-label="Quiz steps"
+          >
+            {breadcrumbs.map((b, idx) => {
+              const isLast = idx === breadcrumbs.length - 1;
+              return (
+                <button
+                  key={b.stepNum}
+                  type="button"
+                  role="tab"
+                  aria-selected={effectiveStep === b.stepNum}
+                  title={b.label}
+                  className={`quiz-crumb ${effectiveStep === b.stepNum ? "is-active" : ""} ${b.filled ? "is-filled" : ""}`}
+                  onClick={() => goToStep(b.stepNum)}
+                >
+                  <span className="quiz-crumb-num">{isLast ? "✓" : formatNumber(idx + 1)}</span>
+                  <span className="quiz-crumb-text" lang={b.isAr ? "ar" : undefined}>
+                    {b.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Pinned Mushaf Ayah Box — remount on question change for soft enter (matches step slides) */}
+        {/* Pinned Mushaf Ayah Box */}
         <div
-          key={question.id}
-          className={`quiz-wizard-ayah-box anim-soft-enter ${effectiveStep === 2 ? "is-picking-governor" : ""}`}
+          key={`${lens}:${activeQuestion.id}`}
+          className={`quiz-wizard-ayah-box anim-soft-enter ${isPickingWordInAyah ? "is-picking-governor" : ""}`}
         >
-          {scopeMode === "ayah" && (
+          {scopeMode === "ayah" && lens !== "examples" && ayahQuestionsForLens.length > 1 && (
             <div className="quiz-wizard-word-tabs" dir="rtl">
-              {ayahQuestions.map((q) => (
+              {ayahQuestionsForLens.map((q) => (
                 <button
                   key={q.id}
                   type="button"
-                  className={`quiz-wizard-word-tab${q.id === question.id ? " is-current" : ""}${completedWordIds.has(q.id) ? " is-done" : ""}`}
-                  onClick={() => handleSelectTargetWord(q)}
+                  className={`quiz-wizard-word-tab${q.id === activeQuestion.id ? " is-current" : ""}${completedIds.has(q.id) ? " is-done" : ""}`}
+                  onClick={() => handleSelectQuestionById(q.id)}
                 >
                   <span lang="ar">{q.targetWord.a}</span>
-                  {completedWordIds.has(q.id) && <small aria-hidden="true">✓</small>}
+                  {completedIds.has(q.id) && <small aria-hidden="true">✓</small>}
                 </button>
               ))}
             </div>
           )}
 
-          {effectiveStep === 2 ? (
+          {lens === "irab" && effectiveStep === 2 ? (
             <p className="quiz-wizard-pick-hint" role="status">
               {t.quiz.pickGovernorHint}
             </p>
           ) : null}
 
+          {lens === "examples" && effectiveStep === 1 && exQuestion ? (
+            <p className="quiz-wizard-pick-hint" role="status">
+              {locale === "ar"
+                ? `انقر على الكلمة التي تمثل: ${exQuestion.facetTitle.ar}`
+                : locale === "id"
+                  ? `Ketuk kata pada ayat yang merupakan: ${exQuestion.facetTitle.id}`
+                  : `Tap the word in the ayah that matches: ${exQuestion.facetTitle.en}`}
+            </p>
+          ) : null}
+
           <p className="verse-line quiz-wizard-verse-line" dir="rtl" lang="ar">
-            {question.verse.w.map((w) => {
-              const isTarget = w.n === question.targetWord.n;
-              const isHead = draft.headWordNum === w.n;
-              const isCorrectHeadHint = Boolean(
-                feedback?.submitted && feedback.isComplete && !feedback.headCorrect && w.n === question.headWord.n,
-              );
+            {activeQuestion.verse.w.map((w) => {
+              const isTarget =
+                lens === "examples"
+                  ? isComplete && w.n === activeQuestion.targetWord.n
+                  : w.n === activeQuestion.targetWord.n;
+              const isHead =
+                lens === "irab"
+                  ? irabDraft.headWordNum === w.n
+                  : lens === "examples"
+                    ? exDraft.spottedWordNum === w.n
+                    : false;
+              const isCorrectHint =
+                (lens === "irab" &&
+                  isComplete &&
+                  irabQuestion &&
+                  irabDraft.headWordNum !== irabQuestion.headWord.n &&
+                  w.n === irabQuestion.headWord.n) ||
+                (lens === "examples" &&
+                  isComplete &&
+                  exQuestion &&
+                  exDraft.spottedWordNum !== exQuestion.targetWord.n &&
+                  w.n === exQuestion.targetWord.n);
+
               return (
                 <button
                   key={w.n}
-                  ref={isTarget ? targetBtnRef : undefined}
+                  ref={w.n === activeQuestion.targetWord.n ? targetBtnRef : undefined}
                   type="button"
-                  aria-label={
-                    isTarget
-                      ? t.quiz.legendTarget(w.a)
-                      : isHead
-                        ? t.quiz.legendHead(activeRoleMeta.governorLabel[locale], w.a)
-                        : w.a
-                  }
                   className={[
                     "quiz-word-token",
                     isTarget ? "is-target" : "",
                     isHead ? "is-head" : "",
-                    isCorrectHeadHint ? "is-correct-head-hint" : "",
-                    effectiveStep === 2 && !isTarget ? "is-governor-candidate" : "",
+                    isCorrectHint ? "is-correct-head-hint" : "",
+                    isPickingWordInAyah && !isTarget ? "is-governor-candidate" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
                   onClick={() => {
-                    if (isTarget) return;
-                    if (effectiveStep === 2) {
-                      selectHeadAndAdvance(w.n);
-                    } else {
-                      handleUpdateDraft({ headWordNum: w.n });
+                    if (isComplete) return;
+                    if (lens === "irab") {
+                      if (w.n === activeQuestion.targetWord.n) return;
+                      setIrabDraft((prev) => ({ ...prev, headWordNum: w.n }));
+                      setSubmitted(false);
+                      if (effectiveStep === 2) {
+                        setAnimDir("forward");
+                        setStep(3);
+                      }
+                    } else if (lens === "examples") {
+                      setExDraft({ spottedWordNum: w.n });
+                      setSubmitted(false);
+                      if (effectiveStep === 1) {
+                        setAnimDir("forward");
+                        setStep(2);
+                      }
                     }
                   }}
                 >
@@ -504,294 +818,847 @@ export function QuizScreen({
                 </button>
               );
             })}
-            <span className="ayah-mark">{formatNumber(question.verse.v)}</span>
+            <span className="ayah-mark">{formatNumber(activeQuestion.verse.v)}</span>
           </p>
-
-          <div className="quiz-wizard-legend">
-            <span className="quiz-legend-item is-target">
-              <span className="quiz-legend-swatch" aria-hidden="true" />
-              <span className="quiz-legend-copy">
-                <small>{t.quiz.targetBadge}</small>
-                <strong lang="ar">{question.targetWord.a}</strong>
-              </span>
-            </span>
-            {selectedHeadWord ? (
-              <span className="quiz-legend-item is-head">
-                <span className="quiz-legend-swatch" aria-hidden="true" />
-                <span className="quiz-legend-copy">
-                  <small>{activeRoleMeta.governorLabel[locale]}</small>
-                  <strong lang="ar">{selectedHeadWord.a}</strong>
-                </span>
-              </span>
-            ) : null}
-          </div>
         </div>
       </section>
 
       {/* ====================================================================
-       * BOTTOM PANE (Bottom 60% of screen): Single-Step Animated Wizard
+       * BOTTOM PANE: Single-Step Animated Wizard Deck per Lens
        * ==================================================================== */}
       <section className="quiz-wizard-bottom" aria-live="polite">
-        <div key={`${question.id}-step-${effectiveStep}`} className={`quiz-wizard-pane anim-${animDir}`}>
-          {/* STEP 1: Syntactic Role */}
-          {effectiveStep === 1 && (
-            <div className="quiz-wizard-step-body">
-              <header className="quiz-wizard-step-head">
-                <div>
-                  <span className="eyebrow">{t.quiz.step1Eyebrow}</span>
-                  <h2>{t.quiz.step1Question(question.targetWord.a)}</h2>
-                </div>
-                <button type="button" className="quiz-text-reveal" onClick={handleRevealAnswer}>
-                  {t.quiz.revealButton}
-                </button>
-              </header>
-
-              <div className="quiz-wizard-grid-roles">
-                {QUIZ_ROLES.map((r) => {
-                  const active = draft.relation === r.code;
-                  return (
-                    <button
-                      key={r.code}
-                      type="button"
-                      className={`quiz-rich-card family-${r.family}${active ? " is-selected" : ""}`}
-                      onClick={() => selectRelationAndAdvance(r.code)}
-                    >
-                      <div className="quiz-rich-top">
-                        <strong lang="ar">{r.ar}</strong>
-                        <span className="quiz-rich-dot" />
-                      </div>
-                      <small>{locale === "id" ? r.id : locale === "ar" ? r.governorLabel.ar : r.en}</small>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: Governing / Linked Word */}
-          {effectiveStep === 2 && (
-            <div className="quiz-wizard-step-body">
-              <header className="quiz-wizard-step-head">
-                <div>
-                  <span className="eyebrow">{t.quiz.step2Eyebrow(activeRoleMeta.governorLabel[locale])}</span>
-                  <h2>{t.quiz.step2Question(activeRoleMeta.governorLabel.ar, question.targetWord.a)}</h2>
-                  <p className="quiz-wizard-subprompt">{t.quiz.step2Hint}</p>
-                </div>
-                <button type="button" className="quiz-back-link" onClick={() => goToStep(1)}>
-                  {t.quiz.backButton}
-                </button>
-              </header>
-
-              <div className="quiz-wizard-gov-grid" dir="rtl">
-                {question.verse.w
-                  .filter((w) => w.n !== question.targetWord.n)
-                  .map((w) => {
-                    const active = draft.headWordNum === w.n;
-                    return (
-                      <button
-                        key={w.n}
-                        type="button"
-                        className={`quiz-gov-chip quiz-wizard-gov-chip${active ? " is-selected" : ""}`}
-                        onClick={() => selectHeadAndAdvance(w.n)}
-                      >
-                        <b lang="ar">{w.a}</b>
-                        <small>#{formatNumber(w.n)}</small>
-                      </button>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: Grammatical Case */}
-          {effectiveStep === 3 && (
-            <div className="quiz-wizard-step-body">
-              <header className="quiz-wizard-step-head">
-                <div>
-                  <span className="eyebrow">{t.quiz.step3Eyebrow}</span>
-                  <h2>{t.quiz.step3Question(question.targetWord.a)}</h2>
-                </div>
-                <button type="button" className="quiz-back-link" onClick={() => goToStep(2)}>
-                  {t.quiz.backButton}
-                </button>
-              </header>
-
-              <div className="quiz-wizard-case-list">
-                {QUIZ_CASES.map((c) => {
-                  const active = draft.grammaticalCase === c.code;
-                  return (
-                    <button
-                      key={c.code}
-                      type="button"
-                      className={`quiz-case-card quiz-wizard-case-card${active ? " is-selected" : ""}`}
-                      onClick={() => selectCaseAndAdvance(c.code)}
-                    >
-                      <div className="quiz-case-row">
-                        <strong lang="ar">{c.ar}</strong>
-                        <span>{locale === "id" ? c.id : c.en}</span>
-                      </div>
-                      <small>{c.shortDesc[locale]}</small>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: Declension Sign */}
-          {effectiveStep === 4 && (
-            <div className="quiz-wizard-step-body">
-              <header className="quiz-wizard-step-head">
-                <div>
-                  <span className="eyebrow">{t.quiz.step4Eyebrow}</span>
-                  <h2>{t.quiz.step4Question(question.targetWord.a)}</h2>
-                </div>
-                <button type="button" className="quiz-back-link" onClick={() => goToStep(3)}>
-                  {t.quiz.backButton}
-                </button>
-              </header>
-
-              <div className="quiz-wizard-sign-grid">
-                {QUIZ_SIGNS.map((s) => {
-                  const active = draft.sign === s.code;
-                  return (
-                    <button
-                      key={s.code}
-                      type="button"
-                      className={`quiz-sign-card quiz-wizard-sign-card${active ? " is-selected" : ""}`}
-                      onClick={() => selectSignAndAdvance(s.code)}
-                    >
-                      <span className="quiz-sign-symbol" lang="ar">
-                        {s.symbol}
-                      </span>
-                      <div>
-                        <strong lang="ar">{s.ar}</strong>
-                        <small>{locale === "id" ? s.id : s.en}</small>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 5: Synthesized Review, Submit & Classical I'rab Reveal */}
-          {effectiveStep === 5 && (
-            <div className="quiz-wizard-step-body">
-              {!feedback?.submitted || !feedback.isComplete ? (
-                <>
+        <div key={`${lens}:${activeQuestion.id}-step-${effectiveStep}`} className={`quiz-wizard-pane anim-${animDir}`}>
+          {/* ================================================================
+           * LENS 1: IʿRĀB SYNTAX WIZARD
+           * ================================================================ */}
+          {lens === "irab" && irabQuestion && (
+            <>
+              {effectiveStep === 1 && (
+                <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">{t.quiz.step5Eyebrow}</span>
-                      <h2>{t.quiz.step5Title(question.targetWord.a)}</h2>
+                      <span className="eyebrow">{t.quiz.step1Eyebrow}</span>
+                      <h2>{t.quiz.step1Question(irabQuestion.targetWord.a)}</h2>
                     </div>
-                    <button type="button" className="quiz-back-link" onClick={() => goToStep(4)}>
-                      {t.quiz.editButton}
-                    </button>
-                  </header>
-
-                  {/* Assembled Arabic Formula Card */}
-                  <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
-                    <strong className="formula-target">{question.targetWord.a}:</strong>{" "}
-                    <span>{draft.relation ? getRoleMeta(draft.relation).ar : "—"}</span>{" "}
-                    <span>{selectedHeadWord ? `لـ ${selectedHeadWord.a}` : "—"}</span>{" "}
-                    <span>{draft.grammaticalCase ? getCaseMeta(draft.grammaticalCase).ar : "—"}</span>{" "}
-                    <span>وعلامة إعرابه</span>{" "}
-                    <span>{draft.sign ? getSignMeta(draft.sign).ar : "—"}</span>.
-                  </div>
-
-                  {/* Interactive 4-chip summary */}
-                  <div className="quiz-wizard-summary-grid">
-                    <button type="button" className="quiz-summary-tile" onClick={() => goToStep(1)}>
-                      <small>
-                        {formatNumber(1)} · {t.quiz.stepRoleCrumb}
-                      </small>
-                      <strong lang="ar">{draft.relation ? getRoleMeta(draft.relation).ar : t.quiz.notSet}</strong>
-                    </button>
-                    <button type="button" className="quiz-summary-tile" onClick={() => goToStep(2)}>
-                      <small>
-                        {formatNumber(2)} · {activeRoleMeta.governorLabel[locale]}
-                      </small>
-                      <strong lang="ar">{selectedHeadWord ? selectedHeadWord.a : t.quiz.notSet}</strong>
-                    </button>
-                    <button type="button" className="quiz-summary-tile" onClick={() => goToStep(3)}>
-                      <small>
-                        {formatNumber(3)} · {t.quiz.stepCaseCrumb}
-                      </small>
-                      <strong lang="ar">
-                        {draft.grammaticalCase ? getCaseMeta(draft.grammaticalCase).ar : t.quiz.notSet}
-                      </strong>
-                    </button>
-                    <button type="button" className="quiz-summary-tile" onClick={() => goToStep(4)}>
-                      <small>
-                        {formatNumber(4)} · {t.quiz.stepSignCrumb}
-                      </small>
-                      <strong lang="ar">{draft.sign ? getSignMeta(draft.sign).ar : t.quiz.notSet}</strong>
-                    </button>
-                  </div>
-
-                  {feedback?.submitted && !feedback.isComplete && (
-                    <div className="quiz-inline-error" role="alert">
-                      <strong>{t.quiz.incompleteAlert}</strong> {feedback.missingFields.join(" · ")}
-                    </div>
-                  )}
-
-                  <div className="quiz-wizard-actions sticky-actions">
-                    <button type="button" className="quiz-submit-btn" onClick={handleSubmit}>
-                      <span>{t.quiz.submitButton}</span>
-                    </button>
-                    <button type="button" className="quiz-secondary-btn" onClick={handleRevealAnswer}>
+                    <button type="button" className="quiz-text-reveal" onClick={handleRevealAnswer}>
                       {t.quiz.revealButton}
                     </button>
-                  </div>
-                </>
-              ) : (
-                /* Revealed Classical Analysis State */
-                <div className={`quiz-wizard-reveal-card ${feedback.allCorrect ? "is-correct" : "is-review"}`}>
-                  <header className="quiz-solution-head">
-                    <div className="quiz-solution-copy">
-                      <span className="eyebrow">
-                        {feedback.allCorrect ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
-                      </span>
-                      <h3>{t.quiz.classicalHeading(question.targetWord.a)}</h3>
-                    </div>
                   </header>
 
-                  <div className="quiz-wizard-verdict-strip">
-                    <span className={`quiz-verdict-chip ${feedback.relationCorrect ? "ok" : "err"}`} lang="ar">
-                      {feedback.relationCorrect
-                        ? `✓ ${getRoleMeta(question.relation).ar}`
-                        : `✗ ${getRoleMeta(question.relation).ar}`}
-                    </span>
-                    <span className={`quiz-verdict-chip ${feedback.headCorrect ? "ok" : "err"}`} lang="ar">
-                      {feedback.headCorrect
-                        ? `✓ ${question.headWord.a}`
-                        : `✗ ${getRoleMeta(question.relation).governorLabel.ar}: ${question.headWord.a}`}
-                    </span>
-                    <span className={`quiz-verdict-chip ${feedback.caseCorrect ? "ok" : "err"}`} lang="ar">
-                      {feedback.caseCorrect
-                        ? `✓ ${getCaseMeta(question.grammaticalCase).ar}`
-                        : `✗ ${getCaseMeta(question.grammaticalCase).ar}`}
-                    </span>
-                    <span className={`quiz-verdict-chip ${feedback.signCorrect ? "ok" : "err"}`} lang="ar">
-                      {feedback.signCorrect
-                        ? `✓ ${getSignMeta(question.sign).ar}`
-                        : `✗ ${getSignMeta(question.sign).ar}`}
-                    </span>
-                  </div>
-
-                  <p className="prose irab-prose quiz-wizard-irab-prose" dir="rtl" lang="ar">
-                    {formatWordIrabText(question.classicalIrab)}
-                  </p>
-
-                  <div className="quiz-wizard-actions sticky-actions">
-                    <button type="button" className="quiz-next-cta" onClick={handleNextRandom}>
-                      {t.quiz.nextButton}
-                    </button>
+                  <div className="quiz-wizard-grid-roles">
+                    {QUIZ_ROLES.map((r) => {
+                      const active = irabDraft.relation === r.code;
+                      return (
+                        <button
+                          key={r.code}
+                          type="button"
+                          className={`quiz-rich-card family-${r.family}${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setIrabDraft((prev) => ({ ...prev, relation: r.code }));
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(2);
+                          }}
+                        >
+                          <div className="quiz-rich-top">
+                            <strong lang="ar">
+                              {r.ar}
+                              {r.tier === "advanced" ? <sup className="quiz-adv-star">★</sup> : null}
+                            </strong>
+                            <span className="quiz-rich-dot" />
+                          </div>
+                          <small>{locale === "id" ? r.id : locale === "ar" ? r.governorLabel.ar : r.en}</small>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
-            </div>
+
+              {effectiveStep === 2 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">{t.quiz.step2Eyebrow(activeRoleMeta.governorLabel[locale])}</span>
+                      <h2>{t.quiz.step2Question(activeRoleMeta.governorLabel.ar, irabQuestion.targetWord.a)}</h2>
+                      <p className="quiz-wizard-subprompt">{t.quiz.step2Hint}</p>
+                    </div>
+                    <button type="button" className="quiz-back-link" onClick={() => goToStep(1)}>
+                      {t.quiz.backButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-gov-grid" dir="rtl">
+                    {irabQuestion.verse.w
+                      .filter((w) => w.n !== irabQuestion.targetWord.n)
+                      .map((w) => {
+                        const active = irabDraft.headWordNum === w.n;
+                        return (
+                          <button
+                            key={w.n}
+                            type="button"
+                            className={`quiz-gov-chip quiz-wizard-gov-chip${active ? " is-selected" : ""}`}
+                            onClick={() => {
+                              setIrabDraft((prev) => ({ ...prev, headWordNum: w.n }));
+                              setSubmitted(false);
+                              setAnimDir("forward");
+                              setStep(3);
+                            }}
+                          >
+                            <b lang="ar">{w.a}</b>
+                            <small>#{formatNumber(w.n)}</small>
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 3 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">{t.quiz.step3Eyebrow}</span>
+                      <h2>{t.quiz.step3Question(irabQuestion.targetWord.a)}</h2>
+                    </div>
+                    <button type="button" className="quiz-back-link" onClick={() => goToStep(2)}>
+                      {t.quiz.backButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-case-list">
+                    {QUIZ_CASES.map((c) => {
+                      const active = irabDraft.grammaticalCase === c.code;
+                      return (
+                        <button
+                          key={c.code}
+                          type="button"
+                          className={`quiz-case-card quiz-wizard-case-card${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setIrabDraft((prev) => ({ ...prev, grammaticalCase: c.code }));
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(4);
+                          }}
+                        >
+                          <div className="quiz-case-row">
+                            <strong lang="ar">{c.ar}</strong>
+                            {locale !== "ar" ? <span>{locale === "id" ? c.id : c.en}</span> : null}
+                          </div>
+                          <small>{c.shortDesc[locale]}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 4 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">{t.quiz.step4Eyebrow}</span>
+                      <h2>{t.quiz.step4Question(irabQuestion.targetWord.a)}</h2>
+                    </div>
+                    <button type="button" className="quiz-back-link" onClick={() => goToStep(3)}>
+                      {t.quiz.backButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-sign-grid">
+                    {QUIZ_SIGNS.map((s) => {
+                      const active = irabDraft.sign === s.code;
+                      return (
+                        <button
+                          key={s.code}
+                          type="button"
+                          className={`quiz-sign-card quiz-wizard-sign-card${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setIrabDraft((prev) => ({ ...prev, sign: s.code }));
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(5);
+                          }}
+                        >
+                          <div>
+                            <strong lang="ar">{s.ar}</strong>
+                            <small>{locale === "ar" ? s.arSub : locale === "id" ? s.id : s.en}</small>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 5 && (
+                <div className="quiz-wizard-step-body">
+                  {!isComplete ? (
+                    <>
+                      <header className="quiz-wizard-step-head">
+                        <div>
+                          <span className="eyebrow">{t.quiz.step5Eyebrow}</span>
+                          <h2>{t.quiz.step5Title(irabQuestion.targetWord.a)}</h2>
+                        </div>
+                        <button type="button" className="quiz-back-link" onClick={() => goToStep(4)}>
+                          {t.quiz.editButton}
+                        </button>
+                      </header>
+
+                      <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
+                        <strong className="formula-target">{irabQuestion.targetWord.a}:</strong>{" "}
+                        <span>{irabDraft.relation ? getRoleMeta(irabDraft.relation).ar : "—"}</span>{" "}
+                        <span>{selectedHeadWord ? `لـ ${selectedHeadWord.a}` : "—"}</span>{" "}
+                        <span>{irabDraft.grammaticalCase ? getCaseMeta(irabDraft.grammaticalCase).ar : "—"}</span>{" "}
+                        <span>وعلامة إعرابه</span>{" "}
+                        <span>{irabDraft.sign ? getSignMeta(irabDraft.sign).ar : "—"}</span>.
+                      </div>
+
+                      <div className="quiz-wizard-summary-grid">
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(1)}>
+                          <small>
+                            {formatNumber(1)} · {t.quiz.stepRoleCrumb}
+                          </small>
+                          <strong lang="ar">
+                            {irabDraft.relation ? getRoleMeta(irabDraft.relation).ar : t.quiz.notSet}
+                          </strong>
+                        </button>
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(2)}>
+                          <small>
+                            {formatNumber(2)} · {activeRoleMeta.governorLabel[locale]}
+                          </small>
+                          <strong lang="ar">{selectedHeadWord ? selectedHeadWord.a : t.quiz.notSet}</strong>
+                        </button>
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(3)}>
+                          <small>
+                            {formatNumber(3)} · {t.quiz.stepCaseCrumb}
+                          </small>
+                          <strong lang="ar">
+                            {irabDraft.grammaticalCase ? getCaseMeta(irabDraft.grammaticalCase).ar : t.quiz.notSet}
+                          </strong>
+                        </button>
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(4)}>
+                          <small>
+                            {formatNumber(4)} · {t.quiz.stepSignCrumb}
+                          </small>
+                          <strong lang="ar">{irabDraft.sign ? getSignMeta(irabDraft.sign).ar : t.quiz.notSet}</strong>
+                        </button>
+                      </div>
+
+                      {submitted && missingFields.length > 0 && (
+                        <div className="quiz-inline-error" role="alert">
+                          <strong>{t.quiz.incompleteAlert}</strong> {missingFields.join(" · ")}
+                        </div>
+                      )}
+
+                      <div className="quiz-wizard-actions sticky-actions">
+                        <button type="button" className="quiz-submit-btn" onClick={handleSubmit}>
+                          <span>{t.quiz.submitButton}</span>
+                        </button>
+                        <button type="button" className="quiz-secondary-btn" onClick={handleRevealAnswer}>
+                          {t.quiz.revealButton}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    (() => {
+                      const relOk = irabDraft.relation === irabQuestion.relation;
+                      const headOk = irabDraft.headWordNum === irabQuestion.headWord.n;
+                      const caseOk = irabDraft.grammaticalCase === irabQuestion.grammaticalCase;
+                      const signOk = irabDraft.sign === irabQuestion.sign;
+                      const allOk = relOk && headOk && caseOk && signOk;
+                      return (
+                        <div className={`quiz-wizard-reveal-card ${allOk ? "is-correct" : "is-review"}`}>
+                          <header className="quiz-solution-head">
+                            <div className="quiz-solution-copy">
+                              <span className="eyebrow">
+                                {allOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
+                              </span>
+                              <h3>{t.quiz.classicalHeading(irabQuestion.targetWord.a)}</h3>
+                            </div>
+                          </header>
+
+                          <div className="quiz-wizard-verdict-strip">
+                            <span className={`quiz-verdict-chip ${relOk ? "ok" : "err"}`} lang="ar">
+                              {relOk
+                                ? `✓ ${getRoleMeta(irabQuestion.relation).ar}`
+                                : `✗ ${irabDraft.relation ? getRoleMeta(irabDraft.relation).ar : "—"} ← ✓ ${getRoleMeta(irabQuestion.relation).ar}`}
+                            </span>
+                            <span className={`quiz-verdict-chip ${headOk ? "ok" : "err"}`} lang="ar">
+                              {headOk
+                                ? `✓ ${irabQuestion.headWord.a}`
+                                : `✗ ${selectedHeadWord ? selectedHeadWord.a : "—"} ← ✓ ${getRoleMeta(irabQuestion.relation).governorLabel.ar}: ${irabQuestion.headWord.a}`}
+                            </span>
+                            <span className={`quiz-verdict-chip ${caseOk ? "ok" : "err"}`} lang="ar">
+                              {caseOk
+                                ? `✓ ${getCaseMeta(irabQuestion.grammaticalCase).ar}`
+                                : `✗ ${irabDraft.grammaticalCase ? getCaseMeta(irabDraft.grammaticalCase).ar : "—"} ← ✓ ${getCaseMeta(irabQuestion.grammaticalCase).ar}`}
+                            </span>
+                            <span className={`quiz-verdict-chip ${signOk ? "ok" : "err"}`} lang="ar">
+                              {signOk
+                                ? `✓ ${irabQuestion.signDetailAr}`
+                                : `✗ ${irabDraft.sign ? getSignMeta(irabDraft.sign).ar : "—"} ← ✓ ${irabQuestion.signDetailAr}`}
+                            </span>
+                          </div>
+
+                          <p className="prose irab-prose quiz-wizard-irab-prose" dir="rtl" lang="ar">
+                            {formatWordIrabText(irabQuestion.classicalIrab)}
+                          </p>
+
+                          <div className="quiz-wizard-actions sticky-actions">
+                            <button type="button" className="quiz-next-cta" onClick={handleNextRandom}>
+                              {t.quiz.nextButton}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ================================================================
+           * LENS 2: ṢARF & MĪZĀN WIZARD
+           * ================================================================ */}
+          {lens === "sarf" && sarfQuestion && (
+            <>
+              {effectiveStep === 1 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">
+                        {locale === "ar"
+                          ? "الخطوة ١ من ٤ · المادة المعجمية (الجذر)"
+                          : "STEP 1 OF 4 · LEXICAL ROOT (MĀDDAH)"}
+                      </span>
+                      <h2>
+                        {locale === "ar"
+                          ? `ما المادة المعجمية (الجذر) لكلمة ﴿${sarfQuestion.targetWord.a}﴾؟`
+                          : locale === "id"
+                            ? `Apa akar kata (maddah) dari ${sarfQuestion.targetWord.a}?`
+                            : `What is the lexical root (māddah) of ${sarfQuestion.targetWord.a}?`}
+                      </h2>
+                    </div>
+                    <button type="button" className="quiz-text-reveal" onClick={handleRevealAnswer}>
+                      {t.quiz.revealButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-sign-grid">
+                    {sarfQuestion.rootOptions.map((opt) => {
+                      const active = sarfDraft.root === opt.code;
+                      return (
+                        <button
+                          key={opt.code}
+                          type="button"
+                          className={`quiz-sign-card quiz-wizard-sign-card${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setSarfDraft((prev) => ({ ...prev, root: opt.code }));
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(2);
+                          }}
+                        >
+                          <div>
+                            <strong lang="ar">{opt.ar}</strong>
+                            <small>{opt.sub[locale]}</small>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 2 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">
+                        {locale === "ar"
+                          ? "الخطوة ٢ من ٤ · الميزان الصرفي (الوزن)"
+                          : "STEP 2 OF 4 · MORPHOLOGICAL MEASURE (WAZN)"}
+                      </span>
+                      <h2>
+                        {locale === "ar"
+                          ? `ما الوزن الصرفي لـ ﴿${sarfQuestion.headAr}﴾؟`
+                          : locale === "id"
+                            ? `Apa wazan sharaf dari ${sarfQuestion.headAr}?`
+                            : `What is the morphological pattern (wazn) of ${sarfQuestion.headAr}?`}
+                      </h2>
+                    </div>
+                    <button type="button" className="quiz-back-link" onClick={() => goToStep(1)}>
+                      {t.quiz.backButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-sign-grid">
+                    {sarfQuestion.waznOptions.map((opt) => {
+                      const active = sarfDraft.wazn === opt.code;
+                      return (
+                        <button
+                          key={opt.code}
+                          type="button"
+                          className={`quiz-sign-card quiz-wizard-sign-card${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setSarfDraft((prev) => ({ ...prev, wazn: opt.code }));
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(3);
+                          }}
+                        >
+                          <div>
+                            <strong lang="ar">{opt.ar}</strong>
+                            <small>{opt.sub[locale]}</small>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 3 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">
+                        {sarfQuestion.kind === "verb"
+                          ? locale === "ar"
+                            ? "الخطوة ٣ من ٤ · باب الفعل"
+                            : "STEP 3 OF 4 · VERB BĀB / FORM"
+                          : locale === "ar"
+                            ? "الخطوة ٣ من ٤ · الاشتقاق ونوع الاسم"
+                            : "STEP 3 OF 4 · NOMINAL DERIVATION (ISHTIQĀQ)"}
+                      </span>
+                      <h2>
+                        {sarfQuestion.kind === "verb"
+                          ? locale === "ar"
+                            ? `من أي باب صرفي جاء الفعل ﴿${sarfQuestion.headAr}﴾؟`
+                            : `Which verbal bāb / form does ${sarfQuestion.headAr} belong to?`
+                          : locale === "ar"
+                            ? `ما نوع الاسم ﴿${sarfQuestion.headAr}﴾ من حيث الاشتقاق؟`
+                            : `What derivational class is the noun ${sarfQuestion.headAr}?`}
+                      </h2>
+                    </div>
+                    <button type="button" className="quiz-back-link" onClick={() => goToStep(2)}>
+                      {t.quiz.backButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-case-list">
+                    {sarfQuestion.classOptions.map((opt) => {
+                      const active = sarfDraft.classCode === opt.code;
+                      return (
+                        <button
+                          key={opt.code}
+                          type="button"
+                          className={`quiz-case-card quiz-wizard-case-card${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setSarfDraft((prev) => ({ ...prev, classCode: opt.code }));
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(4);
+                          }}
+                        >
+                          <div className="quiz-case-row">
+                            <strong lang="ar">{opt.ar}</strong>
+                          </div>
+                          <small>{opt.sub[locale]}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 4 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">
+                        {sarfQuestion.kind === "verb"
+                          ? locale === "ar"
+                            ? "الخطوة ٤ من ٤ · الصحة والاعتلال"
+                            : "STEP 4 OF 4 · ROOT SOUNDNESS (ṢIḤḤA WA-IʿTILĀL)"
+                          : locale === "ar"
+                            ? "الخطوة ٤ من ٤ · البنية العددية والجمع"
+                            : "STEP 4 OF 4 · NUMBER & PLURAL STRUCTURE"}
+                      </span>
+                      <h2>
+                        {sarfQuestion.kind === "verb"
+                          ? locale === "ar"
+                            ? `ما نوع الفعل ﴿${sarfQuestion.headAr}﴾ من حيث الصحة والاعتلال؟`
+                            : `How is ${sarfQuestion.headAr} classified by root soundness?`
+                          : locale === "ar"
+                            ? `ما بنية الاسم ﴿${sarfQuestion.headAr}﴾ من حيث الإفراد والجمع؟`
+                            : `What is the number / plural structure of ${sarfQuestion.headAr}?`}
+                      </h2>
+                    </div>
+                    <button type="button" className="quiz-back-link" onClick={() => goToStep(3)}>
+                      {t.quiz.backButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-case-list">
+                    {sarfQuestion.structureOptions.map((opt) => {
+                      const active = sarfDraft.structureCode === opt.code;
+                      return (
+                        <button
+                          key={opt.code}
+                          type="button"
+                          className={`quiz-case-card quiz-wizard-case-card${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setSarfDraft((prev) => ({ ...prev, structureCode: opt.code }));
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(5);
+                          }}
+                        >
+                          <div className="quiz-case-row">
+                            <strong lang="ar">{opt.ar}</strong>
+                          </div>
+                          <small>{opt.sub[locale]}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 5 && (
+                <div className="quiz-wizard-step-body">
+                  {!isComplete ? (
+                    <>
+                      <header className="quiz-wizard-step-head">
+                        <div>
+                          <span className="eyebrow">
+                            {locale === "ar" ? "مراجعة التحليل الصرفي" : "REVIEW YOUR ṢARF ANALYSIS"}
+                          </span>
+                          <h2>
+                            {locale === "ar"
+                              ? `راجع التحليل الصرفي لـ ﴿${sarfQuestion.targetWord.a}﴾`
+                              : `Review your morphological profile for ${sarfQuestion.targetWord.a}`}
+                          </h2>
+                        </div>
+                        <button type="button" className="quiz-back-link" onClick={() => goToStep(4)}>
+                          {t.quiz.editButton}
+                        </button>
+                      </header>
+
+                      <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
+                        <strong className="formula-target">{sarfQuestion.headAr}:</strong>{" "}
+                        <span>من مادة ({sarfDraft.root ? sarfDraft.root.split("").join(" ") : "—"})</span>،{" "}
+                        <span>على وزن ({sarfDraft.wazn || "—"})</span>،{" "}
+                        <span>{sarfDraft.classCode ? SARF_CLASSES[sarfDraft.classCode]?.ar : "—"}</span>،{" "}
+                        <span>{sarfDraft.structureCode ? SARF_STRUCTURES[sarfDraft.structureCode]?.ar : "—"}</span>.
+                      </div>
+
+                      <div className="quiz-wizard-summary-grid">
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(1)}>
+                          <small>{formatNumber(1)} · {locale === "ar" ? "المادة" : "Root"}</small>
+                          <strong lang="ar">
+                            {sarfDraft.root ? sarfDraft.root.split("").join(" ") : t.quiz.notSet}
+                          </strong>
+                        </button>
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(2)}>
+                          <small>{formatNumber(2)} · {locale === "ar" ? "الوزن" : "Wazn"}</small>
+                          <strong lang="ar">{sarfDraft.wazn || t.quiz.notSet}</strong>
+                        </button>
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(3)}>
+                          <small>{formatNumber(3)} · {locale === "ar" ? "الباب / المشتق" : "Class"}</small>
+                          <strong lang="ar">
+                            {sarfDraft.classCode
+                              ? SARF_CLASSES[sarfDraft.classCode]?.ar || sarfDraft.classCode
+                              : t.quiz.notSet}
+                          </strong>
+                        </button>
+                        <button type="button" className="quiz-summary-tile" onClick={() => goToStep(4)}>
+                          <small>{formatNumber(4)} · {locale === "ar" ? "البنية" : "Structure"}</small>
+                          <strong lang="ar">
+                            {sarfDraft.structureCode
+                              ? SARF_STRUCTURES[sarfDraft.structureCode]?.ar || sarfDraft.structureCode
+                              : t.quiz.notSet}
+                          </strong>
+                        </button>
+                      </div>
+
+                      {submitted && missingFields.length > 0 && (
+                        <div className="quiz-inline-error" role="alert">
+                          <strong>{t.quiz.incompleteAlert}</strong> {missingFields.join(" · ")}
+                        </div>
+                      )}
+
+                      <div className="quiz-wizard-actions sticky-actions">
+                        <button type="button" className="quiz-submit-btn" onClick={handleSubmit}>
+                          <span>
+                            {locale === "ar" ? "تحقق واكشف التحليل الصرفي" : "Submit & Reveal Classical Ṣarf"}
+                          </span>
+                        </button>
+                        <button type="button" className="quiz-secondary-btn" onClick={handleRevealAnswer}>
+                          {t.quiz.revealButton}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    (() => {
+                      const rootOk = sarfDraft.root === sarfQuestion.rootRaw;
+                      const waznOk = sarfDraft.wazn === sarfQuestion.wazn;
+                      const clsOk = sarfDraft.classCode === sarfQuestion.classCode;
+                      const strOk = sarfDraft.structureCode === sarfQuestion.structureCode;
+                      const allOk = rootOk && waznOk && clsOk && strOk;
+                      return (
+                        <div className={`quiz-wizard-reveal-card ${allOk ? "is-correct" : "is-review"}`}>
+                          <header className="quiz-solution-head">
+                            <div className="quiz-solution-copy">
+                              <span className="eyebrow">
+                                {allOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
+                              </span>
+                              <h3>
+                                {locale === "ar"
+                                  ? `التحليل الصرفي الكامل لـ ﴿${sarfQuestion.targetWord.a}﴾`
+                                  : `Classical Ṣarf for ${sarfQuestion.targetWord.a}`}
+                              </h3>
+                            </div>
+                          </header>
+
+                          <div className="quiz-wizard-verdict-strip">
+                            <span className={`quiz-verdict-chip ${rootOk ? "ok" : "err"}`} lang="ar">
+                              {rootOk
+                                ? `✓ المادة: ${sarfQuestion.rootSpaced}`
+                                : `✗ ${sarfDraft.root ? sarfDraft.root.split("").join(" ") : "—"} ← ✓ المادة: ${sarfQuestion.rootSpaced}`}
+                            </span>
+                            <span className={`quiz-verdict-chip ${waznOk ? "ok" : "err"}`} lang="ar">
+                              {waznOk
+                                ? `✓ الوزن: ${sarfQuestion.wazn}`
+                                : `✗ ${sarfDraft.wazn || "—"} ← ✓ الوزن: ${sarfQuestion.wazn}`}
+                            </span>
+                            <span className={`quiz-verdict-chip ${clsOk ? "ok" : "err"}`} lang="ar">
+                              {clsOk
+                                ? `✓ ${SARF_CLASSES[sarfQuestion.classCode]?.ar}`
+                                : `✗ ${sarfDraft.classCode ? SARF_CLASSES[sarfDraft.classCode]?.ar || sarfDraft.classCode : "—"} ← ✓ ${SARF_CLASSES[sarfQuestion.classCode]?.ar}`}
+                            </span>
+                            <span className={`quiz-verdict-chip ${strOk ? "ok" : "err"}`} lang="ar">
+                              {strOk
+                                ? `✓ ${SARF_STRUCTURES[sarfQuestion.structureCode]?.ar}`
+                                : `✗ ${sarfDraft.structureCode ? SARF_STRUCTURES[sarfDraft.structureCode]?.ar || sarfDraft.structureCode : "—"} ← ✓ ${SARF_STRUCTURES[sarfQuestion.structureCode]?.ar}`}
+                            </span>
+                            {sarfQuestion.singular ? (
+                              <span className="quiz-verdict-chip ok" lang="ar">
+                                مفرده: {sarfQuestion.singular}
+                              </span>
+                            ) : null}
+                            {sarfQuestion.asl ? (
+                              <span className="quiz-verdict-chip ok" lang="ar">
+                                أصله: {sarfQuestion.asl}
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <p className="prose irab-prose quiz-wizard-irab-prose" dir="rtl" lang="ar">
+                            {formatIrabText(sarfQuestion.classicalSarf)}
+                          </p>
+
+                          {sarfQuestion.classicalMeaning ? (
+                            <p className="prose quiz-meaning-note" dir="rtl" lang="ar">
+                              <strong>المعنى: </strong>
+                              {sarfQuestion.classicalMeaning}
+                            </p>
+                          ) : null}
+
+                          <div className="quiz-wizard-actions sticky-actions">
+                            <button type="button" className="quiz-next-cta" onClick={handleNextRandom}>
+                              {t.quiz.nextButton}
+                            </button>
+                            {onOpenSearch ? (
+                              <button
+                                type="button"
+                                className="quiz-secondary-btn"
+                                onClick={() => onOpenSearch(sarfQuestion.searchSeed)}
+                              >
+                                {locale === "ar"
+                                  ? `شواهد الجذر (${sarfQuestion.rootSpaced}) ↗`
+                                  : `Root (${sarfQuestion.rootSpaced}) in Examples ↗`}
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ================================================================
+           * LENS 3: EXAMPLES & PATTERN HUNT (/#/search AS A QUIZ)
+           * ================================================================ */}
+          {lens === "examples" && exQuestion && (
+            <>
+              {effectiveStep === 1 && (
+                <div className="quiz-wizard-step-body">
+                  <header className="quiz-wizard-step-head">
+                    <div>
+                      <span className="eyebrow">
+                        {locale === "ar"
+                          ? "استخرج الشاهد من الآية"
+                          : "SPOT THE PATTERN IN THE AYAH"}
+                      </span>
+                      <h2>
+                        {locale === "ar"
+                          ? `أي كلمة في الآية تمثل: «${exQuestion.facetTitle.ar}»؟`
+                          : locale === "id"
+                            ? `Kata mana pada ayat yang merupakan: "${exQuestion.facetTitle.id}"?`
+                            : `Which word in the ayah is an example of: "${exQuestion.facetTitle.en}"?`}
+                      </h2>
+                      <p className="quiz-wizard-subprompt">{exQuestion.facetHint[locale]}</p>
+                    </div>
+                    <button type="button" className="quiz-text-reveal" onClick={handleRevealAnswer}>
+                      {t.quiz.revealButton}
+                    </button>
+                  </header>
+
+                  <div className="quiz-wizard-gov-grid" dir="rtl">
+                    {exQuestion.verse.w.map((w) => {
+                      const active = exDraft.spottedWordNum === w.n;
+                      return (
+                        <button
+                          key={w.n}
+                          type="button"
+                          className={`quiz-gov-chip quiz-wizard-gov-chip${active ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setExDraft({ spottedWordNum: w.n });
+                            setSubmitted(false);
+                            setAnimDir("forward");
+                            setStep(2);
+                          }}
+                        >
+                          <b lang="ar">{w.a}</b>
+                          <small>#{formatNumber(w.n)}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {effectiveStep === 2 && (
+                <div className="quiz-wizard-step-body">
+                  {!isComplete ? (
+                    <>
+                      <header className="quiz-wizard-step-head">
+                        <div>
+                          <span className="eyebrow">
+                            {locale === "ar" ? "مراجعة الشاهد المختار" : "REVIEW SELECTED EXAMPLE"}
+                          </span>
+                          <h2>
+                            {locale === "ar"
+                              ? `تحقق من اختيارك لـ «${exQuestion.facetTitle.ar}»`
+                              : `Confirm your choice for "${exQuestion.facetTitle.en}"`}
+                          </h2>
+                        </div>
+                        <button type="button" className="quiz-back-link" onClick={() => goToStep(1)}>
+                          {t.quiz.editButton}
+                        </button>
+                      </header>
+
+                      <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
+                        <strong className="formula-target">{exQuestion.facetTitle.ar}:</strong>{" "}
+                        <span>{spottedWord ? `﴿${spottedWord.a}﴾` : "—"}</span>
+                      </div>
+
+                      {submitted && missingFields.length > 0 && (
+                        <div className="quiz-inline-error" role="alert">
+                          <strong>{t.quiz.incompleteAlert}</strong> {missingFields.join(" · ")}
+                        </div>
+                      )}
+
+                      <div className="quiz-wizard-actions sticky-actions">
+                        <button type="button" className="quiz-submit-btn" onClick={handleSubmit}>
+                          <span>
+                            {locale === "ar"
+                              ? "تحقق واكشف التحليل"
+                              : "Submit & Reveal Analysis"}
+                          </span>
+                        </button>
+                        <button type="button" className="quiz-secondary-btn" onClick={handleRevealAnswer}>
+                          {t.quiz.revealButton}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    (() => {
+                      const spotOk = exDraft.spottedWordNum === exQuestion.targetWord.n;
+                      return (
+                        <div className={`quiz-wizard-reveal-card ${spotOk ? "is-correct" : "is-review"}`}>
+                          <header className="quiz-solution-head">
+                            <div className="quiz-solution-copy">
+                              <span className="eyebrow">
+                                {spotOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
+                              </span>
+                              <h3>
+                                {locale === "ar"
+                                  ? `الشاهد في الآية: ﴿${exQuestion.targetWord.a}﴾`
+                                  : `Spotted Example: ${exQuestion.targetWord.a}`}
+                              </h3>
+                            </div>
+                          </header>
+
+                          <div className="quiz-wizard-verdict-strip">
+                            <span className={`quiz-verdict-chip ${spotOk ? "ok" : "err"}`} lang="ar">
+                              {spotOk
+                                ? `✓ الشاهد: ${exQuestion.targetWord.a}`
+                                : `✗ ${spottedWord ? spottedWord.a : "—"} ← ✓ الشاهد: ${exQuestion.targetWord.a}`}
+                            </span>
+                            <span className="quiz-verdict-chip ok" lang="ar">
+                              الوزن: {exQuestion.targetWazn}
+                            </span>
+                            <span className="quiz-verdict-chip ok" lang="ar">
+                              المادة: {exQuestion.targetRootSpaced}
+                            </span>
+                          </div>
+
+                          <p className="prose irab-prose quiz-wizard-irab-prose" dir="rtl" lang="ar">
+                            {formatIrabText(
+                              exQuestion.facetCategory === "syntax" && exQuestion.classicalIrab
+                                ? exQuestion.classicalIrab
+                                : exQuestion.classicalSarf,
+                            )}
+                          </p>
+
+                          {exQuestion.classicalMeaning ? (
+                            <p className="prose quiz-meaning-note" dir="rtl" lang="ar">
+                              <strong>المعنى: </strong>
+                              {exQuestion.classicalMeaning}
+                            </p>
+                          ) : null}
+
+                          <div className="quiz-wizard-actions sticky-actions">
+                            <button type="button" className="quiz-next-cta" onClick={handleNextRandom}>
+                              {t.quiz.nextButton}
+                            </button>
+                            {onOpenSearch ? (
+                              <button
+                                type="button"
+                                className="quiz-secondary-btn"
+                                onClick={() => onOpenSearch(exQuestion.searchSeed)}
+                              >
+                                {locale === "ar"
+                                  ? "استكشف هذا النمط في الشواهد ↗"
+                                  : "Explore Pattern in Examples ↗"}
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
