@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadVerses, loadWordIndex } from "../lib/api";
 import { stripDiacritics } from "../lib/arabic";
-import { FORMS, POS, RELATIONS, relationGloss } from "../lib/glossary";
+import { FORMS, POS, RELATIONS, formGloss, posGloss, relationGloss } from "../lib/glossary";
+import type { Locale } from "../lib/i18n/types";
 import { countExamples, exampleFacets, featureSummary, searchExamples, type ExampleQuery } from "../lib/search";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type { VerseRow, WordIndex } from "../lib/types";
 
 const empty: ExampleQuery = { root: "", lemma: "", pos: "", form: "", relation: "" };
+
+interface FilterOption {
+  name: string;
+  value: string;
+  about: string;
+}
 
 interface Props {
   initial?: Partial<ExampleQuery>;
@@ -31,6 +38,18 @@ export function ExampleSearch({ initial, onOpen }: Props) {
     ],
     [t],
   );
+
+  const posOptions = useMemo(() => glossOptions(POS, locale, posGloss), [locale]);
+  const formOptions = useMemo(
+    () =>
+      Object.entries(FORMS).map(([value, gloss]) => ({
+        name: gloss.name,
+        value,
+        about: formGloss(value, locale).about,
+      })),
+    [locale],
+  );
+  const relationOptions = useMemo(() => glossOptions(RELATIONS, locale, relationGloss), [locale]);
 
   useEffect(() => {
     if (initial) setQuery({ ...empty, ...initial });
@@ -58,6 +77,10 @@ export function ExampleSearch({ initial, onOpen }: Props) {
     setQuery((current) => ({ ...current, ...patch }));
   };
 
+  const pickFilter = (key: "pos" | "form" | "relation", value: string) => {
+    set({ [key]: value === "" || query[key] === value ? "" : value });
+  };
+
   return (
     <div className="search-page anim-soft-enter">
       <header className="page-intro">
@@ -78,47 +101,36 @@ export function ExampleSearch({ initial, onOpen }: Props) {
           event.preventDefault();
         }}
       >
-        <label>
+        <label className="filter-text">
           {t.examples.filterRoot}
           <input value={query.root} onChange={(event) => set({ root: event.target.value })} placeholder="علم or Elm" />
         </label>
-        <label>
+        <label className="filter-text">
           {t.examples.filterLemma}
           <input value={query.lemma} onChange={(event) => set({ lemma: event.target.value })} placeholder="hal" />
         </label>
-        <label>
-          {t.examples.filterPos}
-          <select dir="rtl" lang="ar" value={query.pos} onChange={(event) => set({ pos: event.target.value })}>
-            <option value="">{t.examples.anyOption}</option>
-            {glossOptions(POS).map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {t.examples.filterForm}
-          <select dir="rtl" lang="ar" value={query.form} onChange={(event) => set({ form: event.target.value })}>
-            <option value="">{t.examples.anyOption}</option>
-            {Object.entries(FORMS).map(([form, gloss]) => (
-              <option key={form} value={form}>
-                {gloss.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {t.examples.filterRelation}
-          <select dir="rtl" lang="ar" value={query.relation} onChange={(event) => set({ relation: event.target.value })}>
-            <option value="">{t.examples.anyOption}</option>
-            {glossOptions(RELATIONS).map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-        </label>
+
+        <FilterCardField
+          label={t.examples.filterPos}
+          anyLabel={t.examples.anyOption}
+          options={posOptions}
+          value={query.pos}
+          onPick={(value) => pickFilter("pos", value)}
+        />
+        <FilterCardField
+          label={t.examples.filterForm}
+          anyLabel={t.examples.anyOption}
+          options={formOptions}
+          value={query.form}
+          onPick={(value) => pickFilter("form", value)}
+        />
+        <FilterCardField
+          label={t.examples.filterRelation}
+          anyLabel={t.examples.anyOption}
+          options={relationOptions}
+          value={query.relation}
+          onPick={(value) => pickFilter("relation", value)}
+        />
       </form>
       {error ? <p className="banner error">{error}</p> : null}
       {!index && !error ? (
@@ -193,12 +205,64 @@ export function ExampleSearch({ initial, onOpen }: Props) {
   );
 }
 
-function glossOptions(table: Record<string, { name: string }>) {
+function FilterCardField({
+  label,
+  anyLabel,
+  options,
+  value,
+  onPick,
+}: {
+  label: string;
+  anyLabel: string;
+  options: FilterOption[];
+  value: string;
+  onPick: (value: string) => void;
+}) {
+  return (
+    <fieldset className="filter-field">
+      <legend>{label}</legend>
+      <div className="filter-cards" dir="rtl" role="listbox" aria-label={label} aria-multiselectable="false">
+        <button
+          type="button"
+          role="option"
+          aria-selected={value === ""}
+          className={`filter-card${value === "" ? " is-on" : ""}`}
+          onClick={() => onPick("")}
+        >
+          <b>{anyLabel}</b>
+        </button>
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="option"
+            aria-selected={value === option.value}
+            className={`filter-card${value === option.value ? " is-on" : ""}`}
+            onClick={() => onPick(option.value)}
+          >
+            <b lang="ar">{option.name}</b>
+            {option.about ? <small>{option.about}</small> : null}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function glossOptions(
+  table: Record<string, { name: string }>,
+  locale: Locale,
+  glossFn: (code: string, locale: Locale) => { name: string; about: string },
+): FilterOption[] {
   const grouped = new Map<string, string[]>();
   for (const [code, gloss] of Object.entries(table)) {
     grouped.set(gloss.name, [...(grouped.get(gloss.name) ?? []), code]);
   }
-  return [...grouped.entries()].map(([name, codes]) => ({ name, value: codes.join(",") }));
+  return [...grouped.entries()].map(([name, codes]) => ({
+    name,
+    value: codes.join(","),
+    about: glossFn(codes[0], locale).about,
+  }));
 }
 
 function markSnippet(text: string, needle: string) {

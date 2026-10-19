@@ -96,6 +96,8 @@ export interface Translations {
     mukhtasarArSub: string;
     irabTitle: string;
     clauseCount: (index: number, total: number) => string;
+    firstClause: string;
+    lastClause: string;
     clauseNoteContinues: string;
     noTreeTitle: string;
     classicalIrabShort: string;

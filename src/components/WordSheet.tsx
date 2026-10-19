@@ -124,7 +124,7 @@ export function WordSheet({
           }}
         />
         <header className="sheet-head">
-          <p className="eyebrow">
+          <p className="eyebrow sheet-ref">
             {formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
           </p>
           <button
@@ -154,7 +154,7 @@ export function WordSheet({
       </div>
 
       <section>
-        <h3>{t.sheet.corpusMorphology}</h3>
+        <h3 className="sheet-section-label">{t.sheet.corpusMorphology}</h3>
         <p className="source-line">
           {t.common.corpusSource} ·{" "}
           <a href="https://corpus.quran.com/" target="_blank" rel="noreferrer">
@@ -165,7 +165,7 @@ export function WordSheet({
           <div>
             <dt>{t.sheet.partOfSpeech}</dt>
             <dd>
-              <strong lang="ar" dir="rtl">{posGloss(selected.p, locale).name}</strong>
+              <strong className="fact-metric" lang="ar" dir="rtl">{posGloss(selected.p, locale).name}</strong>
               <span>{posGloss(selected.p, locale).about}</span>
             </dd>
           </div>
@@ -173,7 +173,7 @@ export function WordSheet({
             <div>
             <dt>{t.sheet.root}</dt>
             <dd>
-              <strong lang="ar">{spaceLetters(selected.ra || selected.r)}</strong>
+              <strong className="fact-metric" lang="ar">{spaceLetters(selected.ra || selected.r)}</strong>
               <span className="translit">{selected.r}</span>
               <button type="button" className="text-button" onClick={() => onSearchRoot(selected.ra || selected.r || "")}>
                 {t.sheet.searchThisRoot}
@@ -185,7 +185,7 @@ export function WordSheet({
             <div>
             <dt>{t.sheet.lemma}</dt>
             <dd>
-              <strong lang="ar">{selected.la}</strong>
+              <strong className="fact-metric" lang="ar">{selected.la}</strong>
               {selected.g ? <span>{selected.g}</span> : null}
               <span className="translit">{selected.l}</span>
               <button type="button" className="text-button" onClick={() => onSearchLemma(selected.l || "")}>
@@ -198,7 +198,7 @@ export function WordSheet({
             <div key={line.key}>
               <dt>{line.label}</dt>
               <dd>
-                <strong lang="ar" dir="rtl">{line.name}</strong>
+                <strong className="fact-metric" lang="ar" dir="rtl">{line.name}</strong>
                 <span>{line.about}</span>
               </dd>
             </div>
@@ -220,36 +220,36 @@ export function WordSheet({
 
       {word.i ? (
         <section>
-          <h3>{t.sheet.classicalIrab}</h3>
+          <h3 className="sheet-section-label">{t.sheet.classicalIrab}</h3>
           <p className="source-line">
             {t.common.tafsirCenterSource} ·{" "}
             <a href="https://tafsir.net/" target="_blank" rel="noreferrer">
               tafsir.net
             </a>
           </p>
-          <p className="prose irab-prose" dir="rtl" lang="ar">
+          <p className="prose irab-prose sheet-metric-prose" dir="rtl" lang="ar">
             {formatWordIrabText(word.i)}
           </p>
         </section>
       ) : null}
       {word.sf ? (
         <section>
-          <h3>{t.sheet.sarf}</h3>
+          <h3 className="sheet-section-label">{t.sheet.sarf}</h3>
           <p className="source-line">
             {t.common.tafsirCenterSource} ·{" "}
             <a href="https://tafsir.net/" target="_blank" rel="noreferrer">
               tafsir.net
             </a>
           </p>
-          <p className="prose irab-prose" dir="rtl" lang="ar">
+          <p className="prose irab-prose sheet-metric-prose" dir="rtl" lang="ar">
             {formatIrabText(word.sf)}
           </p>
         </section>
       ) : null}
       {word.m ? (
         <section>
-          <h3>{t.sheet.wordMeaning}</h3>
-          <p className="prose" dir="rtl" lang="ar">
+          <h3 className="sheet-section-label">{t.sheet.wordMeaning}</h3>
+          <p className="prose sheet-metric-prose" dir="rtl" lang="ar">
             {word.m}
           </p>
         </section>

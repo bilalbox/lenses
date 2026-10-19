@@ -85,6 +85,8 @@ export const id: Translations = {
     mukhtasarArSub: "Bahasa Arab · QuranEnc",
     irabTitle: "I'rab Kalimat",
     clauseCount: (index: number, total: number) => `Klausa ${formatNum(index + 1, "id")} dari ${formatNum(total, "id")}`,
+    firstClause: "Sudah di klausa pertama.",
+    lastClause: "Sudah di klausa terakhir.",
     clauseNoteContinues: "Klausa ini bersambung ke ayat berikutnya.",
     noTreeTitle: "Belum ada pohon ketergantungan untuk ayat ini.",
     classicalIrabShort: "I'rab",

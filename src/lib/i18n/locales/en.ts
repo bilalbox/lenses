@@ -85,6 +85,8 @@ export const en: Translations = {
     mukhtasarArSub: "Arabic · QuranEnc",
     irabTitle: "Sentence Syntax (Iʿrāb)",
     clauseCount: (index: number, total: number) => `Clause ${formatNum(index + 1, "en")} of ${formatNum(total, "en")}`,
+    firstClause: "Already on the first clause.",
+    lastClause: "Already on the last clause.",
     clauseNoteContinues: "This clause continues into a neighboring verse.",
     noTreeTitle: "No dependency tree for this verse.",
     classicalIrabShort: "Iʿrāb",

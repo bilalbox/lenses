@@ -185,17 +185,37 @@ function VerseBody({
   const frozen = selected !== undefined;
   const narrow = useNarrow();
   const [clauseIndex, setClauseIndex] = useState(0);
+  const [clauseEdgeHint, setClauseEdgeHint] = useState("");
   const [irabOpen, setIrabOpen] = useState(locale === "ar");
   const membership = useMemo(() => clauseMembership(graphs, sura, verse.v), [graphs, sura, verse.v]);
   const segments = useMemo(() => groupWords(verse.w, membership), [verse.w, membership]);
   useEffect(() => {
     setClauseIndex(0);
+    setClauseEdgeHint("");
     setIrabOpen(locale === "ar");
   }, [sura, verse.v, locale]);
+  useEffect(() => {
+    if (!clauseEdgeHint) return;
+    const timer = window.setTimeout(() => setClauseEdgeHint(""), 2200);
+    return () => window.clearTimeout(timer);
+  }, [clauseEdgeHint]);
   const show = narrow ? graphs.filter((_, index) => index === clauseIndex) : graphs;
   const openClause = (index: number) => {
     setClauseIndex(index);
+    setClauseEdgeHint("");
     if (!narrow) document.getElementById(`clause-${index}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const stepClause = (delta: number) => {
+    const next = clauseIndex + delta;
+    if (next < 0) {
+      setClauseEdgeHint(t.verse.firstClause);
+      return;
+    }
+    if (next >= graphs.length) {
+      setClauseEdgeHint(t.verse.lastClause);
+      return;
+    }
+    openClause(next);
   };
   return (
     <>
@@ -363,11 +383,13 @@ function VerseBody({
           })}
           {narrow && graphs.length > 1 ? (
             <div className="clause-stepper">
-              <button type="button" onClick={() => setClauseIndex((value) => Math.max(0, value - 1))} disabled={clauseIndex === 0}>
+              <button type="button" onClick={() => stepClause(-1)} aria-label={t.common.previous}>
                 {t.common.previous}
               </button>
-              <span>{t.verse.clauseCount(clauseIndex, graphs.length)}</span>
-              <button type="button" onClick={() => setClauseIndex((value) => Math.min(graphs.length - 1, value + 1))} disabled={clauseIndex === graphs.length - 1}>
+              <span className={clauseEdgeHint ? "is-edge-hint" : ""} role="status">
+                {clauseEdgeHint || t.verse.clauseCount(clauseIndex, graphs.length)}
+              </span>
+              <button type="button" onClick={() => stepClause(1)} aria-label={t.common.next}>
                 {t.common.next}
               </button>
               {verse.ir ? (

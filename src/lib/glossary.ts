@@ -1175,6 +1175,10 @@ export function relationGloss(code: string, locale: Locale = "en"): Gloss {
   return resolveGloss(RELATIONS[code], code, locale);
 }
 
+export function formGloss(code: string, locale: Locale = "en"): Gloss {
+  return resolveGloss(FORMS[code], code, locale);
+}
+
 export function phraseGloss(code: string, locale: Locale = "en"): Gloss {
   return resolveGloss(PHRASES[code], code, locale);
 }

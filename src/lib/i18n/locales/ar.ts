@@ -91,6 +91,8 @@ export const ar: Translations = {
     mukhtasarArSub: "العربية · QuranEnc",
     irabTitle: "إعراب الآية",
     clauseCount: (index: number, total: number) => `الجملة ${formatNum(index + 1, "ar")} من ${formatNum(total, "ar")}`,
+    firstClause: "أنت في الجملة الأولى.",
+    lastClause: "أنت في الجملة الأخيرة.",
     clauseNoteContinues: "تتصل هذه الجملة بآية مجاورة.",
     noTreeTitle: "لا توجد شجرة إعراب لهذه الآية.",
     classicalIrabShort: "إعراب",
