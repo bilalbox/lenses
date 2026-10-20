@@ -100,6 +100,7 @@ export function QuizScreen({
   const [submitted, setSubmitted] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const targetBtnRef = useRef<HTMLButtonElement | null>(null);
+  const ayahBoxRef = useRef<HTMLDivElement | null>(null);
 
   // Wave 1: Load CURATED_SURAHS immediately for fast initial paint
   useEffect(() => {
@@ -386,6 +387,10 @@ export function QuizScreen({
     return () => window.removeEventListener("keydown", onKey);
   }, [handleSubmit]);
 
+  useEffect(() => {
+    ayahBoxRef.current?.scrollTo({ top: 0 });
+  }, [lens, activeQuestion?.id]);
+
   if (loading || !poolsSeeded || !activeQuestion) {
     return (
       <div className="skeleton page-skeleton" aria-hidden="true">
@@ -539,7 +544,7 @@ export function QuizScreen({
   return (
     <div className="quiz-wizard-viewport anim-soft-enter">
       {/* ====================================================================
-       * TOP PANE: Lens Switcher + Pinned Mushaf Ayah + Progress Strip
+       * TOP PANE: Lens Switcher + Pinned Mushaf Ayah
        * ==================================================================== */}
       <section className="quiz-wizard-top" aria-label={t.common.verse}>
         {/* 3-Lens Switcher */}
@@ -565,6 +570,122 @@ export function QuizScreen({
           })}
         </div>
 
+        {/* Pinned Mushaf Ayah Box */}
+        <div
+          key={`${lens}:${activeQuestion.id}`}
+          ref={ayahBoxRef}
+          className={`quiz-wizard-ayah-box anim-soft-enter ${isPickingWordInAyah ? "is-picking-governor" : ""}`}
+        >
+          {scopeMode === "ayah" && lens !== "examples" && ayahQuestionsForLens.length > 1 && (
+            <div className="quiz-wizard-word-tabs" dir="rtl">
+              {ayahQuestionsForLens.map((q) => (
+                <button
+                  key={q.id}
+                  type="button"
+                  className={`quiz-wizard-word-tab${q.id === activeQuestion.id ? " is-current" : ""}${completedIds.has(q.id) ? " is-done" : ""}`}
+                  onClick={() => handleSelectQuestionById(q.id)}
+                >
+                  <span lang="ar">{q.targetWord.a}</span>
+                  {completedIds.has(q.id) && <small aria-hidden="true">✓</small>}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {lens === "irab" && effectiveStep === 2 ? (
+            <p className="quiz-wizard-pick-hint" role="status">
+              {t.quiz.pickGovernorHint}
+            </p>
+          ) : null}
+
+          {lens === "examples" && effectiveStep === 1 && exQuestion ? (
+            <p className="quiz-wizard-pick-hint" role="status">
+              {locale === "ar"
+                ? `انقر على الكلمة التي تمثل: ${exQuestion.facetTitle.ar}`
+                : locale === "id"
+                  ? `Ketuk kata pada ayat yang merupakan: ${exQuestion.facetTitle.id}`
+                  : `Tap the word in the ayah that matches: ${exQuestion.facetTitle.en}`}
+            </p>
+          ) : null}
+
+          <p className="verse-line quiz-wizard-verse-line" dir="rtl" lang="ar">
+            {activeQuestion.verse.w.map((w) => {
+              const isTarget =
+                lens === "examples"
+                  ? isComplete && w.n === activeQuestion.targetWord.n
+                  : w.n === activeQuestion.targetWord.n;
+              const isHead =
+                lens === "irab"
+                  ? irabDraft.headWordNum === w.n
+                  : lens === "examples"
+                    ? exDraft.spottedWordNum === w.n
+                    : false;
+              const isCorrectHint =
+                (lens === "irab" &&
+                  isComplete &&
+                  irabQuestion &&
+                  irabDraft.headWordNum !== irabQuestion.headWord.n &&
+                  w.n === irabQuestion.headWord.n) ||
+                (lens === "examples" &&
+                  isComplete &&
+                  exQuestion &&
+                  exDraft.spottedWordNum !== exQuestion.targetWord.n &&
+                  w.n === exQuestion.targetWord.n);
+
+              return (
+                <button
+                  key={w.n}
+                  ref={w.n === activeQuestion.targetWord.n ? targetBtnRef : undefined}
+                  type="button"
+                  className={[
+                    "quiz-word-token",
+                    isTarget ? "is-target" : "",
+                    isHead ? "is-head" : "",
+                    isCorrectHint ? "is-correct-head-hint" : "",
+                    isPickingWordInAyah && !isTarget ? "is-governor-candidate" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onClick={() => {
+                    if (isComplete) return;
+                    if (lens === "irab") {
+                      if (w.n === activeQuestion.targetWord.n) return;
+                      setIrabDraft((prev) => ({ ...prev, headWordNum: w.n }));
+                      setSubmitted(false);
+                      if (effectiveStep === 2) {
+                        setAnimDir("forward");
+                        setStep(3);
+                      }
+                    } else if (lens === "examples") {
+                      setExDraft({ spottedWordNum: w.n });
+                      setSubmitted(false);
+                      if (effectiveStep === 1) {
+                        setAnimDir("forward");
+                        setStep(2);
+                      }
+                    }
+                  }}
+                >
+                  <span className="quiz-word-arabic">{w.a}</span>
+                  {(isTarget || isHead) && (
+                    <span
+                      className={`quiz-token-mark ${isTarget ? "mark-target" : ""} ${isHead ? "mark-head" : ""}`}
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
+              );
+            })}
+            <span className="ayah-mark">{formatNumber(activeQuestion.verse.v)}</span>
+          </p>
+        </div>
+
+      </section>
+
+      {/* ====================================================================
+       * BOTTOM PANE: Single-Step Animated Wizard Deck per Lens
+       * ==================================================================== */}
+      <section className="quiz-wizard-bottom" aria-live="polite">
         <div className="quiz-wizard-meta-bar">
           <div className="quiz-wizard-surah-tag">
             <span className="eyebrow quiz-wizard-ref">
@@ -713,120 +834,6 @@ export function QuizScreen({
           </div>
         </div>
 
-        {/* Pinned Mushaf Ayah Box */}
-        <div
-          key={`${lens}:${activeQuestion.id}`}
-          className={`quiz-wizard-ayah-box anim-soft-enter ${isPickingWordInAyah ? "is-picking-governor" : ""}`}
-        >
-          {scopeMode === "ayah" && lens !== "examples" && ayahQuestionsForLens.length > 1 && (
-            <div className="quiz-wizard-word-tabs" dir="rtl">
-              {ayahQuestionsForLens.map((q) => (
-                <button
-                  key={q.id}
-                  type="button"
-                  className={`quiz-wizard-word-tab${q.id === activeQuestion.id ? " is-current" : ""}${completedIds.has(q.id) ? " is-done" : ""}`}
-                  onClick={() => handleSelectQuestionById(q.id)}
-                >
-                  <span lang="ar">{q.targetWord.a}</span>
-                  {completedIds.has(q.id) && <small aria-hidden="true">✓</small>}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {lens === "irab" && effectiveStep === 2 ? (
-            <p className="quiz-wizard-pick-hint" role="status">
-              {t.quiz.pickGovernorHint}
-            </p>
-          ) : null}
-
-          {lens === "examples" && effectiveStep === 1 && exQuestion ? (
-            <p className="quiz-wizard-pick-hint" role="status">
-              {locale === "ar"
-                ? `انقر على الكلمة التي تمثل: ${exQuestion.facetTitle.ar}`
-                : locale === "id"
-                  ? `Ketuk kata pada ayat yang merupakan: ${exQuestion.facetTitle.id}`
-                  : `Tap the word in the ayah that matches: ${exQuestion.facetTitle.en}`}
-            </p>
-          ) : null}
-
-          <p className="verse-line quiz-wizard-verse-line" dir="rtl" lang="ar">
-            {activeQuestion.verse.w.map((w) => {
-              const isTarget =
-                lens === "examples"
-                  ? isComplete && w.n === activeQuestion.targetWord.n
-                  : w.n === activeQuestion.targetWord.n;
-              const isHead =
-                lens === "irab"
-                  ? irabDraft.headWordNum === w.n
-                  : lens === "examples"
-                    ? exDraft.spottedWordNum === w.n
-                    : false;
-              const isCorrectHint =
-                (lens === "irab" &&
-                  isComplete &&
-                  irabQuestion &&
-                  irabDraft.headWordNum !== irabQuestion.headWord.n &&
-                  w.n === irabQuestion.headWord.n) ||
-                (lens === "examples" &&
-                  isComplete &&
-                  exQuestion &&
-                  exDraft.spottedWordNum !== exQuestion.targetWord.n &&
-                  w.n === exQuestion.targetWord.n);
-
-              return (
-                <button
-                  key={w.n}
-                  ref={w.n === activeQuestion.targetWord.n ? targetBtnRef : undefined}
-                  type="button"
-                  className={[
-                    "quiz-word-token",
-                    isTarget ? "is-target" : "",
-                    isHead ? "is-head" : "",
-                    isCorrectHint ? "is-correct-head-hint" : "",
-                    isPickingWordInAyah && !isTarget ? "is-governor-candidate" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  onClick={() => {
-                    if (isComplete) return;
-                    if (lens === "irab") {
-                      if (w.n === activeQuestion.targetWord.n) return;
-                      setIrabDraft((prev) => ({ ...prev, headWordNum: w.n }));
-                      setSubmitted(false);
-                      if (effectiveStep === 2) {
-                        setAnimDir("forward");
-                        setStep(3);
-                      }
-                    } else if (lens === "examples") {
-                      setExDraft({ spottedWordNum: w.n });
-                      setSubmitted(false);
-                      if (effectiveStep === 1) {
-                        setAnimDir("forward");
-                        setStep(2);
-                      }
-                    }
-                  }}
-                >
-                  <span className="quiz-word-arabic">{w.a}</span>
-                  {(isTarget || isHead) && (
-                    <span
-                      className={`quiz-token-mark ${isTarget ? "mark-target" : ""} ${isHead ? "mark-head" : ""}`}
-                      aria-hidden="true"
-                    />
-                  )}
-                </button>
-              );
-            })}
-            <span className="ayah-mark">{formatNumber(activeQuestion.verse.v)}</span>
-          </p>
-        </div>
-      </section>
-
-      {/* ====================================================================
-       * BOTTOM PANE: Single-Step Animated Wizard Deck per Lens
-       * ==================================================================== */}
-      <section className="quiz-wizard-bottom" aria-live="polite">
         <div key={`${lens}:${activeQuestion.id}-step-${effectiveStep}`} className={`quiz-wizard-pane anim-${animDir}`}>
           {/* ================================================================
            * LENS 1: IʿRĀB SYNTAX WIZARD

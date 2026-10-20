@@ -1550,44 +1550,33 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
 
 /* ============================================================================
  * Quiz wizard — pinned ayah + single-step animated deck
+ *
+ * Desktop: fixed viewport. Top GRID ROW is capped at 46% (not max-height on the
+ * child — that left a giant empty grid gap when content was taller than the cap).
+ * Mobile overrides live at the end of this section so they win the cascade.
  * ============================================================================ */
 .quiz-wizard-viewport {
   max-width: 780px;
   margin: 0 auto;
-  height: calc(100dvh - 8.2rem);
-  min-height: 540px;
-  max-height: 920px;
+  height: min(920px, calc(100dvh - 8.2rem));
+  min-height: 0;
   display: grid;
-  grid-template-rows: minmax(235px, 46%) minmax(0, 54%);
+  /* Cap the ROW itself so long ayahs cannot inflate empty grid space */
+  grid-template-rows: minmax(0, 48%) minmax(14rem, 1fr);
   gap: 0.7rem;
 }
 
-@media (max-width: 720px) {
-  .quiz-wizard-viewport {
-    height: calc(100dvh - 5rem);
-    min-height: 500px;
-    grid-template-rows: minmax(220px, 47%) minmax(0, 53%);
-    gap: 0.5rem;
-  }
-
-  main:has(.quiz-wizard-viewport) {
-    padding-bottom: 1rem;
-  }
-}
-
-/* Top Pane: Pinned Ayah & Step Breadcrumbs
-   R_parent = 20px, P ≈ 12px → nested ayah R_child = 8px */
+/* Top Pane: lens + mushaf only (filters/steps live in the bottom deck) */
 .quiz-wizard-top {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 0.75rem 0.95rem;
   box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 0.5rem;
   min-height: 0;
-  /* Clip only at the pane edge; children scroll their own content */
   overflow: clip;
 }
 
@@ -1775,21 +1764,20 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
 }
 
 .quiz-wizard-ayah-box {
-  flex: 1;
-  min-height: 0;
+  min-height: 0; /* allow shrink inside the fr row so long verses scroll here */
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   /* Concentric: parent 20 - padding 12 ≈ 8 */
   border-radius: 8px;
   background: color-mix(in srgb, var(--bg) 50%, var(--paper));
   border: 1px solid var(--line);
-  padding: 0.55rem 0.7rem 0.65rem;
+  /* Extra block padding: Scheherazade ascenders/descenders clip under overflow */
+  padding: 0.7rem 0.7rem 0.75rem;
   display: flex;
   flex-direction: column;
-  /* Fallback first; safe center avoids clipping the first line when overflowing */
   justify-content: flex-start;
-  justify-content: safe center;
   gap: 0.4rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1936,6 +1924,7 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
   gap: 0.65rem;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   /* Room so sticky actions never cover the last option card */
   padding-bottom: 0.15rem;
 }
@@ -2110,6 +2099,7 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
     linear-gradient(to bottom, transparent, var(--paper) 28%),
     var(--paper);
 }
+
 
 .quiz-wizard-actions .quiz-submit-btn,
 .quiz-wizard-actions .quiz-next-cta {
@@ -2286,3 +2276,90 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
   line-height: 1.65;
 }
 
+/* ============================================================================
+ * Quiz wizard — mobile: one document scroll, verse first, no nested traps
+ * Placed last so these declarations win over desktop pane rules above.
+ * ============================================================================ */
+@media (max-width: 720px) {
+  .quiz-wizard-viewport {
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    grid-template-rows: auto auto;
+    gap: 0.65rem;
+  }
+
+  main:has(.quiz-wizard-viewport) {
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  }
+
+  .quiz-wizard-top,
+  .quiz-wizard-bottom {
+    max-height: none;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .quiz-wizard-top {
+    /* Stack to content; ayah is not height-capped on phones */
+    display: flex;
+    flex-direction: column;
+    padding: 0.55rem 0.7rem;
+    gap: 0.4rem;
+  }
+
+  .quiz-wizard-bottom {
+    padding: 0.7rem 0.8rem 0.85rem;
+  }
+
+  /* Ayah grows with the verse — never a nested scroller on phones */
+  .quiz-wizard-ayah-box {
+    flex: 0 0 auto;
+    overflow: visible;
+    min-height: 0;
+    padding: 0.45rem 0.55rem 0.55rem;
+  }
+
+  .quiz-wizard-step-body,
+  .quiz-wizard-irab-prose {
+    overflow: visible;
+    flex: none;
+  }
+
+  .quiz-lens-tab {
+    min-height: 40px;
+  }
+
+  .quiz-wizard-mode-pill .segmented-item,
+  .quiz-wizard-stat,
+  .quiz-wizard-skip,
+  .quiz-crumb,
+  .quiz-wizard-word-tab {
+    min-height: 40px;
+  }
+
+  .quiz-wizard-verse-line .quiz-word-token {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.2rem 0.35rem 0.15rem !important;
+  }
+
+  .quiz-wizard-verse-line .quiz-word-arabic {
+    /* Slightly denser so a mid-length ayah and the question can share a phone screen */
+    font-size: clamp(1.3rem, 4.4vw, 1.7rem);
+    line-height: 1.45;
+  }
+
+  .quiz-wizard-meta-bar {
+    gap: 0.4rem;
+  }
+
+  .quiz-wizard-progress-strip {
+    gap: 0.25rem;
+  }
+
+  .quiz-wizard-actions.sticky-actions {
+    bottom: env(safe-area-inset-bottom);
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom));
+  }
+}
