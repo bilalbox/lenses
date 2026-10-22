@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadSurah } from "../lib/api";
+import { stripTashkeel } from "../lib/arabic";
 import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
 import {
@@ -53,19 +54,19 @@ export function QuizScreen({
   manifest,
   onOpenInReader,
   onOpenSearch,
+  hideDiacritics = false,
 }: {
   manifest: Manifest;
   onOpenInReader: (sura: number, verse: number, word?: number) => void;
   onOpenSearch?: (seed: Partial<ExampleQuery>) => void;
+  hideDiacritics?: boolean;
 }) {
   const { locale, t, formatNumber } = useI18n();
+  const quranText = (text: string) => (hideDiacritics ? stripTashkeel(text) : text);
   const [loadedFiles, setLoadedFiles] = useState<SurahFile[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [lens, setLens] = useState<QuizLens>("irab");
-  const [irabTier, setIrabTier] = useState<"all" | "advanced">("all");
-  const [sarfFilter, setSarfFilter] = useState<"all" | "verb" | "noun">("all");
-  const [scopeMode, setScopeMode] = useState<"word" | "ayah">("word");
 
   const [indices, setIndices] = useState<Record<QuizLens, number>>({
     irab: 0,
@@ -74,7 +75,6 @@ export function QuizScreen({
   });
   const [poolsSeeded, setPoolsSeeded] = useState(false);
 
-  const [completedIds, setCompletedIds] = useState<Set<string>>(() => new Set());
   const [streak, setStreak] = useState(0);
   const [score, setScore] = useState({ solved: 0, attempts: 0 });
 
@@ -131,7 +131,7 @@ export function QuizScreen({
     };
   }, [manifest]);
 
-  const rawIrabPool = useMemo(() => {
+  const irabPool = useMemo(() => {
     const extracted: QuizQuestion[] = [];
     for (const f of loadedFiles) {
       extracted.push(...extractQuizQuestionsFromSurah(f));
@@ -151,20 +151,7 @@ export function QuizScreen({
     return { sarf: stableSarf, examples: pools.examples };
   }, [loadedFiles]);
 
-  const irabPool = useMemo(() => {
-    if (irabTier === "advanced") {
-      const filtered = rawIrabPool.filter((q) => q.isAdvanced);
-      return filtered.length > 0 ? filtered : rawIrabPool;
-    }
-    return rawIrabPool;
-  }, [irabTier, rawIrabPool]);
-
-  const sarfPool = useMemo(() => {
-    if (sarfFilter === "all") return quizPools.sarf;
-    const filtered = quizPools.sarf.filter((q) => q.kind === sarfFilter);
-    return filtered.length > 0 ? filtered : quizPools.sarf;
-  }, [quizPools.sarf, sarfFilter]);
-
+  const sarfPool = quizPools.sarf;
   const examplesPool = quizPools.examples;
 
   // Always open quiz on a random verse (once curated pools are ready).
@@ -197,14 +184,6 @@ export function QuizScreen({
     setStep(1);
   }, []);
 
-  const ayahQuestionsForLens = useMemo(() => {
-    if (!activeQuestion) return [];
-    const { sura, verse } = activeQuestion;
-    if (lens === "irab") return irabPool.filter((q) => q.sura === sura && q.verse.v === verse.v);
-    if (lens === "sarf") return sarfPool.filter((q) => q.sura === sura && q.verse.v === verse.v);
-    return examplesPool.filter((q) => q.sura === sura && q.verse.v === verse.v);
-  }, [activeQuestion, examplesPool, irabPool, lens, sarfPool]);
-
   useEffect(() => {
     targetBtnRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [activeQuestion?.id, lens]);
@@ -215,33 +194,10 @@ export function QuizScreen({
     resetDrafts();
   };
 
-  const handleSelectQuestionById = useCallback(
-    (targetId: string) => {
-      const currentPool =
-        lens === "irab" ? irabPool : lens === "sarf" ? sarfPool : examplesPool;
-      const idx = currentPool.findIndex((q) => q.id === targetId);
-      if (idx >= 0) {
-        setIndices((prev) => ({ ...prev, [lens]: idx }));
-        resetDrafts();
-      }
-    },
-    [examplesPool, irabPool, lens, resetDrafts, sarfPool],
-  );
-
   const handleNextRandom = useCallback(() => {
     const currentPool =
       lens === "irab" ? irabPool : lens === "sarf" ? sarfPool : examplesPool;
     if (currentPool.length <= 1 || !activeQuestion) return;
-
-    if (scopeMode === "ayah" && lens !== "examples") {
-      const nextInAyah = ayahQuestionsForLens.find(
-        (q) => q.id !== activeQuestion.id && !completedIds.has(q.id),
-      );
-      if (nextInAyah) {
-        handleSelectQuestionById(nextInAyah.id);
-        return;
-      }
-    }
 
     const otherAyahPool = currentPool.filter(
       (q) => q.sura !== activeQuestion.sura || q.verse.v !== activeQuestion.verse.v,
@@ -253,20 +209,15 @@ export function QuizScreen({
     resetDrafts();
   }, [
     activeQuestion,
-    ayahQuestionsForLens,
-    completedIds,
     examplesPool,
-    handleSelectQuestionById,
     irabPool,
     lens,
     resetDrafts,
     sarfPool,
-    scopeMode,
   ]);
 
-  const recordOutcome = useCallback((id: string, isAllCorrect: boolean) => {
+  const recordOutcome = useCallback((isAllCorrect: boolean) => {
     if (isAllCorrect) {
-      setCompletedIds((prev) => new Set(prev).add(id));
       setStreak((s) => s + 1);
       setScore((prev) => ({ solved: prev.solved + 1, attempts: prev.attempts + 1 }));
     } else {
@@ -295,7 +246,7 @@ export function QuizScreen({
         irabDraft.sign === irabQuestion.sign;
       setSubmitted(true);
       setMissingFields([]);
-      recordOutcome(irabQuestion.id, allOk);
+      recordOutcome(allOk);
       return;
     }
 
@@ -317,7 +268,7 @@ export function QuizScreen({
         sarfDraft.structureCode === sarfQuestion.structureCode;
       setSubmitted(true);
       setMissingFields([]);
-      recordOutcome(sarfQuestion.id, allOk);
+      recordOutcome(allOk);
       return;
     }
 
@@ -332,7 +283,7 @@ export function QuizScreen({
       const allOk = exDraft.spottedWordNum === exQuestion.targetWord.n;
       setSubmitted(true);
       setMissingFields([]);
-      recordOutcome(exQuestion.id, allOk);
+      recordOutcome(allOk);
     }
   }, [
     activeQuestion,
@@ -371,7 +322,6 @@ export function QuizScreen({
     }
     setSubmitted(true);
     setMissingFields([]);
-    setCompletedIds((prev) => new Set(prev).add(activeQuestion.id));
     setAnimDir("forward");
     setStep(lens === "examples" ? 2 : 5);
   }, [activeQuestion, exQuestion, irabQuestion, lens, sarfQuestion]);
@@ -436,7 +386,6 @@ export function QuizScreen({
   }
   const progressPct = Math.round((filledSteps / totalSteps) * 100);
 
-  const solvedInAyahCount = ayahQuestionsForLens.filter((q) => completedIds.has(q.id)).length;
   const activeRoleMeta =
     lens === "irab" && irabQuestion
       ? irabDraft.relation
@@ -464,7 +413,7 @@ export function QuizScreen({
           },
           {
             stepNum: 2,
-            label: selectedHeadWord ? selectedHeadWord.a : t.quiz.headBadge,
+            label: selectedHeadWord ? quranText(selectedHeadWord.a) : t.quiz.headBadge,
             isAr: Boolean(selectedHeadWord),
             filled: Boolean(irabDraft.headWordNum),
           },
@@ -527,7 +476,7 @@ export function QuizScreen({
         : [
             {
               stepNum: 1,
-              label: spottedWord ? spottedWord.a : locale === "ar" ? "الشاهد" : "Spot Word",
+              label: spottedWord ? quranText(spottedWord.a) : locale === "ar" ? "الشاهد" : "Spot Word",
               isAr: Boolean(spottedWord || locale === "ar"),
               filled: Boolean(exDraft.spottedWordNum),
             },
@@ -576,22 +525,6 @@ export function QuizScreen({
           ref={ayahBoxRef}
           className={`quiz-wizard-ayah-box anim-soft-enter ${isPickingWordInAyah ? "is-picking-governor" : ""}`}
         >
-          {scopeMode === "ayah" && lens !== "examples" && ayahQuestionsForLens.length > 1 && (
-            <div className="quiz-wizard-word-tabs" dir="rtl">
-              {ayahQuestionsForLens.map((q) => (
-                <button
-                  key={q.id}
-                  type="button"
-                  className={`quiz-wizard-word-tab${q.id === activeQuestion.id ? " is-current" : ""}${completedIds.has(q.id) ? " is-done" : ""}`}
-                  onClick={() => handleSelectQuestionById(q.id)}
-                >
-                  <span lang="ar">{q.targetWord.a}</span>
-                  {completedIds.has(q.id) && <small aria-hidden="true">✓</small>}
-                </button>
-              ))}
-            </div>
-          )}
-
           {lens === "irab" && effectiveStep === 2 ? (
             <p className="quiz-wizard-pick-hint" role="status">
               {t.quiz.pickGovernorHint}
@@ -666,7 +599,7 @@ export function QuizScreen({
                     }
                   }}
                 >
-                  <span className="quiz-word-arabic">{w.a}</span>
+                  <span className="quiz-word-arabic">{quranText(w.a)}</span>
                   {(isTarget || isHead) && (
                     <span
                       className={`quiz-token-mark ${isTarget ? "mark-target" : ""} ${isHead ? "mark-head" : ""}`}
@@ -692,85 +625,6 @@ export function QuizScreen({
               {activeQuestion.suraPhonetic} {formatNumber(activeQuestion.sura)}:
               {formatNumber(activeQuestion.verse.v)}
             </span>
-
-            {lens !== "examples" && (
-              <div className="segmented-group quiz-wizard-mode-pill" role="group" aria-label="Quiz scope">
-                <button
-                  type="button"
-                  className={`segmented-item${scopeMode === "word" ? " is-active" : ""}`}
-                  onClick={() => setScopeMode("word")}
-                >
-                  {t.quiz.modeSingleWord}
-                </button>
-                <button
-                  type="button"
-                  className={`segmented-item${scopeMode === "ayah" ? " is-active" : ""}`}
-                  onClick={() => setScopeMode("ayah")}
-                >
-                  {t.quiz.modeFullAyah(solvedInAyahCount, ayahQuestionsForLens.length)}
-                </button>
-              </div>
-            )}
-
-            {lens === "irab" && (
-              <div className="segmented-group quiz-wizard-mode-pill" role="group" aria-label="Difficulty tier">
-                <button
-                  type="button"
-                  className={`segmented-item${irabTier === "all" ? " is-active" : ""}`}
-                  onClick={() => {
-                    setIrabTier("all");
-                    resetDrafts();
-                  }}
-                >
-                  {locale === "ar" ? "الكل" : locale === "id" ? "Semua" : "All"}
-                </button>
-                <button
-                  type="button"
-                  className={`segmented-item${irabTier === "advanced" ? " is-active" : ""}`}
-                  onClick={() => {
-                    setIrabTier("advanced");
-                    resetDrafts();
-                  }}
-                >
-                  {locale === "ar" ? "متقدم ★" : locale === "id" ? "Lanjutan ★" : "Advanced ★"}
-                </button>
-              </div>
-            )}
-
-            {lens === "sarf" && (
-              <div className="segmented-group quiz-wizard-mode-pill" role="group" aria-label="Morphology filter">
-                <button
-                  type="button"
-                  className={`segmented-item${sarfFilter === "all" ? " is-active" : ""}`}
-                  onClick={() => {
-                    setSarfFilter("all");
-                    resetDrafts();
-                  }}
-                >
-                  {locale === "ar" ? "الكل" : "All"}
-                </button>
-                <button
-                  type="button"
-                  className={`segmented-item${sarfFilter === "verb" ? " is-active" : ""}`}
-                  onClick={() => {
-                    setSarfFilter("verb");
-                    resetDrafts();
-                  }}
-                >
-                  {locale === "ar" ? "أفعال" : locale === "id" ? "Fi'il" : "Verbs"}
-                </button>
-                <button
-                  type="button"
-                  className={`segmented-item${sarfFilter === "noun" ? " is-active" : ""}`}
-                  onClick={() => {
-                    setSarfFilter("noun");
-                    resetDrafts();
-                  }}
-                >
-                  {locale === "ar" ? "مشتقات وجموع" : locale === "id" ? "Isim" : "Nouns"}
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="quiz-wizard-stats">
@@ -845,7 +699,7 @@ export function QuizScreen({
                   <header className="quiz-wizard-step-head">
                     <div>
                       <span className="eyebrow">{t.quiz.step1Eyebrow}</span>
-                      <h2>{t.quiz.step1Question(irabQuestion.targetWord.a)}</h2>
+                      <h2>{t.quiz.step1Question(quranText(irabQuestion.targetWord.a))}</h2>
                     </div>
                     <button type="button" className="quiz-text-reveal" onClick={handleRevealAnswer}>
                       {t.quiz.revealButton}
@@ -868,10 +722,7 @@ export function QuizScreen({
                           }}
                         >
                           <div className="quiz-rich-top">
-                            <strong lang="ar">
-                              {r.ar}
-                              {r.tier === "advanced" ? <sup className="quiz-adv-star">★</sup> : null}
-                            </strong>
+                            <strong lang="ar">{r.ar}</strong>
                             <span className="quiz-rich-dot" />
                           </div>
                           <small>{locale === "id" ? r.id : locale === "ar" ? r.governorLabel.ar : r.en}</small>
@@ -887,7 +738,7 @@ export function QuizScreen({
                   <header className="quiz-wizard-step-head">
                     <div>
                       <span className="eyebrow">{t.quiz.step2Eyebrow(activeRoleMeta.governorLabel[locale])}</span>
-                      <h2>{t.quiz.step2Question(activeRoleMeta.governorLabel.ar, irabQuestion.targetWord.a)}</h2>
+                      <h2>{t.quiz.step2Question(activeRoleMeta.governorLabel.ar, quranText(irabQuestion.targetWord.a))}</h2>
                       <p className="quiz-wizard-subprompt">{t.quiz.step2Hint}</p>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(1)}>
@@ -912,7 +763,7 @@ export function QuizScreen({
                               setStep(3);
                             }}
                           >
-                            <b lang="ar">{w.a}</b>
+                            <b lang="ar">{quranText(w.a)}</b>
                             <small>#{formatNumber(w.n)}</small>
                           </button>
                         );
@@ -926,7 +777,7 @@ export function QuizScreen({
                   <header className="quiz-wizard-step-head">
                     <div>
                       <span className="eyebrow">{t.quiz.step3Eyebrow}</span>
-                      <h2>{t.quiz.step3Question(irabQuestion.targetWord.a)}</h2>
+                      <h2>{t.quiz.step3Question(quranText(irabQuestion.targetWord.a))}</h2>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(2)}>
                       {t.quiz.backButton}
@@ -965,7 +816,7 @@ export function QuizScreen({
                   <header className="quiz-wizard-step-head">
                     <div>
                       <span className="eyebrow">{t.quiz.step4Eyebrow}</span>
-                      <h2>{t.quiz.step4Question(irabQuestion.targetWord.a)}</h2>
+                      <h2>{t.quiz.step4Question(quranText(irabQuestion.targetWord.a))}</h2>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(3)}>
                       {t.quiz.backButton}
@@ -1005,7 +856,7 @@ export function QuizScreen({
                       <header className="quiz-wizard-step-head">
                         <div>
                           <span className="eyebrow">{t.quiz.step5Eyebrow}</span>
-                          <h2>{t.quiz.step5Title(irabQuestion.targetWord.a)}</h2>
+                          <h2>{t.quiz.step5Title(quranText(irabQuestion.targetWord.a))}</h2>
                         </div>
                         <button type="button" className="quiz-back-link" onClick={() => goToStep(4)}>
                           {t.quiz.editButton}
@@ -1013,9 +864,9 @@ export function QuizScreen({
                       </header>
 
                       <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
-                        <strong className="formula-target">{irabQuestion.targetWord.a}:</strong>{" "}
+                        <strong className="formula-target">{quranText(irabQuestion.targetWord.a)}:</strong>{" "}
                         <span>{irabDraft.relation ? getRoleMeta(irabDraft.relation).ar : "—"}</span>{" "}
-                        <span>{selectedHeadWord ? `لـ ${selectedHeadWord.a}` : "—"}</span>{" "}
+                        <span>{selectedHeadWord ? `لـ ${quranText(selectedHeadWord.a)}` : "—"}</span>{" "}
                         <span>{irabDraft.grammaticalCase ? getCaseMeta(irabDraft.grammaticalCase).ar : "—"}</span>{" "}
                         <span>وعلامة إعرابه</span>{" "}
                         <span>{irabDraft.sign ? getSignMeta(irabDraft.sign).ar : "—"}</span>.
@@ -1034,7 +885,7 @@ export function QuizScreen({
                           <small>
                             {formatNumber(2)} · {activeRoleMeta.governorLabel[locale]}
                           </small>
-                          <strong lang="ar">{selectedHeadWord ? selectedHeadWord.a : t.quiz.notSet}</strong>
+                          <strong lang="ar">{selectedHeadWord ? quranText(selectedHeadWord.a) : t.quiz.notSet}</strong>
                         </button>
                         <button type="button" className="quiz-summary-tile" onClick={() => goToStep(3)}>
                           <small>
@@ -1081,7 +932,7 @@ export function QuizScreen({
                               <span className="eyebrow">
                                 {allOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
                               </span>
-                              <h3>{t.quiz.classicalHeading(irabQuestion.targetWord.a)}</h3>
+                              <h3>{t.quiz.classicalHeading(quranText(irabQuestion.targetWord.a))}</h3>
                             </div>
                           </header>
 
@@ -1093,8 +944,8 @@ export function QuizScreen({
                             </span>
                             <span className={`quiz-verdict-chip ${headOk ? "ok" : "err"}`} lang="ar">
                               {headOk
-                                ? `✓ ${irabQuestion.headWord.a}`
-                                : `✗ ${selectedHeadWord ? selectedHeadWord.a : "—"} ← ✓ ${getRoleMeta(irabQuestion.relation).governorLabel.ar}: ${irabQuestion.headWord.a}`}
+                                ? `✓ ${quranText(irabQuestion.headWord.a)}`
+                                : `✗ ${selectedHeadWord ? quranText(selectedHeadWord.a) : "—"} ← ✓ ${getRoleMeta(irabQuestion.relation).governorLabel.ar}: ${quranText(irabQuestion.headWord.a)}`}
                             </span>
                             <span className={`quiz-verdict-chip ${caseOk ? "ok" : "err"}`} lang="ar">
                               {caseOk
@@ -1142,10 +993,10 @@ export function QuizScreen({
                       </span>
                       <h2>
                         {locale === "ar"
-                          ? `ما المادة المعجمية (الجذر) لكلمة ﴿${sarfQuestion.targetWord.a}﴾؟`
+                          ? `ما المادة المعجمية (الجذر) لكلمة ﴿${quranText(sarfQuestion.targetWord.a)}﴾؟`
                           : locale === "id"
-                            ? `Apa akar kata (maddah) dari ${sarfQuestion.targetWord.a}?`
-                            : `What is the lexical root (māddah) of ${sarfQuestion.targetWord.a}?`}
+                            ? `Apa akar kata (maddah) dari ${quranText(sarfQuestion.targetWord.a)}?`
+                            : `What is the lexical root (māddah) of ${quranText(sarfQuestion.targetWord.a)}?`}
                       </h2>
                     </div>
                     <button type="button" className="quiz-text-reveal" onClick={handleRevealAnswer}>
@@ -1190,10 +1041,10 @@ export function QuizScreen({
                       </span>
                       <h2>
                         {locale === "ar"
-                          ? `ما الوزن الصرفي لـ ﴿${sarfQuestion.headAr}﴾؟`
+                          ? `ما الوزن الصرفي لـ ﴿${quranText(sarfQuestion.headAr)}﴾؟`
                           : locale === "id"
-                            ? `Apa wazan sharaf dari ${sarfQuestion.headAr}?`
-                            : `What is the morphological pattern (wazn) of ${sarfQuestion.headAr}?`}
+                            ? `Apa wazan sharaf dari ${quranText(sarfQuestion.headAr)}?`
+                            : `What is the morphological pattern (wazn) of ${quranText(sarfQuestion.headAr)}?`}
                       </h2>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(1)}>
@@ -1243,11 +1094,11 @@ export function QuizScreen({
                       <h2>
                         {sarfQuestion.kind === "verb"
                           ? locale === "ar"
-                            ? `من أي باب صرفي جاء الفعل ﴿${sarfQuestion.headAr}﴾؟`
-                            : `Which verbal bāb / form does ${sarfQuestion.headAr} belong to?`
+                            ? `من أي باب صرفي جاء الفعل ﴿${quranText(sarfQuestion.headAr)}﴾؟`
+                            : `Which verbal bāb / form does ${quranText(sarfQuestion.headAr)} belong to?`
                           : locale === "ar"
-                            ? `ما نوع الاسم ﴿${sarfQuestion.headAr}﴾ من حيث الاشتقاق؟`
-                            : `What derivational class is the noun ${sarfQuestion.headAr}?`}
+                            ? `ما نوع الاسم ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الاشتقاق؟`
+                            : `What derivational class is the noun ${quranText(sarfQuestion.headAr)}?`}
                       </h2>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(2)}>
@@ -1297,11 +1148,11 @@ export function QuizScreen({
                       <h2>
                         {sarfQuestion.kind === "verb"
                           ? locale === "ar"
-                            ? `ما نوع الفعل ﴿${sarfQuestion.headAr}﴾ من حيث الصحة والاعتلال؟`
-                            : `How is ${sarfQuestion.headAr} classified by root soundness?`
+                            ? `ما نوع الفعل ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الصحة والاعتلال؟`
+                            : `How is ${quranText(sarfQuestion.headAr)} classified by root soundness?`
                           : locale === "ar"
-                            ? `ما بنية الاسم ﴿${sarfQuestion.headAr}﴾ من حيث الإفراد والجمع؟`
-                            : `What is the number / plural structure of ${sarfQuestion.headAr}?`}
+                            ? `ما بنية الاسم ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الإفراد والجمع؟`
+                            : `What is the number / plural structure of ${quranText(sarfQuestion.headAr)}?`}
                       </h2>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(3)}>
@@ -1346,8 +1197,8 @@ export function QuizScreen({
                           </span>
                           <h2>
                             {locale === "ar"
-                              ? `راجع التحليل الصرفي لـ ﴿${sarfQuestion.targetWord.a}﴾`
-                              : `Review your morphological profile for ${sarfQuestion.targetWord.a}`}
+                              ? `راجع التحليل الصرفي لـ ﴿${quranText(sarfQuestion.targetWord.a)}﴾`
+                              : `Review your morphological profile for ${quranText(sarfQuestion.targetWord.a)}`}
                           </h2>
                         </div>
                         <button type="button" className="quiz-back-link" onClick={() => goToStep(4)}>
@@ -1356,7 +1207,7 @@ export function QuizScreen({
                       </header>
 
                       <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
-                        <strong className="formula-target">{sarfQuestion.headAr}:</strong>{" "}
+                        <strong className="formula-target">{quranText(sarfQuestion.headAr)}:</strong>{" "}
                         <span>من مادة ({sarfDraft.root ? sarfDraft.root.split("").join(" ") : "—"})</span>،{" "}
                         <span>على وزن ({sarfDraft.wazn || "—"})</span>،{" "}
                         <span>{sarfDraft.classCode ? SARF_CLASSES[sarfDraft.classCode]?.ar : "—"}</span>،{" "}
@@ -1425,8 +1276,8 @@ export function QuizScreen({
                               </span>
                               <h3>
                                 {locale === "ar"
-                                  ? `التحليل الصرفي الكامل لـ ﴿${sarfQuestion.targetWord.a}﴾`
-                                  : `Classical Ṣarf for ${sarfQuestion.targetWord.a}`}
+                                  ? `التحليل الصرفي الكامل لـ ﴿${quranText(sarfQuestion.targetWord.a)}﴾`
+                                  : `Classical Ṣarf for ${quranText(sarfQuestion.targetWord.a)}`}
                               </h3>
                             </div>
                           </header>
@@ -1543,7 +1394,7 @@ export function QuizScreen({
                             setStep(2);
                           }}
                         >
-                          <b lang="ar">{w.a}</b>
+                          <b lang="ar">{quranText(w.a)}</b>
                           <small>#{formatNumber(w.n)}</small>
                         </button>
                       );
@@ -1574,7 +1425,7 @@ export function QuizScreen({
 
                       <div className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
                         <strong className="formula-target">{exQuestion.facetTitle.ar}:</strong>{" "}
-                        <span>{spottedWord ? `﴿${spottedWord.a}﴾` : "—"}</span>
+                        <span>{spottedWord ? `﴿${quranText(spottedWord.a)}﴾` : "—"}</span>
                       </div>
 
                       {submitted && missingFields.length > 0 && (
@@ -1608,8 +1459,8 @@ export function QuizScreen({
                               </span>
                               <h3>
                                 {locale === "ar"
-                                  ? `الشاهد في الآية: ﴿${exQuestion.targetWord.a}﴾`
-                                  : `Spotted Example: ${exQuestion.targetWord.a}`}
+                                  ? `الشاهد في الآية: ﴿${quranText(exQuestion.targetWord.a)}﴾`
+                                  : `Spotted Example: ${quranText(exQuestion.targetWord.a)}`}
                               </h3>
                             </div>
                           </header>
@@ -1617,8 +1468,8 @@ export function QuizScreen({
                           <div className="quiz-wizard-verdict-strip">
                             <span className={`quiz-verdict-chip ${spotOk ? "ok" : "err"}`} lang="ar">
                               {spotOk
-                                ? `✓ الشاهد: ${exQuestion.targetWord.a}`
-                                : `✗ ${spottedWord ? spottedWord.a : "—"} ← ✓ الشاهد: ${exQuestion.targetWord.a}`}
+                                ? `✓ الشاهد: ${quranText(exQuestion.targetWord.a)}`
+                                : `✗ ${spottedWord ? quranText(spottedWord.a) : "—"} ← ✓ الشاهد: ${quranText(exQuestion.targetWord.a)}`}
                             </span>
                             <span className="quiz-verdict-chip ok" lang="ar">
                               الوزن: {exQuestion.targetWazn}

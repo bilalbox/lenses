@@ -73,6 +73,13 @@ export function stripDiacritics(text: string): string {
   return text.replace(DIACRITICS, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه");
 }
 
+const TASHKEEL = /[\u064b-\u0652\u0670\u0653-\u065f\u06d6-\u06ed]/g;
+
+/** Removes only vowel marks (harakat / Quranic marks), keeping letter forms unchanged. */
+export function stripTashkeel(text: string): string {
+  return text.replace(TASHKEEL, "");
+}
+
 export function hasArabic(text: string): boolean {
   return /[\u0600-\u06ff]/.test(text);
 }

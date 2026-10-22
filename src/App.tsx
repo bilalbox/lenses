@@ -15,6 +15,8 @@ import { SettingsModal } from "./components/SettingsModal";
 import { QuizScreen } from "./components/QuizScreen";
 import { GearIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from "./components/Icons";
 
+const QUIZ_HIDE_DIACRITICS_KEY = "lenses-quiz-hide-diacritics";
+
 function parseRoute(hash: string): Route {
   const fallback = getOpeningVerse();
   const cleanHash = hash.replace(/^#/, "").split("?")[0] || openingPath();
@@ -59,6 +61,9 @@ export function App() {
   const [manifest, setManifest] = useState<Manifest | null>(null);
   const [error, setError] = useState("");
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || "light");
+  const [quizHideDiacritics, setQuizHideDiacritics] = useState(
+    () => localStorage.getItem(QUIZ_HIDE_DIACRITICS_KEY) === "1",
+  );
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<VerseHit[]>([]);
   const [hitTotal, setHitTotal] = useState(0);
@@ -150,6 +155,11 @@ export function App() {
     if (themeColorMeta) {
       themeColorMeta.setAttribute("content", next === "dark" ? "#101311" : "#0f6e66");
     }
+  };
+
+  const toggleQuizHideDiacritics = (next: boolean) => {
+    setQuizHideDiacritics(next);
+    localStorage.setItem(QUIZ_HIDE_DIACRITICS_KEY, next ? "1" : "0");
   };
 
   const stepVerse = (delta: number) => {
@@ -289,6 +299,7 @@ export function App() {
             manifest={manifest}
             onOpenInReader={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
             onOpenSearch={openSearch}
+            hideDiacritics={quizHideDiacritics}
           />
         ) : null}
       </main>
@@ -336,6 +347,8 @@ export function App() {
         onClose={() => setSettingsOpen(false)}
         theme={theme}
         onSelectTheme={selectTheme}
+        quizHideDiacritics={quizHideDiacritics}
+        onToggleQuizHideDiacritics={toggleQuizHideDiacritics}
         canInstall={Boolean(install)}
         onInstall={() => {
           if (install) {

@@ -32,8 +32,6 @@ export const ar: Translations = {
     corpusSource: "المدونة القرآنية",
   },
   quiz: {
-    modeSingleWord: "كلمة",
-    modeFullAyah: (done: number, total: number) => `الآية (${formatNum(done, "ar")}/${formatNum(total, "ar")})`,
     streakLabel: "تتابع",
     skipButton: "↻ تخطي",
     openReader: (sura: number, verse: number) => `القارئ ${formatNum(sura, "ar")}:${formatNum(verse, "ar")} ↗`,
@@ -75,6 +73,9 @@ export const ar: Translations = {
     themeSection: "المظهر",
     themeLight: "فاتح",
     themeDark: "داكن",
+    quizSection: "الاختبار",
+    quizDiacriticsLabel: "إخفاء التشكيل في الاختبارات",
+    quizDiacriticsDescription: "عرض آيات القرآن بدون حركات لتحدٍّ أصعب.",
     sourcesLink: "مصادر البيانات",
     sourcesDescription: "استكشف مصادر البيانات اللغوية والتراخيص،.",
     installApp: "تثبيت التطبيق",

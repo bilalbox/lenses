@@ -8,6 +8,8 @@ interface Props {
   onClose: () => void;
   theme: string;
   onSelectTheme: (next: "light" | "dark") => void;
+  quizHideDiacritics: boolean;
+  onToggleQuizHideDiacritics: (next: boolean) => void;
   canInstall: boolean;
   onInstall: () => void;
 }
@@ -17,6 +19,8 @@ export function SettingsModal({
   onClose,
   theme,
   onSelectTheme,
+  quizHideDiacritics,
+  onToggleQuizHideDiacritics,
   canInstall,
   onInstall,
 }: Props) {
@@ -156,6 +160,25 @@ export function SettingsModal({
               <span>{t.settings.themeDark}</span>
             </button>
           </div>
+        </section>
+
+        <section className="settings-section">
+          <h3>{t.settings.quizSection}</h3>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={quizHideDiacritics}
+            className="settings-switch-card"
+            onClick={() => onToggleQuizHideDiacritics(!quizHideDiacritics)}
+          >
+            <span className="settings-switch-content">
+              <strong>{t.settings.quizDiacriticsLabel}</strong>
+              <small>{t.settings.quizDiacriticsDescription}</small>
+            </span>
+            <span className={`settings-switch${quizHideDiacritics ? " is-on" : ""}`} aria-hidden="true">
+              <span className="settings-switch-thumb" />
+            </span>
+          </button>
         </section>
 
         <section className="settings-section">

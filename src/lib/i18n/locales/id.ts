@@ -26,8 +26,6 @@ export const id: Translations = {
     corpusSource: "Quranic Arabic Corpus",
   },
   quiz: {
-    modeSingleWord: "1 Kata",
-    modeFullAyah: (done: number, total: number) => `Ayat (${formatNum(done, "id")}/${formatNum(total, "id")})`,
     streakLabel: "beruntun",
     skipButton: "↻ Lewati",
     openReader: (sura: number, verse: number) => `Pembaca ${formatNum(sura, "id")}:${formatNum(verse, "id")} ↗`,
@@ -69,6 +67,9 @@ export const id: Translations = {
     themeSection: "Tampilan",
     themeLight: "Terang",
     themeDark: "Gelap",
+    quizSection: "Kuis",
+    quizDiacriticsLabel: "Sembunyikan harakat di kuis",
+    quizDiacriticsDescription: "Tampilkan ayat Al-Qur'an tanpa harakat untuk tantangan yang lebih sulit.",
     sourcesLink: "Sumber Data",
     sourcesDescription: "Jelajahi sumber data korpus dan lisensi",
     installApp: "Pasang Aplikasi",

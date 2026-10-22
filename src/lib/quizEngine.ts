@@ -46,8 +46,6 @@ export interface QuizQuestion {
   signDetailAr: string;
   classicalIrab: string;
   clauseWords: Word[];
-  /** True when the question involves an advanced role or a secondary/estimated declension sign */
-  isAdvanced: boolean;
 }
 
 export interface RoleMeta {
@@ -56,7 +54,6 @@ export interface RoleMeta {
   en: string;
   id: string;
   family: "core" | "nom" | "clause";
-  tier?: "core" | "advanced";
   governorLabel: {
     ar: string;
     en: string;
@@ -77,7 +74,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Doer (Fāʿil)",
     id: "Pelaku (Fāʿil)",
     family: "core",
-    tier: "core",
     governorLabel: { ar: "الفعل العامل", en: "Governing Verb (Fiʿl)", id: "Fi'il Pengampu" },
     governorPrompt: {
       ar: "اختر الفعل الذي رَفَع هذا الفاعل من الآية",
@@ -92,7 +88,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Passive Subject (Nāʾib Fāʿil)",
     id: "Na'ibul Fa'il (Subjek Pasif)",
     family: "core",
-    tier: "advanced",
     governorLabel: { ar: "الفعل المبني للمجهول", en: "Passive Verb (Fiʿl Majhūl)", id: "Fi'il Majhul" },
     governorPrompt: {
       ar: "اختر الفعل المبني للمجهول (أو الوصف) الذي رَفَع نائب الفاعل",
@@ -107,7 +102,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Direct Object (Mafʿūl bihi)",
     id: "Objek (Mafʿūl bih)",
     family: "core",
-    tier: "core",
     governorLabel: { ar: "الفعل المتعدي", en: "Transitive Verb (Fiʿl)", id: "Fi'il Transitif" },
     governorPrompt: {
       ar: "اختر الفعل الذي نَصَب هذا المفعول به",
@@ -122,7 +116,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Subject / Ism Nāsikh",
     id: "Mubtada' / Isim Nasikh",
     family: "core",
-    tier: "core",
     governorLabel: { ar: "الناسخ أو المسند", en: "Nāsikh or Predicate Head", id: "Amil Nasikh / Khabar" },
     governorPrompt: {
       ar: "اختر الحرف الناسخ أو الفعل الناسخ أو الركن المرتبط به",
@@ -136,7 +129,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Predicate (Khabar)",
     id: "Predikat (Khabar)",
     family: "core",
-    tier: "core",
     governorLabel: { ar: "المبتدأ أو الناسخ", en: "Subject (Mubtadaʾ) or Nāsikh", id: "Mubtada' atau Nasikh" },
     governorPrompt: {
       ar: "اختر المبتدأ أو الناسخ الذي أُخبر عنه بهذا الخبر",
@@ -150,7 +142,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Annexed Noun (Muḍāf ilayhi)",
     id: "Mudhaf Ilaih",
     family: "nom",
-    tier: "core",
     governorLabel: { ar: "المضاف", en: "Annexed Head (Muḍāf)", id: "Kata Sandaran (Muḍāf)" },
     governorPrompt: {
       ar: "اختر الاسم المضاف الذي جَرّ هذا المضاف إليه",
@@ -165,7 +156,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Prepositional Genitive (Majrūr)",
     id: "Isim Majrur",
     family: "nom",
-    tier: "core",
     governorLabel: { ar: "حرف الجر", en: "Preposition (Ḥarf Jarr)", id: "Huruf Jar" },
     governorPrompt: {
       ar: "اختر حرف الجر العامل في هذا الاسم",
@@ -180,7 +170,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Adjective Follower (Naʿt)",
     id: "Sifat (Naʿt)",
     family: "nom",
-    tier: "core",
     governorLabel: { ar: "المنعوت (الموصوف)", en: "Described Noun (Manʿūt)", id: "Kata yang Disifati (Manʿūt)" },
     governorPrompt: {
       ar: "اختر المنعوت الذي يتبعه هذا النعت في الإعراب",
@@ -194,7 +183,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Apposition (Badal)",
     id: "Badal (Pengganti/Penjelas)",
     family: "nom",
-    tier: "advanced",
     governorLabel: { ar: "المبدل منه", en: "Antecedent Noun (Mubdal minhu)", id: "Mubdal Minhu" },
     governorPrompt: {
       ar: "اختر المبدل منه الذي يتبعه هذا البدل في الإعراب",
@@ -208,7 +196,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Conjoined (Maʿṭūf)",
     id: "Kata Sambung (Maʿṭūf)",
     family: "clause",
-    tier: "core",
     governorLabel: { ar: "المعطوف عليه", en: "Conjoined Head (Maʿṭūf ʿalayhi)", id: "Ma'thuf 'Alaih" },
     governorPrompt: {
       ar: "اختر المعطوف عليه الذي يتبعه هذا الاسم في الإعراب",
@@ -222,7 +209,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Circumstantial (Ḥāl)",
     id: "Keterangan Keadaan (Ḥāl)",
     family: "clause",
-    tier: "advanced",
     governorLabel: { ar: "عامل الحال / صاحبها", en: "Verbal Governor / Owner of State", id: "Amil / Shahibul Hal" },
     governorPrompt: {
       ar: "اختر الفعل أو العامل الذي نَصَب هذه الحال",
@@ -237,7 +223,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Cognate Accusative (Mafʿūl Muṭlaq)",
     id: "Maf'ul Muthlaq",
     family: "nom",
-    tier: "advanced",
     governorLabel: { ar: "الفعل المؤكَّد", en: "Cognate Verb (Fiʿl)", id: "Fi'il yang Ditegaskan" },
     governorPrompt: {
       ar: "اختر الفعل الذي أُخذ منه هذا المصدر ونُصب مفعولاً مطلقاً",
@@ -252,7 +237,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
     en: "Specification (Tamyīz)",
     id: "Tamyiz (Penjelas)",
     family: "nom",
-    tier: "advanced",
     governorLabel: { ar: "المميَّز / العامل", en: "Clarified Head (Mumayyaz)", id: "Kata yang Dijelaskan (Mumayyaz)" },
     governorPrompt: {
       ar: "اختر الكلمة أو الفعل الذي أزال هذا التمييز إبهامه",
@@ -731,9 +715,6 @@ export function extractQuizQuestionsFromSurah(file: SurahFile): QuizQuestion[] {
         const id = `${file.n}:${verse.v}:${targetWord.n}:${relation}`;
         if (questions.some((q) => q.id === id)) continue;
 
-        const isSecondarySign = !["damma", "fatha", "kasra"].includes(meta.sign);
-        const isAdvancedRole = ["pass", "circ", "cog", "app", "spec", "subjx", "pred"].includes(relation);
-
         questions.push({
           id,
           sura: file.n,
@@ -748,7 +729,6 @@ export function extractQuizQuestionsFromSurah(file: SurahFile): QuizQuestion[] {
           signDetailAr: meta.detailAr,
           classicalIrab: targetWord.i,
           clauseWords: clauseWords.length > 0 ? clauseWords : verse.w,
-          isAdvanced: isSecondarySign || isAdvancedRole,
         });
       }
     }

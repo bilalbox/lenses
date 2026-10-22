@@ -37,8 +37,6 @@ export interface Translations {
     corpusSource: string;
   };
   quiz: {
-    modeSingleWord: string;
-    modeFullAyah: (done: number, total: number) => string;
     streakLabel: string;
     skipButton: string;
     openReader: (sura: number, verse: number) => string;
@@ -80,6 +78,9 @@ export interface Translations {
     themeSection: string;
     themeLight: string;
     themeDark: string;
+    quizSection: string;
+    quizDiacriticsLabel: string;
+    quizDiacriticsDescription: string;
     sourcesLink: string;
     sourcesDescription: string;
     installApp: string;

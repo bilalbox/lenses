@@ -26,8 +26,6 @@ export const en: Translations = {
     corpusSource: "Quranic Arabic Corpus",
   },
   quiz: {
-    modeSingleWord: "1 Word",
-    modeFullAyah: (done: number, total: number) => `Ayah (${formatNum(done, "en")}/${formatNum(total, "en")})`,
     streakLabel: "streak",
     skipButton: "↻ Skip",
     openReader: (sura: number, verse: number) => `Reader ${formatNum(sura, "en")}:${formatNum(verse, "en")} ↗`,
@@ -69,6 +67,9 @@ export const en: Translations = {
     themeSection: "Appearance",
     themeLight: "Light",
     themeDark: "Dark",
+    quizSection: "Quiz",
+    quizDiacriticsLabel: "Hide diacritics in quizzes",
+    quizDiacriticsDescription: "Show Quran verses without harakat for a harder challenge.",
     sourcesLink: "Data Sources",
     sourcesDescription: "Explore corpus data sources and licenses.",
     installApp: "Install App",
