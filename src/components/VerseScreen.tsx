@@ -4,6 +4,7 @@ import { useI18n } from "../lib/i18n/I18nContext";
 import { normalizeDigits } from "../lib/i18n/format";
 import { formatIrabText } from "../lib/formatIrab";
 import type { Manifest, SurahFile, Verse } from "../lib/types";
+import { useRhetoric } from "../lib/rhetoric";
 import { DependencyTree } from "./DependencyTree";
 import { WordSheet } from "./WordSheet";
 
@@ -217,12 +218,29 @@ function VerseBody({
     }
     openClause(next);
   };
+  const { entries: rhetoricEntries } = useRhetoric();
+  const rhetoricEntry = useMemo(
+    () => rhetoricEntries.find((e) => e.sura === sura && e.verse === verse.v),
+    [rhetoricEntries, sura, verse.v],
+  );
+  const hasBalagha = Boolean(rhetoricEntry);
   return (
     <>
       <header className="verse-title">
-        <p className="eyebrow">
-          {revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} · {phonetic}
-        </p>
+        <div className="verse-title-eyebrow-row">
+          <p className="eyebrow">
+            {revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} · {phonetic}
+          </p>
+          {hasBalagha && (
+            <a
+              href={`#/rhetoric/${sura}/${verse.v}`}
+              className="verse-balagha-deep-link"
+              title="Open Rhetoric Studio for this verse"
+            >
+              <span className="verse-balagha-icon">بلاغة</span> · Rhetoric Studio ↗
+            </a>
+          )}
+        </div>
         <h1>
           <span lang="ar">{unitName}</span>
           <small>
@@ -264,6 +282,20 @@ function VerseBody({
           tanzil.net
         </a>
       </p>
+
+      {/* Surface Sabiq Indonesian translation when Indonesian locale is active */}
+      {locale === "id" && rhetoricEntry?.indonesianAyah && (
+        <div className="verse-sabiq-card">
+          <div className="verse-sabiq-badge">Terjemahan Makna (Sabiq)</div>
+          <p className="verse-sabiq-text">{rhetoricEntry.indonesianAyah}</p>
+          <p className="source-line" style={{ marginTop: "0.35rem", marginBottom: 0 }}>
+            Terjemahan Sabiq (PT. Sabiq) ·{" "}
+            <a href="https://quranenc.com/en/browse/indonesian_sabiq" target="_blank" rel="noreferrer">
+              quranenc.com
+            </a>
+          </p>
+        </div>
+      )}
 
       {/* Tafsir sections prioritized by active locale */}
       {(() => {

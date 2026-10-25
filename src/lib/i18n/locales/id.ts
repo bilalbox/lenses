@@ -12,6 +12,7 @@ export const id: Translations = {
     surahsNav: "Surah",
     examplesNav: "Contoh",
     quizNav: "Kuis",
+    rhetoricNav: "Balaghah",
     previous: "Sebelumnya",
     next: "Berikutnya",
     search: "Cari",

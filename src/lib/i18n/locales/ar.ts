@@ -18,6 +18,7 @@ export const ar: Translations = {
     surahsNav: "السور",
     examplesNav: "أمثلة",
     quizNav: "اختبار",
+    rhetoricNav: "البلاغة",
     previous: "السابق",
     next: "التالي",
     search: "بحث",

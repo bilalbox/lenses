@@ -150,3 +150,21 @@ Publisher: Tafsir Center for Quranic Studies
 Source: QuranEnc.com, key arabic_mokhtasar
 https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/{sura}
 License: QuranEnc republication terms: retain verbatim text and attribution.
+
+------------------------------------------------------------
+Saheeh International English Translation
+Title: The Qur'an: English Meanings
+Translators: Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley)
+Source: Tanzil.net and QuranEnc.com, key english_saheeh
+https://quranenc.com/en/browse/english_saheeh
+License / Terms: Verbatim text retained with clear attribution to Saheeh International.
+Used in Lenses as a literal syntax-aligned translation layer for rhetorical and grammatical study.
+
+------------------------------------------------------------
+Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)
+Title: Terjemahan Al-Qur'an Al-Karim Bahasa Indonesia
+Publisher: PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad)
+Source: QuranEnc.com, key indonesian_sabiq
+https://quranenc.com/en/browse/indonesian_sabiq
+License / Terms: Verbatim text retained with clear attribution to PT. Sabiq dan Rowwad Translation Center.
+

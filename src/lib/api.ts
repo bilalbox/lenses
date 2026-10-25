@@ -1,9 +1,11 @@
 import type { Manifest, SurahFile, VerseRow, WordIndex } from "./types";
+import type { RhetoricEntry } from "./rhetoric";
 
 const surahs = new Map<number, SurahFile>();
 let manifestPromise: Promise<Manifest> | null = null;
 let versesPromise: Promise<VerseRow[]> | null = null;
 let wordsPromise: Promise<WordIndex> | null = null;
+let rhetoricPromise: Promise<RhetoricEntry[]> | null = null;
 
 async function getJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -36,4 +38,9 @@ export function loadVerses(): Promise<VerseRow[]> {
 export function loadWordIndex(): Promise<WordIndex> {
   wordsPromise ??= getJson<WordIndex>("/data/quran/words.json");
   return wordsPromise;
+}
+
+export function loadRhetoric(): Promise<RhetoricEntry[]> {
+  rhetoricPromise ??= getJson<RhetoricEntry[]>("/data/quran/rhetoric.json");
+  return rhetoricPromise;
 }

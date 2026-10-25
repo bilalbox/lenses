@@ -13,6 +13,7 @@ import { SurahIndex } from "./components/SurahIndex";
 import { VerseScreen } from "./components/VerseScreen";
 import { SettingsModal } from "./components/SettingsModal";
 import { QuizScreen } from "./components/QuizScreen";
+import { RhetoricScreen } from "./components/RhetoricScreen";
 import { GearIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from "./components/Icons";
 
 const QUIZ_HIDE_DIACRITICS_KEY = "lenses-quiz-hide-diacritics";
@@ -25,6 +26,11 @@ function parseRoute(hash: string): Route {
   if (parts[0] === "search") return { page: "search", ...fallback };
   if (parts[0] === "surahs") return { page: "surahs", ...fallback };
   if (parts[0] === "sources") return { page: "sources", ...fallback };
+  if (parts[0] === "rhetoric" || parts[0] === "balagha") {
+    const sura = parts[1] ? Number(parts[1]) : undefined;
+    const verse = parts[2] ? Number(parts[2]) : undefined;
+    return { page: "rhetoric", sura: sura || fallback.sura, verse: verse || fallback.verse };
+  }
   const sura = Number(parts[0]);
   const verse = Number(parts[1]);
   const word = parts[2] ? Number(parts[2]) : undefined;
@@ -252,6 +258,9 @@ export function App() {
           <a href="#/quiz" aria-current={route.page === "quiz" ? "page" : undefined}>
             {t.common.quizNav}
           </a>
+          <a href="#/rhetoric" aria-current={route.page === "rhetoric" ? "page" : undefined}>
+            {t.common.rhetoricNav}
+          </a>
           <button
             type="button"
             className="icon-button settings-toggle-button"
@@ -300,6 +309,13 @@ export function App() {
             onOpenInReader={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
             onOpenSearch={openSearch}
             hideDiacritics={quizHideDiacritics}
+          />
+        ) : null}
+        {manifest && route.page === "rhetoric" ? (
+          <RhetoricScreen
+            targetSura={route.sura}
+            targetVerse={route.verse}
+            onOpenVerse={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
           />
         ) : null}
       </main>

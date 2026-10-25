@@ -2372,3 +2372,690 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
     padding-bottom: calc(0.35rem + env(safe-area-inset-bottom));
   }
 }
+
+/* =============================================================================
+   RHETORIC / BALĀGHAH SCREEN STYLES
+   ============================================================================= */
+
+.rhetoric-page {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 6rem;
+}
+
+.rhetoric-pill {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+}
+
+/* Dataset Selector Tabs */
+.rhetoric-dataset-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0 1.25rem;
+}
+
+.rhetoric-ds-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: start;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rhetoric-ds-tab:hover {
+  border-color: color-mix(in srgb, var(--teal) 50%, var(--line));
+  transform: translateY(-1px);
+}
+
+.rhetoric-ds-tab.is-active {
+  border-color: var(--teal);
+  background: color-mix(in srgb, var(--teal-soft) 25%, var(--paper));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.rhetoric-tab-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.rhetoric-tab-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.2rem;
+}
+
+.rhetoric-tab-count-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--bg-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  transition: all 0.15s ease;
+}
+
+.rhetoric-ds-tab.is-active .rhetoric-tab-count-badge {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+}
+
+.rhetoric-tab-title {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rhetoric-tab-cite {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+/* Formula Banner */
+.rhetoric-formula-banner {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.rhetoric-formula-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem 0.8rem;
+}
+
+.rhetoric-formula-box {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  min-width: 140px;
+  max-width: 240px;
+}
+
+.rhetoric-formula-box.is-sub {
+  border-inline-start: 3px solid var(--teal);
+}
+
+.rhetoric-formula-box.is-tool {
+  border-inline-start: 3px solid var(--gold);
+}
+
+.rhetoric-formula-box.is-veh {
+  border-inline-start: 3px solid #8e44ad;
+}
+
+.rhetoric-formula-box.is-wajh,
+.rhetoric-formula-box.is-purpose,
+.rhetoric-formula-box.is-taqdir {
+  border-inline-start: 3px solid #2980b9;
+}
+
+.rhetoric-formula-role {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.rhetoric-formula-val {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.rhetoric-formula-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.rhetoric-formula-plus,
+.rhetoric-formula-arrow {
+  font-weight: 800;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+/* Main Studio Layout (Two Column) */
+.rhetoric-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.rhetoric-entry-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.rhetoric-filter-bar {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rhetoric-filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.rhetoric-surah-select,
+.rhetoric-search-input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.rhetoric-surah-select:focus,
+.rhetoric-search-input:focus {
+  border-color: var(--teal);
+}
+
+.rhetoric-filter-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: var(--muted);
+  padding: 0 0.15rem;
+}
+
+.rhetoric-filter-reset {
+  background: none;
+  border: none;
+  color: var(--teal);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.rhetoric-empty-list {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  background: var(--paper);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.rhetoric-reset-btn {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.rhetoric-loading-card {
+  padding: 2.5rem;
+  text-align: center;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  margin: 1.5rem 0;
+}
+
+.rhetoric-entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 640px;
+  overflow-y: auto;
+  padding-inline-end: 0.35rem;
+}
+
+.rhetoric-entry-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.8rem 0.95rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  text-align: start;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rhetoric-entry-item:hover {
+  background: var(--bg-2);
+}
+
+.rhetoric-entry-item.is-active {
+  border-color: var(--teal);
+  background: color-mix(in srgb, var(--teal-soft) 30%, var(--paper));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.rhetoric-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.rhetoric-ref-pill {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.rhetoric-device-chip {
+  font-family: var(--arabic-ui);
+  font-size: 0.76rem;
+  padding: 0.08rem 0.45rem;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+}
+
+.rhetoric-item-ar {
+  font-family: var(--arabic);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0.2rem 0 0.35rem;
+}
+
+.rhetoric-item-academic-badge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+
+.rhetoric-meta-tag {
+  font-family: var(--arabic-ui);
+  font-size: 0.74rem;
+  color: var(--muted);
+  background: var(--bg-2);
+  padding: 0.08rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+/* Dissection Stage */
+.rhetoric-dissection-stage {
+  position: sticky;
+  top: 1rem;
+}
+
+.rhetoric-stage-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.rhetoric-stage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.85rem;
+}
+
+.rhetoric-stage-header h2 {
+  margin: 0.25rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.rhetoric-reader-jump-btn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--teal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rhetoric-reader-jump-btn:hover {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+}
+
+.rhetoric-stage-ayah {
+  font-family: var(--arabic);
+  font-size: 1.75rem;
+  line-height: 1.7;
+  color: var(--ink);
+  margin: 0 0 0.75rem;
+}
+
+.rhetoric-stage-en {
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 0.35rem;
+}
+
+.rhetoric-snippet-source {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+
+.rhetoric-snippet-source a {
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+.rhetoric-snippet-source a:hover {
+  color: var(--ink);
+}
+
+.rhetoric-stage-subtypes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.rhetoric-tag-pill {
+  font-family: var(--arabic-ui);
+  font-size: 0.78rem;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: var(--bg-2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+/* Sourced Dataset Attributes Grid */
+.rhetoric-stage-dataset-attrs {
+  margin: 1.25rem 0;
+  padding: 1rem 1.15rem;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+}
+
+.rhetoric-attrs-heading {
+  margin: 0 0 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: var(--arabic-ui);
+}
+
+.rhetoric-attrs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.rhetoric-attrs-grid.rhetoric-hadhf-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rhetoric-attr-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.rhetoric-attr-card.is-highlight {
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold-soft) 40%, var(--paper));
+}
+
+.rhetoric-attr-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.rhetoric-attr-val {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.rhetoric-val-ar-lg {
+  font-family: var(--arabic);
+  font-size: 1.2rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.rhetoric-attr-sub {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+.rhetoric-stage-scholarly {
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--line);
+}
+
+.rhetoric-note-src {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.rhetoric-stage-scholarly p {
+  margin: 0.25rem 0 0;
+  font-family: var(--arabic);
+  font-size: 1.15rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Rhetoric Deep Links Across App */
+.verse-title-eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.verse-balagha-deep-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.verse-balagha-deep-link:hover {
+  background: var(--gold);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.verse-balagha-icon {
+  font-family: var(--arabic-ui);
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.verse-balagha-deep-link:hover .verse-balagha-icon {
+  color: #fff;
+}
+
+.surah-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.surah-balagha-chip {
+  font-family: var(--arabic-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line));
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.surah-balagha-chip:hover {
+  background: var(--gold);
+  color: #fff;
+}
+
+.preset-rhetoric-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-family: var(--arabic-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--gold-soft);
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.preset-rhetoric-chip:hover {
+  background: var(--gold);
+  color: #fff;
+}
+
+.loc-balagha-tag {
+  font-family: var(--arabic-ui);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  margin-inline-start: 0.35rem;
+}
+
+/* Sabiq Indonesian direct translation card */
+.verse-sabiq-card {
+  margin: 1.25rem 0 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--paper);
+  border: 1px solid color-mix(in srgb, var(--teal) 30%, var(--line));
+  border-inline-start: 4px solid var(--teal);
+  border-radius: 8px;
+}
+
+.verse-sabiq-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--teal);
+  margin-bottom: 0.4rem;
+}
+
+.verse-sabiq-text {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+  .rhetoric-layout {
+    grid-template-columns: 1fr;
+  }
+  .rhetoric-dataset-tabs {
+    grid-template-columns: 1fr;
+  }
+  .rhetoric-formula-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .rhetoric-formula-box {
+    max-width: 100%;
+  }
+  .rhetoric-attrs-grid.rhetoric-hadhf-grid {
+    grid-template-columns: 1fr;
+  }
+  .rhetoric-attrs-grid {
+    grid-template-columns: 1fr;
+  }
+}

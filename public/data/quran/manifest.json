@@ -1157,6 +1157,24 @@
       "description": "Arabic commentary text of Al-Mukhtasar via QuranEnc.com.",
       "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is arabic_mokhtasar.",
       "url": "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/1"
+    },
+    {
+      "id": "saheeh-international",
+      "title": "Saheeh International English Translation",
+      "kind": "translation",
+      "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net and QuranEnc.com (english_saheeh)",
+      "description": "Literal and syntax-aligned English translation of the Quran, used for structural and rhetorical analysis alongside the Arabic text.",
+      "license": "Public domain / Open educational distribution with attribution to Saheeh International.",
+      "url": "https://quranenc.com/en/browse/english_saheeh"
+    },
+    {
+      "id": "indonesian-sabiq",
+      "title": "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
+      "kind": "translation",
+      "attribution": "PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad), via QuranEnc.com (indonesian_sabiq)",
+      "description": "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
+      "license": "Distribusi terbuka / QuranEnc republication terms.",
+      "url": "https://quranenc.com/en/browse/indonesian_sabiq"
     }
   ]
 }

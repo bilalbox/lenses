@@ -12,6 +12,7 @@ export const en: Translations = {
     surahsNav: "Surahs",
     examplesNav: "Examples",
     quizNav: "Quiz",
+    rhetoricNav: "Rhetoric",
     previous: "Previous",
     next: "Next",
     search: "Search",

@@ -24,6 +24,7 @@ export interface Translations {
     surahsNav: string;
     examplesNav: string;
     quizNav: string;
+    rhetoricNav: string;
     previous: string;
     next: string;
     search: string;
