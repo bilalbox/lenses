@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { loadSurah } from "../lib/api";
+import { loadSurah, loadVerseTranslation } from "../lib/api";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { normalizeDigits } from "../lib/i18n/format";
 import { formatIrabText } from "../lib/formatIrab";
@@ -224,6 +224,28 @@ function VerseBody({
     [rhetoricEntries, sura, verse.v],
   );
   const hasBalagha = Boolean(rhetoricEntry);
+
+  const [fetchedTranslation, setFetchedTranslation] = useState<string>("");
+
+  useEffect(() => {
+    if (locale === "ar") {
+      setFetchedTranslation("");
+      return;
+    }
+    const key = locale === "id" ? "indonesian_sabiq" : "english_saheeh";
+    const preloaded = locale === "id" ? rhetoricEntry?.indonesianAyah : rhetoricEntry?.englishAyah;
+    if (preloaded) {
+      setFetchedTranslation(preloaded);
+      return;
+    }
+    let cancelled = false;
+    loadVerseTranslation(key, sura, verse.v).then((text) => {
+      if (!cancelled) setFetchedTranslation(text);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, sura, verse.v, rhetoricEntry]);
   return (
     <>
       <header className="verse-title">
@@ -283,85 +305,129 @@ function VerseBody({
         </a>
       </p>
 
-      {/* Surface Sabiq Indonesian translation when Indonesian locale is active */}
-      {locale === "id" && rhetoricEntry?.indonesianAyah && (
-        <div className="verse-sabiq-card">
-          <div className="verse-sabiq-badge">Terjemahan Makna (Sabiq)</div>
-          <p className="verse-sabiq-text">{rhetoricEntry.indonesianAyah}</p>
-          <p className="source-line" style={{ marginTop: "0.35rem", marginBottom: 0 }}>
-            Terjemahan Sabiq (PT. Sabiq) ·{" "}
-            <a href="https://quranenc.com/en/browse/indonesian_sabiq" target="_blank" rel="noreferrer">
+      {/* Combined Single Language Tab: Meaning & Commentary */}
+      <details className="mukhtasar verse-meaning-block" open>
+        <summary>
+          <span>{t.verse.verseMeaningTitle}</span>
+          <small>
+            {t.verse.verseMeaningSub} ·{" "}
+            <a
+              href="https://quranenc.com/"
+              target="_blank"
+              rel="noreferrer"
+              onClick={(event) => event.stopPropagation()}
+            >
               quranenc.com
             </a>
-          </p>
-        </div>
-      )}
+          </small>
+        </summary>
 
-      {/* Tafsir sections prioritized by active locale */}
-      {(() => {
-        const mukhtasars = [
-          {
-            key: "ar",
-            text: verse.ma,
-            note: verse.af,
-            lang: "ar",
-            dir: "rtl" as const,
-            title: t.verse.mukhtasarArTitle,
-            sub: t.verse.mukhtasarArSub,
-            className: "prose-ar",
-          },
-          {
-            key: "en",
-            text: verse.en,
-            note: verse.ef,
-            lang: "en",
-            dir: "ltr" as const,
-            title: t.verse.mukhtasarEnTitle,
-            sub: t.verse.mukhtasarEnSub,
-          },
-          {
-            key: "id",
-            text: verse.mk,
-            note: verse.mf,
-            lang: "id",
-            dir: "ltr" as const,
-            title: t.verse.mukhtasarIdTitle,
-            sub: t.verse.mukhtasarIdSub,
-          },
-        ];
-        const ordered = [
-          ...mukhtasars.filter((m) => m.key === locale),
-          ...mukhtasars.filter((m) => m.key !== locale),
-        ];
-        return ordered.map((m) =>
-          m.text ? (
-            <details key={m.key} className="mukhtasar" open={locale === m.key}>
-              <summary>
-                <span>{m.title}</span>
-                <small>
-                  {m.sub} ·{" "}
-                  <a
-                    href="https://quranenc.com/"
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    quranenc.com
-                  </a>
-                </small>
-              </summary>
-              <p lang={m.lang} dir={m.dir} className={m.className}>
-                {m.text}
-              </p>
-              {m.note ? (
-                <p className="mukhtasar-note" lang={m.lang} dir={m.dir}>
-                  {m.note}
+        {/* 1. English Mode: Saheeh International literal translation + English Al-Mukhtasar */}
+        {locale === "en" && (
+          <div className="verse-meaning-content">
+            {fetchedTranslation && (
+              <div className="verse-meaning-section is-translation">
+                <div className="verse-meaning-section-header">
+                  <span className="verse-meaning-badge">{t.verse.translationBadge}</span>
+                  <small className="source-line">
+                    Saheeh International ·{" "}
+                    <a href="https://quranenc.com/en/browse/english_saheeh" target="_blank" rel="noreferrer">
+                      quranenc.com
+                    </a>
+                  </small>
+                </div>
+                <p className="verse-meaning-text" lang="en" dir="ltr">
+                  {fetchedTranslation}
                 </p>
-              ) : null}
-            </details>
-          ) : null,
-        );
-      })()}
+              </div>
+            )}
+
+            {verse.en && (
+              <div className="verse-meaning-section is-tafsir">
+                <div className="verse-meaning-section-header">
+                  <span className="verse-meaning-badge">{t.verse.tafsirBadge}</span>
+                  <small className="source-line">
+                    Tafsir Center ·{" "}
+                    <a href="https://quranenc.com/en/browse/english_mokhtasar" target="_blank" rel="noreferrer">
+                      quranenc.com
+                    </a>
+                  </small>
+                </div>
+                <p className="verse-meaning-prose" lang="en" dir="ltr">
+                  {verse.en}
+                </p>
+                {verse.ef && (
+                  <p className="mukhtasar-note" lang="en" dir="ltr">
+                    {verse.ef}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 2. Indonesian Mode: PT. Sabiq direct translation + Indonesian Al-Mukhtasar */}
+        {locale === "id" && (
+          <div className="verse-meaning-content">
+            {fetchedTranslation && (
+              <div className="verse-meaning-section is-translation">
+                <div className="verse-meaning-section-header">
+                  <span className="verse-meaning-badge">{t.verse.translationBadge}</span>
+                  <small className="source-line">
+                    Terjemahan Sabiq (PT. Sabiq) ·{" "}
+                    <a href="https://quranenc.com/en/browse/indonesian_sabiq" target="_blank" rel="noreferrer">
+                      quranenc.com
+                    </a>
+                  </small>
+                </div>
+                <p className="verse-meaning-text" lang="id" dir="ltr">
+                  {fetchedTranslation}
+                </p>
+              </div>
+            )}
+
+            {verse.mk && (
+              <div className="verse-meaning-section is-tafsir">
+                <div className="verse-meaning-section-header">
+                  <span className="verse-meaning-badge">{t.verse.tafsirBadge}</span>
+                  <small className="source-line">
+                    Pusat Tafsir ·{" "}
+                    <a href="https://quranenc.com/en/browse/indonesian_mokhtasar" target="_blank" rel="noreferrer">
+                      quranenc.com
+                    </a>
+                  </small>
+                </div>
+                <p className="verse-meaning-prose" lang="id" dir="ltr">
+                  {verse.mk}
+                </p>
+                {verse.mf && (
+                  <p className="mukhtasar-note" lang="id" dir="ltr">
+                    {verse.mf}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 3. Arabic Mode: Just Arabic Al-Mukhtasar (no translation needed) */}
+        {locale === "ar" && (
+          <div className="verse-meaning-content">
+            {verse.ma && (
+              <div className="verse-meaning-section is-tafsir">
+                <p className="prose-ar" lang="ar" dir="rtl">
+                  {verse.ma}
+                </p>
+                {verse.af && (
+                  <p className="mukhtasar-note" lang="ar" dir="rtl">
+                    {verse.af}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </details>
 
       {verse.ir ? (
         <details className="irab-block" open={irabOpen} onToggle={(event) => setIrabOpen(event.currentTarget.open)}>

@@ -79,6 +79,10 @@ export const id: Translations = {
   verse: {
     meccan: "Makkiyah",
     madinan: "Madaniyah",
+    verseMeaningTitle: "Makna Ayat",
+    verseMeaningSub: "Terjemahan Sabiq & Al-Mukhtasar · QuranEnc",
+    translationBadge: "Terjemahan Makna",
+    tafsirBadge: "Tafsir (Al-Mukhtasar)",
     mukhtasarEnTitle: "Al-Mukhtasar",
     mukhtasarEnSub: "Bahasa Inggris · QuranEnc",
     mukhtasarIdTitle: "Al-Mukhtasar",

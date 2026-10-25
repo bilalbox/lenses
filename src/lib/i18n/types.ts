@@ -90,6 +90,10 @@ export interface Translations {
   verse: {
     meccan: string;
     madinan: string;
+    verseMeaningTitle: string;
+    verseMeaningSub: string;
+    translationBadge: string;
+    tafsirBadge: string;
     mukhtasarEnTitle: string;
     mukhtasarEnSub: string;
     mukhtasarIdTitle: string;

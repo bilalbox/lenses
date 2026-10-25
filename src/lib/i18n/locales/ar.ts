@@ -85,6 +85,10 @@ export const ar: Translations = {
   verse: {
     meccan: "مكية",
     madinan: "مدنية",
+    verseMeaningTitle: "تفسير الآية",
+    verseMeaningSub: "المختصر في التفسير · QuranEnc",
+    translationBadge: "الترجمة",
+    tafsirBadge: "التفسير (المختصر)",
     mukhtasarEnTitle: "المختصر في التفسير",
     mukhtasarEnSub: "الإنجليزية · QuranEnc",
     mukhtasarIdTitle: "المختصر في التفسير",

@@ -3009,31 +3009,54 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
   margin-inline-start: 0.35rem;
 }
 
-/* Sabiq Indonesian direct translation card */
-.verse-sabiq-card {
-  margin: 1.25rem 0 1.5rem;
-  padding: 1rem 1.25rem;
-  background: var(--paper);
-  border: 1px solid color-mix(in srgb, var(--teal) 30%, var(--line));
-  border-inline-start: 4px solid var(--teal);
-  border-radius: 8px;
+/* Unified Reader Verse Meaning & Commentary Tab */
+.verse-meaning-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 0.85rem;
 }
 
-.verse-sabiq-badge {
-  display: inline-block;
+.verse-meaning-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.verse-meaning-section.is-translation {
+  padding-bottom: 0.95rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+.verse-meaning-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.verse-meaning-badge {
+  font-family: var(--sans);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--teal);
-  margin-bottom: 0.4rem;
 }
 
-.verse-sabiq-text {
+.verse-meaning-text {
   font-family: var(--serif);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   line-height: 1.7;
   color: var(--ink);
+  margin: 0;
+}
+
+.verse-meaning-prose {
+  font-family: var(--sans);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--ink) 92%, var(--muted));
   margin: 0;
 }
 

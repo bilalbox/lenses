@@ -44,3 +44,32 @@ export function loadRhetoric(): Promise<RhetoricEntry[]> {
   rhetoricPromise ??= getJson<RhetoricEntry[]>("/data/quran/rhetoric.json");
   return rhetoricPromise;
 }
+
+const translationCache = new Map<string, Promise<string>>();
+
+export function loadVerseTranslation(
+  key: "english_saheeh" | "indonesian_sabiq",
+  sura: number,
+  aya: number,
+): Promise<string> {
+  const cacheKey = `${key}:${sura}:${aya}`;
+  const cached = translationCache.get(cacheKey);
+  if (cached) return cached;
+
+  const promise = fetch(`https://quranenc.com/api/v1/translation/aya/${key}/${sura}/${aya}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Translation fetch failed");
+      return res.json();
+    })
+    .then((data) => {
+      const text = data?.result?.translation;
+      if (typeof text === "string" && text.trim()) {
+        return text.trim();
+      }
+      return "";
+    })
+    .catch(() => "");
+
+  translationCache.set(cacheKey, promise);
+  return promise;
+}
