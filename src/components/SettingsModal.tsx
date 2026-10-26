@@ -30,27 +30,23 @@ export function SettingsModal({
 
   const [rendered, setRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
-  const prevIsOpen = useRef(isOpen);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
-  if (prevIsOpen.current !== isOpen) {
-    prevIsOpen.current = isOpen;
+  useEffect(() => {
     if (isOpen) {
+      triggerRef.current = document.activeElement as HTMLElement | null;
       setRendered(true);
       setIsClosing(false);
     } else if (rendered && !isClosing) {
       setIsClosing(true);
-    }
-  }
-
-  useEffect(() => {
-    if (isClosing) {
       const timer = window.setTimeout(() => {
         setRendered(false);
         setIsClosing(false);
+        triggerRef.current?.focus?.();
       }, 200);
       return () => clearTimeout(timer);
     }
-  }, [isClosing]);
+  }, [isOpen, rendered, isClosing]);
 
   useEffect(() => {
     if (!isOpen && !isClosing) return;
@@ -62,9 +58,36 @@ export function SettingsModal({
   }, [isOpen, isClosing]);
 
   useEffect(() => {
-    if (!rendered || isClosing) return;
+    if (!rendered || isClosing || !modalRef.current) return;
+    const dialog = modalRef.current;
+    const focusable = dialog.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length > 0) {
+      focusable[0]?.focus();
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key === "Tab") {
+        const elements = dialog.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (elements.length === 0) return;
+        const first = elements[0];
+        const last = elements[elements.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);

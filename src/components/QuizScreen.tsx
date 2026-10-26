@@ -139,17 +139,7 @@ export function QuizScreen({
     return extracted;
   }, [loadedFiles]);
 
-  const sarfCacheRef = useRef<Map<string, SarfQuestion>>(new Map());
-  const quizPools = useMemo(() => {
-    const pools = extractQuizPools(loadedFiles);
-    const stableSarf = pools.sarf.map((q) => {
-      const existing = sarfCacheRef.current.get(q.id);
-      if (existing) return existing;
-      sarfCacheRef.current.set(q.id, q);
-      return q;
-    });
-    return { sarf: stableSarf, examples: pools.examples };
-  }, [loadedFiles]);
+  const quizPools = useMemo(() => extractQuizPools(loadedFiles), [loadedFiles]);
 
   const sarfPool = quizPools.sarf;
   const examplesPool = quizPools.examples;
@@ -158,12 +148,15 @@ export function QuizScreen({
   useEffect(() => {
     if (poolsSeeded || loading) return;
     if (irabPool.length === 0 && sarfPool.length === 0 && examplesPool.length === 0) return;
-    setIndices({
-      irab: irabPool.length ? Math.floor(Math.random() * irabPool.length) : 0,
-      sarf: sarfPool.length ? Math.floor(Math.random() * sarfPool.length) : 0,
-      examples: examplesPool.length ? Math.floor(Math.random() * examplesPool.length) : 0,
+    const raf = requestAnimationFrame(() => {
+      setIndices({
+        irab: irabPool.length ? Math.floor(Math.random() * irabPool.length) : 0,
+        sarf: sarfPool.length ? Math.floor(Math.random() * sarfPool.length) : 0,
+        examples: examplesPool.length ? Math.floor(Math.random() * examplesPool.length) : 0,
+      });
+      setPoolsSeeded(true);
     });
-    setPoolsSeeded(true);
+    return () => cancelAnimationFrame(raf);
   }, [examplesPool.length, irabPool.length, loading, poolsSeeded, sarfPool.length]);
 
   const irabQuestion: QuizQuestion | null = irabPool[indices.irab % Math.max(irabPool.length, 1)] ?? null;
@@ -621,7 +614,7 @@ export function QuizScreen({
       <section className="quiz-wizard-bottom" aria-live="polite">
         <div className="quiz-wizard-meta-bar">
           <div className="quiz-wizard-surah-tag">
-            <span className="eyebrow quiz-wizard-ref">
+            <span className="quiz-wizard-ref">
               {activeQuestion.suraPhonetic} {formatNumber(activeQuestion.sura)}:
               {formatNumber(activeQuestion.verse.v)}
             </span>
@@ -698,7 +691,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">{t.quiz.step1Eyebrow}</span>
                       <h2>{t.quiz.step1Question(quranText(irabQuestion.targetWord.a))}</h2>
                     </div>
                     <button type="button" className="quiz-text-reveal" onClick={handleRevealAnswer}>
@@ -737,7 +729,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">{t.quiz.step2Eyebrow(activeRoleMeta.governorLabel[locale])}</span>
                       <h2>{t.quiz.step2Question(activeRoleMeta.governorLabel.ar, quranText(irabQuestion.targetWord.a))}</h2>
                       <p className="quiz-wizard-subprompt">{t.quiz.step2Hint}</p>
                     </div>
@@ -776,7 +767,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">{t.quiz.step3Eyebrow}</span>
                       <h2>{t.quiz.step3Question(quranText(irabQuestion.targetWord.a))}</h2>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(2)}>
@@ -815,7 +805,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">{t.quiz.step4Eyebrow}</span>
                       <h2>{t.quiz.step4Question(quranText(irabQuestion.targetWord.a))}</h2>
                     </div>
                     <button type="button" className="quiz-back-link" onClick={() => goToStep(3)}>
@@ -855,7 +844,6 @@ export function QuizScreen({
                     <>
                       <header className="quiz-wizard-step-head">
                         <div>
-                          <span className="eyebrow">{t.quiz.step5Eyebrow}</span>
                           <h2>{t.quiz.step5Title(quranText(irabQuestion.targetWord.a))}</h2>
                         </div>
                         <button type="button" className="quiz-back-link" onClick={() => goToStep(4)}>
@@ -929,11 +917,11 @@ export function QuizScreen({
                         <div className={`quiz-wizard-reveal-card ${allOk ? "is-correct" : "is-review"}`}>
                           <header className="quiz-solution-head">
                             <div className="quiz-solution-copy">
-                              <span className="eyebrow">
-                                {allOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
-                              </span>
                               <h3>{t.quiz.classicalHeading(quranText(irabQuestion.targetWord.a))}</h3>
                             </div>
+                            <span className={`quiz-verdict-status-pill ${allOk ? "is-correct" : "is-review"}`}>
+                              {allOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
+                            </span>
                           </header>
 
                           <div className="quiz-wizard-verdict-strip">
@@ -986,11 +974,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">
-                        {locale === "ar"
-                          ? "الخطوة ١ من ٤ · المادة المعجمية (الجذر)"
-                          : "STEP 1 OF 4 · LEXICAL ROOT (MĀDDAH)"}
-                      </span>
                       <h2>
                         {locale === "ar"
                           ? `ما المادة المعجمية (الجذر) لكلمة ﴿${quranText(sarfQuestion.targetWord.a)}﴾؟`
@@ -1034,11 +1017,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">
-                        {locale === "ar"
-                          ? "الخطوة ٢ من ٤ · الميزان الصرفي (الوزن)"
-                          : "STEP 2 OF 4 · MORPHOLOGICAL MEASURE (WAZN)"}
-                      </span>
                       <h2>
                         {locale === "ar"
                           ? `ما الوزن الصرفي لـ ﴿${quranText(sarfQuestion.headAr)}﴾؟`
@@ -1082,15 +1060,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">
-                        {sarfQuestion.kind === "verb"
-                          ? locale === "ar"
-                            ? "الخطوة ٣ من ٤ · باب الفعل"
-                            : "STEP 3 OF 4 · VERB BĀB / FORM"
-                          : locale === "ar"
-                            ? "الخطوة ٣ من ٤ · الاشتقاق ونوع الاسم"
-                            : "STEP 3 OF 4 · NOMINAL DERIVATION (ISHTIQĀQ)"}
-                      </span>
                       <h2>
                         {sarfQuestion.kind === "verb"
                           ? locale === "ar"
@@ -1136,15 +1105,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">
-                        {sarfQuestion.kind === "verb"
-                          ? locale === "ar"
-                            ? "الخطوة ٤ من ٤ · الصحة والاعتلال"
-                            : "STEP 4 OF 4 · ROOT SOUNDNESS (ṢIḤḤA WA-IʿTILĀL)"
-                          : locale === "ar"
-                            ? "الخطوة ٤ من ٤ · البنية العددية والجمع"
-                            : "STEP 4 OF 4 · NUMBER & PLURAL STRUCTURE"}
-                      </span>
                       <h2>
                         {sarfQuestion.kind === "verb"
                           ? locale === "ar"
@@ -1192,9 +1152,6 @@ export function QuizScreen({
                     <>
                       <header className="quiz-wizard-step-head">
                         <div>
-                          <span className="eyebrow">
-                            {locale === "ar" ? "مراجعة التحليل الصرفي" : "REVIEW YOUR ṢARF ANALYSIS"}
-                          </span>
                           <h2>
                             {locale === "ar"
                               ? `راجع التحليل الصرفي لـ ﴿${quranText(sarfQuestion.targetWord.a)}﴾`
@@ -1271,15 +1228,15 @@ export function QuizScreen({
                         <div className={`quiz-wizard-reveal-card ${allOk ? "is-correct" : "is-review"}`}>
                           <header className="quiz-solution-head">
                             <div className="quiz-solution-copy">
-                              <span className="eyebrow">
-                                {allOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
-                              </span>
                               <h3>
                                 {locale === "ar"
                                   ? `التحليل الصرفي الكامل لـ ﴿${quranText(sarfQuestion.targetWord.a)}﴾`
                                   : `Classical Ṣarf for ${quranText(sarfQuestion.targetWord.a)}`}
                               </h3>
                             </div>
+                            <span className={`quiz-verdict-status-pill ${allOk ? "is-correct" : "is-review"}`}>
+                              {allOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
+                            </span>
                           </header>
 
                           <div className="quiz-wizard-verdict-strip">
@@ -1360,11 +1317,6 @@ export function QuizScreen({
                 <div className="quiz-wizard-step-body">
                   <header className="quiz-wizard-step-head">
                     <div>
-                      <span className="eyebrow">
-                        {locale === "ar"
-                          ? "استخرج الشاهد من الآية"
-                          : "SPOT THE PATTERN IN THE AYAH"}
-                      </span>
                       <h2>
                         {locale === "ar"
                           ? `أي كلمة في الآية تمثل: «${exQuestion.facetTitle.ar}»؟`
@@ -1409,9 +1361,6 @@ export function QuizScreen({
                     <>
                       <header className="quiz-wizard-step-head">
                         <div>
-                          <span className="eyebrow">
-                            {locale === "ar" ? "مراجعة الشاهد المختار" : "REVIEW SELECTED EXAMPLE"}
-                          </span>
                           <h2>
                             {locale === "ar"
                               ? `تحقق من اختيارك لـ «${exQuestion.facetTitle.ar}»`
@@ -1454,15 +1403,15 @@ export function QuizScreen({
                         <div className={`quiz-wizard-reveal-card ${spotOk ? "is-correct" : "is-review"}`}>
                           <header className="quiz-solution-head">
                             <div className="quiz-solution-copy">
-                              <span className="eyebrow">
-                                {spotOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
-                              </span>
                               <h3>
                                 {locale === "ar"
                                   ? `الشاهد في الآية: ﴿${quranText(exQuestion.targetWord.a)}﴾`
                                   : `Spotted Example: ${quranText(exQuestion.targetWord.a)}`}
                               </h3>
                             </div>
+                            <span className={`quiz-verdict-status-pill ${spotOk ? "is-correct" : "is-review"}`}>
+                              {spotOk ? t.quiz.exactMatchEyebrow : t.quiz.reviewEyebrow}
+                            </span>
                           </header>
 
                           <div className="quiz-wizard-verdict-strip">

@@ -13,8 +13,8 @@ export function SurahIndex({ manifest, onOpen }: Props) {
   return (
     <div className="surah-page anim-soft-enter">
       <header className="page-intro">
-        <p className="eyebrow">{t.surahs.countEyebrow(manifest.units.length)}</p>
         <h1>{t.surahs.pageTitle}</h1>
+        <p className="page-intro-count">{t.surahs.countEyebrow(manifest.units.length)}</p>
       </header>
       <ol className="surah-grid">
         {manifest.units.map((unit) => {
@@ -22,8 +22,13 @@ export function SurahIndex({ manifest, onOpen }: Props) {
           const none = unit.syntax === 0;
           const rhetoricMatches = rhetoricEntries.filter((e) => e.sura === unit.n);
           return (
-            <li key={unit.n}>
-              <button type="button" onClick={() => onOpen(unit.n)}>
+            <li key={unit.n} className="surah-item">
+              <button
+                type="button"
+                className="surah-card-btn"
+                onClick={() => onOpen(unit.n)}
+                aria-label={`${unit.name} (${unit.phonetic})`}
+              >
                 <span className="num">{formatNumber(unit.n)}</span>
                 <span className="names">
                   <b lang="ar">{unit.name}</b>
@@ -31,26 +36,25 @@ export function SurahIndex({ manifest, onOpen }: Props) {
                     {unit.phonetic} · {unit.rev === "Madinah" ? t.verse.madinan : t.verse.meccan}
                   </small>
                 </span>
-                <div className="surah-badges">
-                  {rhetoricMatches.length > 0 && (
-                    <a
-                      href={`#/rhetoric/${unit.n}/${rhetoricMatches[0].verse}`}
-                      className="surah-balagha-chip"
-                      title={`${rhetoricMatches.length} rhetorical analyses in Balāghah Studio`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      بلاغة · {rhetoricMatches.length} ↗
-                    </a>
-                  )}
-                  <span className={`coverage ${full ? "full" : none ? "none" : "partial"}`}>
-                    {full
-                      ? t.surahs.coverageTreebank
-                      : none
-                        ? t.surahs.coverageMorphology
-                        : t.surahs.coverageTrees(unit.syntax, unit.verses)}
-                  </span>
-                </div>
+                <span className={`coverage ${full ? "full" : none ? "none" : "partial"}`}>
+                  {full
+                    ? t.surahs.coverageTreebank
+                    : none
+                      ? t.surahs.coverageMorphology
+                      : t.surahs.coverageTrees(unit.syntax, unit.verses)}
+                </span>
               </button>
+              {rhetoricMatches.length > 0 && (
+                <div className="surah-badges">
+                  <a
+                    href={`#/rhetoric/${unit.n}/${rhetoricMatches[0].verse}`}
+                    className="surah-balagha-chip"
+                    title={`${rhetoricMatches.length} rhetorical analyses in Balāghah Studio`}
+                  >
+                    بلاغة · {rhetoricMatches.length} ↗
+                  </a>
+                </div>
+              )}
             </li>
           );
         })}

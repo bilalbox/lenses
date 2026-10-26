@@ -122,7 +122,6 @@ export const id: Translations = {
     coverageTrees: (syntax: number, total: number) => `${formatNum(syntax, "id")}/${formatNum(total, "id")} pohon`,
   },
   examples: {
-    eyebrow: "Pencarian contoh",
     pageTitle: "Temukan pola",
     lead: "Cari dalam korpus berdasarkan akar kata, bentuk dasar, jenis kata, wazan verba, atau relasi sintaksis.",
     presetHal: "Pertanyaan hal",
@@ -143,7 +142,6 @@ export const id: Translations = {
     chooseCriteriaHint: "Pilih akar kata, bentuk dasar, jenis kata, wazan, atau relasi.",
   },
   sources: {
-    eyebrow: "Data dan lisensi",
     pageTitle: "Sumber edisi ini dibangun",
     intro:
       "Lenses adalah pembaca untuk analisis yang dipublikasikan secara terbuka. Teks Al-Qur'an bahasa Arab disimpan tanpa perubahan. Lapisan tata bahasa diatribusikan ke sumber aslinya.",

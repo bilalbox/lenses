@@ -122,7 +122,6 @@ export const en: Translations = {
     coverageTrees: (syntax: number, total: number) => `${formatNum(syntax, "en")}/${formatNum(total, "en")} trees`,
   },
   examples: {
-    eyebrow: "Example search",
     pageTitle: "Find the pattern",
     lead: "Search the corpus by root, lemma, part of speech, verb form, or the syntactic relation the word fills.",
     presetHal: "Interrogative hal",
@@ -143,7 +142,6 @@ export const en: Translations = {
     chooseCriteriaHint: "Choose a root, a lemma, a part of speech, a form, or a relation.",
   },
   sources: {
-    eyebrow: "Data and licenses",
     pageTitle: "What this edition is built from",
     intro:
       "Lenses is a reader for analyses other people published. The Arabic Quranic text is stored verbatim. Grammatical layers stay attributed to their sources, and a verse can show more than one of them at once.",

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { stripDiacritics } from "./lib/arabic";
 import { loadManifest, loadVerses } from "./lib/api";
 import { getOpeningVerse, openingPath, rememberVerse } from "./lib/home";
@@ -7,14 +7,25 @@ import { searchVerses, type ExampleQuery, type VerseHit } from "./lib/search";
 import type { Manifest, Route } from "./lib/types";
 import { useI18n } from "./lib/i18n/I18nContext";
 import { normalizeDigits } from "./lib/i18n/format";
-import { ExampleSearch } from "./components/ExampleSearch";
-import { SourcesPage } from "./components/SourcesPage";
-import { SurahIndex } from "./components/SurahIndex";
 import { VerseScreen } from "./components/VerseScreen";
 import { SettingsModal } from "./components/SettingsModal";
-import { QuizScreen } from "./components/QuizScreen";
-import { RhetoricScreen } from "./components/RhetoricScreen";
 import { GearIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from "./components/Icons";
+
+const ExampleSearch = lazy(() =>
+  import("./components/ExampleSearch").then((m) => ({ default: m.ExampleSearch })),
+);
+const SourcesPage = lazy(() =>
+  import("./components/SourcesPage").then((m) => ({ default: m.SourcesPage })),
+);
+const SurahIndex = lazy(() =>
+  import("./components/SurahIndex").then((m) => ({ default: m.SurahIndex })),
+);
+const QuizScreen = lazy(() =>
+  import("./components/QuizScreen").then((m) => ({ default: m.QuizScreen })),
+);
+const RhetoricScreen = lazy(() =>
+  import("./components/RhetoricScreen").then((m) => ({ default: m.RhetoricScreen })),
+);
 
 const QUIZ_HIDE_DIACRITICS_KEY = "lenses-quiz-hide-diacritics";
 
@@ -287,37 +298,47 @@ export function App() {
             <span />
           </div>
         ) : null}
-        {manifest && route.page === "verse" ? (
-          <VerseScreen
-            manifest={manifest}
-            sura={route.sura}
-            verseNumber={route.verse}
-            wordNumber={route.word}
-            onNavigate={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
-            onSearchRoot={(root) => openSearch({ root })}
-            onSearchLemma={(lemma) => openSearch({ lemma })}
-          />
-        ) : null}
-        {manifest && route.page === "search" ? (
-          <ExampleSearch initial={seed} onOpen={(sura, verse, word) => go(`/${sura}/${verse}/${word}`)} />
-        ) : null}
-        {manifest && route.page === "surahs" ? <SurahIndex manifest={manifest} onOpen={(sura) => go(`/${sura}/1`)} /> : null}
-        {manifest && route.page === "sources" ? <SourcesPage manifest={manifest} /> : null}
-        {manifest && route.page === "quiz" ? (
-          <QuizScreen
-            manifest={manifest}
-            onOpenInReader={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
-            onOpenSearch={openSearch}
-            hideDiacritics={quizHideDiacritics}
-          />
-        ) : null}
-        {manifest && route.page === "rhetoric" ? (
-          <RhetoricScreen
-            targetSura={route.sura}
-            targetVerse={route.verse}
-            onOpenVerse={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
-          />
-        ) : null}
+        <Suspense
+          fallback={
+            <div className="skeleton page-skeleton" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+          }
+        >
+          {manifest && route.page === "verse" ? (
+            <VerseScreen
+              manifest={manifest}
+              sura={route.sura}
+              verseNumber={route.verse}
+              wordNumber={route.word}
+              onNavigate={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
+              onSearchRoot={(root) => openSearch({ root })}
+              onSearchLemma={(lemma) => openSearch({ lemma })}
+            />
+          ) : null}
+          {manifest && route.page === "search" ? (
+            <ExampleSearch initial={seed} onOpen={(sura, verse, word) => go(`/${sura}/${verse}/${word}`)} />
+          ) : null}
+          {manifest && route.page === "surahs" ? <SurahIndex manifest={manifest} onOpen={(sura) => go(`/${sura}/1`)} /> : null}
+          {manifest && route.page === "sources" ? <SourcesPage manifest={manifest} /> : null}
+          {manifest && route.page === "quiz" ? (
+            <QuizScreen
+              manifest={manifest}
+              onOpenInReader={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
+              onOpenSearch={openSearch}
+              hideDiacritics={quizHideDiacritics}
+            />
+          ) : null}
+          {manifest && route.page === "rhetoric" ? (
+            <RhetoricScreen
+              targetSura={route.sura}
+              targetVerse={route.verse}
+              onOpenVerse={(sura, verse, word) => go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)}
+            />
+          ) : null}
+        </Suspense>
       </main>
       {route.page !== "quiz" ? (
       <nav className="dock" aria-label={t.common.verse}>

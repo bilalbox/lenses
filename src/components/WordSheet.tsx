@@ -36,19 +36,60 @@ export function WordSheet({
   const [closing, setClosing] = useState(false);
   const touchY = useRef(0);
   const closingTimerRef = useRef<number | null>(null);
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    triggerRef.current = document.activeElement as HTMLElement | null;
+  }, []);
 
   const handleClose = useCallback(() => {
     if (closing) return;
     const isMobile = window.matchMedia("(max-width: 1099px)").matches;
     if (!isMobile) {
       onClose();
+      triggerRef.current?.focus?.();
       return;
     }
     setClosing(true);
     closingTimerRef.current = window.setTimeout(() => {
       onClose();
+      triggerRef.current?.focus?.();
     }, 200);
   }, [closing, onClose]);
+
+  // Focus trap on mobile modal mode
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 1099px)").matches;
+    if (!isMobile || !sheetRef.current) return;
+    const sheetEl = sheetRef.current;
+    const focusable = sheetEl.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length > 0) {
+      focusable[0]?.focus();
+    }
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        const elements = sheetEl.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (elements.length === 0) return;
+        const first = elements[0];
+        const last = elements[elements.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     setClosing(false);
@@ -102,6 +143,7 @@ export function WordSheet({
       role="presentation"
     >
       <aside
+        ref={sheetRef}
         className={`sheet${expanded ? " is-expanded" : ""}${closing ? " is-closing" : ""}`}
         role="dialog"
         aria-modal="true"
@@ -124,7 +166,7 @@ export function WordSheet({
           }}
         />
         <header className="sheet-head">
-          <p className="eyebrow sheet-ref">
+          <p className="sheet-ref">
             {formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
           </p>
           <button

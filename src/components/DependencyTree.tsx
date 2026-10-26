@@ -335,32 +335,46 @@ export function DependencyTree({
                 </g>
               );
             })}
-            {layout.phrases.map((phrase) => (
-              <g
-                key={`badge-${phrase.nodeIndex}`}
-                className={`phrase${nodeDim(phrase.nodeIndex) ? " is-dim" : ""}`}
-                onClick={() =>
-                  setFolded((current) => {
-                    const next = new Set(current);
-                    if (next.has(phrase.nodeIndex)) next.delete(phrase.nodeIndex);
-                    else next.add(phrase.nodeIndex);
-                    return next;
-                  })
-                }
-              >
-                <rect
-                  className="label-chip"
-                  x={phrase.cx - phrase.labelWidth / 2}
-                  y={phrase.badgeTop}
-                  width={phrase.labelWidth}
-                  height={20}
-                  rx={8}
-                />
-                <text x={phrase.cx} y={phrase.badgeTop + 14} textAnchor="middle" className="rtl-label">
-                  {phrase.label}
-                </text>
-              </g>
-            ))}
+            {layout.phrases.map((phrase) => {
+              const isFolded = folded.has(phrase.nodeIndex);
+              const toggleFold = () => {
+                setFolded((current) => {
+                  const next = new Set(current);
+                  if (next.has(phrase.nodeIndex)) next.delete(phrase.nodeIndex);
+                  else next.add(phrase.nodeIndex);
+                  return next;
+                });
+              };
+              return (
+                <g
+                  key={`badge-${phrase.nodeIndex}`}
+                  className={`phrase${nodeDim(phrase.nodeIndex) ? " is-dim" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${phrase.label} (${isFolded ? t.common.open : t.common.previous})`}
+                  aria-expanded={!isFolded}
+                  onClick={toggleFold}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleFold();
+                    }
+                  }}
+                >
+                  <rect
+                    className="label-chip"
+                    x={phrase.cx - phrase.labelWidth / 2}
+                    y={phrase.badgeTop}
+                    width={phrase.labelWidth}
+                    height={20}
+                    rx={8}
+                  />
+                  <text x={phrase.cx} y={phrase.badgeTop + 14} textAnchor="middle" className="rtl-label">
+                    {phrase.label}
+                  </text>
+                </g>
+              );
+            })}
             {layout.boxes.map((box) => {
               const selected =
                 selectedWord === box.word &&
@@ -397,7 +411,8 @@ export function DependencyTree({
                   tabIndex={0}
                   aria-label={`${box.text}${box.caption ? `، ${box.caption}` : ""}`}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter" && box.sura && box.verse && box.word) {
+                    if ((event.key === "Enter" || event.key === " ") && box.sura && box.verse && box.word) {
+                      event.preventDefault();
                       onSelectWord(box.sura, box.verse, box.word, box.anchors[0]?.si);
                     }
                   }}

@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T09:25:00Z",
+  "title": "Design System: Lenses (عدسات)",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Quranic Teal",
+        "canonical": "#0f6e66",
+        "tonalRamp": ["#073531", "#0b4d47", "#0f6e66", "#178f85", "#21b3a6", "#3dbea8", "#7be0d1", "#c4f5ed"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Grammar Amber",
+        "canonical": "#9a6432",
+        "tonalRamp": ["#422912", "#663e1c", "#9a6432", "#ba7f45", "#d69e5c", "#e0b15a", "#edd193", "#f6ead7"]
+      },
+      "accent-crimson": {
+        "role": "tertiary",
+        "displayName": "Crimson / Madder Rose",
+        "canonical": "#8c3d4b",
+        "tonalRamp": ["#421a22", "#632733", "#8c3d4b", "#b05263", "#cf6d7f", "#e08a96", "#f0b6bf", "#fae3e7"]
+      },
+      "accent-slate": {
+        "role": "tertiary",
+        "displayName": "Slate Indigo",
+        "canonical": "#2c4c7c",
+        "tonalRamp": ["#14243b", "#1f3759", "#2c4c7c", "#3e649e", "#5681c2", "#9eb6de", "#c7d7f0", "#ebf1fa"]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Studio Paper",
+        "canonical": "#fffdf8",
+        "tonalRamp": ["#171d1a", "#1b221e", "#2d3832", "#6f675e", "#b7aea2", "#e3d9c8", "#f3efe6", "#fffdf8"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Quranic Display",
+        "purpose": "Primary sacred verse text in Uthmani rasm with full diacritics."
+      },
+      "headline": {
+        "displayName": "Editorial Headline",
+        "purpose": "Surah titles and top-level page headings set in Literata serif."
+      },
+      "title": {
+        "displayName": "Section Title",
+        "purpose": "Component headings, word sheet lemmas, and dataset titles."
+      },
+      "body": {
+        "displayName": "Commentary Body",
+        "purpose": "Translation prose, Al-Mukhtasar commentary, and morphological descriptions."
+      },
+      "label": {
+        "displayName": "Linguistic Metadata",
+        "purpose": "Grammar relation tags, phonetic coordinates, and status chips."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-soft",
+        "value": "0 1px 2px rgba(60, 42, 20, 0.05), 0 6px 14px -4px rgba(60, 42, 20, 0.08)",
+        "purpose": "Subtle ambient elevation under hover and interactive cards."
+      },
+      {
+        "name": "shadow-elevated",
+        "value": "0 1px 2px rgba(60, 42, 20, 0.05), 0 10px 28px -6px rgba(60, 42, 20, 0.1)",
+        "purpose": "Elevation for modal dialogs, search dropdowns, and bottom sheets."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Smooth deceleration curve for modals and sheet expansions."
+      },
+      {
+        "name": "duration-fast",
+        "value": "0.15s",
+        "purpose": "Immediate feedback on button hovers, chip selections, and focus rings."
+      }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "720px" },
+      { "name": "tablet", "value": "1100px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Navigation Pill",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Active navigation indicator and primary action trigger.",
+      "html": "<a class=\"ds-nav-pill is-active\" href=\"#\">Surahs</a>",
+      "css": ".ds-nav-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0.4rem 0.75rem; border-radius: 999px; font-size: 0.95rem; font-weight: 600; text-decoration: none; color: #1c1915; transition: background 0.15s ease, color 0.15s ease; } .ds-nav-pill:hover { background: #e5f3f0; color: #0f6e66; } .ds-nav-pill.is-active { background: #0f6e66; color: #fffdf8; }"
+    },
+    {
+      "name": "Grammar Attribute Chip",
+      "kind": "chip",
+      "refersTo": "chip-grammar",
+      "description": "Morphological segment token or syntactic category badge.",
+      "html": "<span class=\"ds-grammar-chip\"><b lang=\"ar\">اسم</b><small>Noun</small></span>",
+      "css": ".ds-grammar-chip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.35rem 0.65rem; border-radius: 10px; background: #fffdf8; border: 1px solid #e3d9c8; font-size: 0.85rem; color: #1c1915; line-height: 1.2; } .ds-grammar-chip b { font-family: \"Scheherazade New\", serif; font-size: 1.1rem; font-weight: 600; color: #0f6e66; } .ds-grammar-chip small { font-size: 0.72rem; color: #6f675e; }"
+    },
+    {
+      "name": "Finder Search Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Universal verse, chapter, and Arabic root search input.",
+      "html": "<input class=\"ds-search-input\" type=\"text\" placeholder=\"Search Arabic or English (e.g. 59:18)...\" />",
+      "css": ".ds-search-input { width: 100%; border: 1px solid #e3d9c8; background: #fffdf8; color: #1c1915; font-size: 1rem; border-radius: 999px; padding: 0.55rem 0.9rem; transition: border-color 0.15s ease, outline 0.15s ease; } .ds-search-input:focus-visible { border-color: #0f6e66; outline: 2px solid #0f6e66; outline-offset: 1px; }"
+    },
+    {
+      "name": "Balāghah Deep Link Chip",
+      "kind": "chip",
+      "refersTo": "chip-grammar",
+      "description": "Direct navigational deep link jumping into Rhetoric Studio.",
+      "html": "<a class=\"ds-balagha-chip\" href=\"#\"><span class=\"ds-balagha-icon\">بلاغة</span> · Rhetoric Studio ↗</a>",
+      "css": ".ds-balagha-chip { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.75rem; min-height: 38px; border-radius: 999px; background: #f6ead7; color: #1c1915; border: 1px solid #dfc39a; text-decoration: none; transition: background 0.15s ease, color 0.15s ease; } .ds-balagha-chip:hover { background: #9a6432; color: #fffdf8; } .ds-balagha-icon { font-weight: 800; color: #9a6432; } .ds-balagha-chip:hover .ds-balagha-icon { color: #fffdf8; }"
+    },
+    {
+      "name": "Surface Card Container",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Standard container for surah rows, source attributions, and commentary.",
+      "html": "<div class=\"ds-surface-card\"><h4 class=\"ds-card-title\">Surah Al-Baqarah</h4><p class=\"ds-card-desc\">286 verses · Madinah · Full treebank annotation.</p></div>",
+      "css": ".ds-surface-card { background: #fffdf8; border: 1px solid #e3d9c8; border-radius: 16px; padding: 1rem 1.15rem; box-shadow: 0 1px 2px rgba(60, 42, 20, 0.05); } .ds-card-title { margin: 0 0 0.35rem; font-family: Literata, Georgia, serif; font-size: 1.15rem; font-weight: 600; color: #1c1915; } .ds-card-desc { margin: 0; font-size: 0.92rem; color: #6f675e; line-height: 1.5; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Linguistic Observatory",
+    "overview": "Lenses is a precision instrument designed for the deep, contemplative study of Quranic Arabic grammar (naḥw), morphology (ṣarf), and rhetoric (balāghah). Like astronomical instrumentation mapping the celestial sphere, the interface maps linguistic structure with quiet, disciplined clarity. Controls and cards do not announce themselves as software chrome; they remain minimal and unobtrusive, allowing the sacred Uthmani text and analytical diagrams to command the reader's full attention.",
+    "keyCharacteristics": [
+      "Analytical Clarity: Grammar relations, dependencies, and phonetic features are prioritized as first-class visual data.",
+      "Minimal Chrome: Controls and containers recede; no decorative borders, no drop-shadow noise, and no artificial gradients.",
+      "Harmonious Dual-Mode Palette: Warm studio parchment in light mode and deep obsidian in dark mode, both engineered for hours of continuous reading.",
+      "Rigorously Bidirectional: Seamless orchestration of Right-to-Left (RTL) Arabic typography alongside Left-to-Right (LTR) commentary and metadata."
+    ],
+    "rules": [
+      {
+        "name": "The Semantic Rarity Rule",
+        "body": "The primary accent (--teal) is reserved strictly for current selection, head node connections, and active navigation. Its power comes from restraint; it must never be sprayed casually as decorative fill.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dual-Mode Contrast Rule",
+        "body": "Accent backgrounds in dark mode invert text ink to deep dark slate (#10211e) to guarantee contrast ratios exceeding 7:1 (WCAG AAA).",
+        "section": "colors"
+      },
+      {
+        "name": "The Rasm Dominance Rule",
+        "body": "The Quranic Arabic text is the visual center of gravity; analytical captions, phonetic titles, and translation prose must always recede below the Uthmani script in scale and contrast.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Coordinates Rule",
+        "body": "All numeric references (surah:ayah:word coordinates) use tabular numerals (font-variant-numeric: tabular-nums) to prevent optical jitter during live reading steps.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-at-Rest Rule",
+        "body": "Surfaces are flat and flush at rest; subtle layered ambient shadows and 1px boundary lines emerge only on active interaction, modal sheets, or sticky bars.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve the Tanzil Uthmani Quranic text and Al-Mukhtasar commentaries verbatim without any alterations.",
+      "Do state treebank coverage limits honestly (chapters 10–58 unannotated in the treebank).",
+      "Do ensure all text on dark-mode accent backgrounds uses high-contrast ink (#10211e) to maintain AAA contrast.",
+      "Do provide keyboard accessibility (tabIndex={0}, role=\"button\", Space/Enter handlers) for all SVG tree interactions.",
+      "Do keep mobile navigation permanently accessible in a single compact strip when scrolling."
+    ],
+    "donts": [
+      "Don't wrap sacred Quranic verses in heavy, bordered card boxes; let the ayah breathe directly on the canvas.",
+      "Don't use decorative Islamic arabesque flourishes, faux-manuscript clip art, or artificial gradient text.",
+      "Don't add thick \"side-tab\" colored borders to cards, alerts, or formula callouts.",
+      "Don't use hard zero-blur offset drop shadows (4px 4px 0 #000); use soft multi-layer ambient elevation.",
+      "Don't nest interactive elements inside buttons or <summary> elements.",
+      "Don't introduce high-saturation buttons that distract from reading and contemplative focus."
+    ]
+  }
+}

@@ -2,11 +2,11 @@ import type { ReactNode } from "react";
 
 // Regex matching either an embedded intro like "... وهو (( " followed by word: analysis,
 // or a line beginning with word: analysis.
-const EMBED_IRAB_LINE = /^(.*?(?:وهو\s*(?:\(\(|:|\:\(\()\s*))([^:\n]{1,60})([:：])\s*(.*)$/;
-const NORMAL_IRAB_LINE = /^((?:\(\(|\«|\"|\s)*)([^:\n]{1,60})([:：])\s*(.*)$/;
+const EMBED_IRAB_LINE = /^(.*?(?:وهو\s*(?:\(\(|:|:\(\()\s*))([^:\n]{1,60})([:：])\s*(.*)$/;
+const NORMAL_IRAB_LINE = /^((?:\(\(|«|"|\s)*)([^:\n]{1,60})([:：])\s*(.*)$/;
 
 function splitWordEnclosure(rawWord: string): { prefix: string; word: string; suffix: string } {
-  const matchFull = rawWord.match(/^(\(\(+|\«|\"|\{|﴿)(.*?)(\)\)+|\»|\"|\}|﴾)$/);
+  const matchFull = rawWord.match(/^(\(\(+|«|"|\{|﴿)(.*?)(\)\)+|»|"|\}|﴾)$/);
   if (matchFull) {
     return {
       prefix: matchFull[1],
@@ -14,7 +14,7 @@ function splitWordEnclosure(rawWord: string): { prefix: string; word: string; su
       suffix: matchFull[3],
     };
   }
-  const matchStart = rawWord.match(/^(\(\(+|\«|\"|\{|﴿)(.*)$/);
+  const matchStart = rawWord.match(/^(\(\(+|«|"|\{|﴿)(.*)$/);
   if (matchStart) {
     return {
       prefix: matchStart[1],
@@ -80,7 +80,7 @@ export function formatIrabText(text: string): ReactNode {
   });
 }
 
-const BRACKETED_TOKEN = /(\([^\)]+\)|﴿[^﴾]+﴾)/;
+const BRACKETED_TOKEN = /(\([^)]+\)|﴿[^﴾]+﴾)/;
 
 /**
  * Formats word-level morphology/i'rab text where grammatical segments

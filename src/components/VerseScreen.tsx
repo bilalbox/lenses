@@ -249,10 +249,13 @@ function VerseBody({
   return (
     <>
       <header className="verse-title">
-        <div className="verse-title-eyebrow-row">
-          <p className="eyebrow">
-            {revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} · {phonetic}
-          </p>
+        <div className="verse-title-header-row">
+          <h1>
+            <span lang="ar">{unitName}</span>
+            <small>
+              {revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} · {formatNumber(sura)}:{formatNumber(verse.v)} · {phonetic}
+            </small>
+          </h1>
           {hasBalagha && (
             <a
               href={`#/rhetoric/${sura}/${verse.v}`}
@@ -263,12 +266,6 @@ function VerseBody({
             </a>
           )}
         </div>
-        <h1>
-          <span lang="ar">{unitName}</span>
-          <small>
-            {formatNumber(sura)}:{formatNumber(verse.v)} · {phonetic}
-          </small>
-        </h1>
       </header>
       <p className="verse-line" dir="rtl" lang="ar">
         {segments.map((segment) =>
@@ -309,17 +306,7 @@ function VerseBody({
       <details className="mukhtasar verse-meaning-block" open>
         <summary>
           <span>{t.verse.verseMeaningTitle}</span>
-          <small>
-            {t.verse.verseMeaningSub} ·{" "}
-            <a
-              href="https://quranenc.com/"
-              target="_blank"
-              rel="noreferrer"
-              onClick={(event) => event.stopPropagation()}
-            >
-              quranenc.com
-            </a>
-          </small>
+          <small>{t.verse.verseMeaningSub} · QuranEnc</small>
         </summary>
 
         {/* 1. English Mode: Saheeh International literal translation + English Al-Mukhtasar */}

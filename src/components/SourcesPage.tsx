@@ -19,7 +19,6 @@ export function SourcesPage({ manifest }: { manifest: Manifest }) {
   return (
     <article className="sources-page anim-soft-enter">
       <header className="page-intro">
-        <p className="eyebrow">{t.sources.eyebrow}</p>
         <h1>{t.sources.pageTitle}</h1>
         <p>{t.sources.intro}</p>
       </header>

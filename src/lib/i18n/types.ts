@@ -140,7 +140,6 @@ export interface Translations {
     coverageTrees: (syntax: number, total: number) => string;
   };
   examples: {
-    eyebrow: string;
     pageTitle: string;
     lead: string;
     presetHal: string;
@@ -160,7 +159,6 @@ export interface Translations {
     chooseCriteriaHint: string;
   };
   sources: {
-    eyebrow: string;
     pageTitle: string;
     intro: string;
     coverageHeading: string;
