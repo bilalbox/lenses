@@ -178,6 +178,8 @@ Used in Lenses Rhetoric Studio for multi-element simile structural deconstructio
 ------------------------------------------------------------
 Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)
 Framework: Elliptical Eloquence Framework (EEF 2025)
+Paper: Ahmad & Ghafar (2026), 'Elliptical Eloquence in the Qur'an: A Framework for Rhetorical-Stylistic and Digital Tafsir'
+URL: https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir
 Sources: Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī), Al-Muḥarrar al-Wajīz, Iʿrāb al-Qurʾān
 License / Terms: Open Academic & Educational Distribution.
 Used in Lenses Rhetoric Studio for syntactic ellipsis and omission classification.

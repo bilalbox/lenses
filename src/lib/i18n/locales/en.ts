@@ -150,7 +150,7 @@ export const en: Translations = {
       `Morphology covers all ${formatNum(words, "en")} words. The dependency treebank covers ${formatNum(syntaxVerses, "en")} verses${partialText}. Chapters ${formatNum(chStart, "en")}–${formatNum(chEnd, "en")} have no corpus syntax in this export. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`,
     rhetoricCoverageHeading: "Rhetorical Anatomy Coverage",
     rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
-      `The Rhetoric Anatomy Studio covers ${formatNum(versesCount, "en")} analyzed verses across ${formatNum(surasCount, "en")} surahs. This includes compound similes deconstructed into 4-element formulas (Dataset A: Nashir et al. 2026), syntactic ellipsis with scholarly reconstructed taqdīr (Dataset B: EEF 2025), and classical balāghah masterpieces across ‘Ilm al-Maʿānī, al-Bayān, and al-Badīʿ.`,
+      `The Rhetoric Anatomy Studio covers ${formatNum(versesCount, "en")} analyzed verses across ${formatNum(surasCount, "en")} surahs. This includes compound similes deconstructed into 4-element formulas (Nashir et al. 2026), syntactic ellipsis with scholarly reconstructed taqdīr (EEF 2025), and classical balāghah masterpieces across ‘Ilm al-Maʿānī, al-Bayān, and al-Badīʿ.`,
     partialSnippet: (syntax: number, total: number, surah: number) =>
       `, including ${formatNum(syntax, "en")} of ${formatNum(total, "en")} verses in surah ${formatNum(surah, "en")}`,
     licenseLabel: "License:",

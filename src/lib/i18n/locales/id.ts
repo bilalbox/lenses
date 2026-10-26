@@ -150,7 +150,7 @@ export const id: Translations = {
       `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis mencakup ${formatNum(syntaxVerses, "id")} ayat${partialText}. Surah ${formatNum(chStart, "id")}–${formatNum(chEnd, "id")} belum memiliki sintaksis korpus. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`,
     rhetoricCoverageHeading: "Cakupan Studio Retorika (Balaghah)",
     rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
-      `Studio Anatomi Retorika mencakup ${formatNum(versesCount, "id")} ayat teranalisis di ${formatNum(surasCount, "id")} surah, meliputi dekonstruksi formula 4 rukun tamsil perumpamaan (Dataset A: Nashir dkk. 2026), elipsis sintaksis dengan taqdir teruji (Dataset B: EEF 2025), serta karya retorika klasik dalam ilmu Ma'ani, Bayan, dan Badi'.`,
+      `Studio Anatomi Retorika mencakup ${formatNum(versesCount, "id")} ayat teranalisis di ${formatNum(surasCount, "id")} surah, meliputi dekonstruksi formula 4 rukun tamsil perumpamaan (Nashir dkk. 2026), elipsis sintaksis dengan taqdir teruji (EEF 2025), serta karya retorika klasik dalam ilmu Ma'ani, Bayan, dan Badi'.`,
     partialSnippet: (syntax: number, total: number, surah: number) =>
       `, termasuk ${formatNum(syntax, "id")} dari ${formatNum(total, "id")} ayat di surah ${formatNum(surah, "id")}`,
     licenseLabel: "Lisensi:",
@@ -226,7 +226,7 @@ export const id: Translations = {
       },
       "rhetoric-hadhf": {
         title: "Dataset Retorika Elipsis & Peringkasan (Hadhf & I'jaz)",
-        attribution: "Elliptical Eloquence Framework (EEF 2025), bersumber dari Dalail al-I'jaz (Al-Jurjani) dan kitab-kitab i'rab klasik",
+        attribution: "Hishomudin Ahmad & Norfarhana Ahmad Ghafar (2026) / Elliptical Eloquence Framework (EEF 2025), bersumber dari Dalail al-I'jaz (Al-Jurjani) dan kitab-kitab i'rab klasik",
         description: "Katalog elipsis sintaksis dan penghilangan struktur (maf'ul, mudhaf, jawab syarat law, ujaran) beserta rekonstruksi taqdir ilmiah.",
         license: "Distribusi Pendidikan & Riset Terbuka.",
       },

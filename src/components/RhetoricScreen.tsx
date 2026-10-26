@@ -107,7 +107,7 @@ export function RhetoricScreen({ targetSura, targetVerse, onOpenVerse }: Props) 
         <p className="search-lead">
           {locale === "ar"
             ? "تشريح التراكيب البيانية (التشبيه والحذف وبدائع النظم) في القرآن الكريم وفق المصادر التراثية والأكاديمية الموثقة."
-            : "Deconstruct Quranic rhetorical figures through structural anatomy, covering Similes (Dataset A), Ellipses (Dataset B), and Classical Balāghah masterpieces."}
+            : "Deconstruct Quranic rhetorical figures through structural anatomy, covering Similes, Ellipses, and Classical Balāghah masterpieces."}
         </p>
       </header>
 
@@ -127,10 +127,9 @@ export function RhetoricScreen({ targetSura, targetVerse, onOpenVerse }: Props) 
           }}
         >
           <div className="rhetoric-tab-top-row">
-            <span className="rhetoric-tab-tag">Dataset A</span>
+            <span className="rhetoric-tab-title">{locale === "ar" ? "التشبيه والتمثيل" : "Tashbīh (Similes)"}</span>
             <span className="rhetoric-tab-count-badge">{counts["dataset-a-tashbih"]}</span>
           </div>
-          <span className="rhetoric-tab-title">{locale === "ar" ? "التشبيه والتمثيل" : "Tashbīh (Similes)"}</span>
           <span className="rhetoric-tab-cite">Nashir et al. (2026)</span>
         </button>
 
@@ -148,10 +147,9 @@ export function RhetoricScreen({ targetSura, targetVerse, onOpenVerse }: Props) 
           }}
         >
           <div className="rhetoric-tab-top-row">
-            <span className="rhetoric-tab-tag">Dataset B</span>
+            <span className="rhetoric-tab-title">{locale === "ar" ? "الحذف وبلاغة الإيجاز" : "Ḥadhf (Ellipses)"}</span>
             <span className="rhetoric-tab-count-badge">{counts["dataset-b-hadhf"]}</span>
           </div>
-          <span className="rhetoric-tab-title">{locale === "ar" ? "الحذف وبلاغة الإيجاز" : "Ḥadhf (Ellipses)"}</span>
           <span className="rhetoric-tab-cite">EEF Framework (2025)</span>
         </button>
 
@@ -169,10 +167,9 @@ export function RhetoricScreen({ targetSura, targetVerse, onOpenVerse }: Props) 
           }}
         >
           <div className="rhetoric-tab-top-row">
-            <span className="rhetoric-tab-tag">Classical</span>
+            <span className="rhetoric-tab-title">{locale === "ar" ? "أبواب البلاغة الكبرى" : "Classical Figures"}</span>
             <span className="rhetoric-tab-count-badge">{counts["classical-balagha"]}</span>
           </div>
-          <span className="rhetoric-tab-title">{locale === "ar" ? "أبواب البلاغة الكبرى" : "Classical Figures"}</span>
           <span className="rhetoric-tab-cite">Maʿānī · Bayān · Badīʿ</span>
         </button>
       </div>
@@ -378,7 +375,9 @@ export function RhetoricScreen({ targetSura, targetVerse, onOpenVerse }: Props) 
               <div className="rhetoric-stage-card">
                 <div className="rhetoric-stage-header">
                   <div>
-                    <span className="rhetoric-pill">{selectedEntry.datasetBadge}</span>
+                    <span className="rhetoric-pill">
+                      {selectedEntry.datasetBadge.replace(/^(Dataset [AB]|Classical Balāghah):\s*/i, "")}
+                    </span>
                     <h2>
                       <span dir="rtl" lang="ar">{selectedEntry.surahNameAr}</span> {selectedEntry.sura}:{selectedEntry.verse}
                     </h2>
@@ -432,7 +431,7 @@ export function RhetoricScreen({ targetSura, targetVerse, onOpenVerse }: Props) 
                 {/* Sourced Dataset Attributes */}
                 {selectedEntry.tashbih && (
                   <div className="rhetoric-stage-dataset-attrs">
-                    <h3>التوصيف البلاغي للتشبيه (Dataset A Attributes)</h3>
+                    <h3>التوصيف البلاغي للتشبيه</h3>
                     <div className="rhetoric-attrs-grid">
                       <div className="rhetoric-attr-card">
                         <span className="rhetoric-attr-label">نوع التشبيه التركيبي</span>
@@ -462,7 +461,7 @@ export function RhetoricScreen({ targetSura, targetVerse, onOpenVerse }: Props) 
 
                 {selectedEntry.hadhf && (
                   <div className="rhetoric-stage-dataset-attrs">
-                    <h3>أركان الحذف والإيجاز (Dataset B Attributes)</h3>
+                    <h3>أركان الحذف والإيجاز</h3>
                     <div className="rhetoric-attrs-grid rhetoric-hadhf-grid">
                       <div className="rhetoric-attr-card">
                         <span className="rhetoric-attr-label">تصنيف العنصر المحذوف</span>
