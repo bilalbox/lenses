@@ -38,6 +38,11 @@ data/cache/
 .env.*
 !.env.example
 *.local
+*.pem
+*.key
+*.p12
+*service-account*.json
+credentials.json
 
 # Editor directories and files
 .vscode/*

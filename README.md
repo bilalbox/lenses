@@ -2,22 +2,22 @@
 
 Lenses is a small, installable reader for Quranic Arabic grammar. Open a verse, tap a word, and see three layers at once: the Quranic Arabic Corpus morphology, a dependency tree for the clauses the treebank covers, and classical iʿrāb from the Tafsir Center.
 
-The default verse is [Al-Hashr 59:18](http://127.0.0.1:43123/#/59/18). Its meaning is a reminder to look at what one has sent ahead, and the surah file is much smaller than Al-Baqarah.
+The default verse is Al-Hashr 59:18 (`#/59/18`). Its meaning is a reminder to look at what one has sent ahead, and the surah file is much smaller than Al-Baqarah.
 
 ## Run it
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 The dev server listens on [http://127.0.0.1:43123](http://127.0.0.1:43123). The derived JSON is already in `public/data/quran/`, so the app runs without rebuilding the data.
 
 ```bash
-npm run build    # typecheck and production build
-npm run preview  # serve the production build
-npm run lint
-npm run data     # rebuild JSON from the upstream sources
+pnpm build    # typecheck and production build
+pnpm preview  # serve the production build
+pnpm lint
+pnpm data     # rebuild JSON from the upstream sources
 ```
 
 A production build registers a service worker. The shell is precached. Fonts and surah files are cached as they are fetched, and after the first verse appears the app keeps downloading the rest of the library in the background. A later visit, including an offline one, reads from that cache. Use the browser install prompt, or the Install button when the browser offers one.
@@ -27,11 +27,11 @@ A production build registers a service worker. The shell is precached. Fonts and
 The production build is a static site. [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/) serves it. `public/_headers` caches fingerprinted files in `/assets/` for a year and tells the browser to revalidate `index.html`.
 
 ```bash
-npm install
-npm run deploy
+pnpm install
+pnpm deploy
 ```
 
-`npm run deploy` builds and runs `wrangler deploy`. It needs a Cloudflare account. The config is `wrangler.jsonc`, with single-page fallback so a refresh still opens the app.
+`pnpm deploy` builds and runs `wrangler deploy`. It needs a Cloudflare account. The config is `wrangler.jsonc`, with single-page fallback so a refresh still opens the app. Secrets stay out of that file — use Wrangler secrets / `.env` if you add any later.
 
 ## What you can do
 
@@ -89,3 +89,7 @@ scripts/build_data.py
 ```
 
 Surah files are loaded one at a time. Verse search uses `verses.json`. Example search uses `words.json`.
+
+## License
+
+Application code is MIT — see [LICENSE](LICENSE). Quranic text, morphology, syntax, translation, and classical iʿrāb are **not** covered by that license; see [public/data/NOTICES.txt](public/data/NOTICES.txt) and the table above.
