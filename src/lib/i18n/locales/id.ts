@@ -147,8 +147,97 @@ export const id: Translations = {
     pageTitle: "Sumber edisi ini dibangun",
     intro:
       "Lenses adalah pembaca untuk analisis yang dipublikasikan secara terbuka. Teks Al-Qur'an bahasa Arab disimpan tanpa perubahan. Lapisan tata bahasa diatribusikan ke sumber aslinya.",
-    coverageHeading: "Cakupan",
+    coverageHeading: "Cakupan Sintaksis",
     coverageBody: (words: number, syntaxVerses: number, partialText: string, chStart: number, chEnd: number) =>
       `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis mencakup ${formatNum(syntaxVerses, "id")} ayat${partialText}. Surah ${formatNum(chStart, "id")}–${formatNum(chEnd, "id")} belum memiliki sintaksis korpus. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`,
+    rhetoricCoverageHeading: "Cakupan Studio Retorika (Balaghah)",
+    rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
+      `Studio Anatomi Retorika mencakup ${formatNum(versesCount, "id")} ayat teranalisis di ${formatNum(surasCount, "id")} surah, meliputi dekonstruksi formula 4 rukun tamsil perumpamaan (Dataset A: Nashir dkk. 2026), elipsis sintaksis dengan taqdir teruji (Dataset B: EEF 2025), serta karya retorika klasik dalam ilmu Ma'ani, Bayan, dan Badi'.`,
+    partialSnippet: (syntax: number, total: number, surah: number) =>
+      `, termasuk ${formatNum(syntax, "id")} dari ${formatNum(total, "id")} ayat di surah ${formatNum(surah, "id")}`,
+    licenseLabel: "Lisensi:",
+    kinds: {
+      morphology: "Morfologi",
+      syntax: "Pohon Sintaksis",
+      text: "Teks Al-Qur'an",
+      "classical-irab": "I'rab Klasik",
+      tafsir: "Tafsir",
+      translation: "Terjemahan",
+      rhetoric: "Retorika (Balaghah)",
+    },
+    items: {
+      "qac-morphology": {
+        title: "Morfologi Quranic Arabic Corpus 0.4",
+        attribution: "Kais Dukes dan Quranic Arabic Corpus",
+        description: "Segmentasi morfologis, akar kata, bentuk dasar (lemma), dan fitur tata bahasa untuk seluruh kata.",
+        license: "GPL, dengan izin penggunaan dalam aplikasi selama korpus diatribusikan.",
+      },
+      "qac-syntax": {
+        title: "Graf Dependensi Sintaksis Quranic Arabic Corpus",
+        attribution: "Kais Dukes, Quranic Arabic Corpus (kaisdukes/quranic-corpus-api)",
+        description: "Graf dependensi sintaksis dari Quranic Arabic Dependency Treebank.",
+        license: "Didistribusikan sesuai ketentuan korpus: mencantumkan atribusi ke corpus.quran.com.",
+      },
+      tanzil: {
+        title: "Teks Al-Qur'an Rasm Utsmani Tanzil",
+        attribution: "Proyek Tanzil (Tanzil.net)",
+        description: "Teks Arab Al-Qur'an rasm Utsmani yang diverifikasi ketat dari Proyek Tanzil, tanpa perubahan.",
+        license: "Creative Commons BY-ND 3.0.",
+      },
+      "english-mokhtasar": {
+        title: "Al-Mukhtashar fi Tafsir Al-Qur'an (Bahasa Inggris)",
+        attribution: "Markaz Tafsir, teks bahasa Inggris via QuranEnc.com",
+        description: "Terjemahan tafsir ringkas Al-Mukhtashar dalam bahasa Inggris via QuranEnc.com.",
+        license: "Ketentuan publikasi ulang QuranEnc: teks utuh dan mencantumkan sumber.",
+      },
+      "tafsir-center": {
+        title: "Analisis Linguistik Markaz Tafsir (I'rab & Sharaf)",
+        attribution: "Pusat Studi Al-Qur'an Tafsir Center (Markaz Tafsir)",
+        description: "Deskripsi morfologi klasik (sharaf) dari basis data Markaz Tafsir, beserta i'rab kata per kata dan sintaksis kalimat ayat.",
+        license: "Creative Commons Attribution 4.0 International (CC BY 4.0).",
+      },
+      "indonesian-mokhtasar": {
+        title: "Al-Mukhtashar fi Tafsir Al-Qur'an (Bahasa Indonesia)",
+        attribution: "Markaz Tafsir, teks bahasa Indonesia via QuranEnc.com",
+        description: "Terjemahan tafsir ringkas Al-Mukhtashar dalam bahasa Indonesia via QuranEnc.com, edisi V1.0.0 (23 Januari 2017).",
+        license: "Ketentuan publikasi ulang QuranEnc: teks utuh, mencantumkan penerbit dan QuranEnc.com, serta menyebutkan edisi V1.0.0.",
+      },
+      "arabic-mokhtasar": {
+        title: "Al-Mukhtashar fi Tafsir Al-Qur'an (Bahasa Arab)",
+        attribution: "Markaz Tafsir للدراسات القرآنية, teks bahasa Arab via QuranEnc.com",
+        description: "Teks tafsir ringkas terpercaya berbahasa Arab via QuranEnc.com.",
+        license: "Ketentuan publikasi ulang QuranEnc: teks asli utuh dan mencantumkan sumber.",
+      },
+      "saheeh-international": {
+        title: "Terjemahan Bahasa Inggris Saheeh International",
+        attribution: "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net dan QuranEnc.com",
+        description: "Terjemahan harfiah bahasa Inggris yang selaras dengan sintaksis Arab untuk analisis struktural dan retorika.",
+        license: "Domain publik / Distribusi pendidikan terbuka dengan atribusi kepada Saheeh International.",
+      },
+      "indonesian-sabiq": {
+        title: "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
+        attribution: "PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad), via QuranEnc.com",
+        description: "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
+        license: "Distribusi terbuka / Ketentuan publikasi ulang QuranEnc.",
+      },
+      "rhetoric-tashbih": {
+        title: "Dataset Tamsil & Perumpamaan Al-Qur'an (Tashbih)",
+        attribution: "Nashir dkk. (2026), 'Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus' (arXiv:2601.19972)",
+        description: "Anotasi pakar dekonstruksi formula 4 rukun perumpamaan klasik (musyabbah, adat, musyabbah bihi, wajh syabah) dan tamsil majemuk.",
+        license: "Akses Terbuka Akademik (arXiv:2601.19972).",
+      },
+      "rhetoric-hadhf": {
+        title: "Dataset Retorika Elipsis & Peringkasan (Hadhf & I'jaz)",
+        attribution: "Elliptical Eloquence Framework (EEF 2025), bersumber dari Dalail al-I'jaz (Al-Jurjani) dan kitab-kitab i'rab klasik",
+        description: "Katalog elipsis sintaksis dan penghilangan struktur (maf'ul, mudhaf, jawab syarat law, ujaran) beserta rekonstruksi taqdir ilmiah.",
+        license: "Distribusi Pendidikan & Riset Terbuka.",
+      },
+      "classical-balagha": {
+        title: "Mahakarya Balaghah Klasik Al-Qur'an",
+        attribution: "Kitab Rujukan Klasik: Al-Jurjani (Dalail al-I'jaz), Az-Zamakhsyari (Al-Kashshaf), As-Sakkaki (Miftah al-'Ulum), As-Suyuthi (Al-Itqan)",
+        description: "Bedah anatomi perangkat retorika utama Al-Qur'an dalam tiga cabang ilmu: Ilmu Ma'ani (iltifat, qashr), Ilmu Bayan (isti'arah, kinayah), dan Ilmu Badi' (jinas, thibaq, muqabalah).",
+        license: "Domain Publik / Warisan Khazanah Klasik.",
+      },
+    },
   },
 };

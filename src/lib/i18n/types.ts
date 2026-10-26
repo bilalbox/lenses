@@ -13,6 +13,13 @@ export const LOCALES: Record<Locale, LocaleInfo> = {
   id: { code: "id", label: "Bahasa Indonesia", dir: "ltr" },
 };
 
+export interface SourceItemTranslation {
+  title?: string;
+  attribution?: string;
+  description?: string;
+  license?: string;
+}
+
 export interface Translations {
   common: {
     appNameAr: string;
@@ -158,5 +165,11 @@ export interface Translations {
     intro: string;
     coverageHeading: string;
     coverageBody: (words: number, syntaxVerses: number, partialText: string, chStart: number, chEnd: number) => string;
+    partialSnippet: (syntax: number, total: number, surah: number) => string;
+    rhetoricCoverageHeading: string;
+    rhetoricCoverageBody: (versesCount: number, surasCount: number) => string;
+    licenseLabel: string;
+    kinds: Record<string, string>;
+    items: Record<string, SourceItemTranslation>;
   };
 }

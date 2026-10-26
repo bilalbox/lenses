@@ -168,3 +168,24 @@ Source: QuranEnc.com, key indonesian_sabiq
 https://quranenc.com/en/browse/indonesian_sabiq
 License / Terms: Verbatim text retained with clear attribution to PT. Sabiq dan Rowwad Translation Center.
 
+------------------------------------------------------------
+Quranic Similes Dataset (Tashbīh & Tamthīl)
+Paper: Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus
+Authors: Nashir et al. (2026), arXiv:2601.19972
+License / Terms: Open Academic Research Distribution.
+Used in Lenses Rhetoric Studio for multi-element simile structural deconstructions.
+
+------------------------------------------------------------
+Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)
+Framework: Elliptical Eloquence Framework (EEF 2025)
+Sources: Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī), Al-Muḥarrar al-Wajīz, Iʿrāb al-Qurʾān
+License / Terms: Open Academic & Educational Distribution.
+Used in Lenses Rhetoric Studio for syntactic ellipsis and omission classification.
+
+------------------------------------------------------------
+Classical Quranic Balāghah Masterpieces
+Sources: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)
+License / Terms: Public Domain / Classical Heritage.
+Used in Lenses Rhetoric Studio for pivotal figures across Maʿānī, Bayān, and Badīʿ.
+
+

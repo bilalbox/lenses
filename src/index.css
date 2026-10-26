@@ -637,10 +637,15 @@ main { width: min(1180px, calc(100% - 1.5rem)); margin: 0 auto; padding: 1.2rem 
 .coverage { grid-column: 2; font-size: 0.78rem; color: var(--muted); }
 .coverage.full { color: var(--teal); }
 .coverage.partial { color: var(--gold); }
-.source-cards { list-style: none; padding: 0; display: grid; gap: 0.7rem; }
-.source-cards li { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 0.9rem 1rem; }
-.source-cards h3 { margin: 0 0 0.3rem; font-family: var(--serif); }
-.source-cards p { margin: 0.2rem 0; }
+.source-cards { list-style: none; padding: 0; display: grid; gap: 0.85rem; }
+.source-cards li { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.15rem; }
+.source-card-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem; }
+.source-card-header h3 { margin: 0; font-family: var(--serif); font-size: 1.15rem; }
+.source-kind-pill { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; padding: 0.12rem 0.55rem; border-radius: 999px; background: var(--bg-2); color: var(--teal); border: 1px solid var(--line); }
+.source-attribution { font-weight: 600; color: var(--ink); margin: 0.2rem 0 0.35rem; font-size: 0.95rem; }
+.source-description { color: color-mix(in srgb, var(--ink) 85%, var(--muted)); font-size: 0.92rem; line-height: 1.5; margin: 0.25rem 0; }
+.source-license-line { font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0.65rem; }
+.source-cards a { font-size: 0.85rem; }
 .skeleton { display: grid; gap: 0.6rem; }
 .skeleton span { display: block; height: 1.1rem; border-radius: 999px; background: linear-gradient(90deg, var(--bg-2), var(--paper), var(--bg-2)); background-size: 200% 100%; animation: sheen 1.2s infinite; }
 .skeleton span:nth-child(2) { width: 80%; }

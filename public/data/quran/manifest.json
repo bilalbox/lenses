@@ -1175,6 +1175,33 @@
       "description": "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
       "license": "Distribusi terbuka / QuranEnc republication terms.",
       "url": "https://quranenc.com/en/browse/indonesian_sabiq"
+    },
+    {
+      "id": "rhetoric-tashbih",
+      "title": "Quranic Similes Dataset (Tashbīh & Tamthīl)",
+      "kind": "rhetoric",
+      "attribution": "Nashir et al. (2026), 'Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus' (arXiv:2601.19972)",
+      "description": "Multi-label expert annotations of Quranic similes deconstructing the 4-element classical formula (mushabbah, adat, mushabbah bihi, wajh ash-shabah) and compound analogies (tamthīlī).",
+      "license": "Academic Open Access (arXiv:2601.19972).",
+      "url": "https://arxiv.org/abs/2601.19972"
+    },
+    {
+      "id": "rhetoric-hadhf",
+      "title": "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
+      "kind": "rhetoric",
+      "attribution": "Elliptical Eloquence Framework (EEF 2025), grounded in Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī) and classical syntactic exegeses",
+      "description": "Catalog of syntactic ellipsis and structural omissions (omitted object, genitive head, apodosis of conditional 'law', and speech verbs) with scholarly reconstructed taqdīr and rhetorical purposes.",
+      "license": "Open Educational & Research Distribution.",
+      "url": "https://github.com/bilalbox/lenses"
+    },
+    {
+      "id": "classical-balagha",
+      "title": "Classical Quranic Balāghah Masterpieces",
+      "kind": "rhetoric",
+      "attribution": "Foundational Classical Treatises: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)",
+      "description": "Curated anatomical breakdowns of pivotal Quranic rhetorical devices across ‘Ilm al-Maʿānī (iltifāt, qasr), ‘Ilm al-Bayān (istiʿārah, kināyah), and ‘Ilm al-Badīʿ (jinās, tibāq, muqābalah).",
+      "license": "Public Domain / Classical Heritage.",
+      "url": "https://quranenc.com/"
     }
   ]
 }
