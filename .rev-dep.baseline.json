@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "workspaces": {
+    ".": {
+      "missing-node-modules": [
+        {
+          "file": "src/main.tsx",
+          "module": "virtual:pwa-register"
+        }
+      ],
+      "unresolved-imports": [
+        {
+          "file": "src/main.tsx",
+          "request": "virtual:pwa-register",
+          "kind": "literal"
+        }
+      ]
+    }
+  }
+}

@@ -47,14 +47,14 @@ Chapters 10–58 have morphology and classical iʿrāb, and a banner instead of 
 
 The pipeline in `scripts/build_data.py` downloads public files into `data/cache/` (gitignored) and writes compact JSON. It does not scrape corpus.quran.com or tafsir.app. Notices for every upstream file are copied into `public/data/NOTICES.txt`.
 
-| Source | What it contributes | License |
-| --- | --- | --- |
-| [Quranic Arabic Corpus morphology 0.4](https://corpus.quran.com/download/) | Segments, roots, lemmas, features for all 77,429 words | GPL. The file’s own terms allow use in an application when the corpus is credited and linked. |
-| [kaisdukes/quranic-corpus-api](https://github.com/kaisdukes/quranic-corpus-api) `syntax.txt` | Dependency graphs | No LICENSE file in that repository. Treated under the corpus terms: credit corpus.quran.com. |
-| Tanzil Uthmani text, via the same repository | Arabic Quran text, stored verbatim | CC BY-ND 3.0. The text is not edited. |
-| [English Al-Mukhtasar](https://quranenc.com/api/v1/translation/sura/english_mokhtasar/1) | Verse tafsir in English | QuranEnc `english_mokhtasar`. Issued by the Tafsir Center for Quranic Studies. Text is stored verbatim. The public edition list does not give this key its own version number. |
-| [Indonesian Al-Mukhtasar](https://quranenc.com/en/browse/indonesian_mokhtasar) | Verse tafsir in Indonesian | QuranEnc `indonesian_mokhtasar`, edition V1.0.0 (23 January 2017). Issued by the Tafsir Center for Quranic Studies. Text is stored verbatim. |
-| [Tafsir Center `quran.db`](https://huggingface.co/datasets/tafsircenter/tafsir-mcp-data) | Word iʿrāb, ṣarf, short meanings, verse iʿrāb | CC BY 4.0. Credit the Tafsir Center for Quranic Studies. |
+| Source                                                                                       | What it contributes                                    | License                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Quranic Arabic Corpus morphology 0.4](https://corpus.quran.com/download/)                   | Segments, roots, lemmas, features for all 77,429 words | GPL. The file’s own terms allow use in an application when the corpus is credited and linked.                                                                                  |
+| [kaisdukes/quranic-corpus-api](https://github.com/kaisdukes/quranic-corpus-api) `syntax.txt` | Dependency graphs                                      | No LICENSE file in that repository. Treated under the corpus terms: credit corpus.quran.com.                                                                                   |
+| Tanzil Uthmani text, via the same repository                                                 | Arabic Quran text, stored verbatim                     | CC BY-ND 3.0. The text is not edited.                                                                                                                                          |
+| [English Al-Mukhtasar](https://quranenc.com/api/v1/translation/sura/english_mokhtasar/1)     | Verse tafsir in English                                | QuranEnc `english_mokhtasar`. Issued by the Tafsir Center for Quranic Studies. Text is stored verbatim. The public edition list does not give this key its own version number. |
+| [Indonesian Al-Mukhtasar](https://quranenc.com/en/browse/indonesian_mokhtasar)               | Verse tafsir in Indonesian                             | QuranEnc `indonesian_mokhtasar`, edition V1.0.0 (23 January 2017). Issued by the Tafsir Center for Quranic Studies. Text is stored verbatim.                                   |
+| [Tafsir Center `quran.db`](https://huggingface.co/datasets/tafsircenter/tafsir-mcp-data)     | Word iʿrāb, ṣarf, short meanings, verse iʿrāb          | CC BY 4.0. Credit the Tafsir Center for Quranic Studies.                                                                                                                       |
 
 Application code is MIT (`LICENSE`). The morphology-derived JSON is a derivative of the GPL morphology file and keeps that notice.
 
@@ -73,7 +73,7 @@ The corpus graphs omit a separate node for the definite article. Lenses draws `a
 
 ### tafsir.app
 
-[tafsir.app](https://tafsir.app/) (الباحث القرآني) aggregates classical tafsirs and iʿrāb books, including *al-Jadwal*, al-Daʿās, al-Naḥḥās, and *al-Durr al-Maṣūn*. No public repository or open license for that site or its data was found, so Lenses does not copy it.
+[tafsir.app](https://tafsir.app/) (الباحث القرآني) aggregates classical tafsirs and iʿrāb books, including _al-Jadwal_, al-Daʿās, al-Naḥḥās, and _al-Durr al-Maṣūn_. No public repository or open license for that site or its data was found, so Lenses does not copy it.
 
 The extra source in this version is the Tafsir Center linguistic database, which is explicitly CC BY 4.0. A verse can show the corpus tree and the Center’s verse iʿrāb together. A word can show corpus morphology, the Center’s iʿrāb, ṣarf, and a short meaning, each labeled with its source. Full tafsir books stored in the same database are not redistributed.
 
