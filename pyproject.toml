@@ -1,0 +1,25 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["node_modules", "dist", "data", ".wrangler", "public"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B", "I", "UP", "SIM", "C90"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/build_data.py" = ["C901"]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+include = ["scripts"]
+exclude = ["**/node_modules", "**/__pycache__", "data", ".venv"]
+reportMissingImports = "none"
+reportMissingModuleSource = "none"
+
+[tool.vulture]
+min_confidence = 80
+paths = ["scripts"]
+exclude = [".venv/", "vulture_whitelist.py"]

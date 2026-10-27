@@ -1,0 +1,75 @@
+{
+	"version": 1,
+	"findings": [
+		{
+			"id": "src/App.tsx|App",
+			"score": 33,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1139",
+			"score": 50,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1583",
+			"score": 68,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1823",
+			"score": 36,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/QuizScreen.tsx|(anonymous)|260",
+			"score": 69,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/QuizScreen.tsx|(anonymous)|611",
+			"score": 28,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/QuizScreen.tsx|QuizScreen",
+			"score": 192,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/RhetoricScreen.tsx|RhetoricScreen",
+			"score": 44,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/components/VerseScreen.tsx|VerseBody",
+			"score": 29,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/lib/layout.ts|layoutGraph",
+			"score": 75,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/lib/quizEngine.ts|extractIrabMeta",
+			"score": 32,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/lib/quizEngine.ts|extractQuizPools",
+			"score": 64,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/lib/quizEngine.ts|extractQuizQuestionsFromSurah",
+			"score": 139,
+			"note": "Added via --update; replace with owning issue note."
+		},
+		{
+			"id": "src/lib/quizEngine.ts|parseSarfFromWord",
+			"score": 62,
+			"note": "Added via --update; replace with owning issue note."
+		}
+	]
+}

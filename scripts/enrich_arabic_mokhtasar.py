@@ -34,7 +34,7 @@ def download_surah(sura: int, dest: Path) -> list[dict]:
                 dest.write_bytes(content)
                 data = json.loads(content.decode("utf-8"))
                 return data.get("result", [])
-        except Exception as e:
+        except Exception:
             if attempt == max_retries - 1:
                 raise
             time.sleep(1.0 + attempt)
@@ -69,7 +69,9 @@ def main() -> None:
         verses = surah_data.get("verses", [])
 
         if len(verses) != len(by_aya):
-            raise ValueError(f"Verse count mismatch in surah {sura}: {len(verses)} vs {len(by_aya)}")
+            raise ValueError(
+                f"Verse count mismatch in surah {sura}: {len(verses)} vs {len(by_aya)}"
+            )
 
         for verse in verses:
             v_num = verse["v"]

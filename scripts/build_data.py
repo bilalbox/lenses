@@ -24,6 +24,7 @@ import urllib.request
 from collections import defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = ROOT / "data" / "cache"
@@ -130,9 +131,7 @@ PREFIX_LEMMA = {
 }
 
 FORMS = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"}
-DIACRITICS = re.compile(
-    "[\u064b-\u0652\u0670\u0653-\u065f\u06d6-\u06ed\u0640]"
-)
+DIACRITICS = re.compile("[\u064b-\u0652\u0670\u0653-\u065f\u06d6-\u06ed\u0640]")
 ALEF = str.maketrans(
     {
         "أ": "ا",
@@ -292,7 +291,7 @@ def parse_segment(tag: str, features: str, form: str) -> dict:
         i += 1
     if lemma is None and marker in PREFIX_LEMMA:
         lemma = PREFIX_LEMMA[marker]
-    seg = {"k": kind, "p": pos, "bw": form}
+    seg: dict[str, Any] = {"k": kind, "p": pos, "bw": form}
     if lemma:
         seg["l"] = lemma
         seg["la"] = lemma_arabic(lemma)
@@ -425,15 +424,13 @@ def load_center(path: Path) -> dict:
         )
     }
     rasm: dict[tuple[int, int], list[str]] = defaultdict(list)
-    for s, a, w, text in con.execute(
+    for s, a, _w, text in con.execute(
         "SELECT surahNo, ayahNo, wordNo, word FROM word_content_rasm ORDER BY surahNo, ayahNo, wordNo"
     ):
         rasm[(s, a)].append(text)
     verse_irab = {
         (s, a): text
-        for s, a, text in con.execute(
-            "SELECT surahNo, ayahNo, irabAyah1 FROM ayah_content_irab"
-        )
+        for s, a, text in con.execute("SELECT surahNo, ayahNo, irabAyah1 FROM ayah_content_irab")
     }
     con.close()
     return {"irab": irab, "sarf": sarf, "meaning": meaning, "rasm": rasm, "verse": verse_irab}
@@ -442,7 +439,9 @@ def load_center(path: Path) -> dict:
 def align_center(corpus: list[str], center: list[str]) -> list[int | None]:
     a = [norm_ar(w) for w in corpus]
     b = [norm_ar(w) for w in center]
-    if len(a) == len(b) and sum(x == y for x, y in zip(a, b)) >= max(1, int(0.6 * len(a))):
+    if len(a) == len(b) and sum(x == y for x, y in zip(a, b, strict=False)) >= max(
+        1, int(0.6 * len(a))
+    ):
         return list(range(len(a)))
     mapping: list[int | None] = [None] * len(a)
     matcher = SequenceMatcher(a=a, b=b, autojunk=False)
@@ -670,9 +669,13 @@ def main() -> None:
         for verse in surah["verses"]:
             number = verse["v"]
             tokens = verse["tokens"]
-            morph_count = max((w for (s, v, w) in morphology if s == sura and v == number), default=0)
+            morph_count = max(
+                (w for (s, v, w) in morphology if s == sura and v == number), default=0
+            )
             if morph_count != len(tokens):
-                raise SystemExit(f"token mismatch {sura}:{number}: text {len(tokens)} morph {morph_count}")
+                raise SystemExit(
+                    f"token mismatch {sura}:{number}: text {len(tokens)} morph {morph_count}"
+                )
             center_words = center["rasm"].get((sura, number), [])
             mapping = align_center(tokens, center_words)
             if any(item is None for item in mapping):
@@ -688,7 +691,8 @@ def main() -> None:
                 else:
                     slice_ok += 1
                 compact = [
-                    compact_segment(seg, piece, glosses) for seg, piece in zip(segments, sliced)
+                    compact_segment(seg, piece, glosses)
+                    for seg, piece in zip(segments, sliced, strict=False)
                 ]
                 word = {"n": index, "a": arabic, "s": compact}
                 center_index = mapping[index - 1]
@@ -744,7 +748,9 @@ def main() -> None:
             for graph in graphs_by_verse.get((sura, number), []):
                 for node in graph["nodes"]:
                     if node["t"] in ("seg", "slot", "ref") and not node.get("a"):
-                        node["a"] = surahs[node["s"] - 1]["verses"][node["v"] - 1]["tokens"][node["w"] - 1]
+                        node["a"] = surahs[node["s"] - 1]["verses"][node["v"] - 1]["tokens"][
+                            node["w"] - 1
+                        ]
             verse_graphs = []
             for graph in graphs_by_verse.get((sura, number), []):
                 item = {"nodes": graph["nodes"], "edges": graph["edges"]}
@@ -799,15 +805,19 @@ def main() -> None:
         }
         dest = OUT / "surah" / f"{sura:03d}.json"
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        dest.write_text(
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
+        )
         if dest.stat().st_size > 12 * 1024 * 1024:
             raise SystemExit(f"{dest.name} exceeds the 12 MB precache limit")
-        print(f"surah {sura:03d} {dest.stat().st_size/1e6:.2f} MB syntax {coverage[sura]}/{len(built_verses)}")
+        print(
+            f"surah {sura:03d} {dest.stat().st_size / 1e6:.2f} MB syntax {coverage[sura]}/{len(built_verses)}"
+        )
 
-    roots = [""] * len(root_ids)
+    roots: list[Any] = [None] * len(root_ids)
     for key, index in root_ids.items():
         roots[index] = {"b": key, "a": buckwalter(key) if key else ""}
-    lemmas = [""] * len(lemma_ids)
+    lemmas: list[Any] = [None] * len(lemma_ids)
     for key, index in lemma_ids.items():
         lemmas[index] = {
             "b": key,
@@ -815,7 +825,11 @@ def main() -> None:
             "g": glosses.get(key, ""),
         }
     (OUT / "words.json").write_text(
-        json.dumps({"roots": roots, "lemmas": lemmas, "rows": word_rows}, ensure_ascii=False, separators=(",", ":")),
+        json.dumps(
+            {"roots": roots, "lemmas": lemmas, "rows": word_rows},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
         encoding="utf-8",
     )
     (OUT / "verses.json").write_text(
@@ -834,7 +848,9 @@ def main() -> None:
             "words": len(word_rows),
             "syntaxVerses": syntax_verse_count,
             "syntaxGraphs": len(graphs),
-            "partialChapters": [{"n": u["n"], "syntax": u["syntax"], "verses": u["verses"]} for u in partial],
+            "partialChapters": [
+                {"n": u["n"], "syntax": u["syntax"], "verses": u["verses"]} for u in partial
+            ],
             "chaptersWithoutSyntax": missing,
         },
         "sources": [
