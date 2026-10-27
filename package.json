@@ -18,7 +18,8 @@
 		"gate:fast:py": "pnpm gate:fast && pnpm lint:py",
 		"gate": "pnpm gate:fast && pnpm test",
 		"test:ratchets": "bash tests/ratchets/ratchet-contract.test.sh",
-		"test": "echo \"(no unit tests yet; vitest is a follow-up)\"",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"prepare": "husky"
 	},
 	"dependencies": {
@@ -42,6 +43,7 @@
 		"typescript": "^7.0.2",
 		"vite": "^8.3.5",
 		"vite-plugin-pwa": "^2.0.0",
+		"vitest": "^5.0.5",
 		"wrangler": "^4.152.0"
 	},
 	"allowScripts": {
