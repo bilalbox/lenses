@@ -113,6 +113,26 @@ export const ar: Translations = {
 		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
 		nahwTabTitle: "النحو وشجرة الإعراب",
 		treebankNoorBayan: "شجرة نور البيان القرآنية",
+		mutashabihBadge: (count: number) =>
+			`المتشابه اللفظي (${formatNum(count, "ar")})`,
+		mutashabihSectionTitle: "المتشابه اللفظي ونظائر الآيات",
+		mutashabihCounterpartAyah: "الآية المقابلة",
+		mutashabihCurrentAyah: "الآية الحالية",
+		mutashabihMatchScore: (percent: number) =>
+			`نسبة التطابق: ${formatNum(percent, "ar")}٪`,
+		mutashabihDabtTitle: "قاعدة الضبط والحفظ",
+		mutashabihTawjihTitle: "توجيه الاختلاف والبلاغة",
+		mutashabihJumpToAyah: "الانتقال إلى الآية",
+		mutashabihCategoryIdentical: "متشابه تام",
+		mutashabihCategoryOpening: "اتفاق المطالع",
+		mutashabihCategoryEnding: "اتفاق الفواصل",
+		mutashabihCategoryPhrase: "تشابه عبارة",
+		mutashabihCategorySwap: "تقديم وتأخير",
+		mutashabihLegendExact: "متطابق",
+		mutashabihLegendDiff: "اختلاف لفظي",
+		mutashabihLegendExtra: "زيادة أو نقصان",
+		mutashabihSurahDistance: (count: number) =>
+			`البعد: ${formatNum(count, "ar")} سور`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>

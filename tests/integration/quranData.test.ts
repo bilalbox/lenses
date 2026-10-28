@@ -288,6 +288,57 @@ describe("integration: Quran dataset integrity", () => {
 				t.sheet.qiraatSemanticNote,
 				`${code} qiraatSemanticNote`,
 			).toBeTruthy();
+
+			expect(
+				t.verse.mutashabihBadge(3),
+				`${code} mutashabihBadge`,
+			).toBeTruthy();
+			expect(
+				t.verse.mutashabihSectionTitle,
+				`${code} mutashabihSectionTitle`,
+			).toBeTruthy();
+			expect(
+				t.verse.mutashabihDabtTitle,
+				`${code} mutashabihDabtTitle`,
+			).toBeTruthy();
+			expect(
+				t.verse.mutashabihTawjihTitle,
+				`${code} mutashabihTawjihTitle`,
+			).toBeTruthy();
+			expect(
+				t.verse.mutashabihJumpToAyah,
+				`${code} mutashabihJumpToAyah`,
+			).toBeTruthy();
 		}
+	});
+
+	it("validates sample Mutashabih files (Surahs 2, 7, 3)", () => {
+		const mutDir = path.join(
+			process.cwd(),
+			"public",
+			"data",
+			"quran",
+			"mutashabih",
+		);
+		expect(fs.existsSync(mutDir)).toBe(true);
+
+		const baqarahMutPath = path.join(mutDir, "002.json");
+		expect(fs.existsSync(baqarahMutPath)).toBe(true);
+		const baqarahMut = JSON.parse(fs.readFileSync(baqarahMutPath, "utf-8"));
+		expect(baqarahMut.sura).toBe(2);
+		expect(baqarahMut.verses.length).toBeGreaterThan(0);
+
+		// Check 2:58
+		const v58 = baqarahMut.verses.find((v: { v: number }) => v.v === 58);
+		expect(v58).toBeDefined();
+		expect(v58.matches.length).toBeGreaterThan(0);
+		const match7_161 = v58.matches.find(
+			(m: { sura: number; ayah: number }) => m.sura === 7 && m.ayah === 161,
+		);
+		expect(match7_161).toBeDefined();
+		expect(match7_161.score).toBeGreaterThan(0.5);
+		expect(match7_161.dabt).toContain("الضابط");
+		expect(match7_161.srcTokens.length).toBeGreaterThan(0);
+		expect(match7_161.targetTokens.length).toBeGreaterThan(0);
 	});
 });

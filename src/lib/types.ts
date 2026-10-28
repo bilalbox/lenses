@@ -300,3 +300,41 @@ export interface SurahQiraatFile {
 	surah: number;
 	verses: AyahQiraat[];
 }
+
+export type MutashabihCategory =
+	| "identical"
+	| "shared_opening"
+	| "shared_ending"
+	| "shared_phrase"
+	| "word_swap";
+
+export type WordDiffStatus = "exact" | "haraka" | "diff" | "extra";
+
+export interface WordDiffToken {
+	w: number;
+	s: WordDiffStatus;
+	cw?: number | null;
+}
+
+export interface MutashabihMatch {
+	sura: number;
+	ayah: number;
+	cat: MutashabihCategory;
+	score: number;
+	matchedWords: number;
+	srcTokens: WordDiffToken[];
+	targetTokens: WordDiffToken[];
+	dabt?: string;
+	tawjih?: string;
+	noteEn?: string;
+}
+
+export interface VerseMutashabihEntry {
+	v: number;
+	matches: MutashabihMatch[];
+}
+
+export interface SurahMutashabihFile {
+	sura: number;
+	verses: VerseMutashabihEntry[];
+}
