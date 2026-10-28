@@ -5,13 +5,28 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { loadSurah, loadVerseTranslation } from "../lib/api";
+import {
+	loadAsbab,
+	loadSurah,
+	loadSurahSyntax,
+	loadVerseTranslation,
+} from "../lib/api";
 import { formatIrabText } from "../lib/formatIrab";
 import { normalizeDigits } from "../lib/i18n/format";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { useRhetoric } from "../lib/rhetoric";
-import type { Manifest, SurahFile, Verse } from "../lib/types";
+import type {
+	AsbabData,
+	Manifest,
+	SurahFile,
+	SurahSyntaxFile,
+	SyntaxGraph,
+	Verse,
+	VerseSyntax,
+} from "../lib/types";
+import { AsbabDrawer } from "./AsbabDrawer";
 import { DependencyTree } from "./DependencyTree";
+import { NoorBayanTree } from "./NoorBayanTree";
 import { WordSheet } from "./WordSheet";
 
 interface Props {
@@ -164,6 +179,9 @@ export function VerseScreen({
 								setSegment(segmentIndex);
 								onNavigate(sura, verse.v, wordIndex);
 							}}
+							goal={unit.goal || file?.goal}
+							revSeq={unit.revSeq}
+							surahClass={unit.surahClass}
 						/>
 					</div>
 				)}
@@ -193,6 +211,9 @@ function VerseBody({
 	selected,
 	selectedSegment,
 	onSelect,
+	goal,
+	revSeq,
+	surahClass,
 }: {
 	unitName: string;
 	phonetic: string;
@@ -203,6 +224,9 @@ function VerseBody({
 	selected?: number;
 	selectedSegment?: number;
 	onSelect: (word: number, segment?: number) => void;
+	goal?: string;
+	revSeq?: number;
+	surahClass?: string;
 }) {
 	const { locale, t, formatNumber } = useI18n();
 	const graphs = verse.g ?? [];
@@ -211,6 +235,51 @@ function VerseBody({
 	const [clauseIndex, setClauseIndex] = useState(0);
 	const [clauseEdgeHint, setClauseEdgeHint] = useState("");
 	const [irabOpen, setIrabOpen] = useState(locale === "ar");
+
+	const [asbabData, setAsbabData] = useState<AsbabData | null>(null);
+	const [syntaxFile, setSyntaxFile] = useState<SurahSyntaxFile | null>(null);
+	const [asbabOpen, setAsbabOpen] = useState(false);
+	const [syntaxClauseIndex, setSyntaxClauseIndex] = useState(0);
+
+	useEffect(() => {
+		let cancelled = false;
+		loadAsbab()
+			.then((data) => {
+				if (!cancelled) {
+					setAsbabData(data);
+					if (window.location.search.includes("asbab=1")) {
+						setAsbabOpen(true);
+					}
+				}
+			})
+			.catch(() => {});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	useEffect(() => {
+		let cancelled = false;
+		setSyntaxClauseIndex(0);
+		loadSurahSyntax(sura)
+			.then((data) => {
+				if (!cancelled) setSyntaxFile(data);
+			})
+			.catch(() => {});
+		return () => {
+			cancelled = true;
+		};
+	}, [sura]);
+
+	const verseAsbab = useMemo(() => {
+		if (!asbabData) return [];
+		return asbabData[`${sura}:${verse.v}`] ?? [];
+	}, [asbabData, sura, verse.v]);
+
+	const verseSyntax = useMemo(() => {
+		if (!syntaxFile) return null;
+		return syntaxFile.verses.find((item) => item.v === verse.v) ?? null;
+	}, [syntaxFile, verse.v]);
 	const membership = useMemo(
 		() => clauseMembership(graphs, sura, verse.v),
 		[graphs, sura, verse.v],
@@ -231,9 +300,6 @@ function VerseBody({
 		const timer = window.setTimeout(() => setClauseEdgeHint(""), 2200);
 		return () => window.clearTimeout(timer);
 	}, [clauseEdgeHint]);
-	const show = narrow
-		? graphs.filter((_, index) => index === clauseIndex)
-		: graphs;
 	const openClause = (index: number) => {
 		setClauseIndex(index);
 		setClauseEdgeHint("");
@@ -287,27 +353,19 @@ function VerseBody({
 	}, [locale, sura, verse.v, rhetoricEntry]);
 	return (
 		<>
-			<header className="verse-title">
-				<div className="verse-title-header-row">
-					<h1>
-						<span lang="ar">{unitName}</span>
-						<small>
-							{revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} ·{" "}
-							{formatNumber(sura)}:{formatNumber(verse.v)} · {phonetic}
-						</small>
-					</h1>
-					{hasBalagha && (
-						<a
-							href={`#/rhetoric/${sura}/${verse.v}`}
-							className="verse-balagha-deep-link"
-							title="Open Rhetoric Studio for this verse"
-						>
-							<span className="verse-balagha-icon">بلاغة</span> · Rhetoric
-							Studio ↗
-						</a>
-					)}
-				</div>
-			</header>
+			<VerseHeaderCard
+				unitName={unitName}
+				phonetic={phonetic}
+				revelation={revelation}
+				sura={sura}
+				verseNumber={verse.v}
+				goal={goal}
+				revSeq={revSeq}
+				surahClass={surahClass}
+				asbabCount={verseAsbab.length}
+				onOpenAsbab={() => setAsbabOpen(true)}
+				hasBalagha={hasBalagha}
+			/>
 			<p className="verse-line" dir="rtl" lang="ar">
 				{segments.map((segment) =>
 					segment.clause === null ? (
@@ -508,87 +566,33 @@ function VerseBody({
 				</details>
 			) : null}
 
-			{graphs.length ? (
-				<>
-					{graphs.length > 1 ? (
-						<div className="tree-tools">
-							<nav className="clause-outline" dir="rtl" aria-label="Clauses">
-								{graphs.map((_, index) => (
-									<button
-										key={index}
-										type="button"
-										className={index === clauseIndex ? "is-on" : ""}
-										onClick={() => openClause(index)}
-									>
-										{formatNumber(index + 1)}
-									</button>
-								))}
-							</nav>
-						</div>
-					) : null}
-					{show.map((graph) => {
-						const index = graphs.indexOf(graph);
-						return (
-							<DependencyTree
-								key={index}
-								graph={graph}
-								index={index}
-								total={graphs.length}
-								sura={sura}
-								verse={verse.v}
-								words={verse.w}
-								selectedWord={selected}
-								selectedSegment={selectedSegment}
-								frozen={frozen}
-								current={index === clauseIndex}
-								onSelectWord={(nextSura, nextVerse, word, segmentIndex) => {
-									if (nextSura === sura && nextVerse === verse.v)
-										onSelect(word, segmentIndex);
-									else
-										window.location.hash = `#/${nextSura}/${nextVerse}/${word}`;
-								}}
-							/>
-						);
-					})}
-					{narrow && graphs.length > 1 ? (
-						<div className="clause-stepper">
-							<button
-								type="button"
-								onClick={() => stepClause(-1)}
-								aria-label={t.common.previous}
-							>
-								{t.common.previous}
-							</button>
-							<span
-								className={clauseEdgeHint ? "is-edge-hint" : ""}
-								role="status"
-							>
-								{clauseEdgeHint ||
-									t.verse.clauseCount(clauseIndex, graphs.length)}
-							</span>
-							<button
-								type="button"
-								onClick={() => stepClause(1)}
-								aria-label={t.common.next}
-							>
-								{t.common.next}
-							</button>
-							{verse.ir ? (
-								<button
-									type="button"
-									onClick={() => setIrabOpen((value) => !value)}
-								>
-									{t.verse.classicalIrabShort}
-								</button>
-							) : null}
-						</div>
-					) : null}
-				</>
-			) : (
-				<div className="banner">
-					<strong>{t.verse.noTreeTitle}</strong>
-				</div>
-			)}
+			<NahwSyntaxSection
+				verseSyntax={verseSyntax}
+				graphs={graphs}
+				narrow={narrow}
+				sura={sura}
+				verse={verse}
+				selected={selected}
+				selectedSegment={selectedSegment}
+				frozen={frozen}
+				clauseIndex={clauseIndex}
+				syntaxClauseIndex={syntaxClauseIndex}
+				onSelectClause={openClause}
+				onSelectSyntaxClause={setSyntaxClauseIndex}
+				onStepClause={stepClause}
+				onSelectWord={onSelect}
+				clauseEdgeHint={clauseEdgeHint}
+				onToggleIrab={() => setIrabOpen((value) => !value)}
+			/>
+
+			<AsbabDrawer
+				isOpen={asbabOpen}
+				onClose={() => setAsbabOpen(false)}
+				sura={sura}
+				verseNumber={verse.v}
+				surahName={unitName}
+				narrations={verseAsbab}
+			/>
 		</>
 	);
 }
@@ -634,4 +638,266 @@ function groupWords(words: Verse["w"], membership: Map<number, number>) {
 		else segments.push({ clause, words: [word] });
 	}
 	return segments;
+}
+
+function VerseHeaderCard({
+	unitName,
+	phonetic,
+	revelation,
+	sura,
+	verseNumber,
+	goal,
+	revSeq,
+	surahClass,
+	asbabCount,
+	onOpenAsbab,
+	hasBalagha,
+}: {
+	unitName: string;
+	phonetic: string;
+	revelation: string;
+	sura: number;
+	verseNumber: number;
+	goal?: string;
+	revSeq?: number;
+	surahClass?: string;
+	asbabCount: number;
+	onOpenAsbab: () => void;
+	hasBalagha: boolean;
+}) {
+	const { t, formatNumber } = useI18n();
+	return (
+		<header className="verse-title">
+			<div className="verse-title-header-row">
+				<h1>
+					<span lang="ar">{unitName}</span>
+					<small>
+						{revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} ·{" "}
+						{formatNumber(sura)}:{formatNumber(verseNumber)} · {phonetic}
+					</small>
+				</h1>
+				<div className="verse-actions-header">
+					{asbabCount > 0 && (
+						<button
+							type="button"
+							className="asbab-badge-button"
+							onClick={onOpenAsbab}
+							title={t.verse.asbabDrawerTitle}
+						>
+							<span className="asbab-badge-icon" aria-hidden="true">
+								📖
+							</span>
+							<span>{t.verse.asbabBadge(asbabCount)}</span>
+						</button>
+					)}
+					{hasBalagha && (
+						<a
+							href={`#/rhetoric/${sura}/${verseNumber}`}
+							className="verse-balagha-deep-link"
+							title="Open Rhetoric Studio for this verse"
+						>
+							<span className="verse-balagha-icon">بلاغة</span> · Rhetoric
+							Studio ↗
+						</a>
+					)}
+				</div>
+			</div>
+
+			{(goal || revSeq || surahClass) && (
+				<div className="surah-maqasid-card" dir="rtl">
+					<div className="maqasid-meta-row">
+						<span className="maqasid-label">{t.verse.surahGoalLabel}</span>
+						<div className="maqasid-tags">
+							{revSeq && (
+								<span className="maqasid-tag">
+									{t.verse.revelationOrder(revSeq)}
+								</span>
+							)}
+							{surahClass && (
+								<span className="maqasid-tag surah-class-tag">
+									{surahClass}
+								</span>
+							)}
+						</div>
+					</div>
+					{goal && (
+						<p className="maqasid-goal-text" lang="ar">
+							{goal}
+						</p>
+					)}
+				</div>
+			)}
+		</header>
+	);
+}
+
+function NahwSyntaxSection({
+	verseSyntax,
+	graphs,
+	narrow,
+	sura,
+	verse,
+	selected,
+	selectedSegment,
+	frozen,
+	clauseIndex,
+	syntaxClauseIndex,
+	onSelectClause,
+	onSelectSyntaxClause,
+	onStepClause,
+	onSelectWord,
+	clauseEdgeHint,
+	onToggleIrab,
+}: {
+	verseSyntax: VerseSyntax | null;
+	graphs: SyntaxGraph[];
+	narrow: boolean;
+	sura: number;
+	verse: Verse;
+	selected?: number;
+	selectedSegment?: number;
+	frozen: boolean;
+	clauseIndex: number;
+	syntaxClauseIndex: number;
+	onSelectClause: (index: number) => void;
+	onSelectSyntaxClause: (index: number) => void;
+	onStepClause: (delta: number) => void;
+	onSelectWord: (word: number, segment?: number) => void;
+	clauseEdgeHint: string;
+	onToggleIrab: () => void;
+}) {
+	const { t, formatNumber } = useI18n();
+
+	if (verseSyntax?.sentences && verseSyntax.sentences.length > 0) {
+		const activeSentence =
+			verseSyntax.sentences[syntaxClauseIndex] ?? verseSyntax.sentences[0]!;
+		return (
+			<section className="noorbayan-nahw-section">
+				<div className="noorbayan-nahw-header">
+					<div>
+						<h3 className="noorbayan-nahw-title">{t.verse.nahwTabTitle}</h3>
+						<p className="source-line">
+							{t.verse.treebankNoorBayan} ·{" "}
+							<a
+								href="https://github.com/NoorBayan/Quranic-Treebank"
+								target="_blank"
+								rel="noreferrer"
+							>
+								NoorBayan
+							</a>
+						</p>
+					</div>
+
+					{verseSyntax.sentences.length > 1 && (
+						<nav
+							className="noorbayan-clause-outline"
+							dir="rtl"
+							aria-label="Clauses"
+						>
+							{verseSyntax.sentences.map((sent, idx) => (
+								<button
+									key={sent.id}
+									type="button"
+									className={`noorbayan-clause-btn${idx === syntaxClauseIndex ? " is-active" : ""}`}
+									onClick={() => onSelectSyntaxClause(idx)}
+								>
+									{t.verse.clauseCount(idx, verseSyntax.sentences.length)}
+								</button>
+							))}
+						</nav>
+					)}
+				</div>
+
+				<NoorBayanTree
+					sentence={activeSentence}
+					sura={sura}
+					verseNumber={verse.v}
+					selectedWord={selected}
+					onSelectWord={(wordNum) => onSelectWord(wordNum)}
+				/>
+			</section>
+		);
+	}
+
+	if (!graphs.length) {
+		return (
+			<div className="banner">
+				<strong>{t.verse.noTreeTitle}</strong>
+			</div>
+		);
+	}
+
+	const show = narrow
+		? graphs.filter((_, index) => index === clauseIndex)
+		: graphs;
+
+	return (
+		<>
+			{graphs.length > 1 ? (
+				<div className="tree-tools">
+					<nav className="clause-outline" dir="rtl" aria-label="Clauses">
+						{graphs.map((_, index) => (
+							<button
+								key={index}
+								type="button"
+								className={index === clauseIndex ? "is-on" : ""}
+								onClick={() => onSelectClause(index)}
+							>
+								{formatNumber(index + 1)}
+							</button>
+						))}
+					</nav>
+				</div>
+			) : null}
+			{show.map((graph) => {
+				const index = graphs.indexOf(graph);
+				return (
+					<DependencyTree
+						key={index}
+						graph={graph}
+						index={index}
+						total={graphs.length}
+						sura={sura}
+						verse={verse.v}
+						words={verse.w}
+						selectedWord={selected}
+						selectedSegment={selectedSegment}
+						frozen={frozen}
+						current={index === clauseIndex}
+						onSelectWord={(nextSura, nextVerse, word, segmentIndex) => {
+							if (nextSura === sura && nextVerse === verse.v)
+								onSelectWord(word, segmentIndex);
+							else window.location.hash = `#/${nextSura}/${nextVerse}/${word}`;
+						}}
+					/>
+				);
+			})}
+			{narrow && graphs.length > 1 ? (
+				<div className="clause-stepper">
+					<button
+						type="button"
+						onClick={() => onStepClause(-1)}
+						aria-label={t.common.previous}
+					>
+						{t.common.previous}
+					</button>
+					<span className={clauseEdgeHint ? "is-edge-hint" : ""} role="status">
+						{clauseEdgeHint || t.verse.clauseCount(clauseIndex, graphs.length)}
+					</span>
+					<button
+						type="button"
+						onClick={() => onStepClause(1)}
+						aria-label={t.common.next}
+					>
+						{t.common.next}
+					</button>
+					{verse.ir ? (
+						<button type="button" onClick={onToggleIrab}>
+							{t.verse.classicalIrabShort}
+						</button>
+					) : null}
+				</div>
+			) : null}
+		</>
+	);
 }

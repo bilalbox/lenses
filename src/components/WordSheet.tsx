@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { loadSurahQiraat } from "../lib/api";
 import { spaceLetters } from "../lib/arabic";
 import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import {
@@ -8,7 +9,14 @@ import {
 	relationGloss,
 } from "../lib/glossary";
 import { useI18n } from "../lib/i18n/I18nContext";
-import type { SyntaxGraph, Verse, Word } from "../lib/types";
+import type {
+	QiraatRule,
+	SurahQiraatFile,
+	SyntaxGraph,
+	Verse,
+	Word,
+	WordQiraat,
+} from "../lib/types";
 import { CloseIcon } from "./Icons";
 
 interface Props {
@@ -42,6 +50,27 @@ export function WordSheet({
 	const closingTimerRef = useRef<number | null>(null);
 	const sheetRef = useRef<HTMLElement | null>(null);
 	const triggerRef = useRef<HTMLElement | null>(null);
+	const [qiraatFile, setQiraatFile] = useState<SurahQiraatFile | null>(null);
+
+	useEffect(() => {
+		let cancelled = false;
+		loadSurahQiraat(sura)
+			.then((data) => {
+				if (!cancelled) setQiraatFile(data);
+			})
+			.catch(() => {
+				// Non-fatal if surah has no qiraat file
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [sura]);
+
+	const wordQiraat = useMemo(() => {
+		if (!qiraatFile) return null;
+		const verseQ = qiraatFile.verses.find((item) => item.v === verse.v);
+		return verseQ?.words.find((item) => item.w === word.n) ?? null;
+	}, [qiraatFile, verse.v, word.n]);
 
 	useEffect(() => {
 		triggerRef.current = document.activeElement as HTMLElement | null;
@@ -330,6 +359,7 @@ export function WordSheet({
 						</p>
 					</section>
 				) : null}
+				{wordQiraat ? <WordQiraatSection wordQiraat={wordQiraat} /> : null}
 				{word.m ? (
 					<section>
 						<h3 className="sheet-section-label">{t.sheet.wordMeaning}</h3>
@@ -340,6 +370,69 @@ export function WordSheet({
 				) : null}
 			</aside>
 		</div>
+	);
+}
+
+function QiraatRuleList({ rules }: { rules: QiraatRule[] }) {
+	return (
+		<div className="qiraat-rules-list">
+			{rules.map((rule, idx) => (
+				<div key={idx} className="qiraat-rule-item">
+					<div className="qiraat-readers-row">
+						{rule.readers.map((reader, rIdx) => (
+							<span key={rIdx} className="qiraat-reader-pill">
+								{reader}
+							</span>
+						))}
+					</div>
+					<p className="qiraat-rule-text" lang="ar">
+						{rule.rule}
+					</p>
+				</div>
+			))}
+		</div>
+	);
+}
+
+function WordQiraatSection({ wordQiraat }: { wordQiraat: WordQiraat }) {
+	const { t } = useI18n();
+	const hasQ = wordQiraat.q && wordQiraat.q.length > 0;
+	const hasWasl = wordQiraat.wasl && wordQiraat.wasl.length > 0;
+	if (!hasQ && !hasWasl && !wordQiraat.note) return null;
+
+	return (
+		<section className="qiraat-section" dir="rtl">
+			<h3 className="sheet-section-label">{t.sheet.qiraatTitle}</h3>
+			<p className="source-line" dir="ltr">
+				Al-Qirāʾāt al-ʿAshr ·{" "}
+				<a href="https://quran.db" target="_blank" rel="noreferrer">
+					qurandb
+				</a>
+			</p>
+
+			{hasQ && wordQiraat.q ? (
+				<div className="qiraat-mode-block">
+					<h4 className="qiraat-mode-heading">{t.sheet.qiraatIsolation}</h4>
+					<QiraatRuleList rules={wordQiraat.q} />
+				</div>
+			) : null}
+
+			{hasWasl && wordQiraat.wasl ? (
+				<div className="qiraat-mode-block">
+					<h4 className="qiraat-mode-heading">{t.sheet.qiraatWasl}</h4>
+					<QiraatRuleList rules={wordQiraat.wasl} />
+				</div>
+			) : null}
+
+			{wordQiraat.note ? (
+				<div className="qiraat-note-card">
+					<h5 className="qiraat-note-heading">{t.sheet.qiraatSemanticNote}</h5>
+					<p className="qiraat-note-text" lang="ar">
+						{wordQiraat.note}
+					</p>
+				</div>
+			) : null}
+		</section>
 	);
 }
 

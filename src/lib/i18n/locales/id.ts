@@ -106,6 +106,12 @@ export const id: Translations = {
 		clauseNoteContinues: "Klausa ini bersambung ke ayat berikutnya.",
 		noTreeTitle: "Belum ada pohon ketergantungan untuk ayat ini.",
 		classicalIrabShort: "I'rab",
+		surahGoalLabel: "Tujuan Surah",
+		revelationOrder: (seq: number) => `Urutan Turun #${formatNum(seq, "id")}`,
+		asbabBadge: (count: number) => `Sebab Turun (${formatNum(count, "id")})`,
+		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
+		nahwTabTitle: "Nahwu & Pohon Sintaksis",
+		treebankNoorBayan: "Treebank Al-Qur'an NoorBayan",
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -124,6 +130,10 @@ export const id: Translations = {
 		searchThisLemma: "Cari bentuk dasar ini",
 		basePatternHint: "Pola dasar فَعَلَ biasanya tidak ditandai.",
 		impliedEstimated: "Tersirat (Muqaddar)",
+		qiraatTitle: "Sepuluh Qira'at Mutawatirah",
+		qiraatIsolation: "Saat Berhenti (Waqaf)",
+		qiraatWasl: "Saat Bersambung (Washal)",
+		qiraatSemanticNote: "Tafsir Makna & Kebahasaan",
 	},
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "id")} surah`,

@@ -42,11 +42,6 @@
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/VerseScreen.tsx|VerseBody",
-			"score": 29,
-			"note": "Added via --update; replace with owning issue note."
-		},
-		{
 			"id": "src/lib/layout.ts|layoutGraph",
 			"score": 75,
 			"note": "Added via --update; replace with owning issue note."

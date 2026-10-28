@@ -114,6 +114,12 @@ export interface Translations {
 		clauseNoteContinues: string;
 		noTreeTitle: string;
 		classicalIrabShort: string;
+		surahGoalLabel: string;
+		revelationOrder: (seq: number) => string;
+		asbabBadge: (count: number) => string;
+		asbabDrawerTitle: string;
+		nahwTabTitle: string;
+		treebankNoorBayan: string;
 	};
 	sheet: {
 		analysisAria: (wordNumber: number) => string;
@@ -131,6 +137,10 @@ export interface Translations {
 		searchThisLemma: string;
 		basePatternHint: string;
 		impliedEstimated: string;
+		qiraatTitle: string;
+		qiraatIsolation: string;
+		qiraatWasl: string;
+		qiraatSemanticNote: string;
 	};
 	surahs: {
 		countEyebrow: (count: number) => string;

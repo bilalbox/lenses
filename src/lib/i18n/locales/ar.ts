@@ -107,6 +107,12 @@ export const ar: Translations = {
 		clauseNoteContinues: "تتصل هذه الجملة بآية مجاورة.",
 		noTreeTitle: "لا توجد شجرة إعراب لهذه الآية.",
 		classicalIrabShort: "إعراب",
+		surahGoalLabel: "مقصد السورة",
+		revelationOrder: (seq: number) => `ترتيب النزول #${formatNum(seq, "ar")}`,
+		asbabBadge: (count: number) => `سبب النزول (${formatNum(count, "ar")})`,
+		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
+		nahwTabTitle: "النحو وشجرة الإعراب",
+		treebankNoorBayan: "شجرة نور البيان القرآنية",
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -125,6 +131,10 @@ export const ar: Translations = {
 		searchThisLemma: "ابحث عن هذا الأصل",
 		basePatternHint: "الوزن الأصلي فَعَلَ لا يُعلّم غالباً.",
 		impliedEstimated: "مقدَّر",
+		qiraatTitle: "القراءات العشر المتواترة",
+		qiraatIsolation: "عند الوقف والانفراد",
+		qiraatWasl: "عند الوصل والدرج",
+		qiraatSemanticNote: "التوجيه الدلالي واللغوي",
 	},
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "ar")} سورة`,

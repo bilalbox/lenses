@@ -3935,3 +3935,504 @@ main {
 		grid-template-columns: 1fr;
 	}
 }
+
+/* ==========================================================================
+   Surah Maqāṣid Card
+   ========================================================================== */
+.surah-maqasid-card {
+	margin-top: 0.85rem;
+	padding: 0.85rem 1.1rem;
+	background: color-mix(in srgb, var(--panel) 65%, var(--paper));
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.maqasid-meta-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.maqasid-label {
+	font-size: 0.76rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--teal);
+}
+
+.maqasid-tags {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.maqasid-tag {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.72rem;
+	font-weight: 600;
+	padding: 0.15rem 0.55rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--line) 40%, var(--paper));
+	color: var(--muted);
+	border: 1px solid var(--line);
+}
+
+.maqasid-goal-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.15rem;
+	line-height: 1.75;
+	color: var(--ink);
+}
+
+/* ==========================================================================
+   Verse Header Action Buttons (Asbāb badge & deep links)
+   ========================================================================== */
+.verse-actions-header {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+}
+
+.asbab-badge-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-family: var(--sans);
+	font-size: 0.78rem;
+	font-weight: 600;
+	padding: 0.35rem 0.75rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--teal) 10%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 30%, transparent);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.asbab-badge-button:hover {
+	background: color-mix(in srgb, var(--teal) 18%, var(--paper));
+	border-color: var(--teal);
+}
+
+.asbab-badge-icon {
+	font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   Asbāb al-Nuzūl Drawer / Dialog
+   ========================================================================== */
+.asbab-dialog {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	width: min(640px, 95vw);
+	max-height: min(88vh, 720px);
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
+.asbab-sheet-handle {
+	display: none;
+}
+
+.asbab-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.1rem 1.4rem;
+	border-bottom: 1px solid var(--line);
+	position: sticky;
+	top: 0;
+	background: var(--paper);
+	z-index: 2;
+}
+
+.asbab-title-group {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.asbab-icon-wrap {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--teal) 12%, var(--paper));
+	color: var(--teal);
+}
+
+.asbab-heading {
+	margin: 0;
+	font-family: var(--arabic-ui, var(--serif));
+	font-size: 1.15rem;
+	font-weight: 600;
+	color: var(--ink);
+}
+
+.asbab-subheading {
+	margin: 0.15rem 0 0;
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.8rem;
+	color: var(--muted);
+}
+
+.asbab-content {
+	padding: 1.25rem 1.4rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	flex: 1;
+}
+
+.asbab-card {
+	background: color-mix(in srgb, var(--panel) 40%, var(--paper));
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 1.1rem 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.asbab-card-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.asbab-card-num {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--muted);
+}
+
+.asbab-grade-badge {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.72rem;
+	font-weight: 700;
+	padding: 0.15rem 0.6rem;
+	border-radius: 999px;
+	letter-spacing: 0.03em;
+}
+
+.asbab-grade-badge.grade-sahih {
+	background: rgba(16, 185, 129, 0.14);
+	color: #047857;
+	border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.asbab-grade-badge.grade-hasan {
+	background: rgba(13, 148, 136, 0.14);
+	color: #0f766e;
+	border: 1px solid rgba(13, 148, 136, 0.35);
+}
+
+.asbab-grade-badge.grade-daif {
+	background: rgba(239, 68, 68, 0.12);
+	color: #b91c1c;
+	border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.asbab-grade-badge.grade-other {
+	background: var(--panel);
+	color: var(--muted);
+	border: 1px solid var(--line);
+}
+
+.asbab-narration-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.18rem;
+	line-height: 1.85;
+	color: var(--ink);
+}
+
+.asbab-takhrij-block {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 0.65rem 0.85rem;
+	font-size: 0.86rem;
+}
+
+.asbab-takhrij-label {
+	font-family: var(--arabic-ui, var(--sans));
+	font-weight: 700;
+	font-size: 0.76rem;
+	color: var(--teal);
+	margin-bottom: 0.25rem;
+}
+
+.asbab-takhrij-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.05rem;
+	line-height: 1.65;
+	color: var(--muted);
+}
+
+.asbab-footer {
+	padding: 0.75rem 1.4rem;
+	border-top: 1px solid var(--line);
+	background: color-mix(in srgb, var(--panel) 50%, var(--paper));
+}
+
+.asbab-citation {
+	margin: 0;
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.76rem;
+	color: var(--muted);
+	text-align: center;
+}
+
+.asbab-empty {
+	margin: 0;
+	color: var(--muted);
+	text-align: center;
+	padding: 2rem 0;
+}
+
+/* ==========================================================================
+   Dedicated Nahw Tab & NoorBayan Treebank
+   ========================================================================== */
+.noorbayan-nahw-section {
+	margin-top: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.noorbayan-nahw-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.noorbayan-nahw-title {
+	margin: 0;
+	font-family: var(--serif);
+	font-size: 1.15rem;
+	font-weight: 600;
+}
+
+.noorbayan-clause-outline {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	flex-wrap: wrap;
+}
+
+.noorbayan-clause-btn {
+	padding: 0.25rem 0.7rem;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	background: var(--paper);
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--muted);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.noorbayan-clause-btn.is-active,
+.noorbayan-clause-btn:hover {
+	background: var(--teal);
+	color: #ffffff;
+	border-color: var(--teal);
+}
+
+.noorbayan-tree-container {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.noorbayan-tree-header {
+	padding: 0.75rem 1.25rem;
+	border-bottom: 1px solid var(--line);
+	background: color-mix(in srgb, var(--panel) 40%, var(--paper));
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.noorbayan-tree-title-row {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+}
+
+.noorbayan-badge {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.74rem;
+	font-weight: 700;
+	padding: 0.2rem 0.6rem;
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--teal) 10%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+}
+
+.noorbayan-carried-badge {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.74rem;
+	font-weight: 600;
+	padding: 0.2rem 0.55rem;
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--gold) 12%, var(--paper));
+	color: var(--gold);
+	border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+.noorbayan-tree-canvas-scroll {
+	overflow-x: auto;
+	padding: 1.5rem 1rem;
+	display: flex;
+	justify-content: center;
+}
+
+.noorbayan-tree-svg {
+	display: block;
+}
+
+.noorbayan-tree-svg text {
+	font-family: var(--arabic-ui, var(--sans));
+}
+
+.noorbayan-tree-svg .noorbayan-token-text {
+	font-family: var(--arabic);
+}
+
+/* ==========================================================================
+   Per-Word Canonical Qirāʾāt Section in WordSheet
+   ========================================================================== */
+.qiraat-section {
+	margin-top: 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+.qiraat-mode-block {
+	background: color-mix(in srgb, var(--panel) 45%, var(--paper));
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+
+.qiraat-mode-heading {
+	margin: 0;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--teal);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.qiraat-rules-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.qiraat-rule-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px dashed var(--line);
+}
+
+.qiraat-rule-item:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.qiraat-readers-row {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex-wrap: wrap;
+}
+
+.qiraat-reader-pill {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.72rem;
+	font-weight: 700;
+	padding: 0.12rem 0.5rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--teal) 12%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+}
+
+.qiraat-rule-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.05rem;
+	line-height: 1.7;
+	color: var(--ink);
+}
+
+.qiraat-note-card {
+	background: color-mix(in srgb, var(--gold) 8%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.qiraat-note-heading {
+	margin: 0;
+	font-size: 0.78rem;
+	font-weight: 700;
+	color: var(--gold-dark, #b45309);
+}
+
+.qiraat-note-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.05rem;
+	line-height: 1.7;
+	color: var(--ink);
+}
+
+/* Mobile drawer adaptation */
+@media (max-width: 640px) {
+	.asbab-dialog {
+		width: 100%;
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+		max-height: 85vh;
+	}
+	.asbab-sheet-handle {
+		display: block;
+	}
+}
