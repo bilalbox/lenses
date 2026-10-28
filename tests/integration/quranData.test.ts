@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { ar } from "../../src/lib/i18n/locales/ar";
+import { en } from "../../src/lib/i18n/locales/en";
+import { id } from "../../src/lib/i18n/locales/id";
 import type {
 	AsbabData,
 	Manifest,
@@ -260,5 +263,31 @@ describe("integration: Quran dataset integrity", () => {
 		);
 		expect(baqarahQiraat.surah).toBe(2);
 		expect(baqarahQiraat.verses.length).toBeGreaterThan(0);
+	});
+
+	it("verifies i18n locales support Surah Maqasid, Asbab, Nahw, and Qiraat", () => {
+		const locales = { en, ar, id };
+		for (const [code, t] of Object.entries(locales)) {
+			expect(t.verse.surahGoalLabel, `${code} surahGoalLabel`).toBeTruthy();
+			expect(
+				t.verse.revelationOrder(1),
+				`${code} revelationOrder`,
+			).toBeTruthy();
+			expect(t.verse.asbabBadge(2), `${code} asbabBadge`).toBeTruthy();
+			expect(t.verse.asbabDrawerTitle, `${code} asbabDrawerTitle`).toBeTruthy();
+			expect(t.verse.nahwTabTitle, `${code} nahwTabTitle`).toBeTruthy();
+			expect(
+				t.verse.treebankNoorBayan,
+				`${code} treebankNoorBayan`,
+			).toBeTruthy();
+
+			expect(t.sheet.qiraatTitle, `${code} qiraatTitle`).toBeTruthy();
+			expect(t.sheet.qiraatIsolation, `${code} qiraatIsolation`).toBeTruthy();
+			expect(t.sheet.qiraatWasl, `${code} qiraatWasl`).toBeTruthy();
+			expect(
+				t.sheet.qiraatSemanticNote,
+				`${code} qiraatSemanticNote`,
+			).toBeTruthy();
+		}
 	});
 });

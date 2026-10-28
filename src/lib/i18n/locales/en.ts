@@ -106,6 +106,13 @@ export const en: Translations = {
 		clauseNoteContinues: "This clause continues into a neighboring verse.",
 		noTreeTitle: "No dependency tree for this verse.",
 		classicalIrabShort: "Iʿrāb",
+		surahGoalLabel: "Surah Goal",
+		revelationOrder: (seq: number) => `Revelation #${formatNum(seq, "en")}`,
+		asbabBadge: (count: number) =>
+			`Cause of Revelation (${formatNum(count, "en")})`,
+		asbabDrawerTitle: "Causes of Revelation (Asbāb al-Nuzūl)",
+		nahwTabTitle: "Nahw & Syntax Tree",
+		treebankNoorBayan: "NoorBayan Quranic Treebank",
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -124,6 +131,10 @@ export const en: Translations = {
 		searchThisLemma: "Search this lemma",
 		basePatternHint: "The base pattern فَعَلَ is usually left unmarked.",
 		impliedEstimated: "Implied",
+		qiraatTitle: "Ten Canonical Readings (Al-Qirāʾāt al-ʿAshr)",
+		qiraatIsolation: "In Isolation / Waqf",
+		qiraatWasl: "In Continuous Speech / Waṣl",
+		qiraatSemanticNote: "Linguistic & Semantic Exegesis",
 	},
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "en")} surahs`,
