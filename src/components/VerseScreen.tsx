@@ -12,6 +12,7 @@ import { useI18n } from "../lib/i18n/I18nContext";
 import { useRhetoric } from "../lib/rhetoric";
 import type { Manifest, SurahFile, Verse } from "../lib/types";
 import { DependencyTree } from "./DependencyTree";
+import { TreePrototypeHost } from "./prototype/TreePrototypeHost";
 import { WordSheet } from "./WordSheet";
 
 interface Props {
@@ -507,6 +508,8 @@ function VerseBody({
 					</div>
 				</details>
 			) : null}
+
+			<TreePrototypeHost />
 
 			{graphs.length ? (
 				<>
