@@ -198,3 +198,20 @@ URL: https://github.com/NoorBayan/Quranic
 Verification & Clean Export: Quranpedia.net (https://quranpedia.net/dumps/syntax.json.gz)
 License: MIT License
 Used in Lenses for full-Quran dependency tree graphs and constituent phrase analysis.
+
+------------------------------------------------------------
+Al-Muḥarrar fī Asbāb Nuzūl al-Qur'ān
+Author: Dr. Khālid ibn Sulaymān al-Muzaynī
+Publisher: Tafsir Center for Quranic Studies / Dār Ibn al-Jawzī
+Source: Tafsir Center quran.db (CC BY 4.0)
+URL: https://tafsir.net/
+License / Terms: CC BY 4.0 Open Cultural License.
+Used in Lenses for authentic causes of revelation, isnād critique, and hadith gradings.
+
+------------------------------------------------------------
+Ten Canonical Qirāʾāt Variants & Exegesis
+Source: Tafsir Center for Quranic Studies (quran.db)
+Based on: Al-Nashr fī al-Qirā'āt al-'Ashr (Ibn al-Jazarī)
+URL: https://tafsir.net/
+License / Terms: CC BY 4.0 Open Cultural License.
+Used in Lenses for per-word canonical variant readings, phonetic rules, and semantic notes.

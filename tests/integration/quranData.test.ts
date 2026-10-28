@@ -2,8 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type {
+	AsbabData,
 	Manifest,
 	SurahFile,
+	SurahQiraatFile,
 	SurahSyntaxFile,
 	VerseRow,
 } from "../../src/lib/types";
@@ -165,5 +167,98 @@ describe("integration: Quran dataset integrity", () => {
 				}
 			}
 		}
+	});
+
+	it("validates Asbab al-Nuzul dataset integrity (201 ayahs, 326 narrations)", () => {
+		const asbabPath = path.join(dataDir, "asbab.json");
+		expect(fs.existsSync(asbabPath)).toBe(true);
+
+		const asbab: AsbabData = JSON.parse(fs.readFileSync(asbabPath, "utf-8"));
+		const keys = Object.keys(asbab);
+		expect(keys).toHaveLength(201);
+
+		let totalNarrations = 0;
+		for (const [key, narrations] of Object.entries(asbab)) {
+			expect(key).toMatch(/^\d+:\d+$/);
+			expect(narrations.length).toBeGreaterThan(0);
+			totalNarrations += narrations.length;
+
+			for (const nar of narrations) {
+				expect(nar.id).toBeGreaterThan(0);
+				expect(nar.text).toBeTruthy();
+				expect(nar.takhrij).toBeDefined();
+				expect(["sahih", "hasan", "daif", "other"]).toContain(nar.grade);
+			}
+		}
+
+		expect(totalNarrations).toBe(326);
+
+		// Spot check 2:89
+		const baqarah89 = asbab["2:89"];
+		expect(baqarah89).toBeDefined();
+		expect(baqarah89).toHaveLength(2);
+		expect(baqarah89?.[0]?.text).toContain("ابن عباس");
+		expect(baqarah89?.[0]?.grade).toBe("hasan");
+	});
+
+	it("validates Surah Maqasid, revelationSeq, and surahClass in manifest and surah files", () => {
+		const manifest: Manifest = JSON.parse(
+			fs.readFileSync(manifestPath, "utf-8"),
+		);
+
+		expect(manifest.stats.asbabVerses).toBe(201);
+		expect(manifest.stats.qiraatWords).toBe(29605);
+		expect(manifest.stats.qiraatVerses).toBe(5948);
+
+		const revSeqs = new Set<number>();
+		for (const unit of manifest.units) {
+			expect(unit.goal).toBeTruthy();
+			expect(unit.revSeq).toBeGreaterThan(0);
+			expect(unit.revSeq).toBeLessThanOrEqual(114);
+			expect(unit.surahClass).toBeTruthy();
+			if (unit.revSeq) revSeqs.add(unit.revSeq);
+		}
+
+		// Full 1..114 permutation
+		expect(revSeqs.size).toBe(114);
+
+		// Check Surah 1 in file
+		const fatihahFile: SurahFile = JSON.parse(
+			fs.readFileSync(path.join(dataDir, "surah", "001.json"), "utf-8"),
+		);
+		expect(fatihahFile.goal).toBe("تحقيق العبودية الخالصة لله تعالى.");
+		expect(fatihahFile.revSeq).toBe(5);
+		expect(fatihahFile.surahClass).toBe("المثاني");
+	});
+
+	it("validates per-word canonical Qira'at files across all 114 surahs", () => {
+		const qiraatDir = path.join(dataDir, "qiraat");
+		expect(fs.existsSync(qiraatDir)).toBe(true);
+
+		// Spot check Surah 1 (Al-Fatihah)
+		const fatihahQiraatPath = path.join(qiraatDir, "001.json");
+		expect(fs.existsSync(fatihahQiraatPath)).toBe(true);
+
+		const fatihahQiraat: SurahQiraatFile = JSON.parse(
+			fs.readFileSync(fatihahQiraatPath, "utf-8"),
+		);
+		expect(fatihahQiraat.surah).toBe(1);
+
+		// Ayah 4 Word 1 (Maliki vs Maliki)
+		const v4 = fatihahQiraat.verses.find((v) => v.v === 4);
+		expect(v4).toBeDefined();
+		const w1 = v4?.words.find((w) => w.w === 1);
+		expect(w1).toBeDefined();
+		expect(w1?.q?.length).toBeGreaterThan(0);
+		expect(w1?.note).toContain("المِلْك");
+
+		// Spot check Surah 2 (Al-Baqarah)
+		const baqarahQiraatPath = path.join(qiraatDir, "002.json");
+		expect(fs.existsSync(baqarahQiraatPath)).toBe(true);
+		const baqarahQiraat: SurahQiraatFile = JSON.parse(
+			fs.readFileSync(baqarahQiraatPath, "utf-8"),
+		);
+		expect(baqarahQiraat.surah).toBe(2);
+		expect(baqarahQiraat.verses.length).toBeGreaterThan(0);
 	});
 });

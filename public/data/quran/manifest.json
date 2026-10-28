@@ -10,7 +10,10 @@
       "title": "The Opening",
       "rev": "Makkah",
       "verses": 7,
-      "syntax": 7
+      "syntax": 7,
+      "goal": "تحقيق العبودية الخالصة لله تعالى.",
+      "revSeq": 5,
+      "surahClass": "المثاني"
     },
     {
       "n": 2,
@@ -19,7 +22,10 @@
       "title": "The Cow",
       "rev": "Madinah",
       "verses": 286,
-      "syntax": 286
+      "syntax": 286,
+      "goal": "الأمر بتحقيق الخلافة في الأرض بإقامة الإسلام، والاستسلام لله، والتحذير من حال بني إسرائيل.",
+      "revSeq": 87,
+      "surahClass": "الطوال"
     },
     {
       "n": 3,
@@ -28,7 +34,10 @@
       "title": "The Family of Imrān",
       "rev": "Madinah",
       "verses": 200,
-      "syntax": 200
+      "syntax": 200,
+      "goal": "إثبات أن دين الإسلام هو الحق ردًّا على شبهات أهل الكتاب، وتثبيتا للمؤمنين.",
+      "revSeq": 89,
+      "surahClass": "الطوال"
     },
     {
       "n": 4,
@@ -37,7 +46,10 @@
       "title": "The Women",
       "rev": "Madinah",
       "verses": 176,
-      "syntax": 176
+      "syntax": 176,
+      "goal": "تنظيم المجتمع المسلم وبناء علاقاته، وحفظ الحقوق، والحث على الجهاد، وإبطال دعوى قتل المسيح.",
+      "revSeq": 92,
+      "surahClass": "الطوال"
     },
     {
       "n": 5,
@@ -46,7 +58,10 @@
       "title": "The Table spread with Food",
       "rev": "Madinah",
       "verses": 120,
-      "syntax": 120
+      "syntax": 120,
+      "goal": "الأمر بالوفاء بالعقود، والتحذير من مشابهة أهل الكتاب في نقضها.",
+      "revSeq": 112,
+      "surahClass": "الطوال"
     },
     {
       "n": 6,
@@ -55,7 +70,10 @@
       "title": "The Cattle",
       "rev": "Makkah",
       "verses": 165,
-      "syntax": 165
+      "syntax": 165,
+      "goal": "تقرير عقيدة التوحيد والرد على ضلالات المشركين.",
+      "revSeq": 55,
+      "surahClass": "الطوال"
     },
     {
       "n": 7,
@@ -64,7 +82,10 @@
       "title": "The Heights",
       "rev": "Makkah",
       "verses": 206,
-      "syntax": 206
+      "syntax": 206,
+      "goal": "انتصار الحق في صراعه مع الباطل، وبيان عاقبة المستكبرين في الدنيا والآخرة.",
+      "revSeq": 39,
+      "surahClass": "الطوال"
     },
     {
       "n": 8,
@@ -73,7 +94,10 @@
       "title": "The Spoils of War",
       "rev": "Madinah",
       "verses": 75,
-      "syntax": 75
+      "syntax": 75,
+      "goal": "الامتنان على المؤمنين بنصر الله لهم في بدر، وبيان سنن النصر والهزيمة.",
+      "revSeq": 88,
+      "surahClass": "الطوال"
     },
     {
       "n": 9,
@@ -82,7 +106,10 @@
       "title": "The Repentance",
       "rev": "Madinah",
       "verses": 129,
-      "syntax": 129
+      "syntax": 129,
+      "goal": "البراءة من المشركين والمنافقين وجهادهم، وفتح باب التوبة للتائبين.",
+      "revSeq": 113,
+      "surahClass": "الطوال"
     },
     {
       "n": 10,
@@ -91,7 +118,10 @@
       "title": "Jonah",
       "rev": "Makkah",
       "verses": 109,
-      "syntax": 109
+      "syntax": 109,
+      "goal": "تقرير النبوة بالأدلة، ودعوة المكذبين للإيمان مع تهديدهم بالعذاب.",
+      "revSeq": 51,
+      "surahClass": "المئين"
     },
     {
       "n": 11,
@@ -100,7 +130,10 @@
       "title": "Hud",
       "rev": "Makkah",
       "verses": 123,
-      "syntax": 123
+      "syntax": 123,
+      "goal": "تثبيت النبي والمؤمنين بقصص الأنبياء السابقين، وتشديد الوعيد للمكذبين.",
+      "revSeq": 52,
+      "surahClass": "المئين"
     },
     {
       "n": 12,
@@ -109,7 +142,10 @@
       "title": "Joseph",
       "rev": "Makkah",
       "verses": 111,
-      "syntax": 111
+      "syntax": 111,
+      "goal": "الاعتبار بلطف تدبير الله لأوليائه وتمكينهم، وحسن عاقبتهم.",
+      "revSeq": 53,
+      "surahClass": "المئين"
     },
     {
       "n": 13,
@@ -118,7 +154,10 @@
       "title": "The Thunder",
       "rev": "Madinah",
       "verses": 43,
-      "syntax": 43
+      "syntax": 43,
+      "goal": "الرد على منكري الوحي والنبوة ببيان مظاهر عظمة الله.",
+      "revSeq": 96,
+      "surahClass": "المثاني"
     },
     {
       "n": 14,
@@ -127,7 +166,10 @@
       "title": "Abraham",
       "rev": "Makkah",
       "verses": 52,
-      "syntax": 52
+      "syntax": 52,
+      "goal": "إثبات قيام الرسل بالبيان والبلاغ، وتهديد المعرضين عن اتباعهم بالعذاب.",
+      "revSeq": 72,
+      "surahClass": "المثاني"
     },
     {
       "n": 15,
@@ -136,7 +178,10 @@
       "title": "The Rocky Tract",
       "rev": "Makkah",
       "verses": 99,
-      "syntax": 99
+      "syntax": 99,
+      "goal": "توعد المستهزئين بالقرآن، والوعد بحفظه تأييدًا للنبي وتثبيتًا له.",
+      "revSeq": 54,
+      "surahClass": "المثاني"
     },
     {
       "n": 16,
@@ -145,7 +190,10 @@
       "title": "The Bees",
       "rev": "Makkah",
       "verses": 128,
-      "syntax": 128
+      "syntax": 128,
+      "goal": "التذكير بالنعم الدالة على المنعم سبحانه وتعالى.",
+      "revSeq": 70,
+      "surahClass": "المئين"
     },
     {
       "n": 17,
@@ -154,7 +202,10 @@
       "title": "The Night Journey",
       "rev": "Makkah",
       "verses": 111,
-      "syntax": 111
+      "syntax": 111,
+      "goal": "تثبيت الله لرسوله صلى الله عليه وسلم وتأييده بالآيات البينات، وبشارته بالنصر والثبات.",
+      "revSeq": 50,
+      "surahClass": "المئين"
     },
     {
       "n": 18,
@@ -163,7 +214,10 @@
       "title": "The Cave",
       "rev": "Makkah",
       "verses": 110,
-      "syntax": 110
+      "syntax": 110,
+      "goal": "بيان منهج التعامل مع الفتن.",
+      "revSeq": 69,
+      "surahClass": "المئين"
     },
     {
       "n": 19,
@@ -172,7 +226,10 @@
       "title": "Mary",
       "rev": "Makkah",
       "verses": 98,
-      "syntax": 98
+      "syntax": 98,
+      "goal": "إبطال عقيدة نسبة الولد لله من المشركين والنصارى، وبيان سعة رحمة الله بعباده.",
+      "revSeq": 44,
+      "surahClass": "المثاني"
     },
     {
       "n": 20,
@@ -181,7 +238,10 @@
       "title": "Ṭā hā",
       "rev": "Makkah",
       "verses": 135,
-      "syntax": 135
+      "syntax": 135,
+      "goal": "السعادة باتباع هدى القرآن وحمل رسالته، والشقاء بمخالفته.",
+      "revSeq": 45,
+      "surahClass": "المئين"
     },
     {
       "n": 21,
@@ -190,7 +250,10 @@
       "title": "The Prophets",
       "rev": "Makkah",
       "verses": 112,
-      "syntax": 112
+      "syntax": 112,
+      "goal": "إثبات الرسالة وبيان وحدة غاية الأنبياء وعناية الله بهم.",
+      "revSeq": 73,
+      "surahClass": "المئين"
     },
     {
       "n": 22,
@@ -199,7 +262,10 @@
       "title": "The Pilgrimage",
       "rev": "Madinah",
       "verses": 78,
-      "syntax": 78
+      "syntax": 78,
+      "goal": "تعظيم الله سبحانه وتعالى وشعائره والتسليم لأمره.",
+      "revSeq": 103,
+      "surahClass": "المثاني"
     },
     {
       "n": 23,
@@ -208,7 +274,10 @@
       "title": "The Believers",
       "rev": "Makkah",
       "verses": 118,
-      "syntax": 118
+      "syntax": 118,
+      "goal": "بيان فلاح المؤمنين وخسران الكافرين.",
+      "revSeq": 74,
+      "surahClass": "المئين"
     },
     {
       "n": 24,
@@ -217,7 +286,10 @@
       "title": "The Light",
       "rev": "Madinah",
       "verses": 64,
-      "syntax": 64
+      "syntax": 64,
+      "goal": "الدعوة إلى العفاف وحماية الأعراض.",
+      "revSeq": 102,
+      "surahClass": "المثاني"
     },
     {
       "n": 25,
@@ -226,7 +298,10 @@
       "title": "The Criterion",
       "rev": "Makkah",
       "verses": 77,
-      "syntax": 77
+      "syntax": 77,
+      "goal": "الانتصار للرسول صلى الله عليه وسلم وللقرآن ودفع شبه المشركين.",
+      "revSeq": 42,
+      "surahClass": "المثاني"
     },
     {
       "n": 26,
@@ -235,7 +310,10 @@
       "title": "The Poets",
       "rev": "Makkah",
       "verses": 227,
-      "syntax": 227
+      "syntax": 227,
+      "goal": "بيان آيات الله في تأييد المرسلين وإهلاك المكذبين.",
+      "revSeq": 47,
+      "surahClass": "المئين"
     },
     {
       "n": 27,
@@ -244,7 +322,10 @@
       "title": "The Ants",
       "rev": "Makkah",
       "verses": 93,
-      "syntax": 93
+      "syntax": 93,
+      "goal": "الامتنان على النبي صلى الله عليه وسلم بنعمة القرآن وشكرها والصبر على تبليغه.",
+      "revSeq": 48,
+      "surahClass": "المثاني"
     },
     {
       "n": 28,
@@ -253,7 +334,10 @@
       "title": "The Stories",
       "rev": "Makkah",
       "verses": 88,
-      "syntax": 88
+      "syntax": 88,
+      "goal": "سنة الله في تمكين المؤمنين المستضعفين وإهلاك الطغاة المستكبرين.",
+      "revSeq": 49,
+      "surahClass": "المثاني"
     },
     {
       "n": 29,
@@ -262,7 +346,10 @@
       "title": "The Spider",
       "rev": "Makkah",
       "verses": 69,
-      "syntax": 69
+      "syntax": 69,
+      "goal": "الأمر بالصبر والثبات عند الابتلاء والفتن، وبيان حسن عاقبته.",
+      "revSeq": 85,
+      "surahClass": "المثاني"
     },
     {
       "n": 30,
@@ -271,7 +358,10 @@
       "title": "The Romans",
       "rev": "Makkah",
       "verses": 60,
-      "syntax": 60
+      "syntax": 60,
+      "goal": "تأكيد تفرّد الله سبحانه بتصريف الأمور، وبيان سنن الله في خلقه.",
+      "revSeq": 84,
+      "surahClass": "المثاني"
     },
     {
       "n": 31,
@@ -280,7 +370,10 @@
       "title": "Luq'mān",
       "rev": "Makkah",
       "verses": 34,
-      "syntax": 34
+      "syntax": 34,
+      "goal": "الأمر باتباع الحكمة التي تضمّنها القرآن، والتحذير من الإعراض عنها.",
+      "revSeq": 57,
+      "surahClass": "المثاني"
     },
     {
       "n": 32,
@@ -289,7 +382,10 @@
       "title": "The Prostration",
       "rev": "Makkah",
       "verses": 30,
-      "syntax": 30
+      "syntax": 30,
+      "goal": "بيان حقيقة الخلق وأحوال الإنسان في الدنيا والآخرة.",
+      "revSeq": 75,
+      "surahClass": "المثاني"
     },
     {
       "n": 33,
@@ -298,7 +394,10 @@
       "title": "The Combined Forces",
       "rev": "Madinah",
       "verses": 73,
-      "syntax": 73
+      "syntax": 73,
+      "goal": "بيان عناية الله بنبيه صلى الله عليه وسلم، وحماية جنابه وأهل بيته.",
+      "revSeq": 90,
+      "surahClass": "المثاني"
     },
     {
       "n": 34,
@@ -307,7 +406,10 @@
       "title": "Sheba",
       "rev": "Makkah",
       "verses": 54,
-      "syntax": 54
+      "syntax": 54,
+      "goal": "بيان أحوال الناس مع النعم، وسنة الله في تغييرها.",
+      "revSeq": 58,
+      "surahClass": "المثاني"
     },
     {
       "n": 35,
@@ -316,7 +418,10 @@
       "title": "The Originator",
       "rev": "Makkah",
       "verses": 45,
-      "syntax": 45
+      "syntax": 45,
+      "goal": "بيان فقر العباد المطلق إلى فاطر السماوات والأرض، وكمال غناه عنهم.",
+      "revSeq": 43,
+      "surahClass": "المثاني"
     },
     {
       "n": 36,
@@ -325,7 +430,10 @@
       "title": "Yā sīn",
       "rev": "Makkah",
       "verses": 83,
-      "syntax": 83
+      "syntax": 83,
+      "goal": "إثبات الرسالة والبعث ودلائلهما.",
+      "revSeq": 41,
+      "surahClass": "المثاني"
     },
     {
       "n": 37,
@@ -334,7 +442,10 @@
       "title": "Those Ranges in Ranks",
       "rev": "Makkah",
       "verses": 182,
-      "syntax": 182
+      "syntax": 182,
+      "goal": "تنزيه الله عما نسبه إليه المشركون، وإبطال مزاعمهم في الملائكة والجن.",
+      "revSeq": 56,
+      "surahClass": "المئين"
     },
     {
       "n": 38,
@@ -343,7 +454,10 @@
       "title": "Ṣād",
       "rev": "Makkah",
       "verses": 88,
-      "syntax": 88
+      "syntax": 88,
+      "goal": "ذكر المخاصمة بالباطل وعاقبتها.",
+      "revSeq": 38,
+      "surahClass": "المثاني"
     },
     {
       "n": 39,
@@ -352,7 +466,10 @@
       "title": "The Groups",
       "rev": "Makkah",
       "verses": 75,
-      "syntax": 75
+      "syntax": 75,
+      "goal": "الدعوة للتوحيد والإخلاص، ونبذ الشرك.",
+      "revSeq": 59,
+      "surahClass": "المثاني"
     },
     {
       "n": 40,
@@ -361,7 +478,10 @@
       "title": "The Forgiver God",
       "rev": "Makkah",
       "verses": 85,
-      "syntax": 85
+      "syntax": 85,
+      "goal": "بيان حال المجادلين في آيات الله، والرد عليهم.",
+      "revSeq": 60,
+      "surahClass": "المثاني"
     },
     {
       "n": 41,
@@ -370,7 +490,10 @@
       "title": "Explained in Detail",
       "rev": "Makkah",
       "verses": 54,
-      "syntax": 54
+      "syntax": 54,
+      "goal": "بيان حال المعرضين عن الله، وذكر عاقبتهم.",
+      "revSeq": 61,
+      "surahClass": "المثاني"
     },
     {
       "n": 42,
@@ -379,7 +502,10 @@
       "title": "Consultation",
       "rev": "Makkah",
       "verses": 53,
-      "syntax": 53
+      "syntax": 53,
+      "goal": "بيان كمال تشريع الله، ووجوب متابعته، والتحذير من مخالفته.",
+      "revSeq": 62,
+      "surahClass": "المثاني"
     },
     {
       "n": 43,
@@ -388,7 +514,10 @@
       "title": "The Gold Adornment",
       "rev": "Makkah",
       "verses": 89,
-      "syntax": 89
+      "syntax": 89,
+      "goal": "التحذير من الافتتان بزخرف الحياة الدنيا؛ لئلا يكون وسيلة للشرك.",
+      "revSeq": 63,
+      "surahClass": "المثاني"
     },
     {
       "n": 44,
@@ -397,7 +526,10 @@
       "title": "The Smoke",
       "rev": "Makkah",
       "verses": 59,
-      "syntax": 59
+      "syntax": 59,
+      "goal": "تهديد المشركين ببيان ما ينتظرهم من العقوبة العاجلة والآجلة.",
+      "revSeq": 64,
+      "surahClass": "المثاني"
     },
     {
       "n": 45,
@@ -406,7 +538,10 @@
       "title": "Crouching",
       "rev": "Makkah",
       "verses": 37,
-      "syntax": 37
+      "syntax": 37,
+      "goal": "بيان أحوال الخلق من الآيات الشرعية والكونية، ونقض حجج منكري البعث المتكبرين وترهيبهم.",
+      "revSeq": 65,
+      "surahClass": "المثاني"
     },
     {
       "n": 46,
@@ -415,7 +550,10 @@
       "title": "The Curved Sand-hills",
       "rev": "Makkah",
       "verses": 35,
-      "syntax": 35
+      "syntax": 35,
+      "goal": "بيان حاجة البشريّة للرسالة وإنذار المعرضين عنها.",
+      "revSeq": 66,
+      "surahClass": "المثاني"
     },
     {
       "n": 47,
@@ -424,7 +562,10 @@
       "title": "Muḥammad",
       "rev": "Madinah",
       "verses": 38,
-      "syntax": 38
+      "syntax": 38,
+      "goal": "تحريض المؤمنين على القتال، تقويةً لهم وتوهينًا للكافرين.",
+      "revSeq": 95,
+      "surahClass": "المثاني"
     },
     {
       "n": 48,
@@ -433,7 +574,10 @@
       "title": "The Victory",
       "rev": "Madinah",
       "verses": 29,
-      "syntax": 29
+      "syntax": 29,
+      "goal": "تبشير النبي والمؤمنين بالفتح والتمكين.",
+      "revSeq": 111,
+      "surahClass": "المثاني"
     },
     {
       "n": 49,
@@ -442,7 +586,10 @@
       "title": "The Dwellings",
       "rev": "Madinah",
       "verses": 18,
-      "syntax": 18
+      "syntax": 18,
+      "goal": "معالجة اللسان وبيان أثره على إيمان الفرد وأخلاق المجتمع.",
+      "revSeq": 106,
+      "surahClass": "المثاني"
     },
     {
       "n": 50,
@@ -451,7 +598,10 @@
       "title": "Qāf",
       "rev": "Makkah",
       "verses": 45,
-      "syntax": 45
+      "syntax": 45,
+      "goal": "وعظ القلوب بالموت والبعث.",
+      "revSeq": 34,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 51,
@@ -460,7 +610,10 @@
       "title": "The Wind that Scatter",
       "rev": "Makkah",
       "verses": 60,
-      "syntax": 60
+      "syntax": 60,
+      "goal": "تعريف الجن والإنس بأن مصدر رزقهم من الله وحده؛ ليخلصوا له العبادة.",
+      "revSeq": 67,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 52,
@@ -469,7 +622,10 @@
       "title": "The Mount",
       "rev": "Makkah",
       "verses": 49,
-      "syntax": 49
+      "syntax": 49,
+      "goal": "الحجج والبراهين لرد شبهات المكذبين للنبي صلى الله عليه وسلم.",
+      "revSeq": 76,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 53,
@@ -478,7 +634,10 @@
       "title": "The Star",
       "rev": "Makkah",
       "verses": 62,
-      "syntax": 62
+      "syntax": 62,
+      "goal": "إثبات صدق الوحي وأنه من عند الله.",
+      "revSeq": 23,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 54,
@@ -487,7 +646,10 @@
       "title": "The Moon",
       "rev": "Makkah",
       "verses": 55,
-      "syntax": 55
+      "syntax": 55,
+      "goal": "التذكير بنعمة تيسير القرآن، وما فيه من الآيات والنذر.",
+      "revSeq": 37,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 55,
@@ -496,7 +658,10 @@
       "title": "The Most Gracious",
       "rev": "Madinah",
       "verses": 78,
-      "syntax": 78
+      "syntax": 78,
+      "goal": "تذكير الجن والإنس بنعم الله الباطنة والظاهرة، وآثار رحمته في الدنيا والآخرة.",
+      "revSeq": 97,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 56,
@@ -505,7 +670,10 @@
       "title": "The Event",
       "rev": "Makkah",
       "verses": 96,
-      "syntax": 96
+      "syntax": 96,
+      "goal": "بيان أحوال العباد يوم المعاد.",
+      "revSeq": 46,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 57,
@@ -514,7 +682,10 @@
       "title": "The Iron",
       "rev": "Madinah",
       "verses": 29,
-      "syntax": 29
+      "syntax": 29,
+      "goal": "الترقي بالنفوس للإيمان والإنفاق في سبيل الله.",
+      "revSeq": 94,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 58,
@@ -523,7 +694,10 @@
       "title": "She That Disputeth",
       "rev": "Madinah",
       "verses": 22,
-      "syntax": 22
+      "syntax": 22,
+      "goal": "إظهار علم الله الشامل وإحاطته البالغة، تربيةً لمراقبته، وتحذيرًا من مخالفته.",
+      "revSeq": 105,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 59,
@@ -532,7 +706,10 @@
       "title": "The Gathering",
       "rev": "Madinah",
       "verses": 24,
-      "syntax": 24
+      "syntax": 24,
+      "goal": "إظهار قوة الله وعزته في توهين اليهود والمنافقين، وإظهار تفرقهم، في مقابل إظهار تآلف المؤمنين.",
+      "revSeq": 101,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 60,
@@ -541,7 +718,10 @@
       "title": "The Woman to be examined",
       "rev": "Madinah",
       "verses": 13,
-      "syntax": 13
+      "syntax": 13,
+      "goal": "تحذير المؤمنين من تولي الكافرين.",
+      "revSeq": 91,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 61,
@@ -550,7 +730,10 @@
       "title": "The Row",
       "rev": "Madinah",
       "verses": 14,
-      "syntax": 14
+      "syntax": 14,
+      "goal": "حثّ المؤمنين لنصرة الدين.",
+      "revSeq": 109,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 62,
@@ -559,7 +742,10 @@
       "title": "Friday",
       "rev": "Madinah",
       "verses": 11,
-      "syntax": 11
+      "syntax": 11,
+      "goal": "الامتنان على الأمة وتفضيلها برسولها، وبيان فضل يوم الجمعة.",
+      "revSeq": 110,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 63,
@@ -568,7 +754,10 @@
       "title": "The Hypocrites",
       "rev": "Madinah",
       "verses": 11,
-      "syntax": 11
+      "syntax": 11,
+      "goal": "بيان حقيقة المنافقين والتحذير منهم.",
+      "revSeq": 104,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 64,
@@ -577,7 +766,10 @@
       "title": "Mutual Loss & Gain",
       "rev": "Madinah",
       "verses": 18,
-      "syntax": 18
+      "syntax": 18,
+      "goal": "التحذير مما تحصل به الندامة والغبن يوم القيامة.",
+      "revSeq": 108,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 65,
@@ -586,7 +778,10 @@
       "title": "The Divorce",
       "rev": "Madinah",
       "verses": 12,
-      "syntax": 12
+      "syntax": 12,
+      "goal": "بيان أحكام الطلاق وتعظيم حدوده وثمرات التقوى.",
+      "revSeq": 99,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 66,
@@ -595,7 +790,10 @@
       "title": "The Prohibition",
       "rev": "Madinah",
       "verses": 12,
-      "syntax": 12
+      "syntax": 12,
+      "goal": "الدعوة إلى إقامة البيوت على تعظيم حدود الله وتقديم مرضاته وحده.",
+      "revSeq": 107,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 67,
@@ -604,7 +802,10 @@
       "title": "Dominion",
       "rev": "Makkah",
       "verses": 30,
-      "syntax": 30
+      "syntax": 30,
+      "goal": "إظهار كمال ملك الله وقدرته؛ بعثًا على خشيته، وتحذيرًا من عقابه.",
+      "revSeq": 77,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 68,
@@ -613,7 +814,10 @@
       "title": "The Pen",
       "rev": "Makkah",
       "verses": 52,
-      "syntax": 52
+      "syntax": 52,
+      "goal": "شهادة الله للنبي بحسن الخُلق، والدفاع عنه وتثبيته.",
+      "revSeq": 2,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 69,
@@ -622,7 +826,10 @@
       "title": "The Inevitable",
       "rev": "Makkah",
       "verses": 52,
-      "syntax": 52
+      "syntax": 52,
+      "goal": "إثبات أن وقوع القيامة والجزاء فيها حقٌّ لا ريب فيه.",
+      "revSeq": 78,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 70,
@@ -631,7 +838,10 @@
       "title": "The Ways of Ascent",
       "rev": "Makkah",
       "verses": 44,
-      "syntax": 44
+      "syntax": 44,
+      "goal": "بيان حال وجزاء الخلق يوم القيامة.",
+      "revSeq": 79,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 71,
@@ -640,7 +850,10 @@
       "title": "Nūḥ",
       "rev": "Makkah",
       "verses": 28,
-      "syntax": 28
+      "syntax": 28,
+      "goal": "بيان منهج الدعوة للدعاة، من خلال قصة نوح.",
+      "revSeq": 71,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 72,
@@ -649,7 +862,10 @@
       "title": "The Jinn",
       "rev": "Makkah",
       "verses": 28,
-      "syntax": 28
+      "syntax": 28,
+      "goal": "إبطال دين المشركين، ببيان حال الجنّ وإيمانهم بعد سماع القرآن.",
+      "revSeq": 40,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 73,
@@ -658,7 +874,10 @@
       "title": "The One wrapped in Garments",
       "rev": "Makkah",
       "verses": 20,
-      "syntax": 20
+      "syntax": 20,
+      "goal": "بيان الأسباب المعينة على القيام بأعباء الدعوة.",
+      "revSeq": 3,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 74,
@@ -667,7 +886,10 @@
       "title": "The One Enveloped",
       "rev": "Makkah",
       "verses": 56,
-      "syntax": 56
+      "syntax": 56,
+      "goal": "الأمر بالاجتهاد في دعوة المكذبين، وإنذارهم بالآخرة والقرآن.",
+      "revSeq": 4,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 75,
@@ -676,7 +898,10 @@
       "title": "The Resurrection",
       "rev": "Makkah",
       "verses": 40,
-      "syntax": 40
+      "syntax": 40,
+      "goal": "إظهار قدرة الله على بعث الخلق وجمعهم يوم القيامة.",
+      "revSeq": 31,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 76,
@@ -685,7 +910,10 @@
       "title": "Man",
       "rev": "Madinah",
       "verses": 31,
-      "syntax": 31
+      "syntax": 31,
+      "goal": "تذكير الإنسان بأصل خلقه، ومصيره، وبيان ما أعد الله في الجنة لأوليائه.",
+      "revSeq": 98,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 77,
@@ -694,7 +922,10 @@
       "title": "Those sent forth",
       "rev": "Makkah",
       "verses": 50,
-      "syntax": 50
+      "syntax": 50,
+      "goal": "الوعيد للمكذبين بالويل يوم القيامة.",
+      "revSeq": 33,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 78,
@@ -703,7 +934,10 @@
       "title": "The Great News",
       "rev": "Makkah",
       "verses": 40,
-      "syntax": 40
+      "syntax": 40,
+      "goal": "بيان أدلة القدرة على البعث والتخويف من العاقبة.",
+      "revSeq": 80,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 79,
@@ -712,7 +946,10 @@
       "title": "Those who Pull Out",
       "rev": "Makkah",
       "verses": 46,
-      "syntax": 46
+      "syntax": 46,
+      "goal": "التذكير بالله واليوم الآخر.",
+      "revSeq": 81,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 80,
@@ -721,7 +958,10 @@
       "title": "He frowned",
       "rev": "Makkah",
       "verses": 42,
-      "syntax": 42
+      "syntax": 42,
+      "goal": "تذكير الكافرين المستغنين عن ربهم ببراهين البعث.",
+      "revSeq": 24,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 81,
@@ -730,7 +970,10 @@
       "title": "The Overthrowing",
       "rev": "Makkah",
       "verses": 29,
-      "syntax": 29
+      "syntax": 29,
+      "goal": "كمال القرآن في تذكير الأنفس باختلال الكون عند البعث.",
+      "revSeq": 7,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 82,
@@ -739,7 +982,10 @@
       "title": "The Cleaving",
       "rev": "Makkah",
       "verses": 19,
-      "syntax": 19
+      "syntax": 19,
+      "goal": "تحذير الإنسان من الاغترار ونسيان يوم القيامة.",
+      "revSeq": 82,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 83,
@@ -748,7 +994,10 @@
       "title": "Those Who Deal in Fraud",
       "rev": "Makkah",
       "verses": 36,
-      "syntax": 36
+      "syntax": 36,
+      "goal": "تحذير المكذبين الظالمين من يوم القيامة وبشارة المؤمنين به.",
+      "revSeq": 86,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 84,
@@ -757,7 +1006,10 @@
       "title": "The Splitting Asunder",
       "rev": "Makkah",
       "verses": 25,
-      "syntax": 25
+      "syntax": 25,
+      "goal": "تذكير الإنسان برجوعه لربه، وبيان ضعفه، وتقلّب الأحوال به.",
+      "revSeq": 83,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 85,
@@ -766,7 +1018,10 @@
       "title": "The Big Stars",
       "rev": "Makkah",
       "verses": 22,
-      "syntax": 22
+      "syntax": 22,
+      "goal": "بيان قوة الله وإحاطته الشاملة، ونصرته لأوليائه، والبطش بأعدائه.",
+      "revSeq": 27,
+      "surahClass": "طوال المفصل"
     },
     {
       "n": 86,
@@ -775,7 +1030,10 @@
       "title": "The Night-Comer",
       "rev": "Makkah",
       "verses": 17,
-      "syntax": 17
+      "syntax": 17,
+      "goal": "بيان قدرة الله وإحاطته في خلق الإنسان وإعادته.",
+      "revSeq": 36,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 87,
@@ -784,7 +1042,10 @@
       "title": "The Most High",
       "rev": "Makkah",
       "verses": 19,
-      "syntax": 19
+      "syntax": 19,
+      "goal": "تذكير النفس بالحياة الأخروية، وتخليصها من التعلقات الدنيوية.",
+      "revSeq": 8,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 88,
@@ -793,7 +1054,10 @@
       "title": "The Overwhelming",
       "rev": "Makkah",
       "verses": 26,
-      "syntax": 26
+      "syntax": 26,
+      "goal": "التذكير بالآخرة وما فيها من الثواب والعقاب، والنظر في براهين قدرة الله.",
+      "revSeq": 68,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 89,
@@ -802,7 +1066,10 @@
       "title": "The Dawn",
       "rev": "Makkah",
       "verses": 30,
-      "syntax": 30
+      "syntax": 30,
+      "goal": "بيان عاقبة الطغاة، والحكمة من الابتلاء، والتذكير بالآخرة.",
+      "revSeq": 10,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 90,
@@ -811,7 +1078,10 @@
       "title": "The City",
       "rev": "Makkah",
       "verses": 20,
-      "syntax": 20
+      "syntax": 20,
+      "goal": "بيان افتقار الإنسان وكبده وسبل نجاته.",
+      "revSeq": 35,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 91,
@@ -820,7 +1090,10 @@
       "title": "The Sun",
       "rev": "Makkah",
       "verses": 15,
-      "syntax": 15
+      "syntax": 15,
+      "goal": "التأكيد بأطول قسم في القرآن، على تعظيم تزكية النفس بالطاعات، وخسارة دسّها بالمعاصي.",
+      "revSeq": 26,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 92,
@@ -829,7 +1102,10 @@
       "title": "The Night",
       "rev": "Makkah",
       "verses": 21,
-      "syntax": 21
+      "syntax": 21,
+      "goal": "بيان أحوال الخلق في الإيمان والإنفاق وحال كل فريق.",
+      "revSeq": 9,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 93,
@@ -838,7 +1114,10 @@
       "title": "The Forenoon",
       "rev": "Makkah",
       "verses": 11,
-      "syntax": 11
+      "syntax": 11,
+      "goal": "بيان عناية الله بنبيه في أول أمره وآخره.",
+      "revSeq": 11,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 94,
@@ -847,7 +1126,10 @@
       "title": "The Opening Forth",
       "rev": "Makkah",
       "verses": 8,
-      "syntax": 8
+      "syntax": 8,
+      "goal": "المنة على النبي صلى الله عليه وسلم بتمام النعم المعنوية عليه.",
+      "revSeq": 12,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 95,
@@ -856,7 +1138,10 @@
       "title": "The Fig",
       "rev": "Makkah",
       "verses": 8,
-      "syntax": 8
+      "syntax": 8,
+      "goal": "امتنان الله على الإنسان باستقامة فطرته وخلقته، وكمال الرسالة الخاتمة.",
+      "revSeq": 28,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 96,
@@ -865,7 +1150,10 @@
       "title": "The Clot",
       "rev": "Makkah",
       "verses": 19,
-      "syntax": 19
+      "syntax": 19,
+      "goal": "الإنسان بين هدايته بالوحي وضلاله بالاستكبار والجهل.",
+      "revSeq": 1,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 97,
@@ -874,7 +1162,10 @@
       "title": "The Night of Decree",
       "rev": "Makkah",
       "verses": 5,
-      "syntax": 5
+      "syntax": 5,
+      "goal": "بيان فضل ليلة القدر.",
+      "revSeq": 25,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 98,
@@ -883,7 +1174,10 @@
       "title": "The Clear Evidence",
       "rev": "Madinah",
       "verses": 8,
-      "syntax": 8
+      "syntax": 8,
+      "goal": "بيان كمال الرسالة المحمدية ووضوحها.",
+      "revSeq": 100,
+      "surahClass": "أوساط المفصل"
     },
     {
       "n": 99,
@@ -892,7 +1186,10 @@
       "title": "The Earthquake",
       "rev": "Madinah",
       "verses": 8,
-      "syntax": 8
+      "syntax": 8,
+      "goal": "التذكير بأهوال القيامة ودقّة الحساب فيها.",
+      "revSeq": 93,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 100,
@@ -901,7 +1198,10 @@
       "title": "Those That Run",
       "rev": "Makkah",
       "verses": 11,
-      "syntax": 11
+      "syntax": 11,
+      "goal": "تحذير الإنسان من الجحود والطمع بتذكيره بالآخرة.",
+      "revSeq": 14,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 101,
@@ -910,7 +1210,10 @@
       "title": "The Striking Hour",
       "rev": "Makkah",
       "verses": 11,
-      "syntax": 11
+      "syntax": 11,
+      "goal": "قرع القلوب لاستحضار هول القيامة وأحوال الناس في موازينها.",
+      "revSeq": 30,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 102,
@@ -919,7 +1222,10 @@
       "title": "The piling Up",
       "rev": "Makkah",
       "verses": 8,
-      "syntax": 8
+      "syntax": 8,
+      "goal": "تذكير المتكاثرين واللاهين بالدنيا بالقبور والحساب.",
+      "revSeq": 16,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 103,
@@ -928,7 +1234,10 @@
       "title": "Time",
       "rev": "Makkah",
       "verses": 3,
-      "syntax": 3
+      "syntax": 3,
+      "goal": "أسباب النجاة من الخسارة.",
+      "revSeq": 13,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 104,
@@ -937,7 +1246,10 @@
       "title": "The Slanderer",
       "rev": "Makkah",
       "verses": 9,
-      "syntax": 9
+      "syntax": 9,
+      "goal": "التحذير من الاستهزاء بالمؤمنين اغترارًا بكثرة المال.",
+      "revSeq": 32,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 105,
@@ -946,7 +1258,10 @@
       "title": "The Elephant",
       "rev": "Makkah",
       "verses": 5,
-      "syntax": 5
+      "syntax": 5,
+      "goal": "بيان قدرة الله وبطشه بالكائدين لبيته المحرّم.",
+      "revSeq": 19,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 106,
@@ -955,7 +1270,10 @@
       "title": "Quraysh",
       "rev": "Makkah",
       "verses": 4,
-      "syntax": 4
+      "syntax": 4,
+      "goal": "بيان نعمة الله على قريش وحق الله عليهم.",
+      "revSeq": 29,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 107,
@@ -964,7 +1282,10 @@
       "title": "Small Kindnesses",
       "rev": "Makkah",
       "verses": 7,
-      "syntax": 7
+      "syntax": 7,
+      "goal": "بيان صفات المكذبين بالدين.",
+      "revSeq": 17,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 108,
@@ -973,7 +1294,10 @@
       "title": "A River in Paradise",
       "rev": "Makkah",
       "verses": 3,
-      "syntax": 3
+      "syntax": 3,
+      "goal": "بيان منّة الله على نبيه صلى الله عليه وسلم بالخير الكثير؛ والدفاع عنه.",
+      "revSeq": 15,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 109,
@@ -982,7 +1306,10 @@
       "title": "The Disbelievers",
       "rev": "Makkah",
       "verses": 6,
-      "syntax": 6
+      "syntax": 6,
+      "goal": "البراءة من الكفر وأهله.",
+      "revSeq": 18,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 110,
@@ -991,7 +1318,10 @@
       "title": "The Help",
       "rev": "Madinah",
       "verses": 3,
-      "syntax": 3
+      "syntax": 3,
+      "goal": "بشارة النبي صلى الله عليه وسلم بالنصر وختام الرسالة.",
+      "revSeq": 114,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 111,
@@ -1000,7 +1330,10 @@
       "title": "The Palm Fibre",
       "rev": "Makkah",
       "verses": 5,
-      "syntax": 5
+      "syntax": 5,
+      "goal": "بيان خسران أبي لهب وزوجه.",
+      "revSeq": 6,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 112,
@@ -1009,7 +1342,10 @@
       "title": "Sincerity",
       "rev": "Makkah",
       "verses": 4,
-      "syntax": 4
+      "syntax": 4,
+      "goal": "تفرد الله بالألوهية والكمال وتنزهه عن الولد والوالد والنظير.",
+      "revSeq": 22,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 113,
@@ -1018,7 +1354,10 @@
       "title": "The Daybreak",
       "rev": "Makkah",
       "verses": 5,
-      "syntax": 5
+      "syntax": 5,
+      "goal": "الحث على الاعتصام بالله من الشرور.",
+      "revSeq": 20,
+      "surahClass": "قصار المفصل"
     },
     {
       "n": 114,
@@ -1027,7 +1366,10 @@
       "title": "Mankind",
       "rev": "Makkah",
       "verses": 6,
-      "syntax": 6
+      "syntax": 6,
+      "goal": "الحث على الاستعاذة بالله من شر الشيطان ووسوسته.",
+      "revSeq": 21,
+      "surahClass": "قصار المفصل"
     }
   ],
   "stats": {
@@ -1036,7 +1378,10 @@
     "syntaxVerses": 6236,
     "syntaxGraphs": 11596,
     "partialChapters": [],
-    "chaptersWithoutSyntax": []
+    "chaptersWithoutSyntax": [],
+    "asbabVerses": 201,
+    "qiraatWords": 29605,
+    "qiraatVerses": 5948
   },
   "sources": [
     {
@@ -1146,6 +1491,24 @@
       "description": "Curated anatomical breakdowns of pivotal Quranic rhetorical devices across ‘Ilm al-Maʿānī (iltifāt, qasr), ‘Ilm al-Bayān (istiʿārah, kināyah), and ‘Ilm al-Badīʿ (jinās, tibāq, muqābalah).",
       "license": "Public Domain / Classical Heritage.",
       "url": "https://quranenc.com/"
+    },
+    {
+      "id": "asbab-muharrar",
+      "title": "Al-Muḥarrar fī Asbāb Nuzūl al-Qur'ān",
+      "kind": "asbab",
+      "attribution": "Dr. Khālid ibn Sulaymān al-Muzaynī (Tafsir Center for Quranic Studies / Dār Ibn al-Jawzī)",
+      "description": "Critical investigation of authentic causes of revelation across the nine primary hadith books, with isnād evaluation and hadith grading.",
+      "license": "CC BY 4.0",
+      "url": "https://tafsir.net/"
+    },
+    {
+      "id": "canonical-qiraat",
+      "title": "Ten Canonical Qirāʾāt Variants & Exegesis",
+      "kind": "qiraat",
+      "attribution": "Tafsir Center for Quranic Studies, based on Al-Nashr fī al-Qirā'āt al-'Ashr (Ibn al-Jazarī)",
+      "description": "Per-word canonical reading variants across the 10 Qurrā' and 20 Ruwāt with linguistic and semantic explanatory notes.",
+      "license": "CC BY 4.0",
+      "url": "https://tafsir.net/"
     }
   ]
 }

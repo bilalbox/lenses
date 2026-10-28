@@ -1,7 +1,9 @@
 import type {
+	AsbabData,
 	Manifest,
 	RhetoricEntry,
 	SurahFile,
+	SurahQiraatFile,
 	SurahSyntaxFile,
 	VerseRow,
 	WordIndex,
@@ -12,6 +14,8 @@ let manifestPromise: Promise<Manifest> | null = null;
 let versesPromise: Promise<VerseRow[]> | null = null;
 let wordsPromise: Promise<WordIndex> | null = null;
 let rhetoricPromise: Promise<RhetoricEntry[]> | null = null;
+let asbabPromise: Promise<AsbabData> | null = null;
+const qiraatSurahs = new Map<number, Promise<SurahQiraatFile>>();
 
 async function getJson<T>(url: string): Promise<T> {
 	const response = await fetch(url);
@@ -63,6 +67,21 @@ export function loadWordIndex(): Promise<WordIndex> {
 export function loadRhetoric(): Promise<RhetoricEntry[]> {
 	rhetoricPromise ??= getJson<RhetoricEntry[]>("/data/quran/rhetoric.json");
 	return rhetoricPromise;
+}
+
+export function loadAsbab(): Promise<AsbabData> {
+	asbabPromise ??= getJson<AsbabData>("/data/quran/asbab.json");
+	return asbabPromise;
+}
+
+export function loadSurahQiraat(n: number): Promise<SurahQiraatFile> {
+	const cached = qiraatSurahs.get(n);
+	if (cached) return cached;
+	const pending = getJson<SurahQiraatFile>(
+		`/data/quran/qiraat/${String(n).padStart(3, "0")}.json`,
+	);
+	qiraatSurahs.set(n, pending);
+	return pending;
 }
 
 const translationCache = new Map<string, Promise<string>>();

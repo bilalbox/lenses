@@ -183,6 +183,8 @@ export const id: Translations = {
 			tafsir: "Tafsir",
 			translation: "Terjemahan",
 			rhetoric: "Retorika (Balaghah)",
+			asbab: "Asbabun Nuzul",
+			qiraat: "Qira'at Asyrah",
 		},
 		items: {
 			"qac-morphology": {
@@ -209,6 +211,22 @@ export const id: Translations = {
 				description:
 					"Pohon ketergantungan sintaksis dan frasa konstituen lengkap untuk seluruh 6.236 ayat Al-Qur'an dalam 114 surah.",
 				license: "Lisensi MIT.",
+			},
+			"asbab-muharrar": {
+				title: "Al-Muharrar fi Asbab Nuzulil Qur'an",
+				attribution:
+					"Dr. Khalid bin Sulaiman Al-Muzaini (Markaz Tafsir / Dar Ibnul Jauzi)",
+				description:
+					"Kajian kritis sanad dan derajat hadis asbabun nuzul dari sembilan kitab induk hadis.",
+				license: "Lisensi CC BY 4.0.",
+			},
+			"canonical-qiraat": {
+				title: "Variasi Sepuluh Qira'at Mutawatirah & Maknanya",
+				attribution:
+					"Pusat Studi Al-Qur'an Tafsir Center, berbasis kitab An-Nasyr karya Ibnul Jazari",
+				description:
+					"Variasi bacaan 10 Qira'at mutawatir per kata beserta kaidah fonetis dan penjelasan maknanya.",
+				license: "Lisensi CC BY 4.0.",
 			},
 			tanzil: {
 				title: "Teks Al-Qur'an Rasm Utsmani Tanzil",

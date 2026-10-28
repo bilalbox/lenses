@@ -84,6 +84,9 @@ export interface SurahFile {
 	phonetic: string;
 	title: string;
 	rev: string;
+	goal?: string;
+	revSeq?: number;
+	surahClass?: string;
 	verses: Verse[];
 }
 
@@ -95,6 +98,9 @@ export interface UnitSummary {
 	rev: string;
 	verses: number;
 	syntax: number;
+	revSeq?: number;
+	goal?: string;
+	surahClass?: string;
 }
 
 export interface SourceMeta {
@@ -119,6 +125,9 @@ export interface Manifest {
 		syntaxGraphs: number;
 		partialChapters: { n: number; syntax: number; verses: number }[];
 		chaptersWithoutSyntax: number[];
+		asbabVerses?: number;
+		qiraatWords?: number;
+		qiraatVerses?: number;
 	};
 	sources: SourceMeta[];
 }
@@ -258,4 +267,36 @@ export interface VerseSyntax {
 export interface SurahSyntaxFile {
 	surah: number;
 	verses: VerseSyntax[];
+}
+
+export interface AsbabNarration {
+	id: number;
+	text: string;
+	takhrij: string;
+	grade: "sahih" | "hasan" | "daif" | "other";
+	gradeLabel: string;
+}
+
+export type AsbabData = Record<string, AsbabNarration[]>;
+
+export interface QiraatRule {
+	readers: string[];
+	rule: string;
+}
+
+export interface WordQiraat {
+	w: number;
+	q?: QiraatRule[];
+	wasl?: QiraatRule[];
+	note?: string;
+}
+
+export interface AyahQiraat {
+	v: number;
+	words: WordQiraat[];
+}
+
+export interface SurahQiraatFile {
+	surah: number;
+	verses: AyahQiraat[];
 }
