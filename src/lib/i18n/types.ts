@@ -120,6 +120,23 @@ export interface Translations {
 		asbabDrawerTitle: string;
 		nahwTabTitle: string;
 		treebankNoorBayan: string;
+		mutashabihBadge: (count: number) => string;
+		mutashabihSectionTitle: string;
+		mutashabihCounterpartAyah: string;
+		mutashabihCurrentAyah: string;
+		mutashabihMatchScore: (percent: number) => string;
+		mutashabihDabtTitle: string;
+		mutashabihTawjihTitle: string;
+		mutashabihJumpToAyah: string;
+		mutashabihCategoryIdentical: string;
+		mutashabihCategoryOpening: string;
+		mutashabihCategoryEnding: string;
+		mutashabihCategoryPhrase: string;
+		mutashabihCategorySwap: string;
+		mutashabihLegendExact: string;
+		mutashabihLegendDiff: string;
+		mutashabihLegendExtra: string;
+		mutashabihSurahDistance: (count: number) => string;
 	};
 	sheet: {
 		analysisAria: (wordNumber: number) => string;

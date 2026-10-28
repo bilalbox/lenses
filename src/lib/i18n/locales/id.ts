@@ -112,6 +112,26 @@ export const id: Translations = {
 		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
 		nahwTabTitle: "Nahwu & Pohon Sintaksis",
 		treebankNoorBayan: "Treebank Al-Qur'an NoorBayan",
+		mutashabihBadge: (count: number) =>
+			`Kemiripan Redaksi (${formatNum(count, "id")})`,
+		mutashabihSectionTitle: "Al-Mutasyabih al-Lafzhi (Kemiripan Redaksi Ayat)",
+		mutashabihCounterpartAyah: "Ayat Pembanding",
+		mutashabihCurrentAyah: "Ayat Ini",
+		mutashabihMatchScore: (percent: number) =>
+			`Tingkat Kemiripan: ${formatNum(percent, "id")}%`,
+		mutashabihDabtTitle: "Kaidah Hafalan (Dhabt)",
+		mutashabihTawjihTitle: "Tawjih Balaghah & Perbedaan",
+		mutashabihJumpToAyah: "Buka Ayat",
+		mutashabihCategoryIdentical: "Ayat Serupa Penuh",
+		mutashabihCategoryOpening: "Awal Ayat Sama",
+		mutashabihCategoryEnding: "Akhir Ayat Sama",
+		mutashabihCategoryPhrase: "Frasa Serupa",
+		mutashabihCategorySwap: "Perubahan Urutan Kata",
+		mutashabihLegendExact: "Sama Persis",
+		mutashabihLegendDiff: "Perbedaan Kata",
+		mutashabihLegendExtra: "Tambahan / Pengurangan",
+		mutashabihSurahDistance: (count: number) =>
+			`Jarak: ${formatNum(count, "id")} surah`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>

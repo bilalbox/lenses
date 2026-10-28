@@ -4436,3 +4436,417 @@ main {
 		display: block;
 	}
 }
+
+/* ============================================================================
+ * Al-Mutashābih al-Lafẓī (Verbal Similarities & Counterpart Verse Comparison)
+ * ============================================================================ */
+
+.mutashabih-badge-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.3rem 0.65rem;
+	font-size: 0.76rem;
+	font-weight: 600;
+	color: var(--teal);
+	background: color-mix(in srgb, var(--teal) 10%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 28%, transparent);
+	border-radius: 999px;
+	cursor: pointer;
+	transition: all var(--duration-fast) ease;
+}
+
+.mutashabih-badge-button:hover {
+	background: color-mix(in srgb, var(--teal) 18%, var(--paper));
+	border-color: var(--teal);
+	transform: translateY(-1px);
+}
+
+.mutashabih-badge-icon {
+	font-size: 0.85rem;
+}
+
+.mutashabih-block {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	padding: 0.75rem 1rem;
+	margin-block: 1rem;
+	box-shadow: var(--shadow-sm);
+}
+
+.mutashabih-block summary {
+	font-weight: 700;
+	font-size: 0.95rem;
+	cursor: pointer;
+	color: var(--ink);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.mutashabih-summary-label {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.mutashabih-summary-count {
+	font-size: 0.76rem;
+	font-weight: 700;
+	padding: 0.15rem 0.55rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--teal) 14%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 32%, transparent);
+}
+
+.mutashabih-section {
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+	margin-top: 1rem;
+}
+
+.mutashabih-header-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.mutashabih-single-counterpart-label {
+	font-size: 0.88rem;
+	font-weight: 700;
+	color: var(--ink);
+}
+
+.mutashabih-match-badge {
+	font-size: 0.76rem;
+	font-weight: 700;
+	padding: 0.2rem 0.6rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--gold) 15%, var(--paper));
+	color: var(--gold-dark, #b45309);
+	border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+.mutashabih-counterpart-pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.45rem;
+	padding-bottom: 0.25rem;
+}
+
+.mutashabih-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.3rem 0.75rem;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	background: var(--paper);
+	color: var(--ink-soft);
+	font-size: 0.78rem;
+	cursor: pointer;
+	transition: all var(--duration-fast) ease;
+}
+
+.mutashabih-pill:hover {
+	border-color: var(--teal);
+	color: var(--teal);
+}
+
+.mutashabih-pill.is-active {
+	background: var(--teal);
+	color: #fff;
+	border-color: var(--teal);
+	font-weight: 600;
+}
+
+.mutashabih-pill-score {
+	font-size: 0.72rem;
+	opacity: 0.85;
+}
+
+/* Arc diagram */
+.mutashabih-arc-wrapper {
+	width: 100%;
+	background: color-mix(in srgb, var(--paper) 70%, var(--bg));
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.4rem 0.8rem;
+	border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+.mutashabih-arc-svg {
+	width: 100%;
+	height: auto;
+	max-height: 64px;
+	overflow: visible;
+}
+
+.mushaf-track-line {
+	stroke: color-mix(in srgb, var(--line) 80%, transparent);
+	stroke-width: 2px;
+	stroke-linecap: round;
+}
+
+.mutashabih-curve-path {
+	fill: none;
+	stroke: var(--teal);
+	stroke-width: 2.5px;
+	stroke-linecap: round;
+	stroke-dasharray: 4 2;
+}
+
+.arc-pin.is-source {
+	fill: var(--teal);
+	stroke: var(--paper);
+	stroke-width: 1.5px;
+}
+
+.arc-pin.is-target {
+	fill: var(--gold);
+	stroke: var(--paper);
+	stroke-width: 1.5px;
+}
+
+.arc-center-label {
+	font-size: 10px;
+	font-weight: 700;
+	fill: var(--ink);
+	font-family: var(--sans);
+}
+
+.arc-coord-label {
+	font-size: 9px;
+	fill: var(--ink-soft);
+	font-family: var(--mono);
+}
+
+/* Dual verse comparison grid */
+.mutashabih-comparison-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+}
+
+@media (max-width: 720px) {
+	.mutashabih-comparison-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.mutashabih-card {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.9rem 1.1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.mutashabih-card.is-source {
+	border-inline-start: 3px solid var(--teal);
+}
+
+.mutashabih-card.is-target {
+	border-inline-start: 3px solid var(--gold);
+}
+
+.mutashabih-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.mutashabih-verse-tag {
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ink-soft);
+}
+
+.mutashabih-coord-tag {
+	font-family: var(--mono);
+	font-size: 0.85rem;
+	color: var(--ink);
+}
+
+.mutashabih-target-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.mutashabih-jump-btn {
+	padding: 0.18rem 0.55rem;
+	font-size: 0.72rem;
+	font-weight: 600;
+	border-radius: 4px;
+	background: var(--bg);
+	border: 1px solid var(--line);
+	color: var(--teal);
+	cursor: pointer;
+	transition: all var(--duration-fast) ease;
+}
+
+.mutashabih-jump-btn:hover {
+	background: var(--teal);
+	color: #fff;
+	border-color: var(--teal);
+}
+
+/* Word tokens flow */
+.mutashabih-tokens-flow {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem 0.45rem;
+	line-height: 2.2;
+}
+
+.mutashabih-word-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.15rem 0.4rem;
+	border-radius: 6px;
+	background: transparent;
+	border: 1px solid transparent;
+	cursor: pointer;
+	transition: all var(--duration-fast) ease;
+}
+
+.mutashabih-word-chip .word-text {
+	font-family: var(--arabic);
+	font-size: 1.4rem;
+	color: var(--ink);
+}
+
+.mutashabih-word-chip.status-exact {
+	background: transparent;
+}
+
+.mutashabih-word-chip.status-exact:hover {
+	background: color-mix(in srgb, var(--line) 40%, transparent);
+}
+
+.mutashabih-word-chip.status-haraka {
+	border-bottom: 2px dotted var(--teal);
+}
+
+.mutashabih-word-chip.status-diff {
+	background: var(--gold-soft);
+	border-color: color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.mutashabih-word-chip.status-diff .word-text {
+	font-weight: 700;
+	color: var(--gold-dark, #b45309);
+}
+
+.mutashabih-word-chip.status-extra {
+	background: var(--teal-soft);
+	border: 1.5px dashed color-mix(in srgb, var(--teal) 50%, transparent);
+}
+
+.mutashabih-word-chip.is-linked-hover {
+	box-shadow: 0 0 0 2px var(--teal);
+	transform: translateY(-1.5px);
+}
+
+/* Legend */
+.mutashabih-legend {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1.25rem;
+	flex-wrap: wrap;
+	padding: 0.3rem 0;
+	font-size: 0.74rem;
+	color: var(--ink-soft);
+}
+
+.legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.legend-swatch {
+	width: 14px;
+	height: 14px;
+	border-radius: 3px;
+	display: inline-block;
+}
+
+.swatch-exact {
+	border: 1px solid var(--line);
+	background: var(--paper);
+}
+
+.swatch-diff {
+	background: var(--gold-soft);
+	border: 1.5px solid var(--gold);
+}
+
+.swatch-extra {
+	background: var(--teal-soft);
+	border: 1.5px dashed var(--teal);
+}
+
+/* Exegesis cards */
+.mutashabih-exegesis-card {
+	background: var(--paper);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.9rem 1.1rem;
+	border: 1px solid var(--line);
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+.mutashabih-exegesis-card.is-dabt {
+	border-inline-start: 4px solid var(--gold);
+	background: color-mix(in srgb, var(--gold) 5%, var(--paper));
+}
+
+.mutashabih-exegesis-card.is-tawjih {
+	border-inline-start: 4px solid var(--teal);
+	background: color-mix(in srgb, var(--teal) 5%, var(--paper));
+}
+
+.exegesis-header {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+}
+
+.exegesis-header h4 {
+	margin: 0;
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: var(--ink);
+}
+
+.exegesis-icon {
+	font-size: 0.95rem;
+}
+
+.exegesis-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.12rem;
+	line-height: 1.8;
+	color: var(--ink);
+}
+
+.exegesis-text-en {
+	margin: 0;
+	font-size: 0.85rem;
+	line-height: 1.6;
+	color: var(--ink-soft);
+}

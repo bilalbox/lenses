@@ -113,6 +113,26 @@ export const en: Translations = {
 		asbabDrawerTitle: "Causes of Revelation (Asbāb al-Nuzūl)",
 		nahwTabTitle: "Nahw & Syntax Tree",
 		treebankNoorBayan: "NoorBayan Quranic Treebank",
+		mutashabihBadge: (count: number) =>
+			`Verbal Similarities (${formatNum(count, "en")})`,
+		mutashabihSectionTitle: "Al-Mutashābih al-Lafẓī (Verbal Similarities)",
+		mutashabihCounterpartAyah: "Counterpart Ayah",
+		mutashabihCurrentAyah: "Current Ayah",
+		mutashabihMatchScore: (percent: number) =>
+			`Match: ${formatNum(percent, "en")}%`,
+		mutashabihDabtTitle: "Memorization Anchor (Ḍabṭ)",
+		mutashabihTawjihTitle: "Rhetorical Exegesis (Tawjīh)",
+		mutashabihJumpToAyah: "Jump to Ayah",
+		mutashabihCategoryIdentical: "Identical Verse",
+		mutashabihCategoryOpening: "Shared Opening",
+		mutashabihCategoryEnding: "Shared Ending",
+		mutashabihCategoryPhrase: "Shared Phrase",
+		mutashabihCategorySwap: "Word Order Inversion",
+		mutashabihLegendExact: "Identical",
+		mutashabihLegendDiff: "Substitution",
+		mutashabihLegendExtra: "Addition / Omission",
+		mutashabihSurahDistance: (count: number) =>
+			`${formatNum(count, "en")} surahs apart`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>

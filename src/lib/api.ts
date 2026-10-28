@@ -3,6 +3,7 @@ import type {
 	Manifest,
 	RhetoricEntry,
 	SurahFile,
+	SurahMutashabihFile,
 	SurahQiraatFile,
 	SurahSyntaxFile,
 	VerseRow,
@@ -81,6 +82,18 @@ export function loadSurahQiraat(n: number): Promise<SurahQiraatFile> {
 		`/data/quran/qiraat/${String(n).padStart(3, "0")}.json`,
 	);
 	qiraatSurahs.set(n, pending);
+	return pending;
+}
+
+const mutashabihSurahs = new Map<number, Promise<SurahMutashabihFile>>();
+
+export function loadSurahMutashabih(n: number): Promise<SurahMutashabihFile> {
+	const cached = mutashabihSurahs.get(n);
+	if (cached) return cached;
+	const pending = getJson<SurahMutashabihFile>(
+		`/data/quran/mutashabih/${String(n).padStart(3, "0")}.json`,
+	);
+	mutashabihSurahs.set(n, pending);
 	return pending;
 }
 
