@@ -30,6 +30,7 @@ import { AsbabDrawer } from "./AsbabDrawer";
 import { DependencyTree } from "./DependencyTree";
 import { MutashabihSection } from "./MutashabihSection";
 import { NoorBayanTree } from "./NoorBayanTree";
+import { StructurePrototypeHost } from "./prototype/StructurePrototypeHost";
 import { WordSheet } from "./WordSheet";
 
 interface Props {
@@ -451,6 +452,10 @@ function VerseBody({
 				mutashabihOpen={mutashabihOpen}
 				onOpenMutashabih={handleOpenMutashabih}
 				hasBalagha={hasBalagha}
+			/>
+			<StructurePrototypeHost
+				currentSura={sura}
+				onJumpSurah={(targetSura) => onNavigate?.(targetSura, 1)}
 			/>
 			<p className="verse-line" dir="rtl" lang="ar">
 				{segments.map((segment) =>

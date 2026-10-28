@@ -4898,3 +4898,455 @@ main {
 	line-height: 1.6;
 	color: var(--ink-soft);
 }
+
+/* ── Structure / Munāsabāt prototype (#16) ───────────────────────── */
+.prototype-floating-bar {
+	position: fixed;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px;
+	background: rgba(18, 22, 28, 0.94);
+	color: #fff;
+	border-radius: 9999px;
+	box-shadow:
+		0 12px 32px rgba(0, 0, 0, 0.35),
+		0 0 0 1px rgba(255, 255, 255, 0.15);
+	backdrop-filter: blur(12px);
+	font-family: system-ui, sans-serif;
+	font-size: 13px;
+	max-width: calc(100vw - 24px);
+}
+.prototype-switcher-btn {
+	background: transparent;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 6px;
+}
+.prototype-switcher-pills {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+.prototype-switcher-pill {
+	border: none;
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
+	font-weight: 500;
+	padding: 4px 10px;
+	border-radius: 9999px;
+	cursor: pointer;
+}
+.prototype-switcher-pill.is-on {
+	background: var(--gold);
+	color: #12161c;
+	font-weight: 700;
+}
+.prototype-switcher-desc {
+	border-inline-start: 1px solid rgba(255, 255, 255, 0.2);
+	padding-inline-start: 8px;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 11px;
+	max-width: 220px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.structure-prototype-host {
+	margin: 1.25rem 0 1.75rem;
+	padding: 1rem 1.1rem 1.25rem;
+	background: color-mix(in srgb, var(--paper) 88%, var(--teal-soft));
+	border: 1px dashed color-mix(in srgb, var(--gold) 55%, var(--line));
+	border-radius: var(--radius);
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+.structure-prototype-banner {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+.structure-prototype-banner > div:first-child {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+.structure-prototype-mark {
+	align-self: flex-start;
+	font-size: 0.65rem;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	padding: 0.15rem 0.45rem;
+	border-radius: 4px;
+	background: var(--gold);
+	color: #12161c;
+}
+.structure-prototype-banner strong {
+	font-family: var(--serif);
+	font-size: 0.95rem;
+}
+.structure-prototype-banner small {
+	color: var(--muted);
+	font-size: 0.78rem;
+}
+.structure-surah-pills {
+	display: flex;
+	gap: 0.4rem;
+	flex-wrap: wrap;
+}
+.structure-surah-pills button {
+	border: 1px solid var(--line);
+	background: var(--paper);
+	color: var(--ink);
+	border-radius: 999px;
+	padding: 0.3rem 0.7rem;
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+.structure-surah-pills button.is-on {
+	background: var(--teal);
+	border-color: var(--teal);
+	color: var(--paper);
+	font-weight: 700;
+}
+.structure-prototype-title h2 {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: clamp(1.6rem, 3vw, 2.1rem);
+	font-weight: 400;
+	color: var(--ink);
+}
+.structure-prototype-title p {
+	margin: 0.2rem 0 0;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+.structure-variant {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 4px);
+	padding: 0.85rem;
+}
+.structure-svg {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+.structure-radar-svg {
+	max-width: 440px;
+	margin: 0 auto;
+}
+.structure-svg-label {
+	font-family: var(--sans);
+	font-size: 11px;
+}
+.structure-block-legend {
+	list-style: none;
+	margin: 0.85rem 0 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 0.45rem;
+}
+.structure-block-legend.is-compact {
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+.structure-legend-chip {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.1rem;
+	padding: 0.45rem 0.55rem;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: start;
+	font: inherit;
+}
+.structure-legend-chip strong {
+	font-size: 0.85rem;
+}
+.structure-legend-chip span {
+	font-size: 0.7rem;
+	opacity: 0.8;
+}
+.structure-legend-chip em {
+	font-style: normal;
+	font-size: 0.72rem;
+	color: var(--ink);
+	opacity: 0.9;
+}
+.structure-legend-chip.is-on {
+	box-shadow: var(--shadow-soft);
+}
+
+.diptych-stage {
+	display: grid;
+	grid-template-columns: 1fr minmax(140px, 180px) 1fr;
+	gap: 0.75rem;
+	align-items: stretch;
+}
+@media (max-width: 820px) {
+	.diptych-stage {
+		grid-template-columns: 1fr;
+	}
+}
+.diptych-hemisphere {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	min-width: 0;
+}
+.diptych-hemisphere header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.5rem;
+	padding: 0 0.15rem;
+}
+.diptych-hemisphere header span {
+	font-weight: 700;
+	font-size: 0.8rem;
+}
+.diptych-hemisphere header small {
+	color: var(--muted);
+	font-size: 0.7rem;
+}
+.diptych-hemisphere ol {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+.diptych-panel {
+	width: 100%;
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-areas:
+		"id range"
+		"label label"
+		"ar ar"
+		"pair pair";
+	gap: 0.15rem 0.5rem;
+	padding: 0.55rem 0.65rem;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	cursor: pointer;
+	text-align: start;
+	font: inherit;
+	transition: opacity var(--duration-fast) var(--ease-out);
+}
+.diptych-panel.is-on {
+	box-shadow: var(--shadow-soft);
+}
+.diptych-id {
+	grid-area: id;
+	font-weight: 800;
+	font-size: 0.95rem;
+}
+.diptych-range {
+	grid-area: range;
+	font-size: 0.7rem;
+	color: var(--muted);
+	justify-self: end;
+}
+.diptych-label {
+	grid-area: label;
+	font-size: 0.8rem;
+}
+.diptych-label-ar {
+	grid-area: ar;
+	font-family: var(--arabic);
+	font-size: 0.95rem;
+	color: var(--ink);
+}
+.diptych-pair {
+	grid-area: pair;
+	font-size: 0.7rem;
+	color: var(--muted);
+}
+.diptych-keystone {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.diptych-keystone-inner {
+	width: 100%;
+	padding: 1rem 0.75rem;
+	border-radius: 16px;
+	border: 2px solid var(--gold);
+	background: color-mix(in srgb, var(--gold) 14%, var(--paper));
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	box-shadow: var(--shadow-soft);
+}
+.diptych-star {
+	font-size: 1.2rem;
+	color: var(--gold);
+}
+.diptych-keystone-inner strong {
+	font-size: 1.1rem;
+	color: var(--gold);
+}
+.diptych-keystone-inner p {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.05rem;
+	line-height: 1.5;
+}
+.diptych-keystone-inner small {
+	color: var(--muted);
+	font-size: 0.72rem;
+}
+.diptych-keystone-inner em {
+	font-style: normal;
+	font-size: 0.68rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--gold);
+}
+.diptych-hint {
+	margin: 0.75rem 0 0;
+	font-size: 0.78rem;
+	color: var(--muted);
+	text-align: center;
+}
+
+.munasabat-card {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 4px);
+	padding: 1rem 1.1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+.munasabat-card-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+.munasabat-eyebrow {
+	margin: 0;
+	font-size: 0.7rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--muted);
+	font-weight: 700;
+}
+.munasabat-card-head h3 {
+	margin: 0.15rem 0 0;
+	font-family: var(--serif);
+	font-size: 1.15rem;
+}
+.munasabat-ar-names {
+	margin: 0.2rem 0 0;
+	font-family: var(--arabic);
+	font-size: 1.15rem;
+}
+.munasabat-bridge-badge {
+	align-self: flex-start;
+	font-size: 0.7rem;
+	font-weight: 700;
+	padding: 0.25rem 0.55rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--indigo) 14%, var(--paper));
+	color: var(--indigo);
+	border: 1px solid color-mix(in srgb, var(--indigo) 35%, var(--line));
+}
+.munasabat-exegesis {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 0.75rem;
+}
+.munasabat-quote {
+	padding: 0.8rem 0.9rem;
+	border-radius: 12px;
+	border: 1px solid var(--line);
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+.munasabat-quote.is-suyuti {
+	border-inline-start: 4px solid var(--teal);
+	background: color-mix(in srgb, var(--teal) 6%, var(--paper));
+}
+.munasabat-quote.is-biqai {
+	border-inline-start: 4px solid var(--gold);
+	background: color-mix(in srgb, var(--gold) 6%, var(--paper));
+}
+.munasabat-quote header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+.munasabat-source-badge {
+	font-size: 0.72rem;
+	font-weight: 700;
+}
+.munasabat-quote header small {
+	color: var(--muted);
+	font-size: 0.7rem;
+}
+.munasabat-quote-ar {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.05rem;
+	line-height: 1.85;
+}
+.munasabat-quote-en {
+	margin: 0;
+	font-size: 0.82rem;
+	line-height: 1.55;
+	color: var(--muted);
+}
+.munasabat-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+.munasabat-jump {
+	border: none;
+	background: var(--teal);
+	color: var(--paper);
+	font-weight: 700;
+	font-size: 0.82rem;
+	padding: 0.45rem 0.9rem;
+	border-radius: 999px;
+	cursor: pointer;
+}
+.structure-state-dump {
+	font-size: 0.75rem;
+	color: var(--muted);
+}
+.structure-state-dump pre {
+	margin: 0.4rem 0 0;
+	padding: 0.6rem 0.75rem;
+	background: var(--bg-2);
+	border-radius: 8px;
+	overflow: auto;
+	max-height: 180px;
+}
+.structure-loading {
+	margin: 0;
+	color: var(--muted);
+	font-size: 0.9rem;
+}

@@ -343,3 +343,60 @@ export interface SurahMutashabihFile {
 	sura: number;
 	verses: VerseMutashabihEntry[];
 }
+
+export type StructureRole =
+	| "outer_frame_open"
+	| "outer_frame_close"
+	| "frame"
+	| "body"
+	| "pivot"
+	| "center"
+	| "narrative_1"
+	| "narrative_2"
+	| "narrative_3"
+	| "narrative_4"
+	| "transition_1"
+	| "transition_2"
+	| "transition_3"
+	| "seam"
+	| "hinge"
+	| "addendum";
+
+export interface StructureBlock {
+	id: string; // "A", "B", "C", "D", "PIVOT", "C′", "B′", "A′"
+	v: [number, number]; // [startAyah, endAyah] inclusive
+	role: StructureRole;
+	label: string; // English thematic label
+	labelAr?: string; // Arabic thematic label
+	pairId?: string; // Corresponding block ID (e.g. "A′" for "A")
+}
+
+export interface SurahStructureFile {
+	sura: number;
+	nameAr: string;
+	nameEn: string;
+	verseCount: number;
+	family: {
+		id: number;
+		name: string;
+		description: string;
+	};
+	pivot: {
+		verse: string; // "142–152 (axis: v.143)"
+		offset: number; // -0.0017
+		centerLogic: "single_concentration" | "compound_seam";
+		function: string; // "COMMAND_LEGISLATION", "THEOLOGICAL_DECLARATION", etc.
+	};
+	form: "compressed" | "distributed";
+	semantic: "concentrated" | "diffuse" | "transitional";
+	blocks: StructureBlock[];
+	transitionToNext?: {
+		targetSura: number;
+		targetNameAr: string;
+		targetNameEn: string;
+		suyutiLinkAr: string; // from Tanāsuq al-Durar
+		suyutiLinkEn: string;
+		biqaiSummaryAr?: string; // from Naẓm al-Durar
+		biqaiSummaryEn?: string;
+	};
+}
