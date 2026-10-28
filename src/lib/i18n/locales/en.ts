@@ -166,7 +166,9 @@ export const en: Translations = {
 			chStart: number,
 			chEnd: number,
 		) =>
-			`Morphology covers all ${formatNum(words, "en")} words. The dependency treebank covers ${formatNum(syntaxVerses, "en")} verses${partialText}. Chapters ${formatNum(chStart, "en")}–${formatNum(chEnd, "en")} have no corpus syntax in this export. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`,
+			chStart && chEnd
+				? `Morphology covers all ${formatNum(words, "en")} words. The dependency treebank covers ${formatNum(syntaxVerses, "en")} verses${partialText}. Chapters ${formatNum(chStart, "en")}–${formatNum(chEnd, "en")} have no corpus syntax in this export. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`
+				: `Morphology covers all ${formatNum(words, "en")} words. The NoorBayan dependency treebank covers all 114 surahs (${formatNum(syntaxVerses, "en")} verses) with full dependency and constituent tree analysis. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`,
 		rhetoricCoverageHeading: "Rhetorical Anatomy Coverage",
 		rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
 			`The Rhetoric Anatomy Studio covers ${formatNum(versesCount, "en")} analyzed verses across ${formatNum(surasCount, "en")} surahs. This includes compound similes deconstructed into 4-element formulas (Nashir et al. 2026), syntactic ellipsis with scholarly reconstructed taqdīr (EEF 2025), and classical balāghah masterpieces across ‘Ilm al-Maʿānī, al-Bayān, and al-Badīʿ.`,

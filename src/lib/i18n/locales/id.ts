@@ -166,7 +166,9 @@ export const id: Translations = {
 			chStart: number,
 			chEnd: number,
 		) =>
-			`Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis mencakup ${formatNum(syntaxVerses, "id")} ayat${partialText}. Surah ${formatNum(chStart, "id")}–${formatNum(chEnd, "id")} belum memiliki sintaksis korpus. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`,
+			chStart && chEnd
+				? `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis mencakup ${formatNum(syntaxVerses, "id")} ayat${partialText}. Surah ${formatNum(chStart, "id")}–${formatNum(chEnd, "id")} belum memiliki sintaksis korpus. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`
+				: `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis lengkap NoorBayan mencakup seluruh 114 surah (${formatNum(syntaxVerses, "id")} ayat) dengan analisis relasi dependensi dan frasa konstituen lengkap. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`,
 		rhetoricCoverageHeading: "Cakupan Studio Retorika (Balaghah)",
 		rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
 			`Studio Anatomi Retorika mencakup ${formatNum(versesCount, "id")} ayat teranalisis di ${formatNum(surasCount, "id")} surah, meliputi dekonstruksi formula 4 rukun tamsil perumpamaan (Nashir dkk. 2026), elipsis sintaksis dengan taqdir teruji (EEF 2025), serta karya retorika klasik dalam ilmu Ma'ani, Bayan, dan Badi'.`,
@@ -199,6 +201,14 @@ export const id: Translations = {
 					"Graf dependensi sintaksis dari Quranic Arabic Dependency Treebank.",
 				license:
 					"Didistribusikan sesuai ketentuan korpus: mencantumkan atribusi ke corpus.quran.com.",
+			},
+			"noorbayan-syntax": {
+				title: "Pohon Sintaksis Quran Lengkap (NoorBayan)",
+				attribution:
+					"NoorBayan, berbasis Quranic Arabic Corpus Dr. Kais Dukes (rahimahullah), diverifikasi oleh Quranpedia",
+				description:
+					"Pohon ketergantungan sintaksis dan frasa konstituen lengkap untuk seluruh 6.236 ayat Al-Qur'an dalam 114 surah.",
+				license: "Lisensi MIT.",
 			},
 			tanzil: {
 				title: "Teks Al-Qur'an Rasm Utsmani Tanzil",

@@ -214,3 +214,48 @@ export interface RhetoricEntry {
 		text: string;
 	};
 }
+
+export interface SyntaxConstituent {
+	label: string;
+	from: [number, number];
+	to: [number, number];
+}
+
+export interface SyntaxToken {
+	tok: number;
+	text: string;
+	pos: string;
+	rel: string;
+	rel_ar?: string;
+	head: [number, number, number, number] | null;
+	const?: SyntaxConstituent;
+}
+
+export interface SyntaxWord {
+	w: number;
+	text: string;
+	tokens: SyntaxToken[];
+}
+
+export interface SyntaxCarriedWord {
+	s: number;
+	v: number;
+	w: number;
+	text: string;
+}
+
+export interface SyntaxSentence {
+	id: number;
+	words: SyntaxWord[];
+	carried?: SyntaxCarriedWord[];
+}
+
+export interface VerseSyntax {
+	v: number;
+	sentences: SyntaxSentence[];
+}
+
+export interface SurahSyntaxFile {
+	surah: number;
+	verses: VerseSyntax[];
+}

@@ -190,4 +190,11 @@ Sources: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al
 License / Terms: Public Domain / Classical Heritage.
 Used in Lenses Rhetoric Studio for pivotal figures across Maʿānī, Bayān, and Badīʿ.
 
-
+------------------------------------------------------------
+The Quranic Treebank (NoorBayan)
+Project: The Quranic Treebank
+Authors: NoorBayan, building on the Quranic Arabic Corpus of Dr. Kais Dukes (may Allah have mercy on him)
+URL: https://github.com/NoorBayan/Quranic
+Verification & Clean Export: Quranpedia.net (https://quranpedia.net/dumps/syntax.json.gz)
+License: MIT License
+Used in Lenses for full-Quran dependency tree graphs and constituent phrase analysis.

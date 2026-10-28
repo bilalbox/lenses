@@ -2,6 +2,7 @@ import type {
 	Manifest,
 	RhetoricEntry,
 	SurahFile,
+	SurahSyntaxFile,
 	VerseRow,
 	WordIndex,
 } from "./types";
@@ -34,6 +35,18 @@ export function loadSurah(n: number): Promise<SurahFile> {
 		surahs.set(n, file);
 		return file;
 	});
+	return pending;
+}
+
+const syntaxSurahs = new Map<number, Promise<SurahSyntaxFile>>();
+
+export function loadSurahSyntax(n: number): Promise<SurahSyntaxFile> {
+	const cached = syntaxSurahs.get(n);
+	if (cached) return cached;
+	const pending = getJson<SurahSyntaxFile>(
+		`/data/quran/syntax/${String(n).padStart(3, "0")}.json`,
+	);
+	syntaxSurahs.set(n, pending);
 	return pending;
 }
 
