@@ -102,6 +102,7 @@ export interface UnitSummary {
 	goal?: string;
 	surahClass?: string;
 	mutashabih?: number;
+	structure?: number;
 }
 
 export interface SourceMeta {
@@ -131,6 +132,9 @@ export interface Manifest {
 		qiraatVerses?: number;
 		mutashabihVerses?: number;
 		mutashabihPairs?: number;
+		structureSurahs?: number;
+		structureBlocks?: number;
+		munasabatTransitions?: number;
 	};
 	sources: SourceMeta[];
 }
@@ -342,4 +346,83 @@ export interface VerseMutashabihEntry {
 export interface SurahMutashabihFile {
 	sura: number;
 	verses: VerseMutashabihEntry[];
+}
+
+export type StructureRole =
+	| "outer_frame_open"
+	| "outer_frame_close"
+	| "inner_frame_open"
+	| "inner_frame_close"
+	| "frame"
+	| "body"
+	| "pivot"
+	| "center"
+	| "center_flank_left"
+	| "center_flank_right"
+	| "close"
+	| "narrative_1"
+	| "narrative_2"
+	| "narrative_3"
+	| "narrative_4"
+	| "narrative_5"
+	| "narrative_6"
+	| "narrative_7"
+	| "transition_1"
+	| "transition_2"
+	| "transition_3"
+	| "seam"
+	| "hinge"
+	| "addendum";
+
+export interface StructureBlock {
+	id: string;
+	v: [number, number];
+	role: StructureRole;
+	label: string;
+	labelAr?: string;
+	pairId?: string;
+}
+
+export interface SurahStructureFile {
+	sura: number;
+	nameAr: string;
+	nameEn: string;
+	verseCount: number;
+	family: {
+		id: number;
+		name: string;
+		description: string;
+	};
+	pivot: {
+		verse: string;
+		offset: number;
+		centerLogic: "single_concentration" | "compound_seam";
+		function: string;
+	};
+	form: "compressed" | "distributed";
+	semantic: "concentrated" | "diffuse" | "transitional";
+	blocks: StructureBlock[];
+	transitionToNext?: {
+		targetSura: number;
+		targetNameAr: string;
+		targetNameEn: string;
+		suyutiLinkAr: string;
+		suyutiLinkEn: string;
+		biqaiSummaryAr?: string;
+		biqaiSummaryEn?: string;
+	};
+}
+
+export interface TransitionsFile {
+	count: number;
+	transitions: Array<{
+		fromSura: number;
+		targetSura: number;
+		targetNameAr: string;
+		targetNameEn: string;
+		suyutiLinkAr: string;
+		suyutiLinkEn: string;
+		biqaiSummaryAr?: string;
+		biqaiSummaryEn?: string;
+	}>;
 }

@@ -7,6 +7,7 @@
 		"data": "python3 scripts/build_data.py",
 		"data:enrichment": "python3 scripts/build_qurandb_enrichment.py",
 		"data:syntax": "python3 scripts/build_syntax.py",
+		"data:structure": "python3 scripts/build_structure.py",
 		"dev": "vite --host 127.0.0.1 --port 43123",
 		"build": "tsc -b && vite build",
 		"lint": "biome check .",
