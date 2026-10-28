@@ -167,6 +167,8 @@ export interface Route {
 	sura: number;
 	verse: number;
 	word?: number;
+	tab?: string;
+	target?: string;
 }
 
 export type RhetoricDatasetKey =

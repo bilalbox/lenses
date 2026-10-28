@@ -44,12 +44,24 @@ const QUIZ_HIDE_DIACRITICS_KEY = "lenses-quiz-hide-diacritics";
 
 function parseRoute(hash: string): Route {
 	const fallback = getOpeningVerse();
-	const cleanHash = hash.replace(/^#/, "").split("?")[0] || openingPath();
+	const queryIndex = hash.indexOf("?");
+	const queryString = queryIndex >= 0 ? hash.slice(queryIndex + 1) : "";
+	const cleanHash =
+		(queryIndex >= 0 ? hash.slice(0, queryIndex) : hash).replace(/^#/, "") ||
+		openingPath();
 	const parts = cleanHash.split("/").filter(Boolean);
-	if (parts[0] === "quiz") return { page: "quiz", ...fallback };
-	if (parts[0] === "search") return { page: "search", ...fallback };
-	if (parts[0] === "surahs") return { page: "surahs", ...fallback };
-	if (parts[0] === "sources") return { page: "sources", ...fallback };
+	const params = new URLSearchParams(queryString);
+	const tab =
+		params.get("tab") ?? (params.has("mutashabih") ? "mutashabih" : undefined);
+	const target = params.get("target") ?? params.get("counterpart") ?? undefined;
+
+	if (parts[0] === "quiz") return { page: "quiz", ...fallback, tab, target };
+	if (parts[0] === "search")
+		return { page: "search", ...fallback, tab, target };
+	if (parts[0] === "surahs")
+		return { page: "surahs", ...fallback, tab, target };
+	if (parts[0] === "sources")
+		return { page: "sources", ...fallback, tab, target };
 	if (parts[0] === "rhetoric" || parts[0] === "balagha") {
 		const sura = parts[1] ? Number(parts[1]) : undefined;
 		const verse = parts[2] ? Number(parts[2]) : undefined;
@@ -57,13 +69,15 @@ function parseRoute(hash: string): Route {
 			page: "rhetoric",
 			sura: sura || fallback.sura,
 			verse: verse || fallback.verse,
+			tab,
+			target,
 		};
 	}
 	const sura = Number(parts[0]);
 	const verse = Number(parts[1]);
 	const word = parts[2] ? Number(parts[2]) : undefined;
-	if (!sura || !verse) return { page: "verse", ...fallback };
-	return { page: "verse", sura, verse, word };
+	if (!sura || !verse) return { page: "verse", ...fallback, tab, target };
+	return { page: "verse", sura, verse, word, tab, target };
 }
 
 function highlight(text: string, needle: string) {
@@ -366,9 +380,18 @@ export function App() {
 							sura={route.sura}
 							verseNumber={route.verse}
 							wordNumber={route.word}
-							onNavigate={(sura, verse, word) =>
-								go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)
-							}
+							tab={route.tab}
+							target={route.target}
+							onNavigate={(sura, verse, word, params) => {
+								const q = params
+									? `?${new URLSearchParams(params).toString()}`
+									: "";
+								go(
+									word
+										? `/${sura}/${verse}/${word}${q}`
+										: `/${sura}/${verse}${q}`,
+								);
+							}}
 							onSearchRoot={(root) => openSearch({ root })}
 							onSearchLemma={(lemma) => openSearch({ lemma })}
 						/>

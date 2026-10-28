@@ -129,10 +129,14 @@ export const en: Translations = {
 		mutashabihCategoryPhrase: "Shared Phrase",
 		mutashabihCategorySwap: "Word Order Inversion",
 		mutashabihLegendExact: "Identical",
+		mutashabihLegendHaraka: "Vocalization / Haraka",
 		mutashabihLegendDiff: "Substitution",
 		mutashabihLegendExtra: "Addition / Omission",
 		mutashabihSurahDistance: (count: number) =>
 			`${formatNum(count, "en")} surahs apart`,
+		mutashabihEmptyState:
+			"No verbal similarities (mutashābihāt) are recorded for this verse.",
+		mutashabihReturnToAyah: (coord: string) => `Return to ${coord}`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>

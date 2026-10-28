@@ -134,9 +134,12 @@ export interface Translations {
 		mutashabihCategoryPhrase: string;
 		mutashabihCategorySwap: string;
 		mutashabihLegendExact: string;
+		mutashabihLegendHaraka: string;
 		mutashabihLegendDiff: string;
 		mutashabihLegendExtra: string;
 		mutashabihSurahDistance: (count: number) => string;
+		mutashabihEmptyState: string;
+		mutashabihReturnToAyah: (coord: string) => string;
 	};
 	sheet: {
 		analysisAria: (wordNumber: number) => string;

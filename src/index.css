@@ -4462,6 +4462,23 @@ main {
 	transform: translateY(-1px);
 }
 
+.mutashabih-badge-button.is-active {
+	background: var(--teal);
+	color: #fff;
+	border-color: var(--teal);
+}
+
+.mutashabih-empty-card {
+	margin-block: 1rem;
+	padding: 1.5rem 1rem;
+	text-align: center;
+	background: var(--paper);
+	border: 1px dashed var(--line);
+	border-radius: var(--radius);
+	color: var(--ink-soft);
+	font-size: 0.9rem;
+}
+
 .mutashabih-badge-icon {
 	font-size: 0.85rem;
 }
@@ -4563,6 +4580,11 @@ main {
 	color: #fff;
 	border-color: var(--teal);
 	font-weight: 600;
+}
+
+.mutashabih-pill-surah {
+	font-weight: 700;
+	margin-inline-end: 0.15rem;
 }
 
 .mutashabih-pill-score {
@@ -4670,6 +4692,18 @@ main {
 	color: var(--ink-soft);
 }
 
+.mutashabih-coord-cluster {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.mutashabih-surah-tag {
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--ink-soft);
+}
+
 .mutashabih-coord-tag {
 	font-family: var(--mono);
 	font-size: 0.85rem;
@@ -4694,7 +4728,15 @@ main {
 	transition: all var(--duration-fast) ease;
 }
 
-.mutashabih-jump-btn:hover {
+.mutashabih-jump-btn.is-return {
+	background: color-mix(in srgb, var(--teal) 14%, var(--paper));
+	border-color: color-mix(in srgb, var(--teal) 40%, transparent);
+	color: var(--teal);
+	font-weight: 700;
+}
+
+.mutashabih-jump-btn:hover,
+.mutashabih-jump-btn.is-return:hover {
 	background: var(--teal);
 	color: #fff;
 	border-color: var(--teal);
@@ -4785,6 +4827,12 @@ main {
 
 .swatch-exact {
 	border: 1px solid var(--line);
+	background: var(--paper);
+}
+
+.swatch-haraka {
+	border: 1px solid var(--line);
+	border-bottom: 2.5px dotted var(--teal);
 	background: var(--paper);
 }
 

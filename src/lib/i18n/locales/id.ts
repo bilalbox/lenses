@@ -128,10 +128,14 @@ export const id: Translations = {
 		mutashabihCategoryPhrase: "Frasa Serupa",
 		mutashabihCategorySwap: "Perubahan Urutan Kata",
 		mutashabihLegendExact: "Sama Persis",
+		mutashabihLegendHaraka: "Perbedaan Harakat",
 		mutashabihLegendDiff: "Perbedaan Kata",
 		mutashabihLegendExtra: "Tambahan / Pengurangan",
 		mutashabihSurahDistance: (count: number) =>
 			`Jarak: ${formatNum(count, "id")} surah`,
+		mutashabihEmptyState:
+			"Tidak ada ayat mutasyabih lafzhi yang tercatat untuk ayat ini.",
+		mutashabihReturnToAyah: (coord: string) => `Kembali ke ${coord}`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>

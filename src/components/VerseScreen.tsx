@@ -37,7 +37,14 @@ interface Props {
 	sura: number;
 	verseNumber: number;
 	wordNumber?: number;
-	onNavigate: (sura: number, verse: number, word?: number) => void;
+	tab?: string;
+	target?: string;
+	onNavigate: (
+		sura: number,
+		verse: number,
+		word?: number,
+		params?: Record<string, string>,
+	) => void;
 	onSearchRoot: (root: string) => void;
 	onSearchLemma: (lemma: string) => void;
 }
@@ -47,6 +54,8 @@ export function VerseScreen({
 	sura,
 	verseNumber,
 	wordNumber,
+	tab,
+	target,
 	onNavigate,
 	onSearchRoot,
 	onSearchLemma,
@@ -170,6 +179,7 @@ export function VerseScreen({
 				) : (
 					<div key={`${sura}-${verseNumber}`} className="anim-soft-enter">
 						<VerseBody
+							manifest={manifest}
 							unitName={unit.name}
 							phonetic={unit.phonetic}
 							title={unit.title}
@@ -185,6 +195,8 @@ export function VerseScreen({
 							goal={unit.goal || file?.goal}
 							revSeq={unit.revSeq}
 							surahClass={unit.surahClass}
+							tab={tab}
+							target={target}
 							onNavigate={onNavigate}
 						/>
 					</div>
@@ -207,6 +219,7 @@ export function VerseScreen({
 }
 
 function VerseBody({
+	manifest,
 	unitName,
 	phonetic,
 	revelation,
@@ -218,8 +231,11 @@ function VerseBody({
 	goal,
 	revSeq,
 	surahClass,
+	tab,
+	target,
 	onNavigate,
 }: {
+	manifest: Manifest;
 	unitName: string;
 	phonetic: string;
 	title: string;
@@ -232,7 +248,14 @@ function VerseBody({
 	goal?: string;
 	revSeq?: number;
 	surahClass?: string;
-	onNavigate?: (sura: number, verse: number, word?: number) => void;
+	tab?: string;
+	target?: string;
+	onNavigate?: (
+		sura: number,
+		verse: number,
+		word?: number,
+		params?: Record<string, string>,
+	) => void;
 }) {
 	const { locale, t, formatNumber } = useI18n();
 	const graphs = verse.g ?? [];
@@ -247,8 +270,16 @@ function VerseBody({
 	const [mutashabihFile, setMutashabihFile] =
 		useState<SurahMutashabihFile | null>(null);
 	const [asbabOpen, setAsbabOpen] = useState(false);
-	const [mutashabihOpen, setMutashabihOpen] = useState(false);
+	const [mutashabihOpen, setMutashabihOpen] = useState(
+		() => tab === "mutashabih",
+	);
 	const [syntaxClauseIndex, setSyntaxClauseIndex] = useState(0);
+
+	useEffect(() => {
+		if (tab === "mutashabih") {
+			setMutashabihOpen(true);
+		}
+	}, [tab]);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -256,7 +287,10 @@ function VerseBody({
 			.then((data) => {
 				if (!cancelled) {
 					setMutashabihFile(data);
-					if (window.location.search.includes("mutashabih=1")) {
+					if (
+						tab === "mutashabih" ||
+						window.location.search.includes("mutashabih=1")
+					) {
 						setMutashabihOpen(true);
 					}
 				}
@@ -267,7 +301,7 @@ function VerseBody({
 		return () => {
 			cancelled = true;
 		};
-	}, [sura]);
+	}, [sura, tab]);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -317,12 +351,17 @@ function VerseBody({
 	const mutashabihMatches = verseMutashabih?.matches ?? [];
 
 	const handleOpenMutashabih = useCallback(() => {
-		setMutashabihOpen(true);
-		window.setTimeout(() => {
-			document
-				.querySelector(".mutashabih-block")
-				?.scrollIntoView({ behavior: "smooth", block: "start" });
-		}, 50);
+		setMutashabihOpen((open) => {
+			const next = !open;
+			if (next) {
+				window.setTimeout(() => {
+					document
+						.querySelector(".mutashabih-block, .mutashabih-empty-card")
+						?.scrollIntoView({ behavior: "smooth", block: "start" });
+				}, 50);
+			}
+			return next;
+		});
 	}, []);
 	const membership = useMemo(
 		() => clauseMembership(graphs, sura, verse.v),
@@ -409,6 +448,7 @@ function VerseBody({
 				asbabCount={verseAsbab.length}
 				onOpenAsbab={() => setAsbabOpen(true)}
 				mutashabihCount={mutashabihMatches.length}
+				mutashabihOpen={mutashabihOpen}
 				onOpenMutashabih={handleOpenMutashabih}
 				hasBalagha={hasBalagha}
 			/>
@@ -612,7 +652,7 @@ function VerseBody({
 				</details>
 			) : null}
 
-			{mutashabihMatches.length > 0 && (
+			{mutashabihMatches.length > 0 ? (
 				<details
 					className="mutashabih-block"
 					open={mutashabihOpen}
@@ -627,17 +667,26 @@ function VerseBody({
 						</span>
 					</summary>
 					<MutashabihSection
+						manifest={manifest}
 						sura={sura}
 						verseNumber={verse.v}
 						verseWords={verse.w}
 						matches={mutashabihMatches}
+						initialTarget={target}
 						onSelectWord={onSelect}
 						onNavigateAyah={(targetSura, targetAyah) =>
-							onNavigate?.(targetSura, targetAyah, 1)
+							onNavigate?.(targetSura, targetAyah, 1, {
+								tab: "mutashabih",
+								target: `${sura}:${verse.v}`,
+							})
 						}
 					/>
 				</details>
-			)}
+			) : tab === "mutashabih" || mutashabihOpen ? (
+				<div className="mutashabih-empty-card" role="status">
+					<p>{t.verse.mutashabihEmptyState}</p>
+				</div>
+			) : null}
 
 			<NahwSyntaxSection
 				verseSyntax={verseSyntax}
@@ -725,6 +774,7 @@ function VerseHeaderCard({
 	asbabCount,
 	onOpenAsbab,
 	mutashabihCount,
+	mutashabihOpen,
 	onOpenMutashabih,
 	hasBalagha,
 }: {
@@ -739,6 +789,7 @@ function VerseHeaderCard({
 	asbabCount: number;
 	onOpenAsbab: () => void;
 	mutashabihCount?: number;
+	mutashabihOpen?: boolean;
 	onOpenMutashabih?: () => void;
 	hasBalagha: boolean;
 }) {
@@ -770,7 +821,7 @@ function VerseHeaderCard({
 					{mutashabihCount !== undefined && mutashabihCount > 0 && (
 						<button
 							type="button"
-							className="mutashabih-badge-button"
+							className={`mutashabih-badge-button ${mutashabihOpen ? "is-active" : ""}`}
 							onClick={onOpenMutashabih}
 							title={t.verse.mutashabihSectionTitle}
 						>

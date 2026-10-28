@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { loadSurah } from "../lib/api";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type {
+	Manifest,
 	MutashabihCategory,
 	MutashabihMatch,
 	Word,
@@ -10,26 +11,70 @@ import type {
 } from "../lib/types";
 
 interface Props {
+	manifest?: Manifest;
 	sura: number;
 	verseNumber: number;
 	verseWords: Word[];
 	matches: MutashabihMatch[];
+	initialTarget?: string;
 	onSelectWord: (wordNumber: number) => void;
 	onNavigateAyah: (sura: number, verse: number) => void;
 }
 
+function getSurahTitle(
+	manifest: Manifest | undefined,
+	suraId: number,
+	locale: string,
+): string {
+	const unit = manifest?.units.find((u) => u.n === suraId);
+	if (!unit) return `S${suraId}`;
+	return locale === "ar" ? unit.name : unit.phonetic;
+}
+
+function getDiffStatusTooltip(
+	status: WordDiffStatus,
+	t: ReturnType<typeof useI18n>["t"],
+): string {
+	switch (status) {
+		case "exact":
+			return t.verse.mutashabihLegendExact;
+		case "haraka":
+			return t.verse.mutashabihLegendHaraka;
+		case "diff":
+			return t.verse.mutashabihLegendDiff;
+		case "extra":
+			return t.verse.mutashabihLegendExtra;
+	}
+}
+
 export function MutashabihSection({
+	manifest,
 	sura,
 	verseNumber,
 	verseWords,
 	matches,
+	initialTarget,
 	onSelectWord,
 	onNavigateAyah,
 }: Props) {
-	const { t, formatNumber } = useI18n();
+	const { locale, t, formatNumber } = useI18n();
 	const [activeIdx, setActiveIdx] = useState(0);
-	const [hoveredWord, setHoveredWord] = useState<number | null>(null);
+	const [hovered, setHovered] = useState<{
+		word: number;
+		isTarget: boolean;
+	} | null>(null);
 	const [targetWords, setTargetWords] = useState<Word[] | null>(null);
+
+	// When initialTarget changes (e.g. jumped from counterpart "2:58"), auto-select that match
+	useEffect(() => {
+		if (!initialTarget) return;
+		const [pSura, pAyah] = initialTarget.split(":").map(Number);
+		if (!pSura || !pAyah) return;
+		const idx = matches.findIndex((m) => m.sura === pSura && m.ayah === pAyah);
+		if (idx >= 0) {
+			setActiveIdx(idx);
+		}
+	}, [initialTarget, matches]);
 
 	const activeMatch = matches[activeIdx] ?? matches[0];
 
@@ -53,6 +98,12 @@ export function MutashabihSection({
 
 	if (!activeMatch) return null;
 
+	const srcSurahTitle = getSurahTitle(manifest, sura, locale);
+	const targetSurahTitle = getSurahTitle(manifest, activeMatch.sura, locale);
+	const isJumpOrigin =
+		Boolean(initialTarget) &&
+		initialTarget === `${activeMatch.sura}:${activeMatch.ayah}`;
+
 	return (
 		<section
 			className="mutashabih-section"
@@ -63,6 +114,7 @@ export function MutashabihSection({
 					<div className="mutashabih-counterpart-pills" role="tablist">
 						{matches.map((m, idx) => {
 							const isSelected = idx === activeIdx;
+							const pillSurah = getSurahTitle(manifest, m.sura, locale);
 							return (
 								<button
 									key={`${m.sura}:${m.ayah}`}
@@ -72,9 +124,19 @@ export function MutashabihSection({
 									className={`mutashabih-pill ${isSelected ? "is-active" : ""}`}
 									onClick={() => {
 										setActiveIdx(idx);
-										setHoveredWord(null);
+										setHovered(null);
+									}}
+									onKeyDown={(e) => {
+										if (e.key === "ArrowRight") {
+											setActiveIdx((idx + 1) % matches.length);
+											setHovered(null);
+										} else if (e.key === "ArrowLeft") {
+											setActiveIdx((idx - 1 + matches.length) % matches.length);
+											setHovered(null);
+										}
 									}}
 								>
+									<span className="mutashabih-pill-surah">{pillSurah}</span>
 									<span className="mutashabih-pill-coord">
 										{formatNumber(m.sura)}:{formatNumber(m.ayah)}
 									</span>
@@ -87,6 +149,7 @@ export function MutashabihSection({
 					</div>
 				) : (
 					<div className="mutashabih-single-counterpart-label">
+						<span className="mutashabih-pill-surah">{targetSurahTitle}</span>
 						<span className="mutashabih-pill-coord">
 							{formatNumber(activeMatch.sura)}:{formatNumber(activeMatch.ayah)}
 						</span>
@@ -100,6 +163,8 @@ export function MutashabihSection({
 			<MutashabihArc
 				srcSura={sura}
 				targetSura={activeMatch.sura}
+				srcTitle={srcSurahTitle}
+				targetTitle={targetSurahTitle}
 				category={activeMatch.cat}
 			/>
 
@@ -109,17 +174,22 @@ export function MutashabihSection({
 						<span className="mutashabih-verse-tag">
 							{t.verse.mutashabihCurrentAyah}
 						</span>
-						<strong className="mutashabih-coord-tag">
-							{formatNumber(sura)}:{formatNumber(verseNumber)}
-						</strong>
+						<div className="mutashabih-coord-cluster">
+							<span className="mutashabih-surah-tag">{srcSurahTitle}</span>
+							<strong className="mutashabih-coord-tag">
+								{formatNumber(sura)}:{formatNumber(verseNumber)}
+							</strong>
+						</div>
 					</div>
 					<VerseTokensBox
 						words={verseWords}
 						tokens={activeMatch.srcTokens}
-						hoveredWord={hoveredWord}
-						onHoverWord={setHoveredWord}
+						hovered={hovered}
+						onHover={(w) =>
+							setHovered(w === null ? null : { word: w, isTarget: false })
+						}
 						onSelectWord={onSelectWord}
-						isCounterpart={false}
+						isTarget={false}
 					/>
 				</div>
 
@@ -129,29 +199,45 @@ export function MutashabihSection({
 							{t.verse.mutashabihCounterpartAyah}
 						</span>
 						<div className="mutashabih-target-actions">
-							<strong className="mutashabih-coord-tag">
-								{formatNumber(activeMatch.sura)}:
-								{formatNumber(activeMatch.ayah)}
-							</strong>
+							<div className="mutashabih-coord-cluster">
+								<span className="mutashabih-surah-tag">{targetSurahTitle}</span>
+								<strong className="mutashabih-coord-tag">
+									{formatNumber(activeMatch.sura)}:
+									{formatNumber(activeMatch.ayah)}
+								</strong>
+							</div>
 							<button
 								type="button"
-								className="mutashabih-jump-btn"
+								className={`mutashabih-jump-btn ${isJumpOrigin ? "is-return" : ""}`}
 								onClick={() =>
 									onNavigateAyah(activeMatch.sura, activeMatch.ayah)
 								}
-								title={t.verse.mutashabihJumpToAyah}
+								title={
+									isJumpOrigin
+										? t.verse.mutashabihReturnToAyah(
+												`${formatNumber(activeMatch.sura)}:${formatNumber(activeMatch.ayah)}`,
+											)
+										: t.verse.mutashabihJumpToAyah
+								}
 							>
-								↗ {t.verse.mutashabihJumpToAyah}
+								{isJumpOrigin ? "↩ " : "↗ "}
+								{isJumpOrigin
+									? t.verse.mutashabihReturnToAyah(
+											`${formatNumber(activeMatch.sura)}:${formatNumber(activeMatch.ayah)}`,
+										)
+									: t.verse.mutashabihJumpToAyah}
 							</button>
 						</div>
 					</div>
 					<VerseTokensBox
 						words={targetWords ?? []}
 						tokens={activeMatch.targetTokens}
-						hoveredWord={hoveredWord}
-						onHoverWord={setHoveredWord}
+						hovered={hovered}
+						onHover={(w) =>
+							setHovered(w === null ? null : { word: w, isTarget: true })
+						}
 						onSelectWord={() => {}}
-						isCounterpart={true}
+						isTarget={true}
 					/>
 				</div>
 			</div>
@@ -160,6 +246,10 @@ export function MutashabihSection({
 				<span className="legend-item is-exact">
 					<span className="legend-swatch swatch-exact" />
 					{t.verse.mutashabihLegendExact}
+				</span>
+				<span className="legend-item is-haraka">
+					<span className="legend-swatch swatch-haraka" />
+					{t.verse.mutashabihLegendHaraka}
 				</span>
 				<span className="legend-item is-diff">
 					<span className="legend-swatch swatch-diff" />
@@ -213,18 +303,19 @@ export function MutashabihSection({
 function VerseTokensBox({
 	words,
 	tokens,
-	hoveredWord,
-	onHoverWord,
+	hovered,
+	onHover,
 	onSelectWord,
-	isCounterpart,
+	isTarget,
 }: {
 	words: Word[];
 	tokens: WordDiffToken[];
-	hoveredWord: number | null;
-	onHoverWord: (w: number | null) => void;
+	hovered: { word: number; isTarget: boolean } | null;
+	onHover: (w: number | null) => void;
 	onSelectWord: (w: number) => void;
-	isCounterpart: boolean;
+	isTarget: boolean;
 }) {
+	const { t } = useI18n();
 	if (words.length === 0) {
 		return (
 			<div className="mutashabih-loading-tokens">
@@ -243,13 +334,18 @@ function VerseTokensBox({
 			{words.map((w) => {
 				const tok = tokenMap.get(w.n);
 				const status: WordDiffStatus = tok?.s ?? "exact";
-				const cw = tok?.cw ?? null;
 
-				const isLinkedHover =
-					hoveredWord !== null &&
-					(isCounterpart
-						? cw === hoveredWord
-						: w.n === hoveredWord || tok?.cw === hoveredWord);
+				const isDirectHover =
+					hovered !== null &&
+					hovered.isTarget === isTarget &&
+					hovered.word === w.n;
+				const isCounterpartHover =
+					hovered !== null &&
+					hovered.isTarget !== isTarget &&
+					tok?.cw === hovered.word;
+				const isLinkedHover = isDirectHover || isCounterpartHover;
+
+				const chipTooltip = getDiffStatusTooltip(status, t);
 
 				return (
 					<button
@@ -258,11 +354,12 @@ function VerseTokensBox({
 						className={`mutashabih-word-chip status-${status} ${
 							isLinkedHover ? "is-linked-hover" : ""
 						}`}
-						onClick={() => !isCounterpart && onSelectWord(w.n)}
-						onMouseEnter={() => onHoverWord(w.n)}
-						onMouseLeave={() => onHoverWord(null)}
-						onFocus={() => onHoverWord(w.n)}
-						onBlur={() => onHoverWord(null)}
+						title={chipTooltip}
+						onClick={() => !isTarget && onSelectWord(w.n)}
+						onMouseEnter={() => onHover(w.n)}
+						onMouseLeave={() => onHover(null)}
+						onFocus={() => onHover(w.n)}
+						onBlur={() => onHover(null)}
 					>
 						<span className="word-text" lang="ar">
 							{w.a}
@@ -277,10 +374,14 @@ function VerseTokensBox({
 function MutashabihArc({
 	srcSura,
 	targetSura,
+	srcTitle,
+	targetTitle,
 	category,
 }: {
 	srcSura: number;
 	targetSura: number;
+	srcTitle: string;
+	targetTitle: string;
 	category: MutashabihCategory;
 }) {
 	const { t, formatNumber } = useI18n();
@@ -314,7 +415,7 @@ function MutashabihArc({
 				className="mutashabih-arc-svg"
 				preserveAspectRatio="xMidYMid meet"
 			>
-				<title>Cross-surah similarity arc</title>
+				<title>{`Cross-surah similarity arc: ${categoryLabel}`}</title>
 				{/* Mushaf Track Line */}
 				<line
 					x1={20}
@@ -347,7 +448,7 @@ function MutashabihArc({
 					className="arc-coord-label"
 					textAnchor="middle"
 				>
-					S{formatNumber(srcSura)}
+					{`${srcTitle} (${formatNumber(srcSura)})`}
 				</text>
 				{srcSura !== targetSura && (
 					<text
@@ -356,7 +457,7 @@ function MutashabihArc({
 						className="arc-coord-label"
 						textAnchor="middle"
 					>
-						S{formatNumber(targetSura)}
+						{`${targetTitle} (${formatNumber(targetSura)})`}
 					</text>
 				)}
 			</svg>

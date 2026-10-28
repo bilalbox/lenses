@@ -129,10 +129,13 @@ export const ar: Translations = {
 		mutashabihCategoryPhrase: "تشابه عبارة",
 		mutashabihCategorySwap: "تقديم وتأخير",
 		mutashabihLegendExact: "متطابق",
+		mutashabihLegendHaraka: "اختلاف تشكيل / حركة",
 		mutashabihLegendDiff: "اختلاف لفظي",
 		mutashabihLegendExtra: "زيادة أو نقصان",
 		mutashabihSurahDistance: (count: number) =>
 			`البعد: ${formatNum(count, "ar")} سور`,
+		mutashabihEmptyState: "لا توجد مواضع متشابه لفظي مسجلة لهذه الآية.",
+		mutashabihReturnToAyah: (coord: string) => `العودة إلى ${coord}`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
