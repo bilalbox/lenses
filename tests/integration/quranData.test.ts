@@ -8,6 +8,7 @@ import type {
 	AsbabData,
 	Manifest,
 	SurahFile,
+	SurahMutashabihFile,
 	SurahQiraatFile,
 	SurahSyntaxFile,
 	VerseRow,
@@ -312,7 +313,7 @@ describe("integration: Quran dataset integrity", () => {
 		}
 	});
 
-	it("validates sample Mutashabih files (Surahs 2, 7, 3)", () => {
+	it("validates full Quran Mutashabih dataset (all 114 surahs, token diffs, and classical notes)", () => {
 		const mutDir = path.join(
 			process.cwd(),
 			"public",
@@ -322,23 +323,107 @@ describe("integration: Quran dataset integrity", () => {
 		);
 		expect(fs.existsSync(mutDir)).toBe(true);
 
-		const baqarahMutPath = path.join(mutDir, "002.json");
-		expect(fs.existsSync(baqarahMutPath)).toBe(true);
-		const baqarahMut = JSON.parse(fs.readFileSync(baqarahMutPath, "utf-8"));
-		expect(baqarahMut.sura).toBe(2);
-		expect(baqarahMut.verses.length).toBeGreaterThan(0);
-
-		// Check 2:58
-		const v58 = baqarahMut.verses.find((v: { v: number }) => v.v === 58);
-		expect(v58).toBeDefined();
-		expect(v58.matches.length).toBeGreaterThan(0);
-		const match7_161 = v58.matches.find(
-			(m: { sura: number; ayah: number }) => m.sura === 7 && m.ayah === 161,
+		const manifest: Manifest = JSON.parse(
+			fs.readFileSync(manifestPath, "utf-8"),
 		);
+		expect(manifest.stats.mutashabihVerses).toBeGreaterThan(2000);
+		expect(manifest.stats.mutashabihPairs).toBeGreaterThan(3000);
+
+		const sourceIds = manifest.sources.map((s) => s.id);
+		expect(sourceIds).toContain("waqar-mutashabihat");
+		expect(sourceIds).toContain("quranpedia-mutashabihat");
+
+		let totalVersesWithMatches = 0;
+		let totalDirectedMatches = 0;
+
+		const allowedCategories = new Set([
+			"identical",
+			"shared_opening",
+			"shared_ending",
+			"shared_phrase",
+			"word_swap",
+		]);
+		const allowedStatuses = new Set(["exact", "haraka", "diff", "extra"]);
+
+		for (let s = 1; s <= 114; s++) {
+			const fileName = `${String(s).padStart(3, "0")}.json`;
+			const filePath = path.join(mutDir, fileName);
+			expect(
+				fs.existsSync(filePath),
+				`Mutashabih file exists: ${fileName}`,
+			).toBe(true);
+
+			const fileData: SurahMutashabihFile = JSON.parse(
+				fs.readFileSync(filePath, "utf-8"),
+			);
+			expect(fileData.sura).toBe(s);
+			expect(Array.isArray(fileData.verses)).toBe(true);
+
+			const manifestUnit = manifest.units.find((u) => u.n === s);
+			expect(manifestUnit?.mutashabih).toBe(fileData.verses.length);
+
+			totalVersesWithMatches += fileData.verses.length;
+
+			let prevV = 0;
+			for (const vEntry of fileData.verses) {
+				expect(vEntry.v).toBeGreaterThan(prevV); // sorted strictly ascending
+				prevV = vEntry.v;
+				expect(vEntry.matches.length).toBeGreaterThan(0);
+				totalDirectedMatches += vEntry.matches.length;
+
+				for (const m of vEntry.matches) {
+					expect(m.sura).toBeGreaterThanOrEqual(1);
+					expect(m.sura).toBeLessThanOrEqual(114);
+					expect(m.ayah).toBeGreaterThan(0);
+					expect(allowedCategories.has(m.cat)).toBe(true);
+					expect(m.score).toBeGreaterThanOrEqual(0);
+					expect(m.score).toBeLessThanOrEqual(1);
+					expect(m.matchedWords).toBeGreaterThan(0);
+
+					expect(m.srcTokens.length).toBeGreaterThan(0);
+					expect(m.targetTokens.length).toBeGreaterThan(0);
+
+					for (const tok of m.srcTokens) {
+						expect(tok.w).toBeGreaterThan(0);
+						expect(allowedStatuses.has(tok.s)).toBe(true);
+						if (tok.cw !== undefined && tok.cw !== null) {
+							expect(tok.cw).toBeGreaterThan(0);
+						}
+					}
+
+					for (const tok of m.targetTokens) {
+						expect(tok.w).toBeGreaterThan(0);
+						expect(allowedStatuses.has(tok.s)).toBe(true);
+						if (tok.cw !== undefined && tok.cw !== null) {
+							expect(tok.cw).toBeGreaterThan(0);
+						}
+					}
+				}
+			}
+		}
+
+		expect(totalVersesWithMatches).toBe(manifest.stats.mutashabihVerses);
+		expect(totalDirectedMatches).toBeGreaterThan(5000);
+
+		// Spot check 2:58 (Al-Baqarah ↔ Al-A'raf 7:161)
+		const s2Data: SurahMutashabihFile = JSON.parse(
+			fs.readFileSync(path.join(mutDir, "002.json"), "utf-8"),
+		);
+		const v58 = s2Data.verses.find((v) => v.v === 58);
+		expect(v58).toBeDefined();
+		const match7_161 = v58?.matches.find((m) => m.sura === 7 && m.ayah === 161);
 		expect(match7_161).toBeDefined();
-		expect(match7_161.score).toBeGreaterThan(0.5);
-		expect(match7_161.dabt).toContain("الضابط");
-		expect(match7_161.srcTokens.length).toBeGreaterThan(0);
-		expect(match7_161.targetTokens.length).toBeGreaterThan(0);
+		expect(match7_161?.score).toBeGreaterThan(0.5);
+		expect(match7_161?.dabt).toContain("الضابط");
+		expect(match7_161?.noteEn).toContain("We said");
+
+		// Spot check 2:48 (Al-Baqarah ↔ Al-Baqarah 2:123)
+		const v48 = s2Data.verses.find((v) => v.v === 48);
+		expect(v48).toBeDefined();
+		const match2_123 = v48?.matches.find((m) => m.sura === 2 && m.ayah === 123);
+		expect(match2_123).toBeDefined();
+		expect(match2_123?.score).toBeGreaterThan(0.8);
+		expect(match2_123?.cat).toBe("word_swap");
+		expect(match2_123?.noteEn).toContain("shafa'ah");
 	});
 });

@@ -101,6 +101,7 @@ export interface UnitSummary {
 	revSeq?: number;
 	goal?: string;
 	surahClass?: string;
+	mutashabih?: number;
 }
 
 export interface SourceMeta {
@@ -128,6 +129,8 @@ export interface Manifest {
 		asbabVerses?: number;
 		qiraatWords?: number;
 		qiraatVerses?: number;
+		mutashabihVerses?: number;
+		mutashabihPairs?: number;
 	};
 	sources: SourceMeta[];
 }

@@ -215,3 +215,18 @@ Based on: Al-Nashr fī al-Qirā'āt al-'Ashr (Ibn al-Jazarī)
 URL: https://tafsir.net/
 License / Terms: CC BY 4.0 Open Cultural License.
 Used in Lenses for per-word canonical variant readings, phonetic rules, and semantic notes.
+
+
+------------------------------------------------------------
+Quran Mutashabihat Dataset (Huffāẓ Pairs)
+Author: Waqar144
+URL: https://github.com/Waqar144/Quran_Mutashabihat_Data
+License: CC0 1.0 Universal (Public Domain)
+Used in Lenses for canonical verbal similarity (al-mutashābih al-lafẓī) pairings across all 30 Juz.
+
+------------------------------------------------------------
+Quranpedia Verbal Similarities & Memorization Rules
+Source: Quranpedia.net (الموسوعة القرآنية)
+URL: https://quranpedia.net/
+License / Terms: Free to use inside apps and research tools with attribution.
+Used in Lenses for classical ḍabṭ mnemonic anchors and tawjīh rhetorical exegesis.
