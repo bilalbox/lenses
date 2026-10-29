@@ -348,7 +348,10 @@ export function VerseSecondaryLayers({
 						</span>
 					</summary>
 					<div className="verse-layer-body">
-						<ClassicalBalaghaSection entry={classicalBalagha} />
+						<ClassicalBalaghaSection
+							entry={classicalBalagha}
+							showStudioLink={readerPrefs.rhetoricStudio}
+						/>
 					</div>
 				</details>
 			) : null}

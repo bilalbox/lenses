@@ -46,6 +46,9 @@ export interface Translations {
 		corpusSource: string;
 	};
 	quiz: {
+		pageTitle: string;
+		lensesAria: string;
+		stepsAria: string;
 		streakLabel: string;
 		skipButton: string;
 		openReader: (sura: number, verse: number) => string;
@@ -90,6 +93,12 @@ export interface Translations {
 		quizSection: string;
 		quizDiacriticsLabel: string;
 		quizDiacriticsDescription: string;
+		featuresSection: string;
+		featuresSectionHint: string;
+		features: {
+			rhetoricStudio: string;
+			munasabat: string;
+		};
 		readerSection: string;
 		readerSectionHint: string;
 		readerLayers: {
@@ -100,6 +109,9 @@ export interface Translations {
 			asbab: string;
 			balagha: string;
 		};
+		featureOffTitle: (feature: string) => string;
+		featureOffBody: string;
+		featureOffOpenSettings: string;
 		sourcesLink: string;
 		sourcesDescription: string;
 		installApp: string;
@@ -120,6 +132,7 @@ export interface Translations {
 		mukhtasarArSub: string;
 		irabTitle: string;
 		clauseCount: (index: number, total: number) => string;
+		clausesAria: string;
 		firstClause: string;
 		lastClause: string;
 		clauseNoteContinues: string;
@@ -179,17 +192,10 @@ export interface Translations {
 		closeAria: string;
 		expandAria: string;
 		collapseAria: string;
-		corpusMorphology: string;
 		classicalIrab: string;
 		sarf: string;
 		wordMeaning: string;
-		partOfSpeech: string;
-		root: string;
-		lemma: string;
 		searchThisRoot: string;
-		searchThisLemma: string;
-		basePatternHint: string;
-		impliedEstimated: string;
 		qiraatTitle: string;
 		qiraatIsolation: string;
 		qiraatWasl: string;
@@ -210,6 +216,11 @@ export interface Translations {
 		surahPickerLabel: string;
 		emptyState: string;
 		openInReader: (sura: number, verse: number) => string;
+	};
+	rhetoric: {
+		datasetsAria: string;
+		filterSurahAria: string;
+		searchAria: string;
 	};
 	examples: {
 		pageTitle: string;

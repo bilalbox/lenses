@@ -3,9 +3,13 @@ import type { RhetoricEntry } from "../lib/types";
 
 interface Props {
 	entry: RhetoricEntry;
+	showStudioLink?: boolean;
 }
 
-export function ClassicalBalaghaSection({ entry }: Props) {
+export function ClassicalBalaghaSection({
+	entry,
+	showStudioLink = false,
+}: Props) {
 	const { locale, t } = useI18n();
 
 	return (
@@ -53,15 +57,17 @@ export function ClassicalBalaghaSection({ entry }: Props) {
 				</blockquote>
 			) : null}
 
-			<a
-				href={`#/rhetoric/${entry.sura}/${entry.verse}`}
-				className="balagha-studio-link"
-			>
-				{locale === "ar" ? (
-					<span className="verse-balagha-icon">بلاغة</span>
-				) : null}{" "}
-				{t.verse.balaghaStudioLink} ↗
-			</a>
+			{showStudioLink ? (
+				<a
+					href={`#/rhetoric/${entry.sura}/${entry.verse}`}
+					className="balagha-studio-link"
+				>
+					{locale === "ar" ? (
+						<span className="verse-balagha-icon">بلاغة</span>
+					) : null}{" "}
+					{t.verse.balaghaStudioLink} ↗
+				</a>
+			) : null}
 		</div>
 	);
 }

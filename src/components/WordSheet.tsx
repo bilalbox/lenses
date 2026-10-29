@@ -2,17 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadSurahQiraat } from "../lib/api";
 import { spaceLetters } from "../lib/arabic";
 import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
-import {
-	featureLines,
-	kindGloss,
-	posGloss,
-	relationGloss,
-} from "../lib/glossary";
+import { kindGloss } from "../lib/glossary";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type {
 	QiraatRule,
 	SurahQiraatFile,
-	SyntaxGraph,
 	Verse,
 	Word,
 	WordQiraat,
@@ -27,7 +21,6 @@ interface Props {
 	onSelectSegment: (index: number) => void;
 	onClose: () => void;
 	onSearchRoot: (root: string) => void;
-	onSearchLemma: (lemma: string) => void;
 }
 
 export function WordSheet({
@@ -38,14 +31,18 @@ export function WordSheet({
 	onSelectSegment,
 	onClose,
 	onSearchRoot,
-	onSearchLemma,
 }: Props) {
 	const { locale, t, formatNumber } = useI18n();
 	const stem = word.s.find((segment) => segment.k === "m") ?? word.s[0];
 	const selected = word.s.find((_, index) => index === segmentIndex) ?? stem;
-	const implied = impliedDependents(verse.g ?? [], sura, verse.v, word.n);
+	const rootValue = stem?.ra || stem?.r || "";
 	const [expanded, setExpanded] = useState(false);
 	const [closing, setClosing] = useState(false);
+	const [isMobileModal, setIsMobileModal] = useState(
+		() =>
+			typeof window !== "undefined" &&
+			window.matchMedia("(max-width: 1099px)").matches,
+	);
 	const touchY = useRef(0);
 	const closingTimerRef = useRef<number | null>(null);
 	const sheetRef = useRef<HTMLElement | null>(null);
@@ -91,23 +88,22 @@ export function WordSheet({
 		}, 200);
 	}, [closing, onClose]);
 
-	// Focus trap on mobile modal mode
+	// Focus trap while the sheet is the modal dialog (≤1099px)
 	useEffect(() => {
-		const isMobile = window.matchMedia("(max-width: 1099px)").matches;
-		if (!isMobile || !sheetRef.current) return;
+		const media = window.matchMedia("(max-width: 1099px)");
 		const sheetEl = sheetRef.current;
-		const focusable = sheetEl.querySelectorAll<HTMLElement>(
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-		);
-		if (focusable.length > 0) {
-			focusable[0]?.focus();
-		}
+		if (!sheetEl) return;
 
-		const onKey = (event: KeyboardEvent) => {
-			if (event.key === "Tab") {
-				const elements = sheetEl.querySelectorAll<HTMLElement>(
-					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-				);
+		const FOCUSABLE =
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+		const bind = () => {
+			if (!media.matches) return undefined;
+			const focusable = sheetEl.querySelectorAll<HTMLElement>(FOCUSABLE);
+			focusable[0]?.focus();
+			const onKey = (event: KeyboardEvent) => {
+				if (event.key !== "Tab") return;
+				const elements = sheetEl.querySelectorAll<HTMLElement>(FOCUSABLE);
 				if (elements.length === 0) return;
 				const first = elements[0];
 				const last = elements[elements.length - 1];
@@ -118,10 +114,21 @@ export function WordSheet({
 					event.preventDefault();
 					first?.focus();
 				}
-			}
+			};
+			window.addEventListener("keydown", onKey);
+			return () => window.removeEventListener("keydown", onKey);
 		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
+
+		let unbind = bind();
+		const onChange = () => {
+			unbind?.();
+			unbind = bind();
+		};
+		media.addEventListener("change", onChange);
+		return () => {
+			unbind?.();
+			media.removeEventListener("change", onChange);
+		};
 	}, []);
 
 	useEffect(() => {
@@ -153,21 +160,18 @@ export function WordSheet({
 			window.removeEventListener("keydown", onKeyDown, { capture: true });
 	}, [handleClose]);
 
-	// Lock body scroll on mobile
+	// Track mobile modal mode + lock body scroll
 	useEffect(() => {
 		const media = window.matchMedia("(max-width: 1099px)");
-		const updateLock = () => {
-			if (media.matches) {
-				document.body.style.overflow = "hidden";
-			} else {
-				document.body.style.overflow = "";
-			}
+		const update = () => {
+			setIsMobileModal(media.matches);
+			document.body.style.overflow = media.matches ? "hidden" : "";
 		};
-		updateLock();
-		media.addEventListener("change", updateLock);
+		update();
+		media.addEventListener("change", update);
 		return () => {
 			document.body.style.overflow = "";
-			media.removeEventListener("change", updateLock);
+			media.removeEventListener("change", update);
 		};
 	}, []);
 
@@ -183,7 +187,7 @@ export function WordSheet({
 				ref={sheetRef}
 				className={`sheet${expanded ? " is-expanded" : ""}${closing ? " is-closing" : ""}`}
 				role="dialog"
-				aria-modal="true"
+				aria-modal={isMobileModal ? true : undefined}
 				aria-label={t.sheet.analysisAria(word.n)}
 				onClick={(event) => event.stopPropagation()}
 			>
@@ -232,97 +236,6 @@ export function WordSheet({
 					))}
 				</div>
 
-				<section>
-					<h3 className="sheet-section-label">{t.sheet.corpusMorphology}</h3>
-					<p className="source-line">
-						{t.common.corpusSource} ·{" "}
-						<a
-							href="https://corpus.quran.com/"
-							target="_blank"
-							rel="noreferrer"
-						>
-							corpus.quran.com
-						</a>
-					</p>
-					<dl className="facts">
-						<div>
-							<dt>{t.sheet.partOfSpeech}</dt>
-							<dd>
-								<strong className="fact-metric" lang="ar" dir="rtl">
-									{posGloss(selected.p, locale).name}
-								</strong>
-								<span>{posGloss(selected.p, locale).about}</span>
-							</dd>
-						</div>
-						{selected.r ? (
-							<div>
-								<dt>{t.sheet.root}</dt>
-								<dd>
-									<strong className="fact-metric" lang="ar">
-										{spaceLetters(selected.ra || selected.r)}
-									</strong>
-									<span className="translit">{selected.r}</span>
-									<button
-										type="button"
-										className="text-button"
-										onClick={() =>
-											onSearchRoot(selected.ra || selected.r || "")
-										}
-									>
-										{t.sheet.searchThisRoot}
-									</button>
-								</dd>
-							</div>
-						) : null}
-						{selected.l ? (
-							<div>
-								<dt>{t.sheet.lemma}</dt>
-								<dd>
-									<strong className="fact-metric" lang="ar">
-										{selected.la}
-									</strong>
-									{selected.g ? <span>{selected.g}</span> : null}
-									<span className="translit">{selected.l}</span>
-									<button
-										type="button"
-										className="text-button"
-										onClick={() => onSearchLemma(selected.l || "")}
-									>
-										{t.sheet.searchThisLemma}
-									</button>
-								</dd>
-							</div>
-						) : null}
-						{featureLines(selected.f ?? {}, locale).map((line) => (
-							<div key={line.key}>
-								<dt>{line.label}</dt>
-								<dd>
-									<strong className="fact-metric" lang="ar" dir="rtl">
-										{line.name}
-									</strong>
-									<span>{line.about}</span>
-								</dd>
-							</div>
-						))}
-					</dl>
-					{selected.p === "V" && !selected.f?.form ? (
-						<p className="hint">{t.sheet.basePatternHint}</p>
-					) : null}
-					{implied.length ? (
-						<ul className="implied">
-							{implied.map((item, index) => (
-								<li key={`${item.rel}-${index}`}>
-									<span lang="ar" dir="rtl">
-										{t.sheet.impliedEstimated} {item.arabic} ·{" "}
-										{relationGloss(item.rel, locale).name}
-									</span>{" "}
-									{relationGloss(item.rel, locale).about}
-								</li>
-							))}
-						</ul>
-					) : null}
-				</section>
-
 				{word.i ? (
 					<section>
 						<h3 className="sheet-section-label">{t.sheet.classicalIrab}</h3>
@@ -357,6 +270,20 @@ export function WordSheet({
 						>
 							{formatIrabText(word.sf)}
 						</p>
+						{rootValue ? (
+							<p className="sheet-root-action">
+								<span className="fact-metric" lang="ar" dir="rtl">
+									{spaceLetters(rootValue)}
+								</span>
+								<button
+									type="button"
+									className="text-button"
+									onClick={() => onSearchRoot(rootValue)}
+								>
+									{t.sheet.searchThisRoot}
+								</button>
+							</p>
+						) : null}
 					</section>
 				) : null}
 				{wordQiraat ? <WordQiraatSection wordQiraat={wordQiraat} /> : null}
@@ -434,33 +361,4 @@ function WordQiraatSection({ wordQiraat }: { wordQiraat: WordQiraat }) {
 			) : null}
 		</section>
 	);
-}
-
-function impliedDependents(
-	graphs: SyntaxGraph[],
-	sura: number,
-	verse: number,
-	word: number,
-) {
-	const found: { arabic: string; rel: string }[] = [];
-	for (const graph of graphs) {
-		graph.edges.forEach((edge) => {
-			const dependent = graph.nodes[edge.d];
-			const head = graph.nodes[edge.h];
-			if (
-				dependent?.t === "elide" &&
-				head?.s === sura &&
-				head.v === verse &&
-				head.w === word
-			) {
-				const arabic = dependent.a || "—";
-				if (
-					!found.some((item) => item.arabic === arabic && item.rel === edge.r)
-				) {
-					found.push({ arabic, rel: edge.r });
-				}
-			}
-		});
-	}
-	return found;
 }

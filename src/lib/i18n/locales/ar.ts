@@ -34,6 +34,9 @@ export const ar: Translations = {
 		corpusSource: "المدونة القرآنية",
 	},
 	quiz: {
+		pageTitle: "تمارين النحو والصرف",
+		lensesAria: "عدسات الاختبار",
+		stepsAria: "خطوات الاختبار",
 		streakLabel: "تتابع",
 		skipButton: "↻ تخطي",
 		openReader: (sura: number, verse: number) =>
@@ -82,9 +85,16 @@ export const ar: Translations = {
 		quizSection: "الاختبار",
 		quizDiacriticsLabel: "إخفاء التشكيل في الاختبارات",
 		quizDiacriticsDescription: "عرض آيات القرآن بدون حركات لتحدٍّ أصعب.",
+		featuresSection: "الميزات",
+		featuresSectionHint:
+			"تبقى الاستوديوهات الاختيارية معطّلة حتى تفعّلها. إيقاف الميزة يخفيها دون حذف البيانات المحمّلة.",
+		features: {
+			rhetoricStudio: "مختبر البلاغة",
+			munasabat: "المناسبات",
+		},
 		readerSection: "طبقات القارئ",
 		readerSectionHint:
-			"أخفِ الطبقات التي لا تدرسها. الطبقات المعطّلة تُزال من شاشة الآية بالكامل.",
+			"أخفِ الطبقات التي لا تدرسها. الطبقات المعطّلة تُزال من شاشة الآية ولا تُحمَّل حتى تُفعَّل.",
 		readerLayers: {
 			meaning: "تفسير الآية",
 			irab: "إعراب الجملة",
@@ -93,6 +103,10 @@ export const ar: Translations = {
 			asbab: "أسباب النزول",
 			balagha: "البلاغة الكلاسيكية",
 		},
+		featureOffTitle: (feature: string) => `${feature} معطّل`,
+		featureOffBody:
+			"فعّل هذه الميزة من الإعدادات لفتحها. إيقافها لاحقاً لا يحذف شيئاً.",
+		featureOffOpenSettings: "فتح الإعدادات",
 		sourcesLink: "مصادر البيانات",
 		sourcesDescription: "استكشف مصادر البيانات اللغوية وتراخيصها.",
 		installApp: "تثبيت التطبيق",
@@ -114,6 +128,7 @@ export const ar: Translations = {
 		irabTitle: "إعراب الآية",
 		clauseCount: (index: number, total: number) =>
 			`الجملة ${formatNum(index + 1, "ar")} من ${formatNum(total, "ar")}`,
+		clausesAria: "الجمل",
 		firstClause: "أنت في الجملة الأولى.",
 		lastClause: "أنت في الجملة الأخيرة.",
 		clauseNoteContinues: "تتصل هذه الجملة بآية مجاورة.",
@@ -183,17 +198,10 @@ export const ar: Translations = {
 		closeAria: "إغلاق التحليل",
 		expandAria: "توسيع التحليل",
 		collapseAria: "طي التحليل",
-		corpusMorphology: "الصرف والتحليل النحوي",
 		classicalIrab: "الإعراب المفرد",
 		sarf: "الصرف والبنية",
 		wordMeaning: "معنى الكلمة",
-		partOfSpeech: "النوع",
-		root: "الجذر",
-		lemma: "الأصل المعجمي",
 		searchThisRoot: "ابحث عن هذا الجذر",
-		searchThisLemma: "ابحث عن هذا الأصل",
-		basePatternHint: "الوزن الأصلي فَعَلَ لا يُعلّم غالباً.",
-		impliedEstimated: "مقدَّر",
 		qiraatTitle: "القراءات العشر المتواترة",
 		qiraatIsolation: "عند الوقف والانفراد",
 		qiraatWasl: "عند الوصل والدرج",
@@ -216,6 +224,11 @@ export const ar: Translations = {
 		emptyState: "لا تتوفر بيانات بنية لهذه السورة.",
 		openInReader: (sura: number, verse: number) =>
 			`فتح ${formatNum(sura, "ar")}:${formatNum(verse, "ar")} في القارئ ↗`,
+	},
+	rhetoric: {
+		datasetsAria: "مجموعات البلاغة",
+		filterSurahAria: "تصفية حسب السورة",
+		searchAria: "تصفية الآيات والشواهد",
 	},
 	examples: {
 		pageTitle: "استكشف الأنماط النحوية",

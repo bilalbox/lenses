@@ -14,7 +14,7 @@ import {
 } from "../lib/api";
 import { normalizeDigits } from "../lib/i18n/format";
 import { useI18n } from "../lib/i18n/I18nContext";
-import type { ReaderPrefs } from "../lib/readerPrefs";
+import { type ReaderPrefs, rhetoricFetchEnabled } from "../lib/readerPrefs";
 import { useRhetoric } from "../lib/rhetoric";
 import type {
 	AsbabData,
@@ -46,7 +46,6 @@ interface Props {
 		params?: Record<string, string>,
 	) => void;
 	onSearchRoot: (root: string) => void;
-	onSearchLemma: (lemma: string) => void;
 }
 
 export function VerseScreen({
@@ -59,7 +58,6 @@ export function VerseScreen({
 	readerPrefs,
 	onNavigate,
 	onSearchRoot,
-	onSearchLemma,
 }: Props) {
 	const { t } = useI18n();
 	const [file, setFile] = useState<SurahFile | null>(null);
@@ -213,7 +211,6 @@ export function VerseScreen({
 					onSelectSegment={setSegment}
 					onClose={() => onNavigate(sura, verse.v)}
 					onSearchRoot={onSearchRoot}
-					onSearchLemma={onSearchLemma}
 				/>
 			) : null}
 		</div>
@@ -289,6 +286,7 @@ function VerseBody({
 	}, [tab]);
 
 	useEffect(() => {
+		if (!readerPrefs.mutashabih) return;
 		let cancelled = false;
 		loadSurahMutashabih(sura)
 			.then((data) => {
@@ -308,9 +306,10 @@ function VerseBody({
 		return () => {
 			cancelled = true;
 		};
-	}, [sura, tab]);
+	}, [sura, tab, readerPrefs.mutashabih]);
 
 	useEffect(() => {
+		if (!readerPrefs.asbab) return;
 		let cancelled = false;
 		loadAsbab()
 			.then((data) => {
@@ -325,9 +324,10 @@ function VerseBody({
 		return () => {
 			cancelled = true;
 		};
-	}, [tab]);
+	}, [tab, readerPrefs.asbab]);
 
 	useEffect(() => {
+		if (!readerPrefs.nahw) return;
 		let cancelled = false;
 		setSyntaxClauseIndex(0);
 		loadSurahSyntax(sura)
@@ -338,7 +338,7 @@ function VerseBody({
 		return () => {
 			cancelled = true;
 		};
-	}, [sura]);
+	}, [sura, readerPrefs.nahw]);
 
 	const verseAsbab = useMemo(() => {
 		if (!asbabData) return [];
@@ -416,7 +416,9 @@ function VerseBody({
 		}
 		openClause(next);
 	};
-	const { entries: rhetoricEntries } = useRhetoric();
+	const { entries: rhetoricEntries } = useRhetoric(
+		rhetoricFetchEnabled(readerPrefs),
+	);
 	const classicalBalagha = useMemo(
 		() =>
 			rhetoricEntries.find(
@@ -716,7 +718,7 @@ function NahwSyntaxSection({
 			<section className="noorbayan-nahw-section">
 				<div className="noorbayan-nahw-header">
 					<div>
-						<h3 className="noorbayan-nahw-title">{t.verse.nahwTabTitle}</h3>
+						<h2 className="noorbayan-nahw-title">{t.verse.nahwTabTitle}</h2>
 						<p className="source-line">
 							{t.verse.treebankNoorBayan} ·{" "}
 							<a
@@ -733,7 +735,7 @@ function NahwSyntaxSection({
 						<nav
 							className="noorbayan-clause-outline"
 							dir="rtl"
-							aria-label="Clauses"
+							aria-label={t.verse.clausesAria}
 						>
 							{verseSyntax.sentences.map((sent, idx) => (
 								<button
@@ -776,7 +778,11 @@ function NahwSyntaxSection({
 		<>
 			{graphs.length > 1 ? (
 				<div className="tree-tools">
-					<nav className="clause-outline" dir="rtl" aria-label="Clauses">
+					<nav
+						className="clause-outline"
+						dir="rtl"
+						aria-label={t.verse.clausesAria}
+					>
 						{graphs.map((_, index) => (
 							<button
 								key={index}

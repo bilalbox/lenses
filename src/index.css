@@ -11,6 +11,8 @@
 	--teal-soft: #e5f3f0;
 	--gold: #9a6432;
 	--gold-soft: #f6ead7;
+	/* Text on gold-soft / warm tints — AA ≥4.5:1 (do not use --gold for body text there). */
+	--gold-ink: #6e451c;
 	--rose: #8c3d4b;
 	--indigo: #2c4c7c;
 	/* Layered elevation: contact edge + ambient diffuse (avoids muddy single shadows) */
@@ -44,6 +46,7 @@
 	--teal-soft: #16332e;
 	--gold: #e0b15a;
 	--gold-soft: #3a2d1c;
+	--gold-ink: #f0c878;
 	--rose: #e08a96;
 	--indigo: #9eb6de;
 	--shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 12px 32px -6px rgba(0, 0, 0, 0.45);
@@ -473,12 +476,11 @@ main {
 	font-family: var(--sans);
 	font-size: 0.78rem;
 	font-weight: 600;
-	color: inherit;
-	opacity: 0.78;
+	color: var(--ink-soft);
 }
 
 .verse-layer[open] > summary .verse-layer-meta {
-	opacity: 0.9;
+	color: var(--ink-soft);
 }
 
 .verse-layer-body {
@@ -549,6 +551,9 @@ main {
 .sources-page h2 {
 	font-family: var(--serif);
 	font-weight: 600;
+}
+.sources-page > section > p {
+	max-width: 70ch;
 }
 .clause-head h3 {
 	margin: 0;
@@ -864,42 +869,19 @@ main {
 .chip.is-on {
 	outline: 2px solid var(--teal);
 }
-.facts {
-	margin: 0;
+.sheet-root-action {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem 0.85rem;
+	margin: 0.55rem 0 0;
 }
-.facts > div {
-	padding: 0.65rem 0;
-	border-top: 1px solid var(--line);
-}
-.facts dt {
-	color: var(--muted);
-	font-family: var(--arabic-ui);
-	font-size: 0.78rem;
-	font-weight: 400;
-	letter-spacing: 0.01em;
-}
-.facts dd {
-	margin: 0.2rem 0 0;
-	display: grid;
-	justify-items: start;
-	gap: 0.2rem;
-}
-.facts dd .fact-metric,
-.facts dd strong.fact-metric {
-	display: block;
+.sheet-root-action .fact-metric {
 	font-family: var(--arabic-ui);
 	color: var(--ink);
-	font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+	font-size: clamp(1.15rem, 2vw, 1.4rem);
 	font-weight: 600;
 	line-height: 1.25;
-}
-.facts dd span,
-.implied {
-	color: var(--muted);
-}
-.facts dd span:not(.translit) {
-	font-size: 0.86rem;
-	line-height: 1.4;
 }
 .translit {
 	font-family: ui-monospace, monospace;
@@ -913,9 +895,6 @@ main {
 	margin-top: 0.15rem;
 	padding: 0;
 	color: var(--teal);
-}
-.implied {
-	padding-inline-start: 1.1rem;
 }
 .sheet-section-label,
 .sheet h3.sheet-section-label {
@@ -952,6 +931,24 @@ main {
 .page-intro p {
 	max-width: 65ch;
 	text-align: start;
+}
+.feature-off-panel {
+	max-width: 28rem;
+	margin: 2.5rem auto;
+	padding: 0 0.25rem;
+	text-align: start;
+}
+.feature-off-panel h1 {
+	font-size: clamp(1.6rem, 3vw, 2.2rem);
+	margin: 0 0 0.6rem;
+}
+.feature-off-panel p {
+	margin: 0 0 1.25rem;
+	color: var(--muted);
+	max-width: 42ch;
+}
+.feature-off-panel .install-button {
+	width: auto;
 }
 .page-intro-count {
 	margin: 0 0 0.75rem;
@@ -1228,10 +1225,11 @@ main {
 	font-size: 1.15rem;
 }
 .source-kind-pill {
-	font-size: 0.68rem;
+	font-size: 0.72rem;
 	font-weight: 700;
 	text-transform: uppercase;
-	padding: 0.12rem 0.55rem;
+	letter-spacing: 0.02em;
+	padding: 0.15rem 0.55rem;
 	border-radius: 999px;
 	background: var(--bg-2);
 	color: var(--teal);
@@ -2049,28 +2047,24 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
-		animation-duration: 0.01ms !important;
-		animation-iteration-count: 1 !important;
-		scroll-behavior: auto !important;
+	html {
+		scroll-behavior: auto;
 	}
 
+	/* Preserve short opacity feedback; drop travel/transform choreography. */
 	.settings-dialog,
 	.settings-dialog.is-closing,
 	.sheet,
 	.sheet.is-closing,
+	.sheet-backdrop,
+	.sheet-backdrop.is-closing,
 	.quiz-wizard-pane.anim-forward,
 	.quiz-wizard-pane.anim-backward,
-	.anim-soft-enter {
+	.anim-soft-enter,
+	.library-status {
 		transform: none !important;
 		animation: none !important;
 		opacity: 1 !important;
-	}
-
-	/* Keep a short opacity fade for state changes instead of a global 0.01ms wipe. */
-	.anim-soft-enter {
 		transition: opacity 0.12s var(--ease-out) !important;
 	}
 
@@ -2504,14 +2498,22 @@ main {
  * child — that left a giant empty grid gap when content was taller than the cap).
  * Mobile overrides live at the end of this section so they win the cascade.
  * ============================================================================ */
+.quiz-page-title {
+	margin: 0;
+	font-family: var(--serif);
+	font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+	font-weight: 600;
+	line-height: 1.25;
+	color: var(--ink);
+}
 .quiz-wizard-viewport {
 	max-width: 780px;
 	margin: 0 auto;
 	height: min(920px, calc(100dvh - 8.2rem));
 	min-height: 0;
 	display: grid;
-	/* Cap the ROW itself so long ayahs cannot inflate empty grid space */
-	grid-template-rows: minmax(0, 48%) minmax(14rem, 1fr);
+	/* Title + ayah pane + wizard deck */
+	grid-template-rows: auto minmax(0, 48%) minmax(14rem, 1fr);
 	gap: 0.7rem;
 }
 
@@ -2714,10 +2716,10 @@ main {
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	touch-action: pan-y;
-	/* Concentric: parent 20 - padding 12 ≈ 8 */
+	/* Concentric: parent 20 - padding 12 ≈ 8 — tint only, avoid nested card chrome */
 	border-radius: 8px;
 	background: color-mix(in srgb, var(--bg) 50%, var(--paper));
-	border: 1px solid var(--line);
+	border: 1px solid transparent;
 	/* Extra block padding: Scheherazade ascenders/descenders clip under overflow */
 	padding: 0.7rem 0.7rem 0.75rem;
 	display: flex;
@@ -3185,7 +3187,7 @@ main {
 		height: auto;
 		max-height: none;
 		min-height: 0;
-		grid-template-rows: auto auto;
+		grid-template-rows: auto auto auto;
 		gap: 0.65rem;
 	}
 
@@ -3273,14 +3275,14 @@ main {
 
 .rhetoric-pill {
 	font-family: var(--sans);
-	font-size: 0.68rem;
+	font-size: 0.72rem;
 	font-weight: 700;
 	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	padding: 0.12rem 0.45rem;
+	letter-spacing: 0.04em;
+	padding: 0.15rem 0.5rem;
 	border-radius: 999px;
 	background: var(--gold-soft);
-	color: var(--gold);
+	color: var(--gold-ink);
 	border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
@@ -3618,7 +3620,7 @@ main {
 	padding: 0.08rem 0.45rem;
 	border-radius: 999px;
 	background: var(--gold-soft);
-	color: var(--gold);
+	color: var(--gold-ink);
 	border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
@@ -4153,21 +4155,21 @@ main {
 }
 
 .asbab-grade-badge.grade-sahih {
-	background: rgba(16, 185, 129, 0.14);
-	color: #047857;
-	border: 1px solid rgba(16, 185, 129, 0.35);
+	background: color-mix(in srgb, var(--teal) 16%, var(--paper));
+	color: color-mix(in srgb, var(--teal) 72%, var(--ink));
+	border: 1px solid color-mix(in srgb, var(--teal) 42%, var(--line));
 }
 
 .asbab-grade-badge.grade-hasan {
-	background: rgba(13, 148, 136, 0.14);
-	color: #0f766e;
-	border: 1px solid rgba(13, 148, 136, 0.35);
+	background: color-mix(in srgb, var(--indigo) 16%, var(--paper));
+	color: color-mix(in srgb, var(--indigo) 72%, var(--ink));
+	border: 1px solid color-mix(in srgb, var(--indigo) 42%, var(--line));
 }
 
 .asbab-grade-badge.grade-daif {
-	background: rgba(239, 68, 68, 0.12);
-	color: #b91c1c;
-	border: 1px solid rgba(239, 68, 68, 0.3);
+	background: color-mix(in srgb, var(--rose) 16%, var(--paper));
+	color: color-mix(in srgb, var(--rose) 72%, var(--ink));
+	border: 1px solid color-mix(in srgb, var(--rose) 42%, var(--line));
 }
 
 .asbab-grade-badge.grade-other {
@@ -4436,7 +4438,7 @@ main {
 	margin: 0;
 	font-size: 0.78rem;
 	font-weight: 700;
-	color: var(--gold-dark, #b45309);
+	color: var(--gold-ink);
 }
 
 .qiraat-note-text {
@@ -4529,7 +4531,7 @@ main {
 	padding: 0.2rem 0.6rem;
 	border-radius: 999px;
 	background: color-mix(in srgb, var(--gold) 15%, var(--paper));
-	color: var(--gold-dark, #b45309);
+	color: var(--gold-ink);
 	border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
 }
 
@@ -4721,7 +4723,7 @@ main {
 
 .mutashabih-word-chip.status-diff .word-text {
 	font-weight: 700;
-	color: var(--gold-dark, #b45309);
+	color: var(--gold-ink);
 }
 
 .mutashabih-word-chip.status-extra {
@@ -5022,7 +5024,7 @@ main {
 }
 .diptych-keystone-inner strong {
 	font-size: 1.1rem;
-	color: var(--gold);
+	color: var(--gold-ink);
 }
 .diptych-keystone-inner p {
 	margin: 0;
@@ -5036,10 +5038,10 @@ main {
 }
 .diptych-keystone-inner em {
 	font-style: normal;
-	font-size: 0.68rem;
+	font-size: 0.72rem;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
-	color: var(--gold);
+	color: var(--gold-ink);
 }
 .diptych-keystone-jump {
 	margin-top: 0.25rem;
@@ -5087,10 +5089,11 @@ main {
 	color: var(--muted);
 	font-weight: 700;
 }
-.munasabat-card-head h3 {
+.munasabat-card-head h2 {
 	margin: 0.15rem 0 0;
 	font-family: var(--serif);
 	font-size: 1.15rem;
+	font-weight: 600;
 }
 .munasabat-ar-names {
 	margin: 0.2rem 0 0;
@@ -5115,7 +5118,7 @@ main {
 .munasabat-quote {
 	padding: 0.8rem 0.9rem;
 	border-radius: 12px;
-	border: 1px solid var(--line);
+	border: none;
 	display: flex;
 	flex-direction: column;
 	gap: 0.45rem;
@@ -5152,9 +5155,14 @@ main {
 	margin: 0;
 	font-size: 0.82rem;
 	line-height: 1.55;
-	color: var(--muted);
+	color: var(--ink-soft);
 	max-height: 8rem;
 	overflow: auto;
+}
+.munasabat-quote strong,
+.munasabat-quote em {
+	color: var(--gold-ink);
+	font-style: inherit;
 }
 .munasabat-actions {
 	display: flex;

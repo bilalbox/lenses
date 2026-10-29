@@ -228,7 +228,7 @@ export function NoorBayanTree({
 							refY="3"
 							orient="auto"
 						>
-							<polygon points="0 0, 8 3, 0 6" fill="var(--teal, #008080)" />
+							<polygon points="0 0, 8 3, 0 6" fill="var(--teal, #0f6e66)" />
 						</marker>
 						<marker
 							id="nb-arrow-active"
@@ -238,7 +238,7 @@ export function NoorBayanTree({
 							refY="3"
 							orient="auto"
 						>
-							<polygon points="0 0, 8 3, 0 6" fill="var(--gold, #d97706)" />
+							<polygon points="0 0, 8 3, 0 6" fill="var(--gold, #9a6432)" />
 						</marker>
 					</defs>
 
@@ -256,8 +256,8 @@ export function NoorBayanTree({
 								fill="none"
 								stroke={
 									isHighlighted
-										? "var(--gold, #d97706)"
-										: "var(--teal, #008080)"
+										? "var(--gold, #9a6432)"
+										: "var(--teal, #0f6e66)"
 								}
 								strokeWidth={isHighlighted ? 2.5 : 1.75}
 								strokeDasharray={arc.isCarried ? "4 4" : "none"}
@@ -281,7 +281,7 @@ export function NoorBayanTree({
 								y1={wordBaselineY - 35}
 								x2={x}
 								y2={wordBaselineY - 95}
-								stroke="var(--muted, #9ca3af)"
+								stroke="var(--muted, #6f675e)"
 								strokeDasharray="3 3"
 								strokeWidth="1.5"
 							/>
@@ -303,7 +303,7 @@ export function NoorBayanTree({
 								key={`bracket-line-${c.key}`}
 								d={bracketPath}
 								fill="none"
-								stroke="var(--teal, #008080)"
+								stroke="var(--teal, #0f6e66)"
 								strokeWidth="1.5"
 								strokeLinecap="round"
 							/>
@@ -334,11 +334,11 @@ export function NoorBayanTree({
 									rx="8"
 									fill={
 										isActive
-											? "var(--gold-soft, #fef3c7)"
-											: "var(--paper, #ffffff)"
+											? "var(--gold-soft, #f6ead7)"
+											: "var(--paper, #fffdf8)"
 									}
 									stroke={
-										isActive ? "var(--gold, #d97706)" : "var(--line, #e5e7eb)"
+										isActive ? "var(--gold, #9a6432)" : "var(--line, #e3d9c8)"
 									}
 									strokeWidth={isActive ? 2 : 1}
 									className="noorbayan-node-bg"
@@ -352,7 +352,7 @@ export function NoorBayanTree({
 									fontFamily="var(--arabic)"
 									fontWeight="600"
 									fill={
-										tok.text ? "var(--ink, #111827)" : "var(--muted, #9ca3af)"
+										tok.text ? "var(--ink, #1c1915)" : "var(--muted, #6f675e)"
 									}
 									className="noorbayan-token-text"
 								>
@@ -365,7 +365,7 @@ export function NoorBayanTree({
 									width="76"
 									height="17"
 									rx="8.5"
-									fill="rgba(0, 128, 128, 0.09)"
+									fill="color-mix(in srgb, var(--teal) 12%, transparent)"
 								/>
 								<text
 									x={x}
@@ -373,7 +373,7 @@ export function NoorBayanTree({
 									textAnchor="middle"
 									fontSize="10"
 									fontWeight="600"
-									fill="var(--teal, #008080)"
+									fill="var(--teal, #0f6e66)"
 									className="noorbayan-pos-text"
 								>
 									{tok.pos}
@@ -398,13 +398,13 @@ export function NoorBayanTree({
 									rx="11"
 									fill={
 										isHighlighted
-											? "var(--gold-soft, #fef3c7)"
-											: "var(--paper, #ffffff)"
+											? "var(--gold-soft, #f6ead7)"
+											: "var(--paper, #fffdf8)"
 									}
 									stroke={
 										isHighlighted
-											? "var(--gold, #d97706)"
-											: "var(--teal, #008080)"
+											? "var(--gold, #9a6432)"
+											: "var(--teal, #0f6e66)"
 									}
 									strokeWidth="1.2"
 									className="noorbayan-rel-pill-bg"
@@ -417,8 +417,8 @@ export function NoorBayanTree({
 									fontWeight={isHighlighted ? "700" : "500"}
 									fill={
 										isHighlighted
-											? "var(--gold-dark, #b45309)"
-											: "var(--teal-dark, #005959)"
+											? "var(--gold-ink, #6e451c)"
+											: "var(--teal, #0f6e66)"
 									}
 									className="noorbayan-rel-pill-text"
 								>
@@ -443,8 +443,8 @@ export function NoorBayanTree({
 									width={pillWidth}
 									height="24"
 									rx="6"
-									fill="var(--panel, #f3f4f6)"
-									stroke="var(--muted, #9ca3af)"
+									fill="var(--bg-2, #e7e0d2)"
+									stroke="var(--muted, #6f675e)"
 									strokeDasharray="3 3"
 									strokeWidth="1.2"
 								/>
@@ -454,7 +454,7 @@ export function NoorBayanTree({
 									textAnchor="middle"
 									fontSize="11"
 									fontWeight="600"
-									fill="var(--ink, #374151)"
+									fill="var(--ink, #1c1915)"
 								>
 									{tok.relAr ? `محذوف (${tok.relAr})` : "محذوف"}
 								</text>
@@ -478,8 +478,8 @@ export function NoorBayanTree({
 									width={pillWidth}
 									height="20"
 									rx="10"
-									fill="var(--paper, #ffffff)"
-									stroke="var(--teal, #008080)"
+									fill="var(--paper, #fffdf8)"
+									stroke="var(--teal, #0f6e66)"
 									strokeWidth="1"
 								/>
 								<text
@@ -488,7 +488,7 @@ export function NoorBayanTree({
 									textAnchor="middle"
 									fontSize="11"
 									fontWeight="600"
-									fill="var(--teal-dark, #005959)"
+									fill="var(--teal, #0f6e66)"
 								>
 									{c.label}
 								</text>

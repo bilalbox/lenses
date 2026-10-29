@@ -28,6 +28,9 @@ export const id: Translations = {
 		corpusSource: "Quranic Arabic Corpus",
 	},
 	quiz: {
+		pageTitle: "Latihan Nahwu & Sharaf",
+		lensesAria: "Lensa kuis",
+		stepsAria: "Langkah kuis",
 		streakLabel: "beruntun",
 		skipButton: "↻ Lewati",
 		openReader: (sura: number, verse: number) =>
@@ -81,9 +84,16 @@ export const id: Translations = {
 		quizDiacriticsLabel: "Sembunyikan harakat di kuis",
 		quizDiacriticsDescription:
 			"Tampilkan ayat Al-Qur'an tanpa harakat untuk tantangan yang lebih sulit.",
+		featuresSection: "Fitur",
+		featuresSectionHint:
+			"Studio opsional tetap mati sampai Anda mengaktifkannya. Mematikan fitur hanya menyembunyikannya; data yang sudah diunduh tetap di perangkat.",
+		features: {
+			rhetoricStudio: "Studio retorika",
+			munasabat: "Munasabat",
+		},
 		readerSection: "Lapisan pembaca",
 		readerSectionHint:
-			"Sembunyikan lapisan yang tidak Anda pelajari. Lapisan yang dimatikan hilang dari tampilan ayat.",
+			"Sembunyikan lapisan yang tidak Anda pelajari. Lapisan yang dimatikan hilang dari tampilan ayat dan tidak diunduh sebelum diaktifkan.",
 		readerLayers: {
 			meaning: "Makna ayat",
 			irab: "Sintaksis kalimat (iʿrāb)",
@@ -92,6 +102,10 @@ export const id: Translations = {
 			asbab: "Sebab turun",
 			balagha: "Balaghah klasik",
 		},
+		featureOffTitle: (feature: string) => `${feature} dimatikan`,
+		featureOffBody:
+			"Aktifkan fitur ini di Pengaturan untuk membukanya. Mematikannya lagi tidak menghapus data.",
+		featureOffOpenSettings: "Buka Pengaturan",
 		sourcesLink: "Sumber Data",
 		sourcesDescription: "Jelajahi sumber data korpus dan lisensi",
 		installApp: "Pasang Aplikasi",
@@ -113,6 +127,7 @@ export const id: Translations = {
 		irabTitle: "I'rab Kalimat",
 		clauseCount: (index: number, total: number) =>
 			`Klausa ${formatNum(index + 1, "id")} dari ${formatNum(total, "id")}`,
+		clausesAria: "Klausa",
 		firstClause: "Sudah di klausa pertama.",
 		lastClause: "Sudah di klausa terakhir.",
 		clauseNoteContinues: "Klausa ini bersambung ke ayat berikutnya.",
@@ -184,17 +199,10 @@ export const id: Translations = {
 		closeAria: "Tutup analisis",
 		expandAria: "Perluas analisis",
 		collapseAria: "Kecilkan analisis",
-		corpusMorphology: "Morfologi korpus",
 		classicalIrab: "I'rab klasik",
 		sarf: "Sharaf",
 		wordMeaning: "Arti kata",
-		partOfSpeech: "Jenis kata",
-		root: "Akar kata",
-		lemma: "Bentuk dasar",
 		searchThisRoot: "Cari akar kata ini",
-		searchThisLemma: "Cari bentuk dasar ini",
-		basePatternHint: "Pola dasar فَعَلَ biasanya tidak ditandai.",
-		impliedEstimated: "Tersirat (Muqaddar)",
 		qiraatTitle: "Sepuluh Qira'at Mutawatirah",
 		qiraatIsolation: "Saat Berhenti (Waqaf)",
 		qiraatWasl: "Saat Bersambung (Washal)",
@@ -217,6 +225,11 @@ export const id: Translations = {
 		emptyState: "Tidak ada data struktur untuk surah ini.",
 		openInReader: (sura: number, verse: number) =>
 			`Buka ${formatNum(sura, "id")}:${formatNum(verse, "id")} di pembaca ↗`,
+	},
+	rhetoric: {
+		datasetsAria: "Dataset balaghah",
+		filterSurahAria: "Filter menurut surah",
+		searchAria: "Filter ayat atau perangkat",
 	},
 	examples: {
 		pageTitle: "Temukan pola",

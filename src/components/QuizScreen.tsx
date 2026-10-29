@@ -554,6 +554,7 @@ export function QuizScreen({
 
 	return (
 		<div className="quiz-wizard-viewport anim-soft-enter">
+			<h1 className="quiz-page-title">{t.quiz.pageTitle}</h1>
 			{/* ====================================================================
 			 * TOP PANE: Lens Switcher + Pinned Mushaf Ayah
 			 * ==================================================================== */}
@@ -562,7 +563,7 @@ export function QuizScreen({
 				<div
 					className="quiz-lens-switcher"
 					role="tablist"
-					aria-label="Quiz Lenses"
+					aria-label={t.quiz.lensesAria}
 				>
 					{LENS_ORDER.map((l) => {
 						const info = getLensLabel(l, locale);
@@ -570,9 +571,11 @@ export function QuizScreen({
 						return (
 							<button
 								key={l}
+								id={`quiz-lens-tab-${l}`}
 								type="button"
 								role="tab"
 								aria-selected={active}
+								aria-controls="quiz-lens-panel"
 								className={`quiz-lens-tab${active ? " is-active" : ""}`}
 								onClick={() => handleSelectLens(l)}
 							>
@@ -691,7 +694,13 @@ export function QuizScreen({
 			{/* ====================================================================
 			 * BOTTOM PANE: Single-Step Animated Wizard Deck per Lens
 			 * ==================================================================== */}
-			<section className="quiz-wizard-bottom" aria-live="polite">
+			<section
+				id="quiz-lens-panel"
+				className="quiz-wizard-bottom"
+				role="tabpanel"
+				aria-labelledby={`quiz-lens-tab-${lens}`}
+				aria-live="polite"
+			>
 				<div className="quiz-wizard-meta-bar">
 					<div className="quiz-wizard-surah-tag">
 						<span className="quiz-wizard-ref">
@@ -751,16 +760,18 @@ export function QuizScreen({
 					<div
 						className={`quiz-wizard-breadcrumbs${lens === "examples" ? " is-two-steps" : ""}`}
 						role="tablist"
-						aria-label="Quiz steps"
+						aria-label={t.quiz.stepsAria}
 					>
 						{breadcrumbs.map((b, idx) => {
 							const isLast = idx === breadcrumbs.length - 1;
 							return (
 								<button
 									key={b.stepNum}
+									id={`quiz-step-tab-${b.stepNum}`}
 									type="button"
 									role="tab"
 									aria-selected={effectiveStep === b.stepNum}
+									aria-controls="quiz-step-panel"
 									title={b.label}
 									className={`quiz-crumb ${effectiveStep === b.stepNum ? "is-active" : ""} ${b.filled ? "is-filled" : ""}`}
 									onClick={() => goToStep(b.stepNum)}
@@ -781,8 +792,11 @@ export function QuizScreen({
 				</div>
 
 				<div
+					id="quiz-step-panel"
 					key={`${lens}:${activeQuestion.id}-step-${effectiveStep}`}
 					className={`quiz-wizard-pane anim-${animDir}`}
+					role="tabpanel"
+					aria-labelledby={`quiz-step-tab-${effectiveStep}`}
 				>
 					{/* ================================================================
 					 * LENS 1: IʿRĀB SYNTAX WIZARD

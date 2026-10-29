@@ -117,6 +117,14 @@ export function RhetoricScreen({
 		);
 	}, [selectedEntryId, filteredEntries]);
 
+	const rhetoricTabId = (
+		{
+			"dataset-a-tashbih": "rhetoric-tab-tashbih",
+			"dataset-b-hadhf": "rhetoric-tab-hadhf",
+			"classical-balagha": "rhetoric-tab-classical",
+		} as const satisfies Record<RhetoricDatasetKey, string>
+	)[activeDataset];
+
 	return (
 		<div className="rhetoric-page anim-soft-enter">
 			<header className="page-intro">
@@ -133,11 +141,17 @@ export function RhetoricScreen({
 			</header>
 
 			{/* Dataset Selector Tabs with Counts */}
-			<div className="rhetoric-dataset-tabs" role="tablist">
+			<div
+				className="rhetoric-dataset-tabs"
+				role="tablist"
+				aria-label={t.rhetoric.datasetsAria}
+			>
 				<button
+					id="rhetoric-tab-tashbih"
 					type="button"
 					role="tab"
 					aria-selected={activeDataset === "dataset-a-tashbih"}
+					aria-controls="rhetoric-dataset-panel"
 					className={`rhetoric-ds-tab ${activeDataset === "dataset-a-tashbih" ? "is-active" : ""}`}
 					onClick={() => {
 						setActiveDataset("dataset-a-tashbih");
@@ -161,9 +175,11 @@ export function RhetoricScreen({
 				</button>
 
 				<button
+					id="rhetoric-tab-hadhf"
 					type="button"
 					role="tab"
 					aria-selected={activeDataset === "dataset-b-hadhf"}
+					aria-controls="rhetoric-dataset-panel"
 					className={`rhetoric-ds-tab ${activeDataset === "dataset-b-hadhf" ? "is-active" : ""}`}
 					onClick={() => {
 						setActiveDataset("dataset-b-hadhf");
@@ -185,9 +201,11 @@ export function RhetoricScreen({
 				</button>
 
 				<button
+					id="rhetoric-tab-classical"
 					type="button"
 					role="tab"
 					aria-selected={activeDataset === "classical-balagha"}
+					aria-controls="rhetoric-dataset-panel"
 					className={`rhetoric-ds-tab ${activeDataset === "classical-balagha" ? "is-active" : ""}`}
 					onClick={() => {
 						setActiveDataset("classical-balagha");
@@ -350,7 +368,12 @@ export function RhetoricScreen({
 
 			{/* Main Two-Column Layout */}
 			{!loading && (
-				<div className="rhetoric-layout">
+				<div
+					id="rhetoric-dataset-panel"
+					className="rhetoric-layout"
+					role="tabpanel"
+					aria-labelledby={rhetoricTabId}
+				>
 					{/* Left Column: Verse Cards List with Filter Controls */}
 					<div className="rhetoric-entry-list-container">
 						<div className="rhetoric-filter-bar">
@@ -363,7 +386,7 @@ export function RhetoricScreen({
 											e.target.value === "all" ? "all" : Number(e.target.value);
 										setSurahFilter(val);
 									}}
-									aria-label="Filter by Surah"
+									aria-label={t.rhetoric.filterSurahAria}
 								>
 									<option value="all">
 										{locale === "ar" ? "كل السور" : "All Surahs"} (
@@ -384,6 +407,7 @@ export function RhetoricScreen({
 											? "تصفية الآيات والشواهد..."
 											: "Filter verses or devices..."
 									}
+									aria-label={t.rhetoric.searchAria}
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
 								/>

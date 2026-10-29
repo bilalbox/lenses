@@ -5,12 +5,19 @@ import type { Manifest } from "../lib/types";
 
 interface Props {
 	manifest: Manifest;
+	showMunasabat: boolean;
+	showRhetoricStudio: boolean;
 	onOpen: (sura: number) => void;
 }
 
-export function SurahIndex({ manifest, onOpen }: Props) {
+export function SurahIndex({
+	manifest,
+	showMunasabat,
+	showRhetoricStudio,
+	onOpen,
+}: Props) {
 	const { t, formatNumber } = useI18n();
-	const { entries: rhetoricEntries } = useRhetoric();
+	const { entries: rhetoricEntries } = useRhetoric(showRhetoricStudio);
 	const rhetoricBySura = useMemo(() => {
 		const map = new Map<number, { count: number; firstVerse: number }>();
 		for (const entry of rhetoricEntries) {
@@ -35,8 +42,10 @@ export function SurahIndex({ manifest, onOpen }: Props) {
 			<ol className="surah-grid">
 				{manifest.units.map((unit) => {
 					const rhetoric = rhetoricBySura.get(unit.n);
-					const hasStructure = unit.structure != null && unit.structure > 0;
-					const hasBalagha = rhetoric != null && rhetoric.count > 0;
+					const hasStructure =
+						showMunasabat && unit.structure != null && unit.structure > 0;
+					const hasBalagha =
+						showRhetoricStudio && rhetoric != null && rhetoric.count > 0;
 					return (
 						<li key={unit.n} className="surah-item">
 							<div className="surah-card">

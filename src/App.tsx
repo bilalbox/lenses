@@ -1,4 +1,6 @@
-import { lazy, type ReactNode, Suspense, useEffect, useState } from "react";
+import { type ReactNode, Suspense, useEffect, useState } from "react";
+import { AppPages, navigateHash } from "./components/AppPages";
+import { FeatureNavLinks } from "./components/FeatureNavLinks";
 import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
@@ -6,7 +8,6 @@ import {
 	SearchIcon,
 } from "./components/Icons";
 import { SettingsModal } from "./components/SettingsModal";
-import { VerseScreen } from "./components/VerseScreen";
 import { loadManifest, loadVerses } from "./lib/api";
 import { stripDiacritics } from "./lib/arabic";
 import { openingPath, rememberVerse } from "./lib/home";
@@ -19,38 +20,13 @@ import {
 } from "./lib/library";
 import {
 	loadReaderPrefs,
-	type ReaderLayerKey,
+	type ReaderPrefKey,
 	type ReaderPrefs,
 	saveReaderPrefs,
 } from "./lib/readerPrefs";
 import { parseRoute } from "./lib/route";
 import { type ExampleQuery, searchVerses, type VerseHit } from "./lib/search";
-import type { Manifest, Route } from "./lib/types";
-
-const ExampleSearch = lazy(() =>
-	import("./components/ExampleSearch").then((m) => ({
-		default: m.ExampleSearch,
-	})),
-);
-const SourcesPage = lazy(() =>
-	import("./components/SourcesPage").then((m) => ({ default: m.SourcesPage })),
-);
-const SurahIndex = lazy(() =>
-	import("./components/SurahIndex").then((m) => ({ default: m.SurahIndex })),
-);
-const QuizScreen = lazy(() =>
-	import("./components/QuizScreen").then((m) => ({ default: m.QuizScreen })),
-);
-const RhetoricScreen = lazy(() =>
-	import("./components/RhetoricScreen").then((m) => ({
-		default: m.RhetoricScreen,
-	})),
-);
-const MunasabatScreen = lazy(() =>
-	import("./components/MunasabatScreen").then((m) => ({
-		default: m.MunasabatScreen,
-	})),
-);
+import type { Manifest } from "./lib/types";
 
 const QUIZ_HIDE_DIACRITICS_KEY = "lenses-quiz-hide-diacritics";
 
@@ -73,94 +49,24 @@ function highlight(text: string, needle: string) {
 	return parts;
 }
 
-function go(path: string) {
-	if (location.hash !== `#${path}`) location.hash = path;
-}
-
-function AppPages({
-	manifest,
-	route,
-	readerPrefs,
-	seed,
-	quizHideDiacritics,
-	openSearch,
-}: {
-	manifest: Manifest;
-	route: Route;
-	readerPrefs: ReaderPrefs;
-	seed?: Partial<ExampleQuery>;
-	quizHideDiacritics: boolean;
-	openSearch: (next?: Partial<ExampleQuery>) => void;
-}) {
-	if (route.page === "verse") {
-		return (
-			<VerseScreen
-				manifest={manifest}
-				sura={route.sura}
-				verseNumber={route.verse}
-				wordNumber={route.word}
-				tab={route.tab}
-				target={route.target}
-				readerPrefs={readerPrefs}
-				onNavigate={(sura, verse, word, params) => {
-					const q = params ? `?${new URLSearchParams(params).toString()}` : "";
-					go(word ? `/${sura}/${verse}/${word}${q}` : `/${sura}/${verse}${q}`);
-				}}
-				onSearchRoot={(root) => openSearch({ root })}
-				onSearchLemma={(lemma) => openSearch({ lemma })}
-			/>
-		);
+function stepAdjacentVerse(
+	manifest: Manifest,
+	sura: number,
+	verse: number,
+	delta: number,
+) {
+	const unit = manifest.units.find((item) => item.n === sura);
+	if (!unit) return;
+	let nextVerse = verse + delta;
+	let nextSura = sura;
+	if (nextVerse < 1) {
+		nextSura = sura === 1 ? 114 : sura - 1;
+		nextVerse = manifest.units.find((item) => item.n === nextSura)?.verses ?? 1;
+	} else if (nextVerse > unit.verses) {
+		nextSura = sura === 114 ? 1 : sura + 1;
+		nextVerse = 1;
 	}
-	if (route.page === "search") {
-		return (
-			<ExampleSearch
-				initial={seed}
-				onOpen={(sura, verse, word) => go(`/${sura}/${verse}/${word}`)}
-			/>
-		);
-	}
-	if (route.page === "surahs") {
-		return (
-			<SurahIndex manifest={manifest} onOpen={(sura) => go(`/${sura}/1`)} />
-		);
-	}
-	if (route.page === "sources") {
-		return <SourcesPage manifest={manifest} />;
-	}
-	if (route.page === "quiz") {
-		return (
-			<QuizScreen
-				manifest={manifest}
-				onOpenInReader={(sura, verse, word) =>
-					go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)
-				}
-				onOpenSearch={openSearch}
-				hideDiacritics={quizHideDiacritics}
-			/>
-		);
-	}
-	if (route.page === "rhetoric") {
-		return (
-			<RhetoricScreen
-				targetSura={route.sura}
-				targetVerse={route.verse}
-				onOpenVerse={(sura, verse, word) =>
-					go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)
-				}
-			/>
-		);
-	}
-	if (route.page === "munasabat") {
-		return (
-			<MunasabatScreen
-				manifest={manifest}
-				targetSura={route.sura}
-				onOpenVerse={(sura, verse) => go(`/${sura}/${verse}`)}
-				onSelectSurah={(sura) => go(`/munasabat/${sura}`)}
-			/>
-		);
-	}
-	return null;
+	navigateHash(`/${nextSura}/${nextVerse}`);
 }
 
 export function App() {
@@ -276,7 +182,7 @@ export function App() {
 
 	useEffect(() => {
 		if (route.page === "verse" && route.tab === "structure") {
-			go(`/munasabat/${route.sura}`);
+			navigateHash(`/munasabat/${route.sura}`);
 		}
 	}, [route.page, route.tab, route.sura]);
 
@@ -298,7 +204,7 @@ export function App() {
 		localStorage.setItem(QUIZ_HIDE_DIACRITICS_KEY, next ? "1" : "0");
 	};
 
-	const toggleReaderLayer = (key: ReaderLayerKey, next: boolean) => {
+	const toggleReaderPref = (key: ReaderPrefKey, next: boolean) => {
 		setReaderPrefs((prev) => {
 			const updated = { ...prev, [key]: next };
 			saveReaderPrefs(updated);
@@ -306,34 +212,19 @@ export function App() {
 		});
 	};
 
-	const stepVerse = (delta: number) => {
-		if (!manifest) return;
-		const unit = manifest.units.find((item) => item.n === route.sura);
-		if (!unit) return;
-		let nextVerse = route.verse + delta;
-		let nextSura = route.sura;
-		if (nextVerse < 1) {
-			nextSura = route.sura === 1 ? 114 : route.sura - 1;
-			nextVerse =
-				manifest.units.find((item) => item.n === nextSura)?.verses ?? 1;
-		} else if (nextVerse > unit.verses) {
-			nextSura = route.sura === 114 ? 1 : route.sura + 1;
-			nextVerse = 1;
-		}
-		go(`/${nextSura}/${nextVerse}`);
-	};
-
 	const openHit = (hit: VerseHit) => {
 		setSearchOpen(false);
 		setQuery("");
-		go(`/${hit.sura}/${hit.verse}`);
+		navigateHash(`/${hit.sura}/${hit.verse}`);
 	};
 
 	const openSearch = (next: Partial<ExampleQuery> = {}) => {
 		setSeed(next);
-		go("/search");
+		navigateHash("/search");
 		setSearchOpen(false);
 	};
+
+	const showDock = route.page !== "quiz" && route.page !== "munasabat";
 
 	return (
 		<div className="app">
@@ -410,18 +301,7 @@ export function App() {
 					>
 						{t.common.quizNav}
 					</a>
-					<a
-						href="#/rhetoric"
-						aria-current={route.page === "rhetoric" ? "page" : undefined}
-					>
-						{t.common.rhetoricNav}
-					</a>
-					<a
-						href="#/munasabat"
-						aria-current={route.page === "munasabat" ? "page" : undefined}
-					>
-						{t.common.munasabatNav}
-					</a>
+					<FeatureNavLinks route={route} readerPrefs={readerPrefs} />
 					<button
 						type="button"
 						className="icon-button settings-toggle-button"
@@ -465,13 +345,20 @@ export function App() {
 							seed={seed}
 							quizHideDiacritics={quizHideDiacritics}
 							openSearch={openSearch}
+							openSettings={() => setSettingsOpen(true)}
 						/>
 					) : null}
 				</Suspense>
 			</main>
-			{route.page !== "quiz" && route.page !== "munasabat" ? (
+			{showDock ? (
 				<nav className="dock" aria-label={t.common.verse}>
-					<button type="button" onClick={() => stepVerse(-1)}>
+					<button
+						type="button"
+						onClick={() =>
+							manifest &&
+							stepAdjacentVerse(manifest, route.sura, route.verse, -1)
+						}
+					>
 						{dir === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
 						<span>{t.common.previous}</span>
 					</button>
@@ -487,7 +374,9 @@ export function App() {
 							const match = input
 								.trim()
 								.match(/^(\d{1,3})\s*[:\u061b]\s*(\d{1,3})$/);
-							if (match) go(`/${Number(match[1])}/${Number(match[2])}`);
+							if (match) {
+								navigateHash(`/${Number(match[1])}/${Number(match[2])}`);
+							}
 						}}
 					>
 						<input
@@ -497,7 +386,13 @@ export function App() {
 							key={`${route.sura}:${route.verse}`}
 						/>
 					</form>
-					<button type="button" onClick={() => stepVerse(1)}>
+					<button
+						type="button"
+						onClick={() =>
+							manifest &&
+							stepAdjacentVerse(manifest, route.sura, route.verse, 1)
+						}
+					>
 						<span>{t.common.next}</span>
 						{dir === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
 					</button>
@@ -526,7 +421,7 @@ export function App() {
 				quizHideDiacritics={quizHideDiacritics}
 				onToggleQuizHideDiacritics={toggleQuizHideDiacritics}
 				readerPrefs={readerPrefs}
-				onToggleReaderLayer={toggleReaderLayer}
+				onToggleReaderPref={toggleReaderPref}
 				canInstall={Boolean(install)}
 				onInstall={() => {
 					if (install) {

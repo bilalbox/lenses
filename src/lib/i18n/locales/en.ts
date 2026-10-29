@@ -29,6 +29,9 @@ export const en: Translations = {
 		corpusSource: "Quranic Arabic Corpus",
 	},
 	quiz: {
+		pageTitle: "Grammar & Morphology Drills",
+		lensesAria: "Quiz lenses",
+		stepsAria: "Quiz steps",
 		streakLabel: "streak",
 		skipButton: "↻ Skip",
 		openReader: (sura: number, verse: number) =>
@@ -81,9 +84,16 @@ export const en: Translations = {
 		quizDiacriticsLabel: "Hide diacritics in quizzes",
 		quizDiacriticsDescription:
 			"Show Quran verses without harakat for a harder challenge.",
+		featuresSection: "Features",
+		featuresSectionHint:
+			"Optional studios stay off until you enable them. Turning a feature off hides it; downloaded data stays on device.",
+		features: {
+			rhetoricStudio: "Rhetoric studio",
+			munasabat: "Munāsabāt",
+		},
 		readerSection: "Reader layers",
 		readerSectionHint:
-			"Hide layers you are not studying. Disabled layers leave the verse reader entirely.",
+			"Hide layers you are not studying. Disabled layers leave the verse reader entirely and are not downloaded until enabled.",
 		readerLayers: {
 			meaning: "Verse meaning",
 			irab: "Sentence syntax (iʿrāb)",
@@ -92,6 +102,10 @@ export const en: Translations = {
 			asbab: "Causes of revelation",
 			balagha: "Classical balāghah",
 		},
+		featureOffTitle: (feature: string) => `${feature} is turned off`,
+		featureOffBody:
+			"Enable this feature in Settings to open it. Nothing is deleted when you turn it off again.",
+		featureOffOpenSettings: "Open Settings",
 		sourcesLink: "Data Sources",
 		sourcesDescription: "Explore corpus data sources and licenses.",
 		installApp: "Install App",
@@ -113,6 +127,7 @@ export const en: Translations = {
 		irabTitle: "Sentence Syntax (Iʿrāb)",
 		clauseCount: (index: number, total: number) =>
 			`Clause ${formatNum(index + 1, "en")} of ${formatNum(total, "en")}`,
+		clausesAria: "Clauses",
 		firstClause: "Already on the first clause.",
 		lastClause: "Already on the last clause.",
 		clauseNoteContinues: "This clause continues into a neighboring verse.",
@@ -185,17 +200,10 @@ export const en: Translations = {
 		closeAria: "Close analysis",
 		expandAria: "Expand analysis",
 		collapseAria: "Collapse analysis",
-		corpusMorphology: "Corpus morphology",
 		classicalIrab: "Classical iʿrāb",
 		sarf: "Ṣarf",
 		wordMeaning: "Word meaning",
-		partOfSpeech: "Part of speech",
-		root: "Root",
-		lemma: "Lemma",
 		searchThisRoot: "Search this root",
-		searchThisLemma: "Search this lemma",
-		basePatternHint: "The base pattern فَعَلَ is usually left unmarked.",
-		impliedEstimated: "Implied",
 		qiraatTitle: "Ten Canonical Readings (Al-Qirāʾāt al-ʿAshr)",
 		qiraatIsolation: "In Isolation / Waqf",
 		qiraatWasl: "In Continuous Speech / Waṣl",
@@ -218,6 +226,11 @@ export const en: Translations = {
 		emptyState: "No structure data for this surah.",
 		openInReader: (sura: number, verse: number) =>
 			`Open ${formatNum(sura, "en")}:${formatNum(verse, "en")} in reader ↗`,
+	},
+	rhetoric: {
+		datasetsAria: "Rhetoric datasets",
+		filterSurahAria: "Filter by surah",
+		searchAria: "Filter verses or devices",
 	},
 	examples: {
 		pageTitle: "Find the pattern",

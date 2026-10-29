@@ -2,8 +2,9 @@ import { useRef } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { LOCALES, type Locale } from "../lib/i18n/types";
 import {
+	FEATURE_PREF_KEYS,
 	READER_LAYER_KEYS,
-	type ReaderLayerKey,
+	type ReaderPrefKey,
 	type ReaderPrefs,
 } from "../lib/readerPrefs";
 import { useModalLifecycle } from "../lib/useModal";
@@ -17,7 +18,7 @@ interface Props {
 	quizHideDiacritics: boolean;
 	onToggleQuizHideDiacritics: (next: boolean) => void;
 	readerPrefs: ReaderPrefs;
-	onToggleReaderLayer: (key: ReaderLayerKey, next: boolean) => void;
+	onToggleReaderPref: (key: ReaderPrefKey, next: boolean) => void;
 	canInstall: boolean;
 	onInstall: () => void;
 }
@@ -30,7 +31,7 @@ export function SettingsModal({
 	quizHideDiacritics,
 	onToggleQuizHideDiacritics,
 	readerPrefs,
-	onToggleReaderLayer,
+	onToggleReaderPref,
 	canInstall,
 	onInstall,
 }: Props) {
@@ -132,6 +133,38 @@ export function SettingsModal({
 				</section>
 
 				<section className="settings-section">
+					<h3>{t.settings.featuresSection}</h3>
+					<p className="settings-section-hint">
+						{t.settings.featuresSectionHint}
+					</p>
+					<div className="settings-switch-stack">
+						{FEATURE_PREF_KEYS.map((key) => {
+							const on = readerPrefs[key];
+							return (
+								<button
+									key={key}
+									type="button"
+									role="switch"
+									aria-checked={on}
+									className="settings-switch-card"
+									onClick={() => onToggleReaderPref(key, !on)}
+								>
+									<span className="settings-switch-content">
+										<strong>{t.settings.features[key]}</strong>
+									</span>
+									<span
+										className={`settings-switch${on ? " is-on" : ""}`}
+										aria-hidden="true"
+									>
+										<span className="settings-switch-thumb" />
+									</span>
+								</button>
+							);
+						})}
+					</div>
+				</section>
+
+				<section className="settings-section">
 					<h3>{t.settings.readerSection}</h3>
 					<p className="settings-section-hint">
 						{t.settings.readerSectionHint}
@@ -146,7 +179,7 @@ export function SettingsModal({
 									role="switch"
 									aria-checked={on}
 									className="settings-switch-card"
-									onClick={() => onToggleReaderLayer(key, !on)}
+									onClick={() => onToggleReaderPref(key, !on)}
 								>
 									<span className="settings-switch-content">
 										<strong>{t.settings.readerLayers[key]}</strong>

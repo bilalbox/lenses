@@ -28,20 +28,28 @@ export function getRhetoricEntriesAsync(): Promise<RhetoricEntry[]> {
 	return fetchPromise;
 }
 
-export function useRhetoric() {
+export function useRhetoric(enabled = true) {
 	const [entries, setEntries] = useState<RhetoricEntry[]>(
 		() => memoryCache || [],
 	);
-	const [loading, setLoading] = useState<boolean>(() => !memoryCache);
+	const [loading, setLoading] = useState<boolean>(
+		() => enabled && !memoryCache,
+	);
 	const [error, setError] = useState<string>("");
 
 	useEffect(() => {
+		if (!enabled) {
+			if (memoryCache) setEntries(memoryCache);
+			setLoading(false);
+			return;
+		}
 		if (memoryCache) {
 			setEntries(memoryCache);
 			setLoading(false);
 			return;
 		}
 		let cancelled = false;
+		setLoading(true);
 		getRhetoricEntriesAsync()
 			.then((data) => {
 				if (!cancelled) {
@@ -60,7 +68,7 @@ export function useRhetoric() {
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [enabled]);
 
 	return { entries, loading, error };
 }

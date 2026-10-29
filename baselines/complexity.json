@@ -2,17 +2,17 @@
 	"version": 1,
 	"findings": [
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|1139",
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1153",
 			"score": 50,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|1583",
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1597",
 			"score": 68,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|1823",
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1837",
 			"score": 36,
 			"note": "Added via --update; replace with owning issue note."
 		},
@@ -22,7 +22,7 @@
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|611",
+			"id": "src/components/QuizScreen.tsx|(anonymous)|614",
 			"score": 28,
 			"note": "Added via --update; replace with owning issue note."
 		},

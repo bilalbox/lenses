@@ -37,12 +37,17 @@ interface FilterOption {
 
 interface Props {
 	initial?: Partial<ExampleQuery>;
+	rhetoricEnabled?: boolean;
 	onOpen: (sura: number, verse: number, word: number) => void;
 }
 
-export function ExampleSearch({ initial, onOpen }: Props) {
+export function ExampleSearch({
+	initial,
+	rhetoricEnabled = false,
+	onOpen,
+}: Props) {
 	const { locale, t, formatNumber } = useI18n();
-	const { entries: rhetoricEntries } = useRhetoric();
+	const { entries: rhetoricEntries } = useRhetoric(rhetoricEnabled);
 	const [index, setIndex] = useState<WordIndex | null>(null);
 	const [verses, setVerses] = useState<VerseRow[] | null>(null);
 	const [error, setError] = useState("");

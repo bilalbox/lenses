@@ -3,9 +3,15 @@ import { useI18n } from "../lib/i18n/I18nContext";
 import { useRhetoric } from "../lib/rhetoric";
 import type { Manifest } from "../lib/types";
 
-export function SourcesPage({ manifest }: { manifest: Manifest }) {
+export function SourcesPage({
+	manifest,
+	rhetoricEnabled,
+}: {
+	manifest: Manifest;
+	rhetoricEnabled: boolean;
+}) {
 	const { t } = useI18n();
-	const { entries: rhetoricEntries } = useRhetoric();
+	const { entries: rhetoricEntries } = useRhetoric(rhetoricEnabled);
 
 	const partial = manifest.stats.partialChapters[0];
 	const partialText = partial
@@ -38,15 +44,17 @@ export function SourcesPage({ manifest }: { manifest: Manifest }) {
 				</p>
 			</section>
 
-			<section>
-				<h2>{t.sources.rhetoricCoverageHeading}</h2>
-				<p>
-					{t.sources.rhetoricCoverageBody(
-						rhetoricEntries.length || 53,
-						surasWithRhetoricCount,
-					)}
-				</p>
-			</section>
+			{rhetoricEnabled ? (
+				<section>
+					<h2>{t.sources.rhetoricCoverageHeading}</h2>
+					<p>
+						{t.sources.rhetoricCoverageBody(
+							rhetoricEntries.length || 53,
+							surasWithRhetoricCount,
+						)}
+					</p>
+				</section>
+			) : null}
 
 			<ul className="source-cards">
 				{manifest.sources.map((source) => {

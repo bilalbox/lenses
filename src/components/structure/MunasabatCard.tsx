@@ -16,9 +16,9 @@ export function MunasabatCard({ structure, onJump }: Props) {
 			<header className="munasabat-card-head">
 				<div>
 					<p className="munasabat-eyebrow">{t.verse.munasabatCardTitle}</p>
-					<h3>
+					<h2>
 						{structure.nameEn} → {link.targetNameEn}
-					</h3>
+					</h2>
 					<p className="munasabat-ar-names" lang="ar" dir="rtl">
 						{structure.nameAr} ← {link.targetNameAr}
 					</p>

@@ -110,16 +110,22 @@ export function MutashabihSection({
 		>
 			<div className="mutashabih-header-row">
 				{matches.length > 1 ? (
-					<div className="mutashabih-counterpart-pills" role="tablist">
+					<div
+						className="mutashabih-counterpart-pills"
+						role="tablist"
+						aria-label={t.verse.mutashabihCounterpartAyah}
+					>
 						{matches.map((m, idx) => {
 							const isSelected = idx === activeIdx;
 							const pillSurah = getSurahTitle(manifest, m.sura, locale);
 							return (
 								<button
 									key={`${m.sura}:${m.ayah}`}
+									id={`mutashabih-tab-${m.sura}-${m.ayah}`}
 									type="button"
 									role="tab"
 									aria-selected={isSelected}
+									aria-controls="mutashabih-panel"
 									className={`mutashabih-pill ${isSelected ? "is-active" : ""}`}
 									onClick={() => {
 										setActiveIdx(idx);
@@ -159,7 +165,12 @@ export function MutashabihSection({
 				</span>
 			</div>
 
-			<div className="mutashabih-comparison-grid">
+			<div
+				id="mutashabih-panel"
+				className="mutashabih-comparison-grid"
+				role="tabpanel"
+				aria-labelledby={`mutashabih-tab-${activeMatch.sura}-${activeMatch.ayah}`}
+			>
 				<div className="mutashabih-card is-source">
 					<div className="mutashabih-card-header">
 						<span className="mutashabih-verse-tag">
