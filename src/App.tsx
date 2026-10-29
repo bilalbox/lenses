@@ -52,7 +52,12 @@ function parseRoute(hash: string): Route {
 	const parts = cleanHash.split("/").filter(Boolean);
 	const params = new URLSearchParams(queryString);
 	const tab =
-		params.get("tab") ?? (params.has("mutashabih") ? "mutashabih" : undefined);
+		params.get("tab") ??
+		(params.has("mutashabih")
+			? "mutashabih"
+			: params.has("structure")
+				? "structure"
+				: undefined);
 	const target = params.get("target") ?? params.get("counterpart") ?? undefined;
 
 	if (parts[0] === "quiz") return { page: "quiz", ...fallback, tab, target };

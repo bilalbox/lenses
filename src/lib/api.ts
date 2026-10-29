@@ -5,7 +5,9 @@ import type {
 	SurahFile,
 	SurahMutashabihFile,
 	SurahQiraatFile,
+	SurahStructureFile,
 	SurahSyntaxFile,
+	TransitionsFile,
 	VerseRow,
 	WordIndex,
 } from "./types";
@@ -95,6 +97,26 @@ export function loadSurahMutashabih(n: number): Promise<SurahMutashabihFile> {
 	);
 	mutashabihSurahs.set(n, pending);
 	return pending;
+}
+
+const structureSurahs = new Map<number, Promise<SurahStructureFile>>();
+let transitionsPromise: Promise<TransitionsFile> | null = null;
+
+export function loadSurahStructure(n: number): Promise<SurahStructureFile> {
+	const cached = structureSurahs.get(n);
+	if (cached) return cached;
+	const pending = getJson<SurahStructureFile>(
+		`/data/quran/structure/${String(n).padStart(3, "0")}.json`,
+	);
+	structureSurahs.set(n, pending);
+	return pending;
+}
+
+export function loadTransitions(): Promise<TransitionsFile> {
+	transitionsPromise ??= getJson<TransitionsFile>(
+		"/data/quran/transitions.json",
+	);
+	return transitionsPromise;
 }
 
 const translationCache = new Map<string, Promise<string>>();

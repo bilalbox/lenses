@@ -5,5 +5,7 @@
 	"assets": {
 		"directory": "./dist",
 		"not_found_handling": "single-page-application"
-	}
+	},
+	// Required for `wrangler preview` / `pnpm deploy:preview` (branch Previews; leaves production alone).
+	"previews": {}
 }

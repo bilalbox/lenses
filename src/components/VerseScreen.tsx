@@ -9,6 +9,7 @@ import {
 	loadAsbab,
 	loadSurah,
 	loadSurahMutashabih,
+	loadSurahStructure,
 	loadSurahSyntax,
 	loadVerseTranslation,
 } from "../lib/api";
@@ -21,6 +22,7 @@ import type {
 	Manifest,
 	SurahFile,
 	SurahMutashabihFile,
+	SurahStructureFile,
 	SurahSyntaxFile,
 	SyntaxGraph,
 	Verse,
@@ -30,6 +32,7 @@ import { AsbabDrawer } from "./AsbabDrawer";
 import { DependencyTree } from "./DependencyTree";
 import { MutashabihSection } from "./MutashabihSection";
 import { NoorBayanTree } from "./NoorBayanTree";
+import { StructureSection } from "./structure/StructureSection";
 import { WordSheet } from "./WordSheet";
 
 interface Props {
@@ -195,6 +198,7 @@ export function VerseScreen({
 							goal={unit.goal || file?.goal}
 							revSeq={unit.revSeq}
 							surahClass={unit.surahClass}
+							structureBlockCount={unit.structure ?? 0}
 							tab={tab}
 							target={target}
 							onNavigate={onNavigate}
@@ -231,6 +235,7 @@ function VerseBody({
 	goal,
 	revSeq,
 	surahClass,
+	structureBlockCount,
 	tab,
 	target,
 	onNavigate,
@@ -248,6 +253,7 @@ function VerseBody({
 	goal?: string;
 	revSeq?: number;
 	surahClass?: string;
+	structureBlockCount: number;
 	tab?: string;
 	target?: string;
 	onNavigate?: (
@@ -269,15 +275,23 @@ function VerseBody({
 	const [syntaxFile, setSyntaxFile] = useState<SurahSyntaxFile | null>(null);
 	const [mutashabihFile, setMutashabihFile] =
 		useState<SurahMutashabihFile | null>(null);
+	const [structureFile, setStructureFile] = useState<SurahStructureFile | null>(
+		null,
+	);
+	const [structureLoaded, setStructureLoaded] = useState(false);
 	const [asbabOpen, setAsbabOpen] = useState(false);
 	const [mutashabihOpen, setMutashabihOpen] = useState(
 		() => tab === "mutashabih",
 	);
+	const [structureOpen, setStructureOpen] = useState(() => tab === "structure");
 	const [syntaxClauseIndex, setSyntaxClauseIndex] = useState(0);
 
 	useEffect(() => {
 		if (tab === "mutashabih") {
 			setMutashabihOpen(true);
+		}
+		if (tab === "structure") {
+			setStructureOpen(true);
 		}
 	}, [tab]);
 
@@ -297,6 +311,30 @@ function VerseBody({
 			})
 			.catch(() => {
 				if (!cancelled) setMutashabihFile(null);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [sura, tab]);
+
+	useEffect(() => {
+		let cancelled = false;
+		setStructureLoaded(false);
+		loadSurahStructure(sura)
+			.then((data) => {
+				if (!cancelled) {
+					setStructureFile(data);
+					setStructureLoaded(true);
+					if (tab === "structure") {
+						setStructureOpen(true);
+					}
+				}
+			})
+			.catch(() => {
+				if (!cancelled) {
+					setStructureFile(null);
+					setStructureLoaded(true);
+				}
 			});
 		return () => {
 			cancelled = true;
@@ -363,6 +401,23 @@ function VerseBody({
 			return next;
 		});
 	}, []);
+
+	const handleOpenStructure = useCallback(() => {
+		setStructureOpen((open) => {
+			const next = !open;
+			if (next) {
+				window.setTimeout(() => {
+					document
+						.querySelector(".structure-block, .structure-empty-card")
+						?.scrollIntoView({ behavior: "smooth", block: "start" });
+				}, 50);
+			}
+			return next;
+		});
+	}, []);
+
+	const structureBlockTotal =
+		structureFile?.blocks.length ?? structureBlockCount;
 	const membership = useMemo(
 		() => clauseMembership(graphs, sura, verse.v),
 		[graphs, sura, verse.v],
@@ -450,6 +505,9 @@ function VerseBody({
 				mutashabihCount={mutashabihMatches.length}
 				mutashabihOpen={mutashabihOpen}
 				onOpenMutashabih={handleOpenMutashabih}
+				structureCount={structureBlockTotal}
+				structureOpen={structureOpen}
+				onOpenStructure={handleOpenStructure}
 				hasBalagha={hasBalagha}
 			/>
 			<p className="verse-line" dir="rtl" lang="ar">
@@ -688,6 +746,39 @@ function VerseBody({
 				</div>
 			) : null}
 
+			{structureFile && structureFile.blocks.length > 0 ? (
+				<details
+					className="structure-block"
+					open={structureOpen}
+					onToggle={(event) => setStructureOpen(event.currentTarget.open)}
+				>
+					<summary>
+						<span className="structure-summary-label">
+							<span aria-hidden="true">◈</span> {t.verse.structureSectionTitle}
+						</span>
+						<span className="structure-summary-count">
+							{t.verse.structureBadge(structureFile.blocks.length)}
+						</span>
+					</summary>
+					<StructureSection
+						structure={structureFile}
+						currentVerse={verse.v}
+						onSelectBlock={(block) =>
+							onNavigate?.(sura, block.v[0], undefined, {
+								tab: "structure",
+							})
+						}
+						onJumpSurah={(targetSura) =>
+							onNavigate?.(targetSura, 1, undefined, { tab: "structure" })
+						}
+					/>
+				</details>
+			) : structureLoaded && (tab === "structure" || structureOpen) ? (
+				<div className="structure-empty-card" role="status">
+					<p>{t.verse.structureEmptyState}</p>
+				</div>
+			) : null}
+
 			<NahwSyntaxSection
 				verseSyntax={verseSyntax}
 				graphs={graphs}
@@ -776,6 +867,9 @@ function VerseHeaderCard({
 	mutashabihCount,
 	mutashabihOpen,
 	onOpenMutashabih,
+	structureCount,
+	structureOpen,
+	onOpenStructure,
 	hasBalagha,
 }: {
 	unitName: string;
@@ -791,6 +885,9 @@ function VerseHeaderCard({
 	mutashabihCount?: number;
 	mutashabihOpen?: boolean;
 	onOpenMutashabih?: () => void;
+	structureCount?: number;
+	structureOpen?: boolean;
+	onOpenStructure?: () => void;
 	hasBalagha: boolean;
 }) {
 	const { t, formatNumber } = useI18n();
@@ -829,6 +926,19 @@ function VerseHeaderCard({
 								⚖️
 							</span>
 							<span>{t.verse.mutashabihBadge(mutashabihCount)}</span>
+						</button>
+					)}
+					{structureCount !== undefined && structureCount > 0 && (
+						<button
+							type="button"
+							className={`structure-badge-button ${structureOpen ? "is-active" : ""}`}
+							onClick={onOpenStructure}
+							title={t.verse.structureSectionTitle}
+						>
+							<span className="structure-badge-icon" aria-hidden="true">
+								◈
+							</span>
+							<span>{t.verse.structureBadge(structureCount)}</span>
 						</button>
 					)}
 					{hasBalagha && (

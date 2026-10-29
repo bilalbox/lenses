@@ -4,6 +4,7 @@
 	--bg-2: #e7e0d2;
 	--paper: #fffdf8;
 	--ink: #1c1915;
+	--ink-soft: #4a453e;
 	--muted: #6f675e;
 	--line: #e3d9c8;
 	--teal: #0f6e66;
@@ -36,6 +37,7 @@
 	--bg-2: #1b221e;
 	--paper: #171d1a;
 	--ink: #f4efe6;
+	--ink-soft: #d4cbc0;
 	--muted: #b7aea2;
 	--line: #2d3832;
 	--teal: #3dbea8;
@@ -217,8 +219,7 @@ select option {
 }
 /* Parent 16px, padding 0.35rem ≈ 6px → concentric child 10px */
 .finder-results button,
-.results button,
-.surah-grid button {
+.results button {
 	width: 100%;
 	text-align: start;
 	border: 0;
@@ -228,7 +229,6 @@ select option {
 }
 .finder-results button:hover,
 .results button:hover,
-.surah-grid button:hover,
 .verse-line button:hover {
 	background: var(--teal-soft);
 }
@@ -268,6 +268,9 @@ select option {
 	text-decoration: none;
 	border-radius: 999px;
 	padding: 0.4rem 0.7rem;
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
 }
 .topbar nav a[aria-current="page"],
 .install,
@@ -767,7 +770,7 @@ main {
 }
 .sheet-ref {
 	font-variant-numeric: tabular-nums;
-	color: color-mix(in srgb, var(--muted) 88%, transparent);
+	color: var(--muted);
 	font-size: 0.82rem;
 	font-weight: 600;
 	margin: 0;
@@ -803,7 +806,7 @@ main {
 	line-height: 1.3;
 }
 .chip small {
-	color: color-mix(in srgb, var(--muted) 78%, transparent);
+	color: var(--muted);
 	font-family: var(--arabic-ui);
 	font-size: 0.8rem;
 	font-weight: 400;
@@ -828,7 +831,7 @@ main {
 	border-top: 1px solid var(--line);
 }
 .facts dt {
-	color: color-mix(in srgb, var(--muted) 72%, transparent);
+	color: var(--muted);
 	font-family: var(--arabic-ui);
 	font-size: 0.78rem;
 	font-weight: 400;
@@ -851,7 +854,7 @@ main {
 }
 .facts dd span,
 .implied {
-	color: color-mix(in srgb, var(--muted) 78%, transparent);
+	color: var(--muted);
 }
 .facts dd span:not(.translit) {
 	font-size: 0.86rem;
@@ -879,13 +882,13 @@ main {
 	font-family: var(--sans);
 	font-size: 0.82rem;
 	font-weight: 500;
-	color: color-mix(in srgb, var(--muted) 70%, transparent);
+	color: var(--muted);
 	letter-spacing: 0.02em;
 }
 .source-line {
 	margin: 0 0 0.55rem;
 	font-size: 0.78rem;
-	color: color-mix(in srgb, var(--muted) 68%, transparent);
+	color: var(--muted);
 }
 .sheet-metric-prose {
 	font-size: clamp(1.15rem, 2vw, 1.35rem);
@@ -945,7 +948,7 @@ main {
 	display: grid;
 	gap: 0.25rem;
 	font-size: 0.78rem;
-	color: color-mix(in srgb, var(--muted) 78%, transparent);
+	color: var(--muted);
 }
 .filters input {
 	border-radius: 12px;
@@ -962,7 +965,7 @@ main {
 .filter-field legend {
 	padding-inline: 0.2rem;
 	font-size: 0.78rem;
-	color: color-mix(in srgb, var(--muted) 78%, transparent);
+	color: var(--muted);
 }
 .filter-cards {
 	display: grid;
@@ -998,7 +1001,7 @@ main {
 	line-height: 1.25;
 }
 .filter-card small {
-	color: color-mix(in srgb, var(--muted) 78%, transparent);
+	color: var(--muted);
 	font-size: 0.75rem;
 	line-height: 1.35;
 	display: -webkit-box;
@@ -1059,15 +1062,14 @@ main {
 	gap: 0.55rem;
 }
 .surah-grid li {
-	position: relative;
 	display: flex;
 	align-items: stretch;
 }
-.surah-grid button,
-.surah-grid .surah-card-btn {
+.surah-card {
 	width: 100%;
 	display: grid;
 	grid-template-columns: auto 1fr;
+	grid-template-areas: "num names";
 	gap: 0.15rem 0.7rem;
 	align-items: center;
 	min-height: 56px;
@@ -1075,29 +1077,81 @@ main {
 	border: 1px solid var(--line);
 	border-radius: 16px;
 	padding: 0.55rem 0.7rem;
-	text-align: start;
 	transition:
 		background-color var(--duration-fast) ease,
 		border-color var(--duration-fast) ease;
 }
-.surah-grid li:has(.surah-badges) .surah-card-btn {
-	padding-inline-end: 5.5rem;
+.surah-card:has(.surah-meta) {
+	grid-template-areas:
+		"num names"
+		"num meta";
 }
-.surah-grid .surah-badges {
-	position: absolute;
-	inset-inline-end: 0.6rem;
-	top: 50%;
-	transform: translateY(-50%);
+.surah-card:has(.surah-card-btn:hover),
+.surah-card:has(.surah-card-btn:focus-visible) {
+	background: color-mix(in srgb, var(--teal) 6%, var(--paper));
+	border-color: color-mix(in srgb, var(--teal) 35%, var(--line));
+}
+.surah-grid .surah-card-btn {
+	grid-area: names;
+	width: 100%;
+	display: block;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	min-height: 0;
+	text-align: start;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+.surah-card .num {
+	grid-area: num;
+	align-self: center;
+}
+.surah-meta {
+	grid-area: meta;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.45rem;
-	z-index: 2;
+	gap: 0.35rem;
+	font-size: 0.78rem;
+	line-height: 1.2;
+}
+.surah-meta-link {
+	position: relative;
+	color: var(--teal);
+	text-decoration: none;
+	text-underline-offset: 0.15em;
+}
+/* Invisible hit box ≥44×44 without inflating the card chrome. */
+.surah-meta-link::before {
+	content: "";
+	position: absolute;
+	inset: 50% auto auto 50%;
+	width: 44px;
+	height: 44px;
+	transform: translate(-50%, -50%);
+}
+.surah-meta-link:hover {
+	text-decoration: underline;
+}
+.surah-meta-link:focus-visible {
+	text-decoration: underline;
+	outline: 2px solid var(--teal);
+	outline-offset: 2px;
+	border-radius: 4px;
+	z-index: 1;
+}
+.surah-meta-sep {
+	color: var(--muted);
+	pointer-events: none;
+	user-select: none;
 }
 .num {
 	font-family: var(--serif);
 	font-size: 1.3rem;
 	color: var(--teal);
-	grid-row: span 2;
 	font-variant-numeric: tabular-nums;
 }
 .names {
@@ -1107,17 +1161,6 @@ main {
 	font-family: var(--arabic);
 	font-size: 1.45rem;
 	font-weight: 400;
-}
-.coverage {
-	grid-column: 2;
-	font-size: 0.78rem;
-	color: var(--muted);
-}
-.coverage.full {
-	color: var(--teal);
-}
-.coverage.partial {
-	color: var(--gold);
 }
 .source-cards {
 	list-style: none;
@@ -1323,7 +1366,7 @@ main {
 	}
 	html.is-scrolled .topbar nav a,
 	html.is-scrolled .topbar nav button {
-		min-height: 38px;
+		min-height: 44px;
 		padding: 0.35rem 0.65rem;
 		font-size: 0.88rem;
 	}
@@ -1449,6 +1492,9 @@ main {
 }
 .verse-span.is-current {
 	background: var(--teal-soft);
+	padding-block: 0.12em;
+	padding-inline: 0.18em;
+	border-radius: 6px;
 }
 .tree-tools {
 	display: flex;
@@ -1967,7 +2013,6 @@ main {
 	*::after {
 		animation-duration: 0.01ms !important;
 		animation-iteration-count: 1 !important;
-		transition-duration: 0.12s !important;
 		scroll-behavior: auto !important;
 	}
 
@@ -1979,6 +2024,13 @@ main {
 	.quiz-wizard-pane.anim-backward,
 	.anim-soft-enter {
 		transform: none !important;
+		animation: none !important;
+		opacity: 1 !important;
+	}
+
+	/* Keep a short opacity fade for state changes instead of a global 0.01ms wipe. */
+	.anim-soft-enter {
+		transition: opacity 0.12s var(--ease-out) !important;
 	}
 
 	.skeleton span {
@@ -2504,10 +2556,10 @@ main {
 	border: 1px solid var(--line);
 	background: var(--paper);
 	border-radius: 8px;
-	padding: 0.2rem 0.65rem;
+	padding: 0.35rem 0.75rem;
 	font-size: 0.78rem;
 	font-weight: 600;
-	min-height: 32px;
+	min-height: 44px;
 	line-height: 1;
 	display: inline-flex;
 	align-items: center;
@@ -2550,7 +2602,7 @@ main {
 	border: 1px solid var(--line);
 	background: var(--bg-2);
 	font-size: 0.78rem;
-	color: var(--muted);
+	color: color-mix(in srgb, var(--ink) 70%, var(--muted));
 	overflow: hidden;
 	white-space: nowrap;
 	transition:
@@ -2576,7 +2628,8 @@ main {
 	width: 20px;
 	height: 20px;
 	border-radius: 99px;
-	background: rgba(0, 0, 0, 0.07);
+	background: color-mix(in srgb, var(--ink) 10%, var(--paper));
+	color: var(--ink);
 	display: inline-grid;
 	place-items: center;
 	font-size: 0.7rem;
@@ -3040,7 +3093,7 @@ main {
 	font-weight: 700;
 	padding: 0.1rem 0.42rem;
 	border-radius: 6px;
-	background: color-mix(in srgb, var(--teal) 14%, transparent);
+	background: color-mix(in srgb, var(--teal) 16%, var(--paper));
 	color: var(--teal);
 	flex-shrink: 0;
 }
@@ -3137,7 +3190,7 @@ main {
 	}
 
 	.quiz-crumb {
-		min-height: 40px;
+		min-height: 44px;
 	}
 
 	.quiz-wizard-verse-line .quiz-word-token {
@@ -3273,11 +3326,11 @@ main {
 
 /* Formula Banner */
 .rhetoric-formula-banner {
-	background: var(--bg-2);
-	border: 1px solid var(--line);
-	border-radius: var(--radius);
-	padding: 1rem 1.25rem;
-	margin-bottom: 1.5rem;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	padding: 0.25rem 0 0.5rem;
+	margin-bottom: 1.25rem;
 }
 
 .rhetoric-formula-grid {
@@ -3293,35 +3346,29 @@ main {
 	flex-direction: column;
 	padding: 0.65rem 0.85rem;
 	border-radius: 12px;
-	background: var(--paper);
-	border: 1px solid var(--line);
+	background: color-mix(in srgb, var(--bg-2) 70%, var(--paper));
+	border: 0;
 	min-width: 140px;
 	max-width: 240px;
-	transition:
-		border-color var(--duration-fast) ease,
-		background-color var(--duration-fast) ease;
+	transition: background-color var(--duration-fast) ease;
 }
 
 .rhetoric-formula-box.is-sub {
-	background: color-mix(in srgb, var(--teal-soft) 40%, var(--paper));
-	border-color: color-mix(in srgb, var(--teal) 30%, var(--line));
+	background: color-mix(in srgb, var(--teal-soft) 55%, var(--paper));
 }
 
 .rhetoric-formula-box.is-tool {
-	background: color-mix(in srgb, var(--gold-soft) 40%, var(--paper));
-	border-color: color-mix(in srgb, var(--gold) 30%, var(--line));
+	background: color-mix(in srgb, var(--gold-soft) 55%, var(--paper));
 }
 
 .rhetoric-formula-box.is-veh {
-	background: color-mix(in srgb, var(--rose) 10%, var(--paper));
-	border-color: color-mix(in srgb, var(--rose) 30%, var(--line));
+	background: color-mix(in srgb, var(--rose) 12%, var(--paper));
 }
 
 .rhetoric-formula-box.is-wajh,
 .rhetoric-formula-box.is-purpose,
 .rhetoric-formula-box.is-taqdir {
-	background: color-mix(in srgb, var(--indigo) 10%, var(--paper));
-	border-color: color-mix(in srgb, var(--indigo) 30%, var(--line));
+	background: color-mix(in srgb, var(--indigo) 12%, var(--paper));
 }
 
 .rhetoric-formula-box.is-sub .rhetoric-formula-role {
@@ -3340,7 +3387,7 @@ main {
 }
 
 .rhetoric-formula-role {
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	color: var(--muted);
 	margin-bottom: 0.2rem;
@@ -3354,7 +3401,7 @@ main {
 }
 
 .rhetoric-formula-sub {
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	margin-top: 0.25rem;
 }
@@ -3399,7 +3446,8 @@ main {
 .rhetoric-surah-select,
 .rhetoric-search-input {
 	width: 100%;
-	padding: 0.45rem 0.65rem;
+	padding: 0.55rem 0.75rem;
+	min-height: 44px;
 	font-size: 0.82rem;
 	border-radius: 8px;
 	border: 1px solid var(--line);
@@ -3590,9 +3638,13 @@ main {
 }
 
 .rhetoric-reader-jump-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	font-size: 0.82rem;
 	font-weight: 600;
-	padding: 0.35rem 0.75rem;
+	padding: 0.4rem 0.85rem;
+	min-height: 44px;
 	border-radius: 999px;
 	border: 1px solid var(--line);
 	background: var(--bg);
@@ -3660,10 +3712,11 @@ main {
 /* Sourced Dataset Attributes Grid */
 .rhetoric-stage-dataset-attrs {
 	margin: 1.25rem 0;
-	padding: 1rem 1.15rem;
-	border-radius: var(--radius);
-	background: var(--bg-2);
-	border: 1px solid var(--line);
+	padding: 0.35rem 0 0.15rem;
+	border-radius: 0;
+	background: transparent;
+	border: 0;
+	border-block-start: 1px solid var(--line);
 }
 
 .rhetoric-attrs-heading {
@@ -3687,19 +3740,28 @@ main {
 .rhetoric-attr-card {
 	display: flex;
 	flex-direction: column;
-	padding: 0.6rem 0.8rem;
-	border-radius: 8px;
-	background: var(--paper);
-	border: 1px solid var(--line);
+	padding: 0.55rem 0.15rem;
+	border-radius: 0;
+	background: transparent;
+	border: 0;
+	border-block-start: 1px solid var(--line);
+}
+
+.rhetoric-attr-card:first-child {
+	border-block-start: 0;
+	padding-block-start: 0;
 }
 
 .rhetoric-attr-card.is-highlight {
-	border-color: var(--gold);
-	background: color-mix(in srgb, var(--gold-soft) 40%, var(--paper));
+	border-color: transparent;
+	background: color-mix(in srgb, var(--gold-soft) 35%, transparent);
+	border-radius: 8px;
+	padding: 0.55rem 0.7rem;
+	border-block-start: 0;
 }
 
 .rhetoric-attr-label {
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	color: var(--muted);
 	margin-bottom: 0.2rem;
@@ -3720,7 +3782,7 @@ main {
 }
 
 .rhetoric-attr-sub {
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	margin-top: 0.2rem;
 }
@@ -3762,8 +3824,8 @@ main {
 	font-family: var(--sans);
 	font-size: 0.78rem;
 	font-weight: 700;
-	padding: 0.35rem 0.75rem;
-	min-height: 38px;
+	padding: 0.4rem 0.8rem;
+	min-height: 44px;
 	border-radius: 999px;
 	background: var(--gold-soft);
 	color: var(--ink);
@@ -3794,41 +3856,11 @@ main {
 	color: #10211e;
 }
 
-.surah-badges {
-	display: flex;
-	align-items: center;
-	gap: 0.45rem;
-}
-
-.surah-balagha-chip {
-	font-family: var(--arabic-ui);
-	font-size: 0.75rem;
-	font-weight: 700;
-	padding: 0.25rem 0.65rem;
-	min-height: 36px;
-	display: inline-flex;
-	align-items: center;
-	border-radius: 999px;
-	background: var(--gold-soft);
-	color: var(--ink);
-	border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line));
-	text-decoration: none;
-	transition: all 0.15s ease;
-}
-
-.surah-balagha-chip:hover {
-	background: var(--gold);
-	color: #fffdf8;
-}
-:root[data-theme="dark"] .surah-balagha-chip:hover {
-	color: #10211e;
-}
-
 .preset-rhetoric-chip {
 	display: inline-flex;
 	align-items: center;
-	padding: 0.35rem 0.85rem;
-	min-height: 38px;
+	padding: 0.4rem 0.85rem;
+	min-height: 44px;
 	border-radius: 999px;
 	font-family: var(--arabic-ui);
 	font-size: 0.82rem;
@@ -3908,6 +3940,7 @@ main {
 	line-height: 1.65;
 	color: color-mix(in srgb, var(--ink) 92%, var(--muted));
 	margin: 0;
+	max-width: 70ch;
 }
 
 /* Responsive Breakpoints */
@@ -4445,7 +4478,8 @@ main {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4rem;
-	padding: 0.3rem 0.65rem;
+	padding: 0.4rem 0.75rem;
+	min-height: 44px;
 	font-size: 0.76rem;
 	font-weight: 600;
 	color: var(--teal);
@@ -4560,7 +4594,8 @@ main {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.35rem;
-	padding: 0.3rem 0.75rem;
+	padding: 0.4rem 0.8rem;
+	min-height: 44px;
 	border-radius: 999px;
 	border: 1px solid var(--line);
 	background: var(--paper);
@@ -4671,11 +4706,11 @@ main {
 }
 
 .mutashabih-card.is-source {
-	border-inline-start: 3px solid var(--teal);
+	background: color-mix(in srgb, var(--teal) 6%, var(--paper));
 }
 
 .mutashabih-card.is-target {
-	border-inline-start: 3px solid var(--gold);
+	background: color-mix(in srgb, var(--gold) 7%, var(--paper));
 }
 
 .mutashabih-card-header {
@@ -4717,10 +4752,14 @@ main {
 }
 
 .mutashabih-jump-btn {
-	padding: 0.18rem 0.55rem;
-	font-size: 0.72rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.35rem 0.75rem;
+	min-height: 44px;
+	font-size: 0.78rem;
 	font-weight: 600;
-	border-radius: 4px;
+	border-radius: 8px;
 	background: var(--bg);
 	border: 1px solid var(--line);
 	color: var(--teal);
@@ -4858,13 +4897,11 @@ main {
 }
 
 .mutashabih-exegesis-card.is-dabt {
-	border-inline-start: 4px solid var(--gold);
-	background: color-mix(in srgb, var(--gold) 5%, var(--paper));
+	background: color-mix(in srgb, var(--gold) 8%, var(--paper));
 }
 
 .mutashabih-exegesis-card.is-tawjih {
-	border-inline-start: 4px solid var(--teal);
-	background: color-mix(in srgb, var(--teal) 5%, var(--paper));
+	background: color-mix(in srgb, var(--teal) 8%, var(--paper));
 }
 
 .exegesis-header {
@@ -4873,11 +4910,14 @@ main {
 	gap: 0.45rem;
 }
 
-.exegesis-header h4 {
+.exegesis-header h4,
+.exegesis-heading {
 	margin: 0;
 	font-size: 0.85rem;
 	font-weight: 700;
 	color: var(--ink);
+	font-family: var(--sans);
+	line-height: 1.3;
 }
 
 .exegesis-icon {
@@ -4897,4 +4937,345 @@ main {
 	font-size: 0.85rem;
 	line-height: 1.6;
 	color: var(--ink-soft);
+}
+
+/* Munāsabāt & Surah Structure (Diptych Foldout) */
+.structure-badge-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	border: 1px solid color-mix(in srgb, var(--indigo) 40%, var(--line));
+	background: color-mix(in srgb, var(--indigo) 10%, var(--paper));
+	color: var(--ink);
+	font: inherit;
+	font-size: 0.78rem;
+	font-weight: 700;
+	padding: 0.4rem 0.75rem;
+	min-height: 44px;
+	border-radius: 999px;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease;
+}
+.structure-badge-button:hover {
+	background: color-mix(in srgb, var(--indigo) 18%, var(--paper));
+}
+.structure-badge-button.is-active {
+	border-color: var(--indigo);
+	background: color-mix(in srgb, var(--indigo) 22%, var(--paper));
+}
+.structure-badge-icon {
+	font-size: 0.85rem;
+	color: var(--indigo);
+}
+.structure-block {
+	margin-top: 1rem;
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 4px);
+	background: var(--paper);
+	padding: 0.35rem 0.85rem 0.95rem;
+}
+.structure-block summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	cursor: pointer;
+	padding: 0.55rem 0.1rem;
+	font-weight: 700;
+	list-style: none;
+}
+.structure-block summary::-webkit-details-marker {
+	display: none;
+}
+.structure-summary-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+.structure-summary-count {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: var(--indigo);
+}
+.structure-empty-card {
+	margin-top: 1rem;
+	padding: 1rem 1.1rem;
+	border: 1px dashed var(--line);
+	border-radius: calc(var(--radius) - 4px);
+	background: color-mix(in srgb, var(--indigo) 4%, var(--paper));
+	color: var(--muted);
+}
+.structure-section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding-top: 0.35rem;
+}
+.structure-variant {
+	min-width: 0;
+}
+.diptych-stage {
+	display: grid;
+	grid-template-columns: 1fr minmax(140px, 180px) 1fr;
+	gap: 0.75rem;
+	align-items: stretch;
+}
+@media (max-width: 820px) {
+	.diptych-stage {
+		grid-template-columns: 1fr;
+	}
+}
+.diptych-hemisphere {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	min-width: 0;
+}
+.diptych-hemisphere header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.5rem;
+	padding: 0 0.15rem;
+}
+.diptych-hemisphere header span {
+	font-weight: 700;
+	font-size: 0.8rem;
+}
+.diptych-hemisphere header small {
+	color: var(--muted);
+	font-size: 0.7rem;
+}
+.diptych-hemisphere ol {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+.diptych-panel {
+	width: 100%;
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-areas:
+		"id range"
+		"label label"
+		"ar ar"
+		"pair pair";
+	gap: 0.15rem 0.5rem;
+	padding: 0.55rem 0.65rem;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	cursor: pointer;
+	text-align: start;
+	font: inherit;
+	transition: opacity var(--duration-fast) var(--ease-out);
+}
+.diptych-panel.is-on,
+.diptych-panel.is-current {
+	box-shadow: var(--shadow-soft);
+}
+.diptych-panel.is-current {
+	outline: 2px solid color-mix(in srgb, var(--indigo) 55%, var(--line));
+	outline-offset: 1px;
+}
+.diptych-id {
+	grid-area: id;
+	font-weight: 800;
+	font-size: 0.95rem;
+}
+.diptych-range {
+	grid-area: range;
+	font-size: 0.72rem;
+	color: color-mix(in srgb, var(--ink) 58%, var(--muted));
+	justify-self: end;
+}
+.diptych-label {
+	grid-area: label;
+	font-size: 0.8rem;
+}
+.diptych-label-ar {
+	grid-area: ar;
+	font-family: var(--arabic);
+	font-size: 0.95rem;
+	color: var(--ink);
+}
+.diptych-pair {
+	grid-area: pair;
+	font-size: 0.7rem;
+	color: var(--muted);
+}
+.diptych-keystone {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.diptych-keystone-inner {
+	width: 100%;
+	padding: 1rem 0.75rem;
+	border-radius: 16px;
+	border: 2px solid var(--gold);
+	background: color-mix(in srgb, var(--gold) 14%, var(--paper));
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	box-shadow: var(--shadow-soft);
+}
+.diptych-star {
+	font-size: 1.2rem;
+	color: var(--gold);
+}
+.diptych-keystone-inner strong {
+	font-size: 1.1rem;
+	color: var(--gold);
+}
+.diptych-keystone-inner p {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.05rem;
+	line-height: 1.5;
+}
+.diptych-keystone-inner small {
+	color: var(--muted);
+	font-size: 0.72rem;
+}
+.diptych-keystone-inner em {
+	font-style: normal;
+	font-size: 0.68rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--gold);
+}
+.diptych-keystone-jump {
+	margin-top: 0.25rem;
+	border: 1px solid color-mix(in srgb, var(--gold) 50%, var(--line));
+	background: color-mix(in srgb, var(--gold) 18%, var(--paper));
+	color: var(--ink);
+	font: inherit;
+	font-size: 0.78rem;
+	font-weight: 700;
+	padding: 0.4rem 0.75rem;
+	min-height: 44px;
+	border-radius: 999px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.diptych-hint {
+	margin: 0.75rem 0 0;
+	font-size: 0.78rem;
+	color: var(--muted);
+	text-align: center;
+}
+.munasabat-card {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 4px);
+	padding: 1rem 1.1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+.munasabat-card-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+.munasabat-eyebrow {
+	margin: 0;
+	font-size: 0.7rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--muted);
+	font-weight: 700;
+}
+.munasabat-card-head h3 {
+	margin: 0.15rem 0 0;
+	font-family: var(--serif);
+	font-size: 1.15rem;
+}
+.munasabat-ar-names {
+	margin: 0.2rem 0 0;
+	font-family: var(--arabic);
+	font-size: 1.15rem;
+}
+.munasabat-bridge-badge {
+	align-self: flex-start;
+	font-size: 0.7rem;
+	font-weight: 700;
+	padding: 0.25rem 0.55rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--indigo) 14%, var(--paper));
+	color: var(--indigo);
+	border: 1px solid color-mix(in srgb, var(--indigo) 35%, var(--line));
+}
+.munasabat-exegesis {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 0.75rem;
+}
+.munasabat-quote {
+	padding: 0.8rem 0.9rem;
+	border-radius: 12px;
+	border: 1px solid var(--line);
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+.munasabat-quote.is-suyuti {
+	background: color-mix(in srgb, var(--teal) 8%, var(--paper));
+}
+.munasabat-quote.is-biqai {
+	background: color-mix(in srgb, var(--gold) 8%, var(--paper));
+}
+.munasabat-quote header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+.munasabat-source-badge {
+	font-size: 0.72rem;
+	font-weight: 700;
+}
+.munasabat-quote header small {
+	color: color-mix(in srgb, var(--ink) 58%, var(--muted));
+	font-size: 0.75rem;
+}
+.munasabat-quote-ar {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.05rem;
+	line-height: 1.85;
+	max-height: 12rem;
+	overflow: auto;
+}
+.munasabat-quote-en {
+	margin: 0;
+	font-size: 0.82rem;
+	line-height: 1.55;
+	color: var(--muted);
+	max-height: 8rem;
+	overflow: auto;
+}
+.munasabat-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+.munasabat-jump {
+	border: none;
+	background: var(--teal);
+	color: var(--paper);
+	font-weight: 700;
+	font-size: 0.82rem;
+	padding: 0.45rem 0.9rem;
+	border-radius: 999px;
+	cursor: pointer;
 }

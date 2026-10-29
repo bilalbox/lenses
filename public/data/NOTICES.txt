@@ -230,3 +230,19 @@ Source: Quranpedia.net (الموسوعة القرآنية)
 URL: https://quranpedia.net/
 License / Terms: Free to use inside apps and research tools with attribution.
 Used in Lenses for classical ḍabṭ mnemonic anchors and tawjīh rhetorical exegesis.
+
+
+------------------------------------------------------------
+Maraya Ring Composition Corpus
+Platform: maraya.app (Ayah Labs)
+Author: Feras Mansi
+URL: https://maraya.app
+License / Terms: Educational research use with attribution to Ayah Labs / Maraya.
+Used in Lenses for full-Quran symmetrical surah blocks, families, and pivot axes.
+
+------------------------------------------------------------
+Tanāsuq al-Durar fī Tanāsub al-Suwar (Asrār Tartīb al-Qurʾān)
+Author: Jalāl al-Dīn al-Suyūṭī (d. 911 AH)
+Source: Turath.io Book 9992 (https://files.turath.io/books-v3/9992.json)
+License / Terms: Classical heritage text; retained with clear attribution.
+Used in Lenses for inter-surah munāsabāt transition exegesis.

@@ -137,6 +137,29 @@ export const en: Translations = {
 		mutashabihEmptyState:
 			"No verbal similarities (mutashābihāt) are recorded for this verse.",
 		mutashabihReturnToAyah: (coord: string) => `Return to ${coord}`,
+		structureBadge: (count: number) =>
+			`Surah Structure (${formatNum(count, "en")})`,
+		structureSectionTitle: "Munāsabāt & Surah Structure",
+		structureEmptyState:
+			"No ring-composition structure is recorded for this surah.",
+		structurePivotLabel: "Pivot / central axis",
+		structureOpeningHemisphere: "Opening hemisphere",
+		structureClosingHemisphere: "Closing hemisphere",
+		structureJumpToBlock: "Jump to this block",
+		structureVerseRange: (start: number, end: number) =>
+			start === end
+				? `v. ${formatNum(start, "en")}`
+				: `vv. ${formatNum(start, "en")}–${formatNum(end, "en")}`,
+		structurePairHint:
+			"Focus or hover a panel to light its symmetrical partner across the fold.",
+		munasabatCardTitle: "Munāsabāt · مناسبة السور",
+		munasabatBridgeBadge: "Thematic bridge",
+		munasabatSuyutiLabel: "al-Suyūṭī",
+		munasabatSuyutiWork: "Tanāsuq al-Durar",
+		munasabatBiqaiLabel: "al-Biqāʿī",
+		munasabatBiqaiWork: "Naẓm al-Durar",
+		munasabatJumpNext: (name: string, number: string) =>
+			`Jump to ${name} (${number}) ↗`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -163,10 +186,11 @@ export const en: Translations = {
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "en")} surahs`,
 		pageTitle: "Browse the Quran",
-		coverageTreebank: "Treebank",
-		coverageMorphology: "Morphology",
-		coverageTrees: (syntax: number, total: number) =>
-			`${formatNum(syntax, "en")}/${formatNum(total, "en")} trees`,
+		metaLinksLabel: "Surah layers",
+		structureLink: "Structure",
+		balaghaLink: "Balāghah",
+		balaghaLinkTitle: (count: number) =>
+			`${formatNum(count, "en")} rhetorical analyses in Balāghah Studio`,
 	},
 	examples: {
 		pageTitle: "Find the pattern",

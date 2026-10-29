@@ -10,7 +10,9 @@ import type {
 	SurahFile,
 	SurahMutashabihFile,
 	SurahQiraatFile,
+	SurahStructureFile,
 	SurahSyntaxFile,
+	TransitionsFile,
 	VerseRow,
 } from "../../src/lib/types";
 
@@ -310,6 +312,18 @@ describe("integration: Quran dataset integrity", () => {
 				t.verse.mutashabihJumpToAyah,
 				`${code} mutashabihJumpToAyah`,
 			).toBeTruthy();
+
+			expect(t.verse.structureBadge(5), `${code} structureBadge`).toBeTruthy();
+			expect(
+				t.verse.structureSectionTitle,
+				`${code} structureSectionTitle`,
+			).toBeTruthy();
+			expect(
+				t.verse.munasabatCardTitle,
+				`${code} munasabatCardTitle`,
+			).toBeTruthy();
+			expect(t.surahs.structureLink, `${code} structureLink`).toBeTruthy();
+			expect(t.surahs.balaghaLink, `${code} balaghaLink`).toBeTruthy();
 		}
 	});
 
@@ -425,5 +439,93 @@ describe("integration: Quran dataset integrity", () => {
 		expect(match2_123?.score).toBeGreaterThan(0.8);
 		expect(match2_123?.cat).toBe("word_swap");
 		expect(match2_123?.noteEn).toContain("shafa'ah");
+	});
+
+	it("validates full Quran structure + munāsabāt dataset (114 surahs, contiguous blocks)", () => {
+		const structureDir = path.join(dataDir, "structure");
+		const transitionsPath = path.join(dataDir, "transitions.json");
+		expect(fs.existsSync(structureDir)).toBe(true);
+		expect(fs.existsSync(transitionsPath)).toBe(true);
+
+		const manifest: Manifest = JSON.parse(
+			fs.readFileSync(manifestPath, "utf-8"),
+		);
+		expect(manifest.stats.structureSurahs).toBe(114);
+		expect(manifest.stats.structureBlocks).toBeGreaterThan(500);
+		expect(manifest.stats.munasabatTransitions).toBe(113);
+
+		const sourceIds = manifest.sources.map((s) => s.id);
+		expect(sourceIds).toContain("maraya-ring-composition");
+		expect(sourceIds).toContain("suyuti-tanasuq-al-durar");
+
+		let totalBlocks = 0;
+		for (let s = 1; s <= 114; s++) {
+			const fileName = `${String(s).padStart(3, "0")}.json`;
+			const filePath = path.join(structureDir, fileName);
+			expect(fs.existsSync(filePath), `structure file ${fileName}`).toBe(true);
+
+			const fileData: SurahStructureFile = JSON.parse(
+				fs.readFileSync(filePath, "utf-8"),
+			);
+			expect(fileData.sura).toBe(s);
+			expect(fileData.verseCount).toBe(
+				manifest.units.find((u) => u.n === s)?.verses,
+			);
+			expect(fileData.blocks.length).toBeGreaterThan(0);
+			expect(manifest.units.find((u) => u.n === s)?.structure).toBe(
+				fileData.blocks.length,
+			);
+			expect(
+				fileData.blocks.some((b) => b.role === "pivot" || b.role === "center"),
+			).toBe(true);
+
+			const spans = [...fileData.blocks]
+				.map((b) => b.v)
+				.sort((a, b) => a[0] - b[0]);
+			expect(spans[0]?.[0]).toBe(1);
+			expect(spans.at(-1)?.[1]).toBe(fileData.verseCount);
+			for (let i = 1; i < spans.length; i++) {
+				expect(spans[i]?.[0]).toBe((spans[i - 1]?.[1] ?? 0) + 1);
+			}
+			totalBlocks += fileData.blocks.length;
+
+			if (s < 114) {
+				expect(fileData.transitionToNext?.targetSura).toBe(s + 1);
+				expect(fileData.transitionToNext?.suyutiLinkAr.length).toBeGreaterThan(
+					20,
+				);
+			} else {
+				expect(fileData.transitionToNext).toBeUndefined();
+			}
+		}
+		expect(totalBlocks).toBe(manifest.stats.structureBlocks);
+
+		const transitions: TransitionsFile = JSON.parse(
+			fs.readFileSync(transitionsPath, "utf-8"),
+		);
+		expect(transitions.count).toBe(113);
+		expect(transitions.transitions).toHaveLength(113);
+		expect(transitions.transitions[0]?.fromSura).toBe(1);
+		expect(transitions.transitions[0]?.targetSura).toBe(2);
+		expect(transitions.transitions[0]?.suyutiLinkAr).toContain("الكتاب");
+
+		const fatihah: SurahStructureFile = JSON.parse(
+			fs.readFileSync(path.join(structureDir, "001.json"), "utf-8"),
+		);
+		expect(fatihah.blocks.map((b) => b.id)).toEqual([
+			"A",
+			"B",
+			"PIVOT",
+			"B′",
+			"A′",
+		]);
+		expect(fatihah.pivot.function).toBe("THEOLOGICAL_DECLARATION");
+
+		const baqarah: SurahStructureFile = JSON.parse(
+			fs.readFileSync(path.join(structureDir, "002.json"), "utf-8"),
+		);
+		expect(baqarah.blocks.find((b) => b.id === "D")?.v).toEqual([142, 152]);
+		expect(baqarah.transitionToNext?.targetSura).toBe(3);
+		expect(baqarah.transitionToNext?.targetNameAr).toContain("عمران");
 	});
 });

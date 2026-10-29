@@ -136,6 +136,29 @@ export const id: Translations = {
 		mutashabihEmptyState:
 			"Tidak ada ayat mutasyabih lafzhi yang tercatat untuk ayat ini.",
 		mutashabihReturnToAyah: (coord: string) => `Kembali ke ${coord}`,
+		structureBadge: (count: number) =>
+			`Struktur Surah (${formatNum(count, "id")})`,
+		structureSectionTitle: "Munasabat & Struktur Surah",
+		structureEmptyState:
+			"Tidak ada struktur komposisi cincin yang tercatat untuk surah ini.",
+		structurePivotLabel: "Poros / sumbu tengah",
+		structureOpeningHemisphere: "Hemisfer pembuka",
+		structureClosingHemisphere: "Hemisfer penutup",
+		structureJumpToBlock: "Lompat ke blok ini",
+		structureVerseRange: (start: number, end: number) =>
+			start === end
+				? `ay. ${formatNum(start, "id")}`
+				: `ay. ${formatNum(start, "id")}–${formatNum(end, "id")}`,
+		structurePairHint:
+			"Fokuskan atau arahkan kursor ke panel untuk menyorot pasangan simetrisnya di lipatan.",
+		munasabatCardTitle: "Munasabat · مناسبة السور",
+		munasabatBridgeBadge: "Jembatan tematik",
+		munasabatSuyutiLabel: "al-Suyūṭī",
+		munasabatSuyutiWork: "Tanāsuq al-Durar",
+		munasabatBiqaiLabel: "al-Biqāʿī",
+		munasabatBiqaiWork: "Naẓm al-Durar",
+		munasabatJumpNext: (name: string, number: string) =>
+			`Lompat ke ${name} (${number}) ↗`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -162,10 +185,11 @@ export const id: Translations = {
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "id")} surah`,
 		pageTitle: "Jelajahi Al-Qur'an",
-		coverageTreebank: "Treebank",
-		coverageMorphology: "Morfologi",
-		coverageTrees: (syntax: number, total: number) =>
-			`${formatNum(syntax, "id")}/${formatNum(total, "id")} pohon`,
+		metaLinksLabel: "Lapisan surah",
+		structureLink: "Struktur",
+		balaghaLink: "Balaghah",
+		balaghaLinkTitle: (count: number) =>
+			`${formatNum(count, "id")} analisis retorika di Studio Balaghah`,
 	},
 	examples: {
 		pageTitle: "Temukan pola",

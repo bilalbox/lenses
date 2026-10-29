@@ -136,6 +136,28 @@ export const ar: Translations = {
 			`البعد: ${formatNum(count, "ar")} سور`,
 		mutashabihEmptyState: "لا توجد مواضع متشابه لفظي مسجلة لهذه الآية.",
 		mutashabihReturnToAyah: (coord: string) => `العودة إلى ${coord}`,
+		structureBadge: (count: number) =>
+			`بنية السورة (${formatNum(count, "ar")})`,
+		structureSectionTitle: "المناسبات وبنية السورة",
+		structureEmptyState: "لا توجد بنية حلقية مسجّلة لهذه السورة.",
+		structurePivotLabel: "المحور والمركز",
+		structureOpeningHemisphere: "نصف الافتتاح",
+		structureClosingHemisphere: "نصف الختام",
+		structureJumpToBlock: "الانتقال إلى هذا المقطع",
+		structureVerseRange: (start: number, end: number) =>
+			start === end
+				? `آية ${formatNum(start, "ar")}`
+				: `الآيات ${formatNum(start, "ar")}–${formatNum(end, "ar")}`,
+		structurePairHint:
+			"ركّز على مقطع أو مرّر المؤشر فوقه ليُضاء قرينه المتناظر عبر الطيّة.",
+		munasabatCardTitle: "المناسبات · مناسبة السور",
+		munasabatBridgeBadge: "جسر موضوعي",
+		munasabatSuyutiLabel: "السيوطي",
+		munasabatSuyutiWork: "تناسق الدرر",
+		munasabatBiqaiLabel: "البقاعي",
+		munasabatBiqaiWork: "نظم الدرر",
+		munasabatJumpNext: (name: string, number: string) =>
+			`الانتقال إلى ${name} (${number}) ↗`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -162,10 +184,11 @@ export const ar: Translations = {
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "ar")} سورة`,
 		pageTitle: "تصفح القرآن الكريم",
-		coverageTreebank: "شجرة النحو",
-		coverageMorphology: "الصرف والإعراب",
-		coverageTrees: (syntax: number, total: number) =>
-			`${formatNum(syntax, "ar")}/${formatNum(total, "ar")} شجرة`,
+		metaLinksLabel: "طبقات السورة",
+		structureLink: "البنية",
+		balaghaLink: "البلاغة",
+		balaghaLinkTitle: (count: number) =>
+			`${formatNum(count, "ar")} تحليل بلاغي في استوديو البلاغة`,
 	},
 	examples: {
 		pageTitle: "استكشف الأنماط النحوية",
