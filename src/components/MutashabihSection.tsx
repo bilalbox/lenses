@@ -267,7 +267,7 @@ export function MutashabihSection({
 						<span className="exegesis-icon" aria-hidden="true">
 							📿
 						</span>
-						<h4>{t.verse.mutashabihDabtTitle}</h4>
+						<h2 className="exegesis-heading">{t.verse.mutashabihDabtTitle}</h2>
 					</div>
 					<p className="exegesis-text" lang="ar" dir="rtl">
 						{activeMatch.dabt}
@@ -281,7 +281,9 @@ export function MutashabihSection({
 						<span className="exegesis-icon" aria-hidden="true">
 							💡
 						</span>
-						<h4>{t.verse.mutashabihTawjihTitle}</h4>
+						<h2 className="exegesis-heading">
+							{t.verse.mutashabihTawjihTitle}
+						</h2>
 					</div>
 					<p className="exegesis-text" lang="ar" dir="rtl">
 						{activeMatch.tawjih}

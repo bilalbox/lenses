@@ -140,6 +140,22 @@ export interface Translations {
 		mutashabihSurahDistance: (count: number) => string;
 		mutashabihEmptyState: string;
 		mutashabihReturnToAyah: (coord: string) => string;
+		structureBadge: (count: number) => string;
+		structureSectionTitle: string;
+		structureEmptyState: string;
+		structurePivotLabel: string;
+		structureOpeningHemisphere: string;
+		structureClosingHemisphere: string;
+		structureJumpToBlock: string;
+		structureVerseRange: (start: number, end: number) => string;
+		structurePairHint: string;
+		munasabatCardTitle: string;
+		munasabatBridgeBadge: string;
+		munasabatSuyutiLabel: string;
+		munasabatSuyutiWork: string;
+		munasabatBiqaiLabel: string;
+		munasabatBiqaiWork: string;
+		munasabatJumpNext: (name: string, number: string) => string;
 	};
 	sheet: {
 		analysisAria: (wordNumber: number) => string;
@@ -165,9 +181,10 @@ export interface Translations {
 	surahs: {
 		countEyebrow: (count: number) => string;
 		pageTitle: string;
-		coverageTreebank: string;
-		coverageMorphology: string;
-		coverageTrees: (syntax: number, total: number) => string;
+		metaLinksLabel: string;
+		structureLink: string;
+		balaghaLink: string;
+		balaghaLinkTitle: (count: number) => string;
 	};
 	examples: {
 		pageTitle: string;

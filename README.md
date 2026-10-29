@@ -28,10 +28,11 @@ The production build is a static site. [Workers Static Assets](https://developer
 
 ```bash
 pnpm install
-pnpm deploy
+pnpm deploy            # production
+pnpm deploy:preview    # branch Preview (does not replace production)
 ```
 
-`pnpm deploy` builds and runs `wrangler deploy`. It needs a Cloudflare account. The config is `wrangler.jsonc`, with single-page fallback so a refresh still opens the app. Secrets stay out of that file — use Wrangler secrets / `.env` if you add any later.
+`pnpm deploy` builds and runs `wrangler deploy`. `pnpm deploy:preview` builds and runs `wrangler preview`, which publishes an isolated Preview URL under the same Worker without promoting production traffic. Both need a Cloudflare account. The config is `wrangler.jsonc`, with single-page fallback so a refresh still opens the app. Secrets stay out of that file — use Wrangler secrets / `.env` if you add any later.
 
 ## What you can do
 

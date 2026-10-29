@@ -312,6 +312,18 @@ describe("integration: Quran dataset integrity", () => {
 				t.verse.mutashabihJumpToAyah,
 				`${code} mutashabihJumpToAyah`,
 			).toBeTruthy();
+
+			expect(t.verse.structureBadge(5), `${code} structureBadge`).toBeTruthy();
+			expect(
+				t.verse.structureSectionTitle,
+				`${code} structureSectionTitle`,
+			).toBeTruthy();
+			expect(
+				t.verse.munasabatCardTitle,
+				`${code} munasabatCardTitle`,
+			).toBeTruthy();
+			expect(t.surahs.structureLink, `${code} structureLink`).toBeTruthy();
+			expect(t.surahs.balaghaLink, `${code} balaghaLink`).toBeTruthy();
 		}
 	});
 

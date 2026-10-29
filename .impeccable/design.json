@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 2,
-	"generatedAt": "2026-10-26T09:25:00Z",
+	"generatedAt": "2026-10-29T01:42:27Z",
 	"title": "Design System: Lenses (عدسات)",
 	"extensions": {
 		"colorMeta": {
@@ -127,8 +127,14 @@
 			}
 		],
 		"breakpoints": [
-			{ "name": "mobile", "value": "720px" },
-			{ "name": "tablet", "value": "1100px" }
+			{
+				"name": "mobile",
+				"value": "720px"
+			},
+			{
+				"name": "tablet",
+				"value": "1100px"
+			}
 		]
 	},
 	"components": [

@@ -13,6 +13,7 @@
 		"lint": "biome check .",
 		"preview": "vite preview --host 127.0.0.1 --port 43123",
 		"deploy": "pnpm run build && wrangler deploy",
+		"deploy:preview": "pnpm run build && wrangler preview",
 		"typecheck": "tsc -b",
 		"lint:graph": "tsx scripts/run-rev-dep.ts",
 		"lint:complexity": "tsx scripts/ratchets/run-complexity.ts",
