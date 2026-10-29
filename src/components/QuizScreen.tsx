@@ -240,7 +240,7 @@ export function QuizScreen({
 		const nextIdx = picked
 			? currentPool.findIndex((q) => q.id === picked.id)
 			: 0;
-		setIndices((prev) => ({ ...prev, [lens]: nextIdx >= 0 ? nextIdx : 0 }));
+		setIndices((prev) => ({ ...prev, [lens]: Math.max(nextIdx, 0) }));
 		resetDrafts();
 	}, [activeQuestion, examplesPool, irabPool, lens, resetDrafts, sarfPool]);
 

@@ -85,7 +85,7 @@ export function searchVerses(
 
 function sameLexeme(query: string, entry: Lexeme | undefined): boolean {
 	if (!query.trim()) return true;
-	if (!entry || !entry.b) return false;
+	if (!entry?.b) return false;
 	const q = query.trim();
 	if (q.toLowerCase() === entry.b.toLowerCase()) return true;
 	const arabic = hasArabic(q) ? stripDiacritics(q) : stripDiacritics(q);

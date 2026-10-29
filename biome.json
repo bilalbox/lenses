@@ -32,7 +32,11 @@
 				"useKeyWithClickEvents": "off",
 				"useValidAnchor": "off"
 			},
+			"complexity": {
+				"noImportantStyles": "off"
+			},
 			"style": {
+				"noDescendingSpecificity": "off",
 				"noNonNullAssertion": "off"
 			},
 			"suspicious": {

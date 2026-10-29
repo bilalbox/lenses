@@ -189,6 +189,11 @@ export function NoorBayanTree({
 		65 +
 		(constituents.length > 0 ? (maxTier + 1) * bracketTierHeight + 20 : 40);
 
+	const muqaddarTokens = useMemo(
+		() => flatTokens.filter((t) => t.head === null && !t.isRoot && !t.isNonRel),
+		[flatTokens],
+	);
+
 	return (
 		<div className="noorbayan-tree-container" dir="rtl">
 			<div className="noorbayan-tree-header">
@@ -237,34 +242,154 @@ export function NoorBayanTree({
 						</marker>
 					</defs>
 
-					{/* 1. Dependency Arcs */}
+					{/* Layer 1: connector lines only (behind fills) */}
 					{finalArcs.map((arc) => {
-						const isHighlighted =
-							hoveredTokenId !== null &&
-							(flatTokens[arc.depIdx]?.id === hoveredTokenId ||
-								(arc.headIdx !== -1 &&
-									flatTokens[arc.headIdx]?.id === hoveredTokenId));
+						const isHighlighted = arcIsHighlighted(
+							arc,
+							hoveredTokenId,
+							flatTokens,
+						);
+						return (
+							<path
+								key={`arc-line-${arc.id}`}
+								d={arc.path}
+								fill="none"
+								stroke={
+									isHighlighted
+										? "var(--gold, #d97706)"
+										: "var(--teal, #008080)"
+								}
+								strokeWidth={isHighlighted ? 2.5 : 1.75}
+								strokeDasharray={arc.isCarried ? "4 4" : "none"}
+								markerEnd={
+									isHighlighted
+										? "url(#nb-arrow-active)"
+										: "url(#nb-arrow-default)"
+								}
+								className="noorbayan-arc-line"
+							/>
+						);
+					})}
+
+					{muqaddarTokens.map((tok) => {
+						const idx = flatTokens.findIndex((t) => t.id === tok.id);
+						const x = getTokenX(idx);
+						return (
+							<line
+								key={`muqaddar-line-${tok.id}`}
+								x1={x}
+								y1={wordBaselineY - 35}
+								x2={x}
+								y2={wordBaselineY - 95}
+								stroke="var(--muted, #9ca3af)"
+								strokeDasharray="3 3"
+								strokeWidth="1.5"
+							/>
+						);
+					})}
+
+					{constituents.map((c) => {
+						const { left, right, bracketY } = constituentGeom(
+							c,
+							getTokenX,
+							tokenWidth,
+							wordBaselineY,
+							bracketTierHeight,
+						);
+						const cornerSize = 7;
+						const bracketPath = `M ${left} ${bracketY - cornerSize} L ${left} ${bracketY} L ${right} ${bracketY} L ${right} ${bracketY - cornerSize}`;
+						return (
+							<path
+								key={`bracket-line-${c.key}`}
+								d={bracketPath}
+								fill="none"
+								stroke="var(--teal, #008080)"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+							/>
+						);
+					})}
+
+					{/* Layer 2: opaque fills (nodes + pills) so lines never cross text */}
+					{flatTokens.map((tok, index) => {
+						const x = getTokenX(index);
+						const isWordSelected = selectedWord === tok.wordNum;
+						const isHovered = hoveredTokenId === tok.id;
+						const isActive = isHovered || isWordSelected;
 
 						return (
-							<g key={arc.id} className="noorbayan-arc-group">
-								<path
-									d={arc.path}
-									fill="none"
+							<g
+								key={tok.id}
+								className={`noorbayan-token-node${isActive ? " is-active" : ""}`}
+								cursor="pointer"
+								onMouseEnter={() => setHoveredTokenId(tok.id)}
+								onMouseLeave={() => setHoveredTokenId(null)}
+								onClick={() => onSelectWord?.(tok.wordNum)}
+							>
+								<rect
+									x={x - tokenWidth / 2}
+									y={wordBaselineY - 35}
+									width={tokenWidth}
+									height="76"
+									rx="8"
+									fill={
+										isActive
+											? "var(--gold-soft, #fef3c7)"
+											: "var(--paper, #ffffff)"
+									}
 									stroke={
-										isHighlighted
-											? "var(--gold, #d97706)"
-											: "var(--teal, #008080)"
+										isActive ? "var(--gold, #d97706)" : "var(--line, #e5e7eb)"
 									}
-									strokeWidth={isHighlighted ? 2.5 : 1.75}
-									strokeDasharray={arc.isCarried ? "4 4" : "none"}
-									markerEnd={
-										isHighlighted
-											? "url(#nb-arrow-active)"
-											: "url(#nb-arrow-default)"
-									}
-									className="noorbayan-arc-line"
+									strokeWidth={isActive ? 2 : 1}
+									className="noorbayan-node-bg"
 								/>
-								{/* Arc Relation Label Pill */}
+
+								<text
+									x={x}
+									y={wordBaselineY + 5}
+									textAnchor="middle"
+									fontSize="21"
+									fontFamily="var(--arabic)"
+									fontWeight="600"
+									fill={
+										tok.text ? "var(--ink, #111827)" : "var(--muted, #9ca3af)"
+									}
+									className="noorbayan-token-text"
+								>
+									{tok.text || "[مقدَّر]"}
+								</text>
+
+								<rect
+									x={x - 38}
+									y={wordBaselineY + 18}
+									width="76"
+									height="17"
+									rx="8.5"
+									fill="rgba(0, 128, 128, 0.09)"
+								/>
+								<text
+									x={x}
+									y={wordBaselineY + 30}
+									textAnchor="middle"
+									fontSize="10"
+									fontWeight="600"
+									fill="var(--teal, #008080)"
+									className="noorbayan-pos-text"
+								>
+									{tok.pos}
+								</text>
+							</g>
+						);
+					})}
+
+					{finalArcs.map((arc) => {
+						const isHighlighted = arcIsHighlighted(
+							arc,
+							hoveredTokenId,
+							flatTokens,
+						);
+						return (
+							<g key={`arc-label-${arc.id}`} className="noorbayan-arc-group">
 								<rect
 									x={arc.midX - 42}
 									y={arc.topY - 13}
@@ -303,148 +428,50 @@ export function NoorBayanTree({
 						);
 					})}
 
-					{/* 2. Elliptical Governor Badges for Muqaddar (head === null) */}
-					{flatTokens
-						.filter((t) => t.head === null && !t.isRoot && !t.isNonRel)
-						.map((tok) => {
-							const idx = flatTokens.findIndex((t) => t.id === tok.id);
-							const x = getTokenX(idx);
-							const pillWidth = 96;
-							return (
-								<g
-									key={`muqaddar-${tok.id}`}
-									className="noorbayan-muqaddar-group"
-								>
-									<line
-										x1={x}
-										y1={wordBaselineY - 35}
-										x2={x}
-										y2={wordBaselineY - 95}
-										stroke="var(--muted, #9ca3af)"
-										strokeDasharray="3 3"
-										strokeWidth="1.5"
-									/>
-									<rect
-										x={x - pillWidth / 2}
-										y={wordBaselineY - 118}
-										width={pillWidth}
-										height="24"
-										rx="6"
-										fill="var(--panel, #f3f4f6)"
-										stroke="var(--muted, #9ca3af)"
-										strokeDasharray="3 3"
-										strokeWidth="1.2"
-									/>
-									<text
-										x={x}
-										y={wordBaselineY - 102}
-										textAnchor="middle"
-										fontSize="11"
-										fontWeight="600"
-										fill="var(--ink, #374151)"
-									>
-										{tok.relAr ? `محذوف (${tok.relAr})` : "محذوف"}
-									</text>
-								</g>
-							);
-						})}
-
-					{/* 3. Word & Token Nodes */}
-					{flatTokens.map((tok, index) => {
-						const x = getTokenX(index);
-						const isWordSelected = selectedWord === tok.wordNum;
-						const isHovered = hoveredTokenId === tok.id;
-						const isActive = isHovered || isWordSelected;
-
+					{muqaddarTokens.map((tok) => {
+						const idx = flatTokens.findIndex((t) => t.id === tok.id);
+						const x = getTokenX(idx);
+						const pillWidth = 96;
 						return (
 							<g
-								key={tok.id}
-								className={`noorbayan-token-node${isActive ? " is-active" : ""}`}
-								cursor="pointer"
-								onMouseEnter={() => setHoveredTokenId(tok.id)}
-								onMouseLeave={() => setHoveredTokenId(null)}
-								onClick={() => onSelectWord?.(tok.wordNum)}
+								key={`muqaddar-${tok.id}`}
+								className="noorbayan-muqaddar-group"
 							>
-								{/* Token Box */}
 								<rect
-									x={x - tokenWidth / 2}
-									y={wordBaselineY - 35}
-									width={tokenWidth}
-									height="76"
-									rx="8"
-									fill={
-										isActive
-											? "var(--gold-soft, #fef3c7)"
-											: "var(--paper, #ffffff)"
-									}
-									stroke={
-										isActive ? "var(--gold, #d97706)" : "var(--line, #e5e7eb)"
-									}
-									strokeWidth={isActive ? 2 : 1}
-									className="noorbayan-node-bg"
-								/>
-
-								{/* Arabic Surface Text */}
-								<text
-									x={x}
-									y={wordBaselineY + 5}
-									textAnchor="middle"
-									fontSize="21"
-									fontFamily="var(--arabic)"
-									fontWeight="600"
-									fill={
-										tok.text ? "var(--ink, #111827)" : "var(--muted, #9ca3af)"
-									}
-									className="noorbayan-token-text"
-								>
-									{tok.text || "[مقدَّر]"}
-								</text>
-
-								{/* POS Tag Pill */}
-								<rect
-									x={x - 38}
-									y={wordBaselineY + 18}
-									width="76"
-									height="17"
-									rx="8.5"
-									fill="rgba(0, 128, 128, 0.09)"
+									x={x - pillWidth / 2}
+									y={wordBaselineY - 118}
+									width={pillWidth}
+									height="24"
+									rx="6"
+									fill="var(--panel, #f3f4f6)"
+									stroke="var(--muted, #9ca3af)"
+									strokeDasharray="3 3"
+									strokeWidth="1.2"
 								/>
 								<text
 									x={x}
-									y={wordBaselineY + 30}
+									y={wordBaselineY - 102}
 									textAnchor="middle"
-									fontSize="10"
+									fontSize="11"
 									fontWeight="600"
-									fill="var(--teal, #008080)"
-									className="noorbayan-pos-text"
+									fill="var(--ink, #374151)"
 								>
-									{tok.pos}
+									{tok.relAr ? `محذوف (${tok.relAr})` : "محذوف"}
 								</text>
 							</g>
 						);
 					})}
 
-					{/* 4. Tiered Constituent Brackets (Below Words) */}
 					{constituents.map((c) => {
-						const x1 = getTokenX(c.startIdx) + tokenWidth / 2 - 8;
-						const x2 = getTokenX(c.endIdx) - tokenWidth / 2 + 8;
-						const left = Math.min(x1, x2);
-						const right = Math.max(x1, x2);
-						const bracketY = wordBaselineY + 60 + c.tier * bracketTierHeight;
-						const cornerSize = 7;
-						const bracketPath = `M ${left} ${bracketY - cornerSize} L ${left} ${bracketY} L ${right} ${bracketY} L ${right} ${bracketY - cornerSize}`;
-						const midX = (left + right) / 2;
-						const pillWidth = Math.min(130, Math.max(80, right - left - 20));
-
+						const { bracketY, midX, pillWidth } = constituentGeom(
+							c,
+							getTokenX,
+							tokenWidth,
+							wordBaselineY,
+							bracketTierHeight,
+						);
 						return (
 							<g key={c.key} className="noorbayan-constituent-group">
-								<path
-									d={bracketPath}
-									fill="none"
-									stroke="var(--teal, #008080)"
-									strokeWidth="1.5"
-									strokeLinecap="round"
-								/>
 								<rect
 									x={midX - pillWidth / 2}
 									y={bracketY - 10}
@@ -485,6 +512,35 @@ interface DistinctConst {
 	endIdx: number;
 	span: number;
 	tier: number;
+}
+
+function arcIsHighlighted(
+	arc: Arc,
+	hoveredTokenId: string | null,
+	flatTokens: FlatToken[],
+): boolean {
+	return (
+		hoveredTokenId !== null &&
+		(flatTokens[arc.depIdx]?.id === hoveredTokenId ||
+			(arc.headIdx !== -1 && flatTokens[arc.headIdx]?.id === hoveredTokenId))
+	);
+}
+
+function constituentGeom(
+	c: DistinctConst,
+	getTokenX: (tokenIndex: number) => number,
+	tokenWidth: number,
+	wordBaselineY: number,
+	bracketTierHeight: number,
+) {
+	const x1 = getTokenX(c.startIdx) + tokenWidth / 2 - 8;
+	const x2 = getTokenX(c.endIdx) - tokenWidth / 2 + 8;
+	const left = Math.min(x1, x2);
+	const right = Math.max(x1, x2);
+	const bracketY = wordBaselineY + 60 + c.tier * bracketTierHeight;
+	const midX = (left + right) / 2;
+	const pillWidth = Math.min(130, Math.max(80, right - left - 20));
+	return { left, right, bracketY, midX, pillWidth };
 }
 
 function extractDistinctConstituents(flatTokens: FlatToken[]): DistinctConst[] {

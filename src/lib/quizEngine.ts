@@ -531,7 +531,7 @@ function extractIrabMeta(
 	}
 
 	const m = stemClauseBare.match(/^(.*?)علامة\s+(رفعه|نصبه|جره)\s+(.+)$/);
-	if (!m || !m[1] || !m[2] || !m[3]) return null;
+	if (!m?.[1] || !m[2] || !m[3]) return null;
 
 	const beforeAlama = m[1].trim();
 	const caseWord = m[2];
@@ -1178,7 +1178,7 @@ function seededShuffle<T>(items: T[], seedStr: string): T[] {
 
 function extractParen(text: string): string {
 	const m = text.match(PAREN_RE);
-	return m && m[1] ? m[1].trim() : "";
+	return m?.[1] ? m[1].trim() : "";
 }
 
 interface ParsedSarfBlock {
