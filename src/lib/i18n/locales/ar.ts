@@ -19,6 +19,7 @@ export const ar: Translations = {
 		examplesNav: "أمثلة",
 		quizNav: "اختبار",
 		rhetoricNav: "البلاغة",
+		munasabatNav: "المناسبات",
 		previous: "السابق",
 		next: "التالي",
 		search: "بحث",
@@ -81,6 +82,17 @@ export const ar: Translations = {
 		quizSection: "الاختبار",
 		quizDiacriticsLabel: "إخفاء التشكيل في الاختبارات",
 		quizDiacriticsDescription: "عرض آيات القرآن بدون حركات لتحدٍّ أصعب.",
+		readerSection: "طبقات القارئ",
+		readerSectionHint:
+			"أخفِ الطبقات التي لا تدرسها. الطبقات المعطّلة تُزال من شاشة الآية بالكامل.",
+		readerLayers: {
+			meaning: "تفسير الآية",
+			irab: "إعراب الجملة",
+			nahw: "النحو وشجرة الإعراب",
+			mutashabih: "المتشابه اللفظي",
+			asbab: "أسباب النزول",
+			balagha: "البلاغة الكلاسيكية",
+		},
 		sourcesLink: "مصادر البيانات",
 		sourcesDescription: "استكشف مصادر البيانات اللغوية وتراخيصها.",
 		installApp: "تثبيت التطبيق",
@@ -111,6 +123,12 @@ export const ar: Translations = {
 		revelationOrder: (seq: number) => `ترتيب النزول #${formatNum(seq, "ar")}`,
 		asbabBadge: (count: number) => `سبب النزول (${formatNum(count, "ar")})`,
 		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
+		asbabSectionTitle: "أسباب النزول",
+		balaghaBadge: "البلاغة الكلاسيكية",
+		balaghaSectionTitle: "البلاغة الكلاسيكية",
+		balaghaStudioLink: "فتح في مختبر البلاغة",
+		balaghaBranchLabel: "الفرع",
+		balaghaDeviceLabel: "الفن",
 		nahwTabTitle: "النحو وشجرة الإعراب",
 		treebankNoorBayan: "شجرة نور البيان القرآنية",
 		mutashabihBadge: (count: number) =>
@@ -186,9 +204,18 @@ export const ar: Translations = {
 		pageTitle: "تصفح القرآن الكريم",
 		metaLinksLabel: "طبقات السورة",
 		structureLink: "البنية",
+		munasabatLink: "المناسبات",
 		balaghaLink: "البلاغة",
 		balaghaLinkTitle: (count: number) =>
 			`${formatNum(count, "ar")} تحليل بلاغي في استوديو البلاغة`,
+	},
+	munasabat: {
+		pageTitle: "مختبر المناسبات وبنية السور",
+		lead: "استكشف التركيب الدائري لكل سورة والروابط الكلاسيكية التي تصلها بما قبلها وبعدها.",
+		surahPickerLabel: "السورة",
+		emptyState: "لا تتوفر بيانات بنية لهذه السورة.",
+		openInReader: (sura: number, verse: number) =>
+			`فتح ${formatNum(sura, "ar")}:${formatNum(verse, "ar")} في القارئ ↗`,
 	},
 	examples: {
 		pageTitle: "استكشف الأنماط النحوية",

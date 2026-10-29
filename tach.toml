@@ -1,7 +1,37 @@
 exact = true
 forbid_circular_dependencies = true
 source_roots = ["scripts"]
+exclude = ["**/check-quiz-mobile-scroll.py", "**/__pycache__"]
 
 [[modules]]
-path = "."
+path = "paths"
+depends_on = []
+utility = true
+
+[[modules]]
+path = "build_data"
+depends_on = []
+
+[[modules]]
+path = "build_mutashabih"
+depends_on = []
+
+[[modules]]
+path = "build_qurandb_enrichment"
+depends_on = []
+
+[[modules]]
+path = "build_rhetoric_dataset"
+depends_on = []
+
+[[modules]]
+path = "build_structure"
+depends_on = []
+
+[[modules]]
+path = "build_syntax"
+depends_on = []
+
+[[modules]]
+path = "enrich_arabic_mokhtasar"
 depends_on = []

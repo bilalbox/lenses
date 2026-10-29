@@ -64,11 +64,11 @@ export function SurahIndex({ manifest, onOpen }: Props) {
 									>
 										{hasStructure ? (
 											<a
-												href={`#/${unit.n}/1?tab=structure`}
+												href={`#/munasabat/${unit.n}`}
 												className="surah-meta-link"
-												title={t.verse.structureSectionTitle}
+												title={t.munasabat.pageTitle}
 											>
-												{t.surahs.structureLink}
+												{t.surahs.munasabatLink}
 											</a>
 										) : null}
 										{hasStructure && hasBalagha ? (

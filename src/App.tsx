@@ -9,7 +9,7 @@ import { SettingsModal } from "./components/SettingsModal";
 import { VerseScreen } from "./components/VerseScreen";
 import { loadManifest, loadVerses } from "./lib/api";
 import { stripDiacritics } from "./lib/arabic";
-import { getOpeningVerse, openingPath, rememberVerse } from "./lib/home";
+import { openingPath, rememberVerse } from "./lib/home";
 import { normalizeDigits } from "./lib/i18n/format";
 import { useI18n } from "./lib/i18n/I18nContext";
 import {
@@ -17,6 +17,13 @@ import {
 	startLibrary,
 	watchLibrary,
 } from "./lib/library";
+import {
+	loadReaderPrefs,
+	type ReaderLayerKey,
+	type ReaderPrefs,
+	saveReaderPrefs,
+} from "./lib/readerPrefs";
+import { parseRoute } from "./lib/route";
 import { type ExampleQuery, searchVerses, type VerseHit } from "./lib/search";
 import type { Manifest, Route } from "./lib/types";
 
@@ -39,51 +46,13 @@ const RhetoricScreen = lazy(() =>
 		default: m.RhetoricScreen,
 	})),
 );
+const MunasabatScreen = lazy(() =>
+	import("./components/MunasabatScreen").then((m) => ({
+		default: m.MunasabatScreen,
+	})),
+);
 
 const QUIZ_HIDE_DIACRITICS_KEY = "lenses-quiz-hide-diacritics";
-
-function parseRoute(hash: string): Route {
-	const fallback = getOpeningVerse();
-	const queryIndex = hash.indexOf("?");
-	const queryString = queryIndex >= 0 ? hash.slice(queryIndex + 1) : "";
-	const cleanHash =
-		(queryIndex >= 0 ? hash.slice(0, queryIndex) : hash).replace(/^#/, "") ||
-		openingPath();
-	const parts = cleanHash.split("/").filter(Boolean);
-	const params = new URLSearchParams(queryString);
-	const tab =
-		params.get("tab") ??
-		(params.has("mutashabih")
-			? "mutashabih"
-			: params.has("structure")
-				? "structure"
-				: undefined);
-	const target = params.get("target") ?? params.get("counterpart") ?? undefined;
-
-	if (parts[0] === "quiz") return { page: "quiz", ...fallback, tab, target };
-	if (parts[0] === "search")
-		return { page: "search", ...fallback, tab, target };
-	if (parts[0] === "surahs")
-		return { page: "surahs", ...fallback, tab, target };
-	if (parts[0] === "sources")
-		return { page: "sources", ...fallback, tab, target };
-	if (parts[0] === "rhetoric" || parts[0] === "balagha") {
-		const sura = parts[1] ? Number(parts[1]) : undefined;
-		const verse = parts[2] ? Number(parts[2]) : undefined;
-		return {
-			page: "rhetoric",
-			sura: sura || fallback.sura,
-			verse: verse || fallback.verse,
-			tab,
-			target,
-		};
-	}
-	const sura = Number(parts[0]);
-	const verse = Number(parts[1]);
-	const word = parts[2] ? Number(parts[2]) : undefined;
-	if (!sura || !verse) return { page: "verse", ...fallback, tab, target };
-	return { page: "verse", sura, verse, word, tab, target };
-}
 
 function highlight(text: string, needle: string) {
 	if (needle.length < 2) return text;
@@ -108,6 +77,92 @@ function go(path: string) {
 	if (location.hash !== `#${path}`) location.hash = path;
 }
 
+function AppPages({
+	manifest,
+	route,
+	readerPrefs,
+	seed,
+	quizHideDiacritics,
+	openSearch,
+}: {
+	manifest: Manifest;
+	route: Route;
+	readerPrefs: ReaderPrefs;
+	seed?: Partial<ExampleQuery>;
+	quizHideDiacritics: boolean;
+	openSearch: (next?: Partial<ExampleQuery>) => void;
+}) {
+	if (route.page === "verse") {
+		return (
+			<VerseScreen
+				manifest={manifest}
+				sura={route.sura}
+				verseNumber={route.verse}
+				wordNumber={route.word}
+				tab={route.tab}
+				target={route.target}
+				readerPrefs={readerPrefs}
+				onNavigate={(sura, verse, word, params) => {
+					const q = params ? `?${new URLSearchParams(params).toString()}` : "";
+					go(word ? `/${sura}/${verse}/${word}${q}` : `/${sura}/${verse}${q}`);
+				}}
+				onSearchRoot={(root) => openSearch({ root })}
+				onSearchLemma={(lemma) => openSearch({ lemma })}
+			/>
+		);
+	}
+	if (route.page === "search") {
+		return (
+			<ExampleSearch
+				initial={seed}
+				onOpen={(sura, verse, word) => go(`/${sura}/${verse}/${word}`)}
+			/>
+		);
+	}
+	if (route.page === "surahs") {
+		return (
+			<SurahIndex manifest={manifest} onOpen={(sura) => go(`/${sura}/1`)} />
+		);
+	}
+	if (route.page === "sources") {
+		return <SourcesPage manifest={manifest} />;
+	}
+	if (route.page === "quiz") {
+		return (
+			<QuizScreen
+				manifest={manifest}
+				onOpenInReader={(sura, verse, word) =>
+					go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)
+				}
+				onOpenSearch={openSearch}
+				hideDiacritics={quizHideDiacritics}
+			/>
+		);
+	}
+	if (route.page === "rhetoric") {
+		return (
+			<RhetoricScreen
+				targetSura={route.sura}
+				targetVerse={route.verse}
+				onOpenVerse={(sura, verse, word) =>
+					go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)
+				}
+			/>
+		);
+	}
+	if (route.page === "munasabat") {
+		return (
+			<MunasabatScreen
+				manifest={manifest}
+				targetSura={route.sura}
+				onOpenVerse={(sura, verse) => go(`/${sura}/${verse}`)}
+				onSelectSurah={(sura) => go(`/munasabat/${sura}`)}
+			/>
+		);
+	}
+	return null;
+}
+
 export function App() {
 	const { t, dir } = useI18n();
 	const [route, setRoute] = useState(() => parseRoute(location.hash));
@@ -118,6 +173,9 @@ export function App() {
 	);
 	const [quizHideDiacritics, setQuizHideDiacritics] = useState(
 		() => localStorage.getItem(QUIZ_HIDE_DIACRITICS_KEY) === "1",
+	);
+	const [readerPrefs, setReaderPrefs] = useState<ReaderPrefs>(() =>
+		loadReaderPrefs(),
 	);
 	const [query, setQuery] = useState("");
 	const [hits, setHits] = useState<VerseHit[]>([]);
@@ -216,6 +274,12 @@ export function App() {
 		};
 	}, [query]);
 
+	useEffect(() => {
+		if (route.page === "verse" && route.tab === "structure") {
+			go(`/munasabat/${route.sura}`);
+		}
+	}, [route.page, route.tab, route.sura]);
+
 	const selectTheme = (next: "light" | "dark") => {
 		document.documentElement.dataset.theme = next;
 		localStorage.setItem("lenses-theme", next);
@@ -232,6 +296,14 @@ export function App() {
 	const toggleQuizHideDiacritics = (next: boolean) => {
 		setQuizHideDiacritics(next);
 		localStorage.setItem(QUIZ_HIDE_DIACRITICS_KEY, next ? "1" : "0");
+	};
+
+	const toggleReaderLayer = (key: ReaderLayerKey, next: boolean) => {
+		setReaderPrefs((prev) => {
+			const updated = { ...prev, [key]: next };
+			saveReaderPrefs(updated);
+			return updated;
+		});
 	};
 
 	const stepVerse = (delta: number) => {
@@ -257,7 +329,7 @@ export function App() {
 		go(`/${hit.sura}/${hit.verse}`);
 	};
 
-	const openSearch = (next: Partial<ExampleQuery>) => {
+	const openSearch = (next: Partial<ExampleQuery> = {}) => {
 		setSeed(next);
 		go("/search");
 		setSearchOpen(false);
@@ -344,6 +416,12 @@ export function App() {
 					>
 						{t.common.rhetoricNav}
 					</a>
+					<a
+						href="#/munasabat"
+						aria-current={route.page === "munasabat" ? "page" : undefined}
+					>
+						{t.common.munasabatNav}
+					</a>
 					<button
 						type="button"
 						className="icon-button settings-toggle-button"
@@ -379,65 +457,19 @@ export function App() {
 						</div>
 					}
 				>
-					{manifest && route.page === "verse" ? (
-						<VerseScreen
+					{manifest ? (
+						<AppPages
 							manifest={manifest}
-							sura={route.sura}
-							verseNumber={route.verse}
-							wordNumber={route.word}
-							tab={route.tab}
-							target={route.target}
-							onNavigate={(sura, verse, word, params) => {
-								const q = params
-									? `?${new URLSearchParams(params).toString()}`
-									: "";
-								go(
-									word
-										? `/${sura}/${verse}/${word}${q}`
-										: `/${sura}/${verse}${q}`,
-								);
-							}}
-							onSearchRoot={(root) => openSearch({ root })}
-							onSearchLemma={(lemma) => openSearch({ lemma })}
-						/>
-					) : null}
-					{manifest && route.page === "search" ? (
-						<ExampleSearch
-							initial={seed}
-							onOpen={(sura, verse, word) => go(`/${sura}/${verse}/${word}`)}
-						/>
-					) : null}
-					{manifest && route.page === "surahs" ? (
-						<SurahIndex
-							manifest={manifest}
-							onOpen={(sura) => go(`/${sura}/1`)}
-						/>
-					) : null}
-					{manifest && route.page === "sources" ? (
-						<SourcesPage manifest={manifest} />
-					) : null}
-					{manifest && route.page === "quiz" ? (
-						<QuizScreen
-							manifest={manifest}
-							onOpenInReader={(sura, verse, word) =>
-								go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)
-							}
-							onOpenSearch={openSearch}
-							hideDiacritics={quizHideDiacritics}
-						/>
-					) : null}
-					{manifest && route.page === "rhetoric" ? (
-						<RhetoricScreen
-							targetSura={route.sura}
-							targetVerse={route.verse}
-							onOpenVerse={(sura, verse, word) =>
-								go(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`)
-							}
+							route={route}
+							readerPrefs={readerPrefs}
+							seed={seed}
+							quizHideDiacritics={quizHideDiacritics}
+							openSearch={openSearch}
 						/>
 					) : null}
 				</Suspense>
 			</main>
-			{route.page !== "quiz" ? (
+			{route.page !== "quiz" && route.page !== "munasabat" ? (
 				<nav className="dock" aria-label={t.common.verse}>
 					<button type="button" onClick={() => stepVerse(-1)}>
 						{dir === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -493,6 +525,8 @@ export function App() {
 				onSelectTheme={selectTheme}
 				quizHideDiacritics={quizHideDiacritics}
 				onToggleQuizHideDiacritics={toggleQuizHideDiacritics}
+				readerPrefs={readerPrefs}
+				onToggleReaderLayer={toggleReaderLayer}
 				canInstall={Boolean(install)}
 				onInstall={() => {
 					if (install) {

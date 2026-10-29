@@ -14,6 +14,7 @@ export const en: Translations = {
 		examplesNav: "Examples",
 		quizNav: "Quiz",
 		rhetoricNav: "Rhetoric",
+		munasabatNav: "Munāsabāt",
 		previous: "Previous",
 		next: "Next",
 		search: "Search",
@@ -80,6 +81,17 @@ export const en: Translations = {
 		quizDiacriticsLabel: "Hide diacritics in quizzes",
 		quizDiacriticsDescription:
 			"Show Quran verses without harakat for a harder challenge.",
+		readerSection: "Reader layers",
+		readerSectionHint:
+			"Hide layers you are not studying. Disabled layers leave the verse reader entirely.",
+		readerLayers: {
+			meaning: "Verse meaning",
+			irab: "Sentence syntax (iʿrāb)",
+			nahw: "Nahw & syntax tree",
+			mutashabih: "Verbal similarities",
+			asbab: "Causes of revelation",
+			balagha: "Classical balāghah",
+		},
 		sourcesLink: "Data Sources",
 		sourcesDescription: "Explore corpus data sources and licenses.",
 		installApp: "Install App",
@@ -111,6 +123,12 @@ export const en: Translations = {
 		asbabBadge: (count: number) =>
 			`Cause of Revelation (${formatNum(count, "en")})`,
 		asbabDrawerTitle: "Causes of Revelation (Asbāb al-Nuzūl)",
+		asbabSectionTitle: "Asbāb al-Nuzūl (Causes of Revelation)",
+		balaghaBadge: "Classical Balāghah",
+		balaghaSectionTitle: "Classical Balāghah",
+		balaghaStudioLink: "Open in Balāghah Studio",
+		balaghaBranchLabel: "Branch",
+		balaghaDeviceLabel: "Figure",
 		nahwTabTitle: "Nahw & Syntax Tree",
 		treebankNoorBayan: "NoorBayan Quranic Treebank",
 		mutashabihBadge: (count: number) =>
@@ -188,9 +206,18 @@ export const en: Translations = {
 		pageTitle: "Browse the Quran",
 		metaLinksLabel: "Surah layers",
 		structureLink: "Structure",
+		munasabatLink: "Munāsabāt",
 		balaghaLink: "Balāghah",
 		balaghaLinkTitle: (count: number) =>
 			`${formatNum(count, "en")} rhetorical analyses in Balāghah Studio`,
+	},
+	munasabat: {
+		pageTitle: "Munāsabāt Studio",
+		lead: "Explore each surah’s ring composition and the classical transitions that link it to its neighbors.",
+		surahPickerLabel: "Surah",
+		emptyState: "No structure data for this surah.",
+		openInReader: (sura: number, verse: number) =>
+			`Open ${formatNum(sura, "en")}:${formatNum(verse, "en")} in reader ↗`,
 	},
 	examples: {
 		pageTitle: "Find the pattern",

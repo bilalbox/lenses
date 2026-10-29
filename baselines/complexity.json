@@ -2,11 +2,6 @@
 	"version": 1,
 	"findings": [
 		{
-			"id": "src/App.tsx|App",
-			"score": 33,
-			"note": "Added via --update; replace with owning issue note."
-		},
-		{
 			"id": "src/components/QuizScreen.tsx|(anonymous)|1139",
 			"score": 50,
 			"note": "Added via --update; replace with owning issue note."

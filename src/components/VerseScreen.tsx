@@ -9,30 +9,26 @@ import {
 	loadAsbab,
 	loadSurah,
 	loadSurahMutashabih,
-	loadSurahStructure,
 	loadSurahSyntax,
 	loadVerseTranslation,
 } from "../lib/api";
-import { formatIrabText } from "../lib/formatIrab";
 import { normalizeDigits } from "../lib/i18n/format";
 import { useI18n } from "../lib/i18n/I18nContext";
+import type { ReaderPrefs } from "../lib/readerPrefs";
 import { useRhetoric } from "../lib/rhetoric";
 import type {
 	AsbabData,
 	Manifest,
 	SurahFile,
 	SurahMutashabihFile,
-	SurahStructureFile,
 	SurahSyntaxFile,
 	SyntaxGraph,
 	Verse,
 	VerseSyntax,
 } from "../lib/types";
-import { AsbabDrawer } from "./AsbabDrawer";
 import { DependencyTree } from "./DependencyTree";
-import { MutashabihSection } from "./MutashabihSection";
 import { NoorBayanTree } from "./NoorBayanTree";
-import { StructureSection } from "./structure/StructureSection";
+import { VerseSecondaryLayers } from "./VerseSecondaryLayers";
 import { WordSheet } from "./WordSheet";
 
 interface Props {
@@ -42,6 +38,7 @@ interface Props {
 	wordNumber?: number;
 	tab?: string;
 	target?: string;
+	readerPrefs: ReaderPrefs;
 	onNavigate: (
 		sura: number,
 		verse: number,
@@ -59,6 +56,7 @@ export function VerseScreen({
 	wordNumber,
 	tab,
 	target,
+	readerPrefs,
 	onNavigate,
 	onSearchRoot,
 	onSearchLemma,
@@ -198,9 +196,9 @@ export function VerseScreen({
 							goal={unit.goal || file?.goal}
 							revSeq={unit.revSeq}
 							surahClass={unit.surahClass}
-							structureBlockCount={unit.structure ?? 0}
 							tab={tab}
 							target={target}
+							readerPrefs={readerPrefs}
 							onNavigate={onNavigate}
 						/>
 					</div>
@@ -235,9 +233,9 @@ function VerseBody({
 	goal,
 	revSeq,
 	surahClass,
-	structureBlockCount,
 	tab,
 	target,
+	readerPrefs,
 	onNavigate,
 }: {
 	manifest: Manifest;
@@ -253,9 +251,9 @@ function VerseBody({
 	goal?: string;
 	revSeq?: number;
 	surahClass?: string;
-	structureBlockCount: number;
 	tab?: string;
 	target?: string;
+	readerPrefs: ReaderPrefs;
 	onNavigate?: (
 		sura: number,
 		verse: number,
@@ -269,30 +267,25 @@ function VerseBody({
 	const narrow = useNarrow();
 	const [clauseIndex, setClauseIndex] = useState(0);
 	const [clauseEdgeHint, setClauseEdgeHint] = useState("");
-	const [irabOpen, setIrabOpen] = useState(locale === "ar");
+	const [irabOpen, setIrabOpen] = useState(false);
 
 	const [asbabData, setAsbabData] = useState<AsbabData | null>(null);
 	const [syntaxFile, setSyntaxFile] = useState<SurahSyntaxFile | null>(null);
 	const [mutashabihFile, setMutashabihFile] =
 		useState<SurahMutashabihFile | null>(null);
-	const [structureFile, setStructureFile] = useState<SurahStructureFile | null>(
-		null,
+	const [asbabOpen, setAsbabOpen] = useState(
+		() => tab === "asbab" || window.location.search.includes("asbab=1"),
 	);
-	const [structureLoaded, setStructureLoaded] = useState(false);
-	const [asbabOpen, setAsbabOpen] = useState(false);
 	const [mutashabihOpen, setMutashabihOpen] = useState(
 		() => tab === "mutashabih",
 	);
-	const [structureOpen, setStructureOpen] = useState(() => tab === "structure");
+	const [balaghaOpen, setBalaghaOpen] = useState(() => tab === "balagha");
 	const [syntaxClauseIndex, setSyntaxClauseIndex] = useState(0);
 
 	useEffect(() => {
-		if (tab === "mutashabih") {
-			setMutashabihOpen(true);
-		}
-		if (tab === "structure") {
-			setStructureOpen(true);
-		}
+		if (tab === "mutashabih") setMutashabihOpen(true);
+		if (tab === "asbab") setAsbabOpen(true);
+		if (tab === "balagha") setBalaghaOpen(true);
 	}, [tab]);
 
 	useEffect(() => {
@@ -319,35 +312,11 @@ function VerseBody({
 
 	useEffect(() => {
 		let cancelled = false;
-		setStructureLoaded(false);
-		loadSurahStructure(sura)
-			.then((data) => {
-				if (!cancelled) {
-					setStructureFile(data);
-					setStructureLoaded(true);
-					if (tab === "structure") {
-						setStructureOpen(true);
-					}
-				}
-			})
-			.catch(() => {
-				if (!cancelled) {
-					setStructureFile(null);
-					setStructureLoaded(true);
-				}
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [sura, tab]);
-
-	useEffect(() => {
-		let cancelled = false;
 		loadAsbab()
 			.then((data) => {
 				if (!cancelled) {
 					setAsbabData(data);
-					if (window.location.search.includes("asbab=1")) {
+					if (tab === "asbab" || window.location.search.includes("asbab=1")) {
 						setAsbabOpen(true);
 					}
 				}
@@ -356,7 +325,7 @@ function VerseBody({
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [tab]);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -388,36 +357,22 @@ function VerseBody({
 
 	const mutashabihMatches = verseMutashabih?.matches ?? [];
 
-	const handleOpenMutashabih = useCallback(() => {
-		setMutashabihOpen((open) => {
-			const next = !open;
-			if (next) {
-				window.setTimeout(() => {
-					document
-						.querySelector(".mutashabih-block, .mutashabih-empty-card")
-						?.scrollIntoView({ behavior: "smooth", block: "start" });
-				}, 50);
-			}
-			return next;
-		});
+	const scrollToLayer = useCallback((selector: string) => {
+		window.setTimeout(() => {
+			document
+				.querySelector(selector)
+				?.scrollIntoView({ behavior: "smooth", block: "start" });
+		}, 50);
 	}, []);
 
-	const handleOpenStructure = useCallback(() => {
-		setStructureOpen((open) => {
+	const handleOpenAsbab = useCallback(() => {
+		setAsbabOpen((open) => {
 			const next = !open;
-			if (next) {
-				window.setTimeout(() => {
-					document
-						.querySelector(".structure-block, .structure-empty-card")
-						?.scrollIntoView({ behavior: "smooth", block: "start" });
-				}, 50);
-			}
+			if (next) scrollToLayer(".asbab-block");
 			return next;
 		});
-	}, []);
+	}, [scrollToLayer]);
 
-	const structureBlockTotal =
-		structureFile?.blocks.length ?? structureBlockCount;
 	const membership = useMemo(
 		() => clauseMembership(graphs, sura, verse.v),
 		[graphs, sura, verse.v],
@@ -430,9 +385,12 @@ function VerseBody({
 		if (sura || verse.v) {
 			setClauseIndex(0);
 			setClauseEdgeHint("");
-			setIrabOpen(locale === "ar");
+			setIrabOpen(false);
+			setMutashabihOpen(tab === "mutashabih");
+			setAsbabOpen(tab === "asbab");
+			setBalaghaOpen(tab === "balagha");
 		}
-	}, [sura, verse.v, locale]);
+	}, [sura, verse.v, tab]);
 	useEffect(() => {
 		if (!clauseEdgeHint) return;
 		const timer = window.setTimeout(() => setClauseEdgeHint(""), 2200);
@@ -459,11 +417,20 @@ function VerseBody({
 		openClause(next);
 	};
 	const { entries: rhetoricEntries } = useRhetoric();
-	const rhetoricEntry = useMemo(
+	const classicalBalagha = useMemo(
+		() =>
+			rhetoricEntries.find(
+				(e) =>
+					e.dataset === "classical-balagha" &&
+					e.sura === sura &&
+					e.verse === verse.v,
+			),
+		[rhetoricEntries, sura, verse.v],
+	);
+	const rhetoricForTranslation = useMemo(
 		() => rhetoricEntries.find((e) => e.sura === sura && e.verse === verse.v),
 		[rhetoricEntries, sura, verse.v],
 	);
-	const hasBalagha = Boolean(rhetoricEntry);
 
 	const [fetchedTranslation, setFetchedTranslation] = useState<string>("");
 
@@ -475,8 +442,8 @@ function VerseBody({
 		const key = locale === "id" ? "indonesian_sabiq" : "english_saheeh";
 		const preloaded =
 			locale === "id"
-				? rhetoricEntry?.indonesianAyah
-				: rhetoricEntry?.englishAyah;
+				? rhetoricForTranslation?.indonesianAyah
+				: rhetoricForTranslation?.englishAyah;
 		if (preloaded) {
 			setFetchedTranslation(preloaded);
 			return;
@@ -488,7 +455,7 @@ function VerseBody({
 		return () => {
 			cancelled = true;
 		};
-	}, [locale, sura, verse.v, rhetoricEntry]);
+	}, [locale, sura, verse.v, rhetoricForTranslation]);
 	return (
 		<>
 			<VerseHeaderCard
@@ -500,15 +467,10 @@ function VerseBody({
 				goal={goal}
 				revSeq={revSeq}
 				surahClass={surahClass}
+				showAsbab={readerPrefs.asbab && verseAsbab.length > 0}
 				asbabCount={verseAsbab.length}
-				onOpenAsbab={() => setAsbabOpen(true)}
-				mutashabihCount={mutashabihMatches.length}
-				mutashabihOpen={mutashabihOpen}
-				onOpenMutashabih={handleOpenMutashabih}
-				structureCount={structureBlockTotal}
-				structureOpen={structureOpen}
-				onOpenStructure={handleOpenStructure}
-				hasBalagha={hasBalagha}
+				asbabOpen={asbabOpen}
+				onOpenAsbab={handleOpenAsbab}
 			/>
 			<p className="verse-line" dir="rtl" lang="ar">
 				{segments.map((segment) =>
@@ -553,258 +515,48 @@ function VerseBody({
 				</a>
 			</p>
 
-			{/* Combined Single Language Tab: Meaning & Commentary */}
-			<details className="mukhtasar verse-meaning-block" open>
-				<summary>
-					<span>{t.verse.verseMeaningTitle}</span>
-					<small>{t.verse.verseMeaningSub} · QuranEnc</small>
-				</summary>
-
-				{/* 1. English Mode: Saheeh International literal translation + English Al-Mukhtasar */}
-				{locale === "en" && (
-					<div className="verse-meaning-content">
-						{fetchedTranslation && (
-							<div className="verse-meaning-section is-translation">
-								<div className="verse-meaning-section-header">
-									<span className="verse-meaning-badge">
-										{t.verse.translationBadge}
-									</span>
-									<small className="source-line">
-										Saheeh International ·{" "}
-										<a
-											href="https://quranenc.com/en/browse/english_saheeh"
-											target="_blank"
-											rel="noreferrer"
-										>
-											quranenc.com
-										</a>
-									</small>
-								</div>
-								<p className="verse-meaning-text" lang="en" dir="ltr">
-									{fetchedTranslation}
-								</p>
-							</div>
-						)}
-
-						{verse.en && (
-							<div className="verse-meaning-section is-tafsir">
-								<div className="verse-meaning-section-header">
-									<span className="verse-meaning-badge">
-										{t.verse.tafsirBadge}
-									</span>
-									<small className="source-line">
-										Tafsir Center ·{" "}
-										<a
-											href="https://quranenc.com/en/browse/english_mokhtasar"
-											target="_blank"
-											rel="noreferrer"
-										>
-											quranenc.com
-										</a>
-									</small>
-								</div>
-								<p className="verse-meaning-prose" lang="en" dir="ltr">
-									{verse.en}
-								</p>
-								{verse.ef && (
-									<p className="mukhtasar-note" lang="en" dir="ltr">
-										{verse.ef}
-									</p>
-								)}
-							</div>
-						)}
-					</div>
-				)}
-
-				{/* 2. Indonesian Mode: PT. Sabiq direct translation + Indonesian Al-Mukhtasar */}
-				{locale === "id" && (
-					<div className="verse-meaning-content">
-						{fetchedTranslation && (
-							<div className="verse-meaning-section is-translation">
-								<div className="verse-meaning-section-header">
-									<span className="verse-meaning-badge">
-										{t.verse.translationBadge}
-									</span>
-									<small className="source-line">
-										Terjemahan Sabiq (PT. Sabiq) ·{" "}
-										<a
-											href="https://quranenc.com/en/browse/indonesian_sabiq"
-											target="_blank"
-											rel="noreferrer"
-										>
-											quranenc.com
-										</a>
-									</small>
-								</div>
-								<p className="verse-meaning-text" lang="id" dir="ltr">
-									{fetchedTranslation}
-								</p>
-							</div>
-						)}
-
-						{verse.mk && (
-							<div className="verse-meaning-section is-tafsir">
-								<div className="verse-meaning-section-header">
-									<span className="verse-meaning-badge">
-										{t.verse.tafsirBadge}
-									</span>
-									<small className="source-line">
-										Pusat Tafsir ·{" "}
-										<a
-											href="https://quranenc.com/en/browse/indonesian_mokhtasar"
-											target="_blank"
-											rel="noreferrer"
-										>
-											quranenc.com
-										</a>
-									</small>
-								</div>
-								<p className="verse-meaning-prose" lang="id" dir="ltr">
-									{verse.mk}
-								</p>
-								{verse.mf && (
-									<p className="mukhtasar-note" lang="id" dir="ltr">
-										{verse.mf}
-									</p>
-								)}
-							</div>
-						)}
-					</div>
-				)}
-
-				{/* 3. Arabic Mode: Just Arabic Al-Mukhtasar (no translation needed) */}
-				{locale === "ar" && (
-					<div className="verse-meaning-content">
-						{verse.ma && (
-							<div className="verse-meaning-section is-tafsir">
-								<p className="prose-ar" lang="ar" dir="rtl">
-									{verse.ma}
-								</p>
-								{verse.af && (
-									<p className="mukhtasar-note" lang="ar" dir="rtl">
-										{verse.af}
-									</p>
-								)}
-							</div>
-						)}
-					</div>
-				)}
-			</details>
-
-			{verse.ir ? (
-				<details
-					className="irab-block"
-					open={irabOpen}
-					onToggle={(event) => setIrabOpen(event.currentTarget.open)}
-				>
-					<summary>{t.verse.irabTitle}</summary>
-					<p className="source-line">
-						{t.common.tafsirCenterSource} ·{" "}
-						<a href="https://tafsir.net/" target="_blank" rel="noreferrer">
-							tafsir.net
-						</a>
-					</p>
-					<div className="prose irab-prose" dir="rtl" lang="ar">
-						{formatIrabText(verse.ir)}
-					</div>
-				</details>
-			) : null}
-
-			{mutashabihMatches.length > 0 ? (
-				<details
-					className="mutashabih-block"
-					open={mutashabihOpen}
-					onToggle={(event) => setMutashabihOpen(event.currentTarget.open)}
-				>
-					<summary>
-						<span className="mutashabih-summary-label">
-							<span aria-hidden="true">⚖️</span> {t.verse.mutashabihSectionTitle}
-						</span>
-						<span className="mutashabih-summary-count">
-							{t.verse.mutashabihBadge(mutashabihMatches.length)}
-						</span>
-					</summary>
-					<MutashabihSection
-						manifest={manifest}
-						sura={sura}
-						verseNumber={verse.v}
-						verseWords={verse.w}
-						matches={mutashabihMatches}
-						initialTarget={target}
-						onSelectWord={onSelect}
-						onNavigateAyah={(targetSura, targetAyah) =>
-							onNavigate?.(targetSura, targetAyah, 1, {
-								tab: "mutashabih",
-								target: `${sura}:${verse.v}`,
-							})
-						}
-					/>
-				</details>
-			) : tab === "mutashabih" || mutashabihOpen ? (
-				<div className="mutashabih-empty-card" role="status">
-					<p>{t.verse.mutashabihEmptyState}</p>
-				</div>
-			) : null}
-
-			{structureFile && structureFile.blocks.length > 0 ? (
-				<details
-					className="structure-block"
-					open={structureOpen}
-					onToggle={(event) => setStructureOpen(event.currentTarget.open)}
-				>
-					<summary>
-						<span className="structure-summary-label">
-							<span aria-hidden="true">◈</span> {t.verse.structureSectionTitle}
-						</span>
-						<span className="structure-summary-count">
-							{t.verse.structureBadge(structureFile.blocks.length)}
-						</span>
-					</summary>
-					<StructureSection
-						structure={structureFile}
-						currentVerse={verse.v}
-						onSelectBlock={(block) =>
-							onNavigate?.(sura, block.v[0], undefined, {
-								tab: "structure",
-							})
-						}
-						onJumpSurah={(targetSura) =>
-							onNavigate?.(targetSura, 1, undefined, { tab: "structure" })
-						}
-					/>
-				</details>
-			) : structureLoaded && (tab === "structure" || structureOpen) ? (
-				<div className="structure-empty-card" role="status">
-					<p>{t.verse.structureEmptyState}</p>
-				</div>
-			) : null}
-
-			<NahwSyntaxSection
-				verseSyntax={verseSyntax}
-				graphs={graphs}
-				narrow={narrow}
+			<VerseSecondaryLayers
+				manifest={manifest}
 				sura={sura}
 				verse={verse}
-				selected={selected}
-				selectedSegment={selectedSegment}
-				frozen={frozen}
-				clauseIndex={clauseIndex}
-				syntaxClauseIndex={syntaxClauseIndex}
-				onSelectClause={openClause}
-				onSelectSyntaxClause={setSyntaxClauseIndex}
-				onStepClause={stepClause}
-				onSelectWord={onSelect}
-				clauseEdgeHint={clauseEdgeHint}
-				onToggleIrab={() => setIrabOpen((value) => !value)}
-			/>
-
-			<AsbabDrawer
-				isOpen={asbabOpen}
-				onClose={() => setAsbabOpen(false)}
-				sura={sura}
-				verseNumber={verse.v}
-				surahName={unitName}
-				narrations={verseAsbab}
+				readerPrefs={readerPrefs}
+				fetchedTranslation={fetchedTranslation}
+				irabOpen={irabOpen}
+				onIrabToggle={setIrabOpen}
+				mutashabihMatches={mutashabihMatches}
+				mutashabihOpen={mutashabihOpen}
+				onMutashabihToggle={setMutashabihOpen}
+				tab={tab}
+				target={target}
+				onSelect={onSelect}
+				onNavigate={onNavigate}
+				verseAsbab={verseAsbab}
+				asbabOpen={asbabOpen}
+				onAsbabToggle={setAsbabOpen}
+				classicalBalagha={classicalBalagha}
+				balaghaOpen={balaghaOpen}
+				onBalaghaToggle={setBalaghaOpen}
+				nahwPanel={
+					readerPrefs.nahw ? (
+						<NahwSyntaxSection
+							verseSyntax={verseSyntax}
+							graphs={graphs}
+							narrow={narrow}
+							sura={sura}
+							verse={verse}
+							selected={selected}
+							selectedSegment={selectedSegment}
+							frozen={frozen}
+							clauseIndex={clauseIndex}
+							syntaxClauseIndex={syntaxClauseIndex}
+							onSelectClause={openClause}
+							onSelectSyntaxClause={setSyntaxClauseIndex}
+							onStepClause={stepClause}
+							onSelectWord={onSelect}
+							clauseEdgeHint={clauseEdgeHint}
+						/>
+					) : null
+				}
 			/>
 		</>
 	);
@@ -862,15 +614,10 @@ function VerseHeaderCard({
 	goal,
 	revSeq,
 	surahClass,
+	showAsbab,
 	asbabCount,
+	asbabOpen,
 	onOpenAsbab,
-	mutashabihCount,
-	mutashabihOpen,
-	onOpenMutashabih,
-	structureCount,
-	structureOpen,
-	onOpenStructure,
-	hasBalagha,
 }: {
 	unitName: string;
 	phonetic: string;
@@ -880,104 +627,49 @@ function VerseHeaderCard({
 	goal?: string;
 	revSeq?: number;
 	surahClass?: string;
+	showAsbab: boolean;
 	asbabCount: number;
+	asbabOpen: boolean;
 	onOpenAsbab: () => void;
-	mutashabihCount?: number;
-	mutashabihOpen?: boolean;
-	onOpenMutashabih?: () => void;
-	structureCount?: number;
-	structureOpen?: boolean;
-	onOpenStructure?: () => void;
-	hasBalagha: boolean;
 }) {
 	const { t, formatNumber } = useI18n();
+	const revelationLabel =
+		revelation === "Madinah" ? t.verse.madinan : t.verse.meccan;
+	const metaParts = [
+		revelationLabel,
+		`${formatNumber(sura)}:${formatNumber(verseNumber)}`,
+		phonetic,
+		goal ? t.verse.surahGoalLabel : null,
+		revSeq ? t.verse.revelationOrder(revSeq) : null,
+		surahClass || null,
+	].filter(Boolean);
+
 	return (
 		<header className="verse-title">
 			<div className="verse-title-header-row">
 				<h1>
 					<span lang="ar">{unitName}</span>
-					<small>
-						{revelation === "Madinah" ? t.verse.madinan : t.verse.meccan} ·{" "}
-						{formatNumber(sura)}:{formatNumber(verseNumber)} · {phonetic}
-					</small>
+					<small>{metaParts.join(" · ")}</small>
 				</h1>
-				<div className="verse-actions-header">
-					{asbabCount > 0 && (
+				{showAsbab ? (
+					<div className="verse-actions-header">
 						<button
 							type="button"
-							className="asbab-badge-button"
+							className={`asbab-badge-button${asbabOpen ? " is-active" : ""}`}
 							onClick={onOpenAsbab}
-							title={t.verse.asbabDrawerTitle}
+							title={t.verse.asbabSectionTitle}
 						>
-							<span className="asbab-badge-icon" aria-hidden="true">
-								📖
-							</span>
-							<span>{t.verse.asbabBadge(asbabCount)}</span>
+							{t.verse.asbabBadge(asbabCount)}
 						</button>
-					)}
-					{mutashabihCount !== undefined && mutashabihCount > 0 && (
-						<button
-							type="button"
-							className={`mutashabih-badge-button ${mutashabihOpen ? "is-active" : ""}`}
-							onClick={onOpenMutashabih}
-							title={t.verse.mutashabihSectionTitle}
-						>
-							<span className="mutashabih-badge-icon" aria-hidden="true">
-								⚖️
-							</span>
-							<span>{t.verse.mutashabihBadge(mutashabihCount)}</span>
-						</button>
-					)}
-					{structureCount !== undefined && structureCount > 0 && (
-						<button
-							type="button"
-							className={`structure-badge-button ${structureOpen ? "is-active" : ""}`}
-							onClick={onOpenStructure}
-							title={t.verse.structureSectionTitle}
-						>
-							<span className="structure-badge-icon" aria-hidden="true">
-								◈
-							</span>
-							<span>{t.verse.structureBadge(structureCount)}</span>
-						</button>
-					)}
-					{hasBalagha && (
-						<a
-							href={`#/rhetoric/${sura}/${verseNumber}`}
-							className="verse-balagha-deep-link"
-							title="Open Rhetoric Studio for this verse"
-						>
-							<span className="verse-balagha-icon">بلاغة</span> · Rhetoric
-							Studio ↗
-						</a>
-					)}
-				</div>
+					</div>
+				) : null}
 			</div>
 
-			{(goal || revSeq || surahClass) && (
-				<div className="surah-maqasid-card" dir="rtl">
-					<div className="maqasid-meta-row">
-						<span className="maqasid-label">{t.verse.surahGoalLabel}</span>
-						<div className="maqasid-tags">
-							{revSeq && (
-								<span className="maqasid-tag">
-									{t.verse.revelationOrder(revSeq)}
-								</span>
-							)}
-							{surahClass && (
-								<span className="maqasid-tag surah-class-tag">
-									{surahClass}
-								</span>
-							)}
-						</div>
-					</div>
-					{goal && (
-						<p className="maqasid-goal-text" lang="ar">
-							{goal}
-						</p>
-					)}
-				</div>
-			)}
+			{goal ? (
+				<p className="maqasid-goal-text" lang="ar" dir="rtl">
+					{goal}
+				</p>
+			) : null}
 		</header>
 	);
 }
@@ -998,7 +690,6 @@ function NahwSyntaxSection({
 	onStepClause,
 	onSelectWord,
 	clauseEdgeHint,
-	onToggleIrab,
 }: {
 	verseSyntax: VerseSyntax | null;
 	graphs: SyntaxGraph[];
@@ -1015,7 +706,6 @@ function NahwSyntaxSection({
 	onStepClause: (delta: number) => void;
 	onSelectWord: (word: number, segment?: number) => void;
 	clauseEdgeHint: string;
-	onToggleIrab: () => void;
 }) {
 	const { t, formatNumber } = useI18n();
 
@@ -1142,11 +832,6 @@ function NahwSyntaxSection({
 					>
 						{t.common.next}
 					</button>
-					{verse.ir ? (
-						<button type="button" onClick={onToggleIrab}>
-							{t.verse.classicalIrabShort}
-						</button>
-					) : null}
 				</div>
 			) : null}
 		</>

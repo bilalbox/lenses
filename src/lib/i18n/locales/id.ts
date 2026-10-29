@@ -13,6 +13,7 @@ export const id: Translations = {
 		examplesNav: "Contoh",
 		quizNav: "Kuis",
 		rhetoricNav: "Balaghah",
+		munasabatNav: "Munasabat",
 		previous: "Sebelumnya",
 		next: "Berikutnya",
 		search: "Cari",
@@ -80,6 +81,17 @@ export const id: Translations = {
 		quizDiacriticsLabel: "Sembunyikan harakat di kuis",
 		quizDiacriticsDescription:
 			"Tampilkan ayat Al-Qur'an tanpa harakat untuk tantangan yang lebih sulit.",
+		readerSection: "Lapisan pembaca",
+		readerSectionHint:
+			"Sembunyikan lapisan yang tidak Anda pelajari. Lapisan yang dimatikan hilang dari tampilan ayat.",
+		readerLayers: {
+			meaning: "Makna ayat",
+			irab: "Sintaksis kalimat (iʿrāb)",
+			nahw: "Nahwu & pohon sintaksis",
+			mutashabih: "Kesamaan verbal",
+			asbab: "Sebab turun",
+			balagha: "Balaghah klasik",
+		},
 		sourcesLink: "Sumber Data",
 		sourcesDescription: "Jelajahi sumber data korpus dan lisensi",
 		installApp: "Pasang Aplikasi",
@@ -110,6 +122,12 @@ export const id: Translations = {
 		revelationOrder: (seq: number) => `Urutan Turun #${formatNum(seq, "id")}`,
 		asbabBadge: (count: number) => `Sebab Turun (${formatNum(count, "id")})`,
 		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
+		asbabSectionTitle: "Asbabun Nuzul (Sebab Turunnya Ayat)",
+		balaghaBadge: "Balaghah Klasik",
+		balaghaSectionTitle: "Balaghah Klasik",
+		balaghaStudioLink: "Buka di Studio Balaghah",
+		balaghaBranchLabel: "Cabang",
+		balaghaDeviceLabel: "Tokoh retoris",
 		nahwTabTitle: "Nahwu & Pohon Sintaksis",
 		treebankNoorBayan: "Treebank Al-Qur'an NoorBayan",
 		mutashabihBadge: (count: number) =>
@@ -187,9 +205,18 @@ export const id: Translations = {
 		pageTitle: "Jelajahi Al-Qur'an",
 		metaLinksLabel: "Lapisan surah",
 		structureLink: "Struktur",
+		munasabatLink: "Munasabat",
 		balaghaLink: "Balaghah",
 		balaghaLinkTitle: (count: number) =>
 			`${formatNum(count, "id")} analisis retorika di Studio Balaghah`,
+	},
+	munasabat: {
+		pageTitle: "Studio Munasabat",
+		lead: "Jelajahi komposisi cincin setiap surah dan hubungan klasik yang menghubungkannya dengan tetangga.",
+		surahPickerLabel: "Surah",
+		emptyState: "Tidak ada data struktur untuk surah ini.",
+		openInReader: (sura: number, verse: number) =>
+			`Buka ${formatNum(sura, "id")}:${formatNum(verse, "id")} di pembaca ↗`,
 	},
 	examples: {
 		pageTitle: "Temukan pola",

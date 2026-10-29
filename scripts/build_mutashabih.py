@@ -26,7 +26,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+from paths import ROOT
+
 DEFAULT_CACHE_DIR = ROOT / "data" / "cache"
 DEFAULT_SURAH_DIR = ROOT / "public" / "data" / "quran" / "surah"
 DEFAULT_OUT_DIR = ROOT / "public" / "data" / "quran" / "mutashabih"

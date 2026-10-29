@@ -3,7 +3,6 @@ import { loadSurah } from "../lib/api";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type {
 	Manifest,
-	MutashabihCategory,
 	MutashabihMatch,
 	Word,
 	WordDiffStatus,
@@ -160,14 +159,6 @@ export function MutashabihSection({
 				</span>
 			</div>
 
-			<MutashabihArc
-				srcSura={sura}
-				targetSura={activeMatch.sura}
-				srcTitle={srcSurahTitle}
-				targetTitle={targetSurahTitle}
-				category={activeMatch.cat}
-			/>
-
 			<div className="mutashabih-comparison-grid">
 				<div className="mutashabih-card is-source">
 					<div className="mutashabih-card-header">
@@ -264,9 +255,6 @@ export function MutashabihSection({
 			{activeMatch.dabt && (
 				<div className="mutashabih-exegesis-card is-dabt">
 					<div className="exegesis-header">
-						<span className="exegesis-icon" aria-hidden="true">
-							📿
-						</span>
 						<h2 className="exegesis-heading">{t.verse.mutashabihDabtTitle}</h2>
 					</div>
 					<p className="exegesis-text" lang="ar" dir="rtl">
@@ -278,9 +266,6 @@ export function MutashabihSection({
 			{activeMatch.tawjih && (
 				<div className="mutashabih-exegesis-card is-tawjih">
 					<div className="exegesis-header">
-						<span className="exegesis-icon" aria-hidden="true">
-							💡
-						</span>
 						<h2 className="exegesis-heading">
 							{t.verse.mutashabihTawjihTitle}
 						</h2>
@@ -371,116 +356,4 @@ function VerseTokensBox({
 			})}
 		</div>
 	);
-}
-
-function MutashabihArc({
-	srcSura,
-	targetSura,
-	srcTitle,
-	targetTitle,
-	category,
-}: {
-	srcSura: number;
-	targetSura: number;
-	srcTitle: string;
-	targetTitle: string;
-	category: MutashabihCategory;
-}) {
-	const { t, formatNumber } = useI18n();
-	const width = 560;
-	const height = 56;
-	const baselineY = 46;
-
-	const x1 = Math.round(20 + ((srcSura - 1) / 113) * (width - 40));
-	const x2 = Math.round(20 + ((targetSura - 1) / 113) * (width - 40));
-
-	const leftX = Math.min(x1, x2);
-	const rightX = Math.max(x1, x2);
-	const midX = (leftX + rightX) / 2;
-	const span = Math.abs(x2 - x1);
-
-	// Arc height proportional to distance, capped
-	const arcPeak = Math.max(
-		8,
-		baselineY - Math.min(36, Math.max(16, span * 0.25)),
-	);
-
-	const pathD = `M ${x1} ${baselineY} C ${x1} ${arcPeak}, ${x2} ${arcPeak}, ${x2} ${baselineY}`;
-	const distance = Math.abs(targetSura - srcSura);
-
-	const categoryLabel = getCategoryLabel(category, t);
-
-	return (
-		<div className="mutashabih-arc-wrapper" aria-hidden="true">
-			<svg
-				viewBox={`0 0 ${width} ${height}`}
-				className="mutashabih-arc-svg"
-				preserveAspectRatio="xMidYMid meet"
-			>
-				<title>{`Cross-surah similarity arc: ${categoryLabel}`}</title>
-				{/* Mushaf Track Line */}
-				<line
-					x1={20}
-					y1={baselineY}
-					x2={width - 20}
-					y2={baselineY}
-					className="mushaf-track-line"
-				/>
-
-				{/* Connecting Bézier Arc */}
-				<path d={pathD} className="mutashabih-curve-path" />
-
-				{/* Source and Target Pins */}
-				<circle cx={x1} cy={baselineY} r={4.5} className="arc-pin is-source" />
-				<circle cx={x2} cy={baselineY} r={4.5} className="arc-pin is-target" />
-
-				{/* Category / Distance Pill above arc */}
-				<g transform={`translate(${midX}, ${Math.max(10, arcPeak - 2)})`}>
-					<text className="arc-center-label" textAnchor="middle">
-						{categoryLabel}
-						{distance > 0
-							? ` · ${t.verse.mutashabihSurahDistance(distance)}`
-							: ""}
-					</text>
-				</g>
-
-				<text
-					x={x1}
-					y={baselineY + 9}
-					className="arc-coord-label"
-					textAnchor="middle"
-				>
-					{`${srcTitle} (${formatNumber(srcSura)})`}
-				</text>
-				{srcSura !== targetSura && (
-					<text
-						x={x2}
-						y={baselineY + 9}
-						className="arc-coord-label"
-						textAnchor="middle"
-					>
-						{`${targetTitle} (${formatNumber(targetSura)})`}
-					</text>
-				)}
-			</svg>
-		</div>
-	);
-}
-
-function getCategoryLabel(
-	cat: MutashabihCategory,
-	t: ReturnType<typeof useI18n>["t"],
-): string {
-	switch (cat) {
-		case "identical":
-			return t.verse.mutashabihCategoryIdentical;
-		case "shared_opening":
-			return t.verse.mutashabihCategoryOpening;
-		case "shared_ending":
-			return t.verse.mutashabihCategoryEnding;
-		case "word_swap":
-			return t.verse.mutashabihCategorySwap;
-		default:
-			return t.verse.mutashabihCategoryPhrase;
-	}
 }

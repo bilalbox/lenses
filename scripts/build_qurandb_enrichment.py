@@ -23,7 +23,8 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+from paths import ROOT
+
 DEFAULT_DB_PATH = ROOT / "data" / "cache" / "quran.db"
 DEFAULT_DATA_DIR = ROOT / "public" / "data" / "quran"
 DEFAULT_NOTICES_PATH = ROOT / "public" / "data" / "NOTICES.txt"

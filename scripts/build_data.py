@@ -26,7 +26,8 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+from paths import ROOT
+
 CACHE = ROOT / "data" / "cache"
 OUT = ROOT / "public" / "data" / "quran"
 

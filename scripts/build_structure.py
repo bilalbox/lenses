@@ -20,7 +20,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+from paths import ROOT
+
 DEFAULT_CACHE_DIR = ROOT / "data" / "cache"
 DEFAULT_OUT_DIR = ROOT / "public" / "data" / "quran" / "structure"
 DEFAULT_TRANSITIONS_PATH = ROOT / "public" / "data" / "quran" / "transitions.json"

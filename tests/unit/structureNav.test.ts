@@ -109,7 +109,23 @@ describe("structureNav: i18n keys for structure / munāsabāt", () => {
 				`${code} munasabatJumpNext`,
 			).toContain("2");
 			expect(t.surahs.structureLink, `${code} structureLink`).toBeTruthy();
+			expect(t.surahs.munasabatLink, `${code} munasabatLink`).toBeTruthy();
 			expect(t.surahs.balaghaLink, `${code} balaghaLink`).toBeTruthy();
+			expect(t.common.munasabatNav, `${code} munasabatNav`).toBeTruthy();
+			expect(t.munasabat.pageTitle, `${code} munasabat.pageTitle`).toBeTruthy();
+			expect(
+				t.verse.asbabSectionTitle,
+				`${code} asbabSectionTitle`,
+			).toBeTruthy();
+			expect(
+				t.verse.balaghaSectionTitle,
+				`${code} balaghaSectionTitle`,
+			).toBeTruthy();
+			expect(t.settings.readerSection, `${code} readerSection`).toBeTruthy();
+			expect(
+				t.settings.readerLayers.balagha,
+				`${code} readerLayers.balagha`,
+			).toBeTruthy();
 		}
 	});
 });

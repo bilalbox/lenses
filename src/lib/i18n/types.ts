@@ -32,6 +32,7 @@ export interface Translations {
 		examplesNav: string;
 		quizNav: string;
 		rhetoricNav: string;
+		munasabatNav: string;
 		previous: string;
 		next: string;
 		search: string;
@@ -89,6 +90,16 @@ export interface Translations {
 		quizSection: string;
 		quizDiacriticsLabel: string;
 		quizDiacriticsDescription: string;
+		readerSection: string;
+		readerSectionHint: string;
+		readerLayers: {
+			meaning: string;
+			irab: string;
+			nahw: string;
+			mutashabih: string;
+			asbab: string;
+			balagha: string;
+		};
 		sourcesLink: string;
 		sourcesDescription: string;
 		installApp: string;
@@ -118,6 +129,12 @@ export interface Translations {
 		revelationOrder: (seq: number) => string;
 		asbabBadge: (count: number) => string;
 		asbabDrawerTitle: string;
+		asbabSectionTitle: string;
+		balaghaBadge: string;
+		balaghaSectionTitle: string;
+		balaghaStudioLink: string;
+		balaghaBranchLabel: string;
+		balaghaDeviceLabel: string;
 		nahwTabTitle: string;
 		treebankNoorBayan: string;
 		mutashabihBadge: (count: number) => string;
@@ -183,8 +200,16 @@ export interface Translations {
 		pageTitle: string;
 		metaLinksLabel: string;
 		structureLink: string;
+		munasabatLink: string;
 		balaghaLink: string;
 		balaghaLinkTitle: (count: number) => string;
+	};
+	munasabat: {
+		pageTitle: string;
+		lead: string;
+		surahPickerLabel: string;
+		emptyState: string;
+		openInReader: (sura: number, verse: number) => string;
 	};
 	examples: {
 		pageTitle: string;

@@ -8,7 +8,8 @@ import time
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+from paths import ROOT
+
 CACHE_DIR = ROOT / "data" / "cache" / "arabic_mokhtasar"
 SURAH_DIR = ROOT / "public" / "data" / "quran" / "surah"
 MANIFEST_FILE = ROOT / "public" / "data" / "quran" / "manifest.json"

@@ -1,6 +1,11 @@
 import { useRef } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { LOCALES, type Locale } from "../lib/i18n/types";
+import {
+	READER_LAYER_KEYS,
+	type ReaderLayerKey,
+	type ReaderPrefs,
+} from "../lib/readerPrefs";
 import { useModalLifecycle } from "../lib/useModal";
 import { BookIcon, CheckIcon, CloseIcon, MoonIcon, SunIcon } from "./Icons";
 
@@ -11,6 +16,8 @@ interface Props {
 	onSelectTheme: (next: "light" | "dark") => void;
 	quizHideDiacritics: boolean;
 	onToggleQuizHideDiacritics: (next: boolean) => void;
+	readerPrefs: ReaderPrefs;
+	onToggleReaderLayer: (key: ReaderLayerKey, next: boolean) => void;
 	canInstall: boolean;
 	onInstall: () => void;
 }
@@ -22,6 +29,8 @@ export function SettingsModal({
 	onSelectTheme,
 	quizHideDiacritics,
 	onToggleQuizHideDiacritics,
+	readerPrefs,
+	onToggleReaderLayer,
 	canInstall,
 	onInstall,
 }: Props) {
@@ -119,6 +128,38 @@ export function SettingsModal({
 							<MoonIcon />
 							<span>{t.settings.themeDark}</span>
 						</button>
+					</div>
+				</section>
+
+				<section className="settings-section">
+					<h3>{t.settings.readerSection}</h3>
+					<p className="settings-section-hint">
+						{t.settings.readerSectionHint}
+					</p>
+					<div className="settings-switch-stack">
+						{READER_LAYER_KEYS.map((key) => {
+							const on = readerPrefs[key];
+							return (
+								<button
+									key={key}
+									type="button"
+									role="switch"
+									aria-checked={on}
+									className="settings-switch-card"
+									onClick={() => onToggleReaderLayer(key, !on)}
+								>
+									<span className="settings-switch-content">
+										<strong>{t.settings.readerLayers[key]}</strong>
+									</span>
+									<span
+										className={`settings-switch${on ? " is-on" : ""}`}
+										aria-hidden="true"
+									>
+										<span className="settings-switch-thumb" />
+									</span>
+								</button>
+							);
+						})}
 					</div>
 				</section>
 
