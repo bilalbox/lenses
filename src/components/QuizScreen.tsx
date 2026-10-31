@@ -50,13 +50,14 @@ import {
 	type WizardStep,
 } from "../lib/quizSession";
 import type { ExampleQuery } from "../lib/search";
-import type { Manifest, MutashabihQuizFile } from "../lib/types";
+import type { Manifest, MutashabihQuizFile, Word } from "../lib/types";
 import { MutashabihQuiz } from "./MutashabihQuiz";
 import {
 	type QuizCrumb,
 	QuizLensSwitcher,
 	QuizMetaBar,
 	QuizProgressStrip,
+	QuizStepHead,
 } from "./QuizChrome";
 
 /** A quiz surah's morphology plus its treebank; a missing treebank only costs the iʿrāb questions. */
@@ -256,6 +257,7 @@ export function QuizScreen({
 		);
 
 	const isComplete = verdict !== null;
+	const irabTargetAr = irabQuestion ? quranText(irabQuestion.targetWord.a) : "";
 	const effectiveStep: WizardStep = isComplete ? maxStep(lens) : session.step;
 	const animDir = session.animDir;
 	const goToStep = (next: WizardStep) =>
@@ -419,12 +421,6 @@ export function QuizScreen({
 					ref={ayahBoxRef}
 					className={`quiz-wizard-ayah-box anim-soft-enter ${isPickingWordInAyah ? "is-picking-governor" : ""}`}
 				>
-					{lens === "irab" && effectiveStep === 2 ? (
-						<p className="quiz-wizard-pick-hint" role="status">
-							{t.quiz.pickGovernorHint}
-						</p>
-					) : null}
-
 					<p className="verse-line quiz-wizard-verse-line" dir="rtl" lang="ar">
 						{activeQ.verse.w.map((w) => {
 							const isTarget =
@@ -545,15 +541,10 @@ export function QuizScreen({
 						<>
 							{effectiveStep === 1 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{t.quiz.step1Question(
-													quranText(irabQuestion.targetWord.a),
-												)}
-											</h2>
-										</div>
-									</header>
+									<QuizStepHead
+										title={t.quiz.step1Question(irabTargetAr)}
+										focus={irabTargetAr}
+									/>
 
 									<RolePicker
 										value={irabDraft.relation}
@@ -572,44 +563,42 @@ export function QuizScreen({
 
 							{effectiveStep === 2 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{t.quiz.step2Question(
-													activeRoleMeta.governorLabel.ar,
-													quranText(irabQuestion.targetWord.a),
-												)}
-											</h2>
-										</div>
-										<button
-											type="button"
-											className="quiz-back-link"
-											onClick={() => goToStep(1)}
-										>
-											{t.quiz.backButton}
-										</button>
-									</header>
+									<QuizStepHead
+										title={t.quiz.step2Question(
+											activeRoleMeta.governorLabel.ar,
+											irabTargetAr,
+										)}
+										focus={irabTargetAr}
+										hint={t.quiz.pickGovernorHint}
+										backLabel={t.quiz.backButton}
+										onBack={() => goToStep(1)}
+									/>
+
+									<GovernorPicker
+										words={irabQuestion.verse.w}
+										targetNum={irabQuestion.targetWord.n}
+										value={irabDraft.headWordNum}
+										format={quranText}
+										onPick={(n) =>
+											dispatch({
+												type: "answer",
+												field: "headWordNum",
+												value: n,
+												step: 3,
+											})
+										}
+									/>
 								</div>
 							)}
 
 							{effectiveStep === 3 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{t.quiz.step3Question(
-													quranText(irabQuestion.targetWord.a),
-												)}
-											</h2>
-										</div>
-										<button
-											type="button"
-											className="quiz-back-link"
-											onClick={() => goToStep(2)}
-										>
-											{t.quiz.backButton}
-										</button>
-									</header>
+									<QuizStepHead
+										title={t.quiz.step3Question(irabTargetAr)}
+										focus={irabTargetAr}
+										backLabel={t.quiz.backButton}
+										onBack={() => goToStep(2)}
+									/>
 
 									<div className="quiz-wizard-case-list">
 										{QUIZ_CASES.map((c) => {
@@ -644,22 +633,12 @@ export function QuizScreen({
 
 							{effectiveStep === 4 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{t.quiz.step4Question(
-													quranText(irabQuestion.targetWord.a),
-												)}
-											</h2>
-										</div>
-										<button
-											type="button"
-											className="quiz-back-link"
-											onClick={() => goToStep(3)}
-										>
-											{t.quiz.backButton}
-										</button>
-									</header>
+									<QuizStepHead
+										title={t.quiz.step4Question(irabTargetAr)}
+										focus={irabTargetAr}
+										backLabel={t.quiz.backButton}
+										onBack={() => goToStep(3)}
+									/>
 
 									<div className="quiz-wizard-sign-grid">
 										{signsForCase(irabDraft.grammaticalCase).map((s) => {
@@ -699,22 +678,12 @@ export function QuizScreen({
 								<div className="quiz-wizard-step-body">
 									{!isComplete ? (
 										<>
-											<header className="quiz-wizard-step-head">
-												<div>
-													<h2>
-														{t.quiz.step5Title(
-															quranText(irabQuestion.targetWord.a),
-														)}
-													</h2>
-												</div>
-												<button
-													type="button"
-													className="quiz-back-link"
-													onClick={() => goToStep(4)}
-												>
-													{t.quiz.editButton}
-												</button>
-											</header>
+											<QuizStepHead
+												title={t.quiz.step5Title(irabTargetAr)}
+												focus={irabTargetAr}
+												backLabel={t.quiz.editButton}
+												onBack={() => goToStep(4)}
+											/>
 
 											<p
 												className="quiz-wizard-formula-preview"
@@ -879,17 +848,16 @@ export function QuizScreen({
 						<>
 							{effectiveStep === 1 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{locale === "ar"
-													? `ما المادة المعجمية (الجذر) لكلمة ﴿${quranText(sarfQuestion.targetWord.a)}﴾؟`
-													: locale === "id"
-														? `Apa akar kata (maddah) dari ${quranText(sarfQuestion.targetWord.a)}?`
-														: `What is the lexical root (māddah) of ${quranText(sarfQuestion.targetWord.a)}?`}
-											</h2>
-										</div>
-									</header>
+									<QuizStepHead
+										title={
+											locale === "ar"
+												? `ما المادة المعجمية (الجذر) لكلمة ﴿${quranText(sarfQuestion.targetWord.a)}﴾؟`
+												: locale === "id"
+													? `Apa akar kata (maddah) dari ${quranText(sarfQuestion.targetWord.a)}?`
+													: `What is the lexical root (māddah) of ${quranText(sarfQuestion.targetWord.a)}?`
+										}
+										focus={quranText(sarfQuestion.targetWord.a)}
+									/>
 
 									<div className="quiz-wizard-sign-grid">
 										{sarfQuestion.rootOptions.map((opt) => {
@@ -921,24 +889,18 @@ export function QuizScreen({
 
 							{effectiveStep === 2 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{locale === "ar"
-													? `ما الوزن الصرفي لـ ﴿${quranText(sarfQuestion.headAr)}﴾؟`
-													: locale === "id"
-														? `Apa wazan sharaf dari ${quranText(sarfQuestion.headAr)}?`
-														: `What is the morphological pattern (wazn) of ${quranText(sarfQuestion.headAr)}?`}
-											</h2>
-										</div>
-										<button
-											type="button"
-											className="quiz-back-link"
-											onClick={() => goToStep(1)}
-										>
-											{t.quiz.backButton}
-										</button>
-									</header>
+									<QuizStepHead
+										title={
+											locale === "ar"
+												? `ما الوزن الصرفي لـ ﴿${quranText(sarfQuestion.headAr)}﴾؟`
+												: locale === "id"
+													? `Apa wazan sharaf dari ${quranText(sarfQuestion.headAr)}?`
+													: `What is the morphological pattern (wazn) of ${quranText(sarfQuestion.headAr)}?`
+										}
+										focus={quranText(sarfQuestion.headAr)}
+										backLabel={t.quiz.backButton}
+										onBack={() => goToStep(1)}
+									/>
 
 									<div className="quiz-wizard-sign-grid">
 										{sarfQuestion.waznOptions.map((opt) => {
@@ -970,26 +932,20 @@ export function QuizScreen({
 
 							{effectiveStep === 3 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{sarfQuestion.kind === "verb"
-													? locale === "ar"
-														? `من أي باب صرفي جاء الفعل ﴿${quranText(sarfQuestion.headAr)}﴾؟`
-														: `Which verbal bāb / form does ${quranText(sarfQuestion.headAr)} belong to?`
-													: locale === "ar"
-														? `ما نوع الاسم ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الاشتقاق؟`
-														: `What derivational class is the noun ${quranText(sarfQuestion.headAr)}?`}
-											</h2>
-										</div>
-										<button
-											type="button"
-											className="quiz-back-link"
-											onClick={() => goToStep(2)}
-										>
-											{t.quiz.backButton}
-										</button>
-									</header>
+									<QuizStepHead
+										title={
+											sarfQuestion.kind === "verb"
+												? locale === "ar"
+													? `من أي باب صرفي جاء الفعل ﴿${quranText(sarfQuestion.headAr)}﴾؟`
+													: `Which verbal bāb / form does ${quranText(sarfQuestion.headAr)} belong to?`
+												: locale === "ar"
+													? `ما نوع الاسم ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الاشتقاق؟`
+													: `What derivational class is the noun ${quranText(sarfQuestion.headAr)}?`
+										}
+										focus={quranText(sarfQuestion.headAr)}
+										backLabel={t.quiz.backButton}
+										onBack={() => goToStep(2)}
+									/>
 
 									<div className="quiz-wizard-case-list">
 										{sarfQuestion.classOptions.map((opt) => {
@@ -1021,26 +977,20 @@ export function QuizScreen({
 
 							{effectiveStep === 4 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{sarfQuestion.kind === "verb"
-													? locale === "ar"
-														? `ما نوع الفعل ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الصحة والاعتلال؟`
-														: `How is ${quranText(sarfQuestion.headAr)} classified by root soundness?`
-													: locale === "ar"
-														? `ما بنية الاسم ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الإفراد والجمع؟`
-														: `What is the number / plural structure of ${quranText(sarfQuestion.headAr)}?`}
-											</h2>
-										</div>
-										<button
-											type="button"
-											className="quiz-back-link"
-											onClick={() => goToStep(3)}
-										>
-											{t.quiz.backButton}
-										</button>
-									</header>
+									<QuizStepHead
+										title={
+											sarfQuestion.kind === "verb"
+												? locale === "ar"
+													? `ما نوع الفعل ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الصحة والاعتلال؟`
+													: `How is ${quranText(sarfQuestion.headAr)} classified by root soundness?`
+												: locale === "ar"
+													? `ما بنية الاسم ﴿${quranText(sarfQuestion.headAr)}﴾ من حيث الإفراد والجمع؟`
+													: `What is the number / plural structure of ${quranText(sarfQuestion.headAr)}?`
+										}
+										focus={quranText(sarfQuestion.headAr)}
+										backLabel={t.quiz.backButton}
+										onBack={() => goToStep(3)}
+									/>
 
 									<div className="quiz-wizard-case-list">
 										{sarfQuestion.structureOptions.map((opt) => {
@@ -1074,22 +1024,16 @@ export function QuizScreen({
 								<div className="quiz-wizard-step-body">
 									{!isComplete ? (
 										<>
-											<header className="quiz-wizard-step-head">
-												<div>
-													<h2>
-														{locale === "ar"
-															? `راجع التحليل الصرفي لـ ﴿${quranText(sarfQuestion.targetWord.a)}﴾`
-															: `Review your morphological profile for ${quranText(sarfQuestion.targetWord.a)}`}
-													</h2>
-												</div>
-												<button
-													type="button"
-													className="quiz-back-link"
-													onClick={() => goToStep(4)}
-												>
-													{t.quiz.editButton}
-												</button>
-											</header>
+											<QuizStepHead
+												title={
+													locale === "ar"
+														? `راجع التحليل الصرفي لـ ﴿${quranText(sarfQuestion.targetWord.a)}﴾`
+														: `Review your morphological profile for ${quranText(sarfQuestion.targetWord.a)}`
+												}
+												focus={quranText(sarfQuestion.targetWord.a)}
+												backLabel={t.quiz.editButton}
+												onBack={() => goToStep(4)}
+											/>
 
 											<p
 												className="quiz-wizard-formula-preview"
@@ -1292,20 +1236,16 @@ export function QuizScreen({
 						<>
 							{effectiveStep === 1 && (
 								<div className="quiz-wizard-step-body">
-									<header className="quiz-wizard-step-head">
-										<div>
-											<h2>
-												{locale === "ar"
-													? `أي كلمة في الآية تمثل: «${exQuestion.facetTitle.ar}»؟`
-													: locale === "id"
-														? `Kata mana pada ayat yang merupakan: "${exQuestion.facetTitle.id}"?`
-														: `Which word in the ayah is an example of: "${exQuestion.facetTitle.en}"?`}
-											</h2>
-											<p className="quiz-wizard-subprompt">
-												{exQuestion.facetHint[locale]}
-											</p>
-										</div>
-									</header>
+									<QuizStepHead
+										title={
+											locale === "ar"
+												? `أي كلمة في الآية تمثل: «${exQuestion.facetTitle.ar}»؟`
+												: locale === "id"
+													? `Kata mana pada ayat yang merupakan: "${exQuestion.facetTitle.id}"?`
+													: `Which word in the ayah is an example of: "${exQuestion.facetTitle.en}"?`
+										}
+										hint={exQuestion.facetHint[locale]}
+									/>
 								</div>
 							)}
 
@@ -1313,22 +1253,15 @@ export function QuizScreen({
 								<div className="quiz-wizard-step-body">
 									{!isComplete ? (
 										<>
-											<header className="quiz-wizard-step-head">
-												<div>
-													<h2>
-														{locale === "ar"
-															? `تحقق من اختيارك لـ «${exQuestion.facetTitle.ar}»`
-															: `Confirm your choice for "${exQuestion.facetTitle.en}"`}
-													</h2>
-												</div>
-												<button
-													type="button"
-													className="quiz-back-link"
-													onClick={() => goToStep(1)}
-												>
-													{t.quiz.editButton}
-												</button>
-											</header>
+											<QuizStepHead
+												title={
+													locale === "ar"
+														? `تحقق من اختيارك لـ «${exQuestion.facetTitle.ar}»`
+														: `Confirm your choice for "${exQuestion.facetTitle.en}"`
+												}
+												backLabel={t.quiz.editButton}
+												onBack={() => goToStep(1)}
+											/>
 
 											<p
 												className="quiz-wizard-formula-preview"
@@ -1504,6 +1437,41 @@ function RolePicker({
 					</div>
 				</section>
 			))}
+		</div>
+	);
+}
+
+/** The ayah's words as answer cards for the governor step; the ayah above takes taps too. */
+function GovernorPicker({
+	words,
+	targetNum,
+	value,
+	format,
+	onPick,
+}: {
+	words: Word[];
+	targetNum: number;
+	value: number | null;
+	/** How the ayah renders a word (diacritics on or off). */
+	format: (text: string) => string;
+	onPick: (wordNum: number) => void;
+}) {
+	return (
+		<div className="quiz-governor-grid" dir="rtl">
+			{words
+				.filter((w) => w.n !== targetNum)
+				.map((w) => (
+					<button
+						key={w.n}
+						type="button"
+						lang="ar"
+						aria-pressed={value === w.n}
+						className={`quiz-governor-card${value === w.n ? " is-selected" : ""}`}
+						onClick={() => onPick(w.n)}
+					>
+						{format(w.a)}
+					</button>
+				))}
 		</div>
 	);
 }

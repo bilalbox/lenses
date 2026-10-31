@@ -2856,19 +2856,6 @@ main {
 	box-shadow: inset 0 0 0 1.5px var(--teal);
 }
 
-.quiz-wizard-pick-hint {
-	margin: 0;
-	flex-shrink: 0;
-	font-size: 0.8rem;
-	font-weight: 600;
-	color: var(--teal);
-	background: var(--teal-soft);
-	border-radius: 8px;
-	padding: 0.35rem 0.6rem;
-	text-align: start;
-	max-width: 65ch;
-}
-
 .quiz-wizard-verse-line {
 	margin: 0;
 	padding: 0.15rem 0;
@@ -2960,25 +2947,45 @@ main {
 }
 
 .quiz-wizard-step-head {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 0.75rem;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: start;
+	gap: 0.3rem 0.75rem;
 	flex-shrink: 0;
+	padding-block: 0.35rem 0.75rem;
+	border-bottom: 1px solid var(--line);
+	margin-bottom: 0.15rem;
 }
 
-.quiz-wizard-step-head > div {
-	min-width: 0;
-	flex: 1;
-	max-width: 65ch;
-}
-
-.quiz-wizard-step-head h2 {
-	margin: 0.1rem 0 0;
+/* The question is the screen's headline: it outranks every option card below. */
+.quiz-question {
+	margin: 0;
+	max-width: 40ch;
 	font-family: var(--serif);
-	font-size: clamp(1.05rem, 2.2vw, 1.32rem);
-	line-height: 1.35;
-	text-wrap: pretty;
+	font-size: clamp(1.3rem, 3vw, 1.7rem);
+	font-weight: 700;
+	line-height: 1.45;
+	color: var(--ink);
+	text-wrap: balance;
+}
+
+:lang(ar) .quiz-question,
+.quiz-question:lang(ar) {
+	font-family: var(--arabic-ui);
+}
+
+.quiz-question-focus {
+	font-family: var(--arabic);
+	font-size: 1.3em;
+	font-weight: 400;
+	line-height: 1;
+	color: var(--gold-ink);
+	white-space: nowrap;
+}
+
+.quiz-wizard-step-head .quiz-wizard-subprompt {
+	grid-column: 1 / -1;
+	margin: 0;
 }
 
 .quiz-wizard-subprompt {
@@ -2990,23 +2997,59 @@ main {
 }
 
 .quiz-back-link {
-	border: 1px solid var(--line);
-	background: var(--bg-2);
-	border-radius: 10px;
-	padding: 0.4rem 0.75rem;
-	font-size: 0.82rem;
+	border: 0;
+	background: transparent;
+	border-radius: 8px;
+	padding: 0.3rem 0.55rem;
+	font-size: 0.8rem;
 	font-weight: 600;
-	min-height: 48px;
+	color: var(--muted);
+	min-height: 40px;
 	white-space: nowrap;
 	flex-shrink: 0;
 	transition:
 		background-color var(--duration-fast) ease,
-		border-color var(--duration-fast) ease,
 		color var(--duration-fast) ease;
 }
 
 .quiz-back-link:hover {
+	background: var(--bg-2);
+	color: var(--teal);
+}
+
+/* Governor step: the ayah's words as answer cards */
+.quiz-governor-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-content: start;
+}
+
+.quiz-governor-card {
+	min-height: 56px;
+	min-width: 64px;
+	padding: 0.2rem 0.9rem;
+	border-radius: 10px;
+	border: 1px solid var(--line);
+	background: var(--bg-2);
+	font-family: var(--arabic);
+	font-size: clamp(1.45rem, 3vw, 1.75rem);
+	line-height: 1.6;
+	transition:
+		background-color var(--duration-fast) ease,
+		border-color var(--duration-fast) ease,
+		box-shadow var(--duration-fast) ease;
+}
+
+.quiz-governor-card:hover {
 	border-color: var(--teal);
+	background: var(--paper);
+}
+
+.quiz-governor-card.is-selected {
+	background: var(--teal-soft);
+	border-color: var(--teal);
+	box-shadow: inset 0 0 0 1px var(--teal);
 	color: var(--teal);
 }
 

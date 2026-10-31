@@ -16,6 +16,7 @@ import {
 	QuizLensSwitcher,
 	QuizMetaBar,
 	QuizProgressStrip,
+	QuizStepHead,
 } from "./QuizChrome";
 
 type Show = (text: string) => string;
@@ -243,17 +244,12 @@ function ChoiceStep({
 	const { t } = useI18n();
 	return (
 		<>
-			<header className="quiz-wizard-step-head">
-				<div>
-					<h2>{title}</h2>
-					{hint ? <p className="quiz-wizard-subprompt">{hint}</p> : null}
-				</div>
-				{onBack ? (
-					<button type="button" className="quiz-back-link" onClick={onBack}>
-						{t.quiz.backButton}
-					</button>
-				) : null}
-			</header>
+			<QuizStepHead
+				title={title}
+				hint={hint}
+				backLabel={t.quiz.backButton}
+				onBack={onBack}
+			/>
 			<div className="quiz-wizard-sign-grid">
 				{choices.map((c) => (
 					<button
@@ -295,18 +291,11 @@ function CheckStep({
 	].filter(Boolean);
 	return (
 		<>
-			<header className="quiz-wizard-step-head">
-				<div>
-					<h2>{copy.reviewTitle}</h2>
-				</div>
-				<button
-					type="button"
-					className="quiz-back-link"
-					onClick={() => onEdit(2)}
-				>
-					{t.quiz.editButton}
-				</button>
-			</header>
+			<QuizStepHead
+				title={copy.reviewTitle}
+				backLabel={t.quiz.editButton}
+				onBack={() => onEdit(2)}
+			/>
 			<p className="quiz-wizard-formula-preview" dir="rtl" lang="ar">
 				<AnswerPart
 					step={1}

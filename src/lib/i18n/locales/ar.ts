@@ -55,7 +55,7 @@ export const ar: Translations = {
 		legendTarget: (wordAr: string) => `المطلوب · ${wordAr}`,
 		legendHead: (roleLabel: string, wordAr: string) =>
 			`${roleLabel} · ${wordAr}`,
-		pickGovernorHint: "اضغط كلمة في الآية لتعيين العامل",
+		pickGovernorHint: "اختر كلمة مما يلي، أو اضغطها في الآية أعلاه.",
 		step1Eyebrow: "الخطوة ١ من ٤ · الموقع الإعرابي",
 		step1Question: (wordAr: string) => `ما الموقع الإعرابي لكلمة ${wordAr}؟`,
 		step2Eyebrow: (govLabel: string) => `الخطوة ٢ من ٤ · اختر ${govLabel}`,

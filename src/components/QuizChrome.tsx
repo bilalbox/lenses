@@ -1,5 +1,5 @@
 /** Quiz chrome shared by every lens: lens tabs, the meta bar, and the step strip. */
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { getLensLabel, type QuizLens } from "../lib/quizCatalog";
 import type { QuizSessionState, WizardStep } from "../lib/quizSession";
@@ -168,5 +168,48 @@ export function QuizProgressStrip({
 				))}
 			</div>
 		</div>
+	);
+}
+
+/** The question text with each occurrence of `focus` (the word being asked about) set apart. */
+function emphasize(text: string, focus: string | undefined): ReactNode {
+	if (!focus || !text.includes(focus)) return text;
+	return text.split(focus).flatMap((part, i) =>
+		i === 0
+			? [part]
+			: [
+					<span key={i} className="quiz-question-focus" lang="ar">
+						{focus}
+					</span>,
+					part,
+				],
+	);
+}
+
+/** A step's question, set large so it reads before the options under it. */
+export function QuizStepHead({
+	title,
+	focus,
+	hint,
+	backLabel,
+	onBack,
+}: {
+	title: string;
+	/** Arabic word in `title` to emphasize. */
+	focus?: string;
+	hint?: string;
+	backLabel?: string;
+	onBack?: () => void;
+}) {
+	return (
+		<header className="quiz-wizard-step-head">
+			<h2 className="quiz-question">{emphasize(title, focus)}</h2>
+			{onBack ? (
+				<button type="button" className="quiz-back-link" onClick={onBack}>
+					{backLabel}
+				</button>
+			) : null}
+			{hint ? <p className="quiz-wizard-subprompt">{hint}</p> : null}
+		</header>
 	);
 }

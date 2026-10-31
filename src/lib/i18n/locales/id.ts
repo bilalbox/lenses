@@ -49,7 +49,8 @@ export const id: Translations = {
 		legendTarget: (wordAr: string) => `Target · ${wordAr}`,
 		legendHead: (roleLabel: string, wordAr: string) =>
 			`${roleLabel} · ${wordAr}`,
-		pickGovernorHint: "Ketuk kata pada ayat untuk memilih pengampu",
+		pickGovernorHint:
+			"Pilih kata di bawah, atau ketuk langsung pada ayat di atas.",
 		step1Eyebrow: "LANGKAH 1 DARI 4 · KEDUDUKAN SINTAKSIS",
 		step1Question: (wordAr: string) =>
 			`Apa kedudukan i'rab (موقع إعرابي) dari kata ${wordAr}?`,

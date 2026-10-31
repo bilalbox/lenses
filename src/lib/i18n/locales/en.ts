@@ -50,7 +50,7 @@ export const en: Translations = {
 		legendTarget: (wordAr: string) => `Target · ${wordAr}`,
 		legendHead: (roleLabel: string, wordAr: string) =>
 			`${roleLabel} · ${wordAr}`,
-		pickGovernorHint: "Tap a word in the ayah to set the governor",
+		pickGovernorHint: "Pick a word below, or tap it in the ayah above.",
 		step1Eyebrow: "STEP 1 OF 4 · SYNTACTIC ROLE",
 		step1Question: (wordAr: string) =>
 			`What is the syntactic role (موقع إعرابي) of ${wordAr}?`,
