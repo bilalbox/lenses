@@ -332,6 +332,35 @@ export interface SurahMutashabihFile {
 	verses: VerseMutashabihEntry[];
 }
 
+/** One wording for a quiz blank, with the ayahs (`[sura, ayah]`) that use it. */
+export interface MutashabihQuizOption {
+	/** Uthmani words; empty when the ayah has no word at the blank. */
+	a: string;
+	refs: [number, number][];
+}
+
+/** A blank where an ayah's wording parts from a similar ayah. */
+export interface MutashabihQuizEntry {
+	id: string;
+	s: number;
+	v: number;
+	/** The ayah's Uthmani words. */
+	w: string[];
+	/** Index of the first blanked word; with `len` 0 the blank sits before it. */
+	at: number;
+	len: number;
+	opts: MutashabihQuizOption[];
+	/** Index of the ayah's own wording in `opts`. */
+	ans: number;
+	/** Surah choices, the ayah's own among them. */
+	surahs: number[];
+}
+
+export interface MutashabihQuizFile {
+	version: number;
+	questions: MutashabihQuizEntry[];
+}
+
 export type StructureRole =
 	| "outer_frame_open"
 	| "outer_frame_close"

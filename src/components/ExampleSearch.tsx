@@ -19,6 +19,7 @@ import {
 	featureSummary,
 	searchExamples,
 } from "../lib/search";
+import { Combobox, type ComboboxOption } from "./Combobox";
 
 const empty: ExampleQuery = {
 	root: "",
@@ -28,11 +29,10 @@ const empty: ExampleQuery = {
 	relation: "",
 };
 
-interface FilterOption {
-	name: string;
-	value: string;
-	about: string;
-}
+type FilterOption = ComboboxOption;
+
+/** Verb form only means something for verbs, so its row waits for a verb POS. */
+const isVerbPos = (pos: string) => pos.split(",").includes("V");
 
 interface Props {
 	initial?: Partial<ExampleQuery>;
@@ -126,9 +126,11 @@ export function ExampleSearch({
 		setQuery((current) => ({ ...current, ...patch }));
 	};
 
-	const pickFilter = (key: "pos" | "form" | "relation", value: string) => {
-		set({ [key]: value === "" || query[key] === value ? "" : value });
-	};
+	const pickPos = (pos: string) =>
+		set(isVerbPos(pos) ? { pos } : { pos, form: "" });
+	const pickForm = (value: string) =>
+		set({ form: value === "" || query.form === value ? "" : value });
+	const showForm = isVerbPos(query.pos) || Boolean(query.form);
 
 	return (
 		<div className="search-page anim-soft-enter">
@@ -173,27 +175,33 @@ export function ExampleSearch({
 					/>
 				</label>
 
-				<FilterCardField
+				<Combobox
 					label={t.examples.filterPos}
-					anyLabel={t.examples.anyOption}
-					options={posOptions}
+					options={withCurrent(posOptions, query.pos, POS)}
 					value={query.pos}
-					onPick={(value) => pickFilter("pos", value)}
+					placeholder={t.examples.anyOption}
+					emptyText={t.examples.noOptionMatch}
+					clearLabel={t.examples.clearFilter(t.examples.filterPos)}
+					onChange={pickPos}
 				/>
-				<FilterCardField
-					label={t.examples.filterForm}
-					anyLabel={t.examples.anyOption}
-					options={formOptions}
-					value={query.form}
-					onPick={(value) => pickFilter("form", value)}
-				/>
-				<FilterCardField
+				<Combobox
 					label={t.examples.filterRelation}
-					anyLabel={t.examples.anyOption}
-					options={relationOptions}
+					options={withCurrent(relationOptions, query.relation, RELATIONS)}
 					value={query.relation}
-					onPick={(value) => pickFilter("relation", value)}
+					placeholder={t.examples.anyOption}
+					emptyText={t.examples.noOptionMatch}
+					clearLabel={t.examples.clearFilter(t.examples.filterRelation)}
+					onChange={(relation) => set({ relation })}
 				/>
+				{showForm ? (
+					<FormChips
+						label={t.examples.filterForm}
+						anyLabel={t.examples.anyOption}
+						options={formOptions}
+						value={query.form}
+						onPick={pickForm}
+					/>
+				) : null}
 			</form>
 			{error ? <p className="banner error">{error}</p> : null}
 			{!index && !error ? (
@@ -211,9 +219,10 @@ export function ExampleSearch({
 						<strong>{formatNumber(total)}</strong>
 						<span>{t.examples.wordsFound(total, hits.length)}</span>
 					</p>
-					{facets.forms.length > 1 || facets.lemmas.length > 1 ? (
+					{(!showForm && facets.forms.length > 1) ||
+					facets.lemmas.length > 1 ? (
 						<div className="facets" dir="rtl">
-							{facets.forms.map((facet) => (
+							{(showForm ? [] : facets.forms).map((facet) => (
 								<button
 									key={facet.key}
 									type="button"
@@ -302,7 +311,7 @@ export function ExampleSearch({
 	);
 }
 
-function FilterCardField({
+function FormChips({
 	label,
 	anyLabel,
 	options,
@@ -318,38 +327,41 @@ function FilterCardField({
 	return (
 		<fieldset className="filter-field">
 			<legend>{label}</legend>
-			<div
-				className="filter-cards"
-				dir="rtl"
-				role="listbox"
-				aria-label={label}
-				aria-multiselectable="false"
-			>
-				<button
-					type="button"
-					role="option"
-					aria-selected={value === ""}
-					className={`filter-card${value === "" ? " is-on" : ""}`}
-					onClick={() => onPick("")}
-				>
-					<b>{anyLabel}</b>
-				</button>
-				{options.map((option) => (
-					<button
-						key={option.value}
-						type="button"
-						role="option"
-						aria-selected={value === option.value}
-						className={`filter-card${value === option.value ? " is-on" : ""}`}
-						onClick={() => onPick(option.value)}
-					>
-						<b lang="ar">{option.name}</b>
-						{option.about ? <small>{option.about}</small> : null}
-					</button>
-				))}
+			<div className="filter-chips" dir="rtl">
+				{[{ name: anyLabel, value: "", about: "" }, ...options].map(
+					(option) => (
+						<button
+							key={option.value}
+							type="button"
+							aria-pressed={value === option.value}
+							title={option.about || undefined}
+							className={`filter-chip${value === option.value ? " is-on" : ""}`}
+							onClick={() => onPick(option.value)}
+						>
+							<b lang={option.value ? "ar" : undefined}>{option.name}</b>
+							{option.value ? <small>{option.value}</small> : null}
+						</button>
+					),
+				)}
 			</div>
 		</fieldset>
 	);
+}
+
+/**
+ * Presets and quiz links can filter by a code group that is not one of the
+ * listed options (e.g. "N,ADJ"); list it too so the active filter stays visible.
+ */
+function withCurrent(
+	options: FilterOption[],
+	value: string,
+	table: Record<string, { name: string }>,
+): FilterOption[] {
+	if (!value || options.some((o) => o.value === value)) return options;
+	const name = [
+		...new Set(value.split(",").map((code) => table[code]?.name ?? code)),
+	].join(" / ");
+	return [{ name, value, about: "" }, ...options];
 }
 
 function glossOptions(

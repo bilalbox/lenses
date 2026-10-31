@@ -8,7 +8,7 @@
 		"data:enrichment": "python3 scripts/build_qurandb_enrichment.py",
 		"data:syntax": "python3 scripts/build_syntax.py",
 		"data:structure": "python3 scripts/build_structure.py",
-		"data:mutashabih": "python3 scripts/build_mutashabih.py",
+		"data:mutashabih": "python3 scripts/build_mutashabih.py && python3 scripts/build_mutashabih_quiz.py",
 		"data:rhetoric": "python3 scripts/build_rhetoric_dataset.py",
 		"data:all": "pnpm data && pnpm data:syntax && pnpm data:structure && pnpm data:mutashabih && pnpm data:enrichment && pnpm data:rhetoric",
 		"dev": "vite --host 127.0.0.1 --port 43123",

@@ -54,7 +54,7 @@ export const POS: Record<string, RawGloss> = {
 	ADJ: {
 		name: "صفة",
 		about: {
-			en: "A describing word that follows the noun and matches it in case, gender, number, and definiteness.",
+			en: "Adjective: a describing word that follows the noun and matches it in case, gender, number, and definiteness.",
 			ar: "تابع يوضح متبوعه أو يخصصه ويطابقه في الإعراب والنوع والعدد والتعريف.",
 			id: "Kata sifat (na'at/shifah) yang menerangkan kata benda sebelumnya.",
 		},
@@ -62,7 +62,7 @@ export const POS: Record<string, RawGloss> = {
 	V: {
 		name: "فعل",
 		about: {
-			en: "An action or state, conjugated for person, gender, and number.",
+			en: "Verb: an action or state, conjugated for person, gender, and number.",
 			ar: "كلمة دلت على حدث مقترن بزمن محدد: ماضٍ أو مضارع أو أمر.",
 			id: "Kata kerja (fi'il) yang terikat waktu dan pelaku.",
 		},
@@ -70,7 +70,7 @@ export const POS: Record<string, RawGloss> = {
 	P: {
 		name: "حرف جر",
 		about: {
-			en: "A particle such as bi-, fī, or ʿalā that puts the following noun in the genitive.",
+			en: "Preposition: a particle such as bi-, fī, or ʿalā that puts the following noun in the genitive.",
 			ar: "حرف يربط بين الكلمات ويجر الاسم الذي يليه مثل في وعلى والباء.",
 			id: "Kata depan (huruf jar) seperti fi, 'ala, atau bi yang memajrurkan isim sesudahnya.",
 		},
@@ -377,7 +377,7 @@ export const RELATIONS: Record<string, RawGloss> = {
 	subj: {
 		name: "فاعل",
 		about: {
-			en: "The doer of the verb, the fāʿil. Usually nominative.",
+			en: "Subject: the doer of the verb, the fāʿil. Usually nominative.",
 			ar: "اسم مرفوع يدل على من قام بالفعل أو اتصف به.",
 			id: "Pelaku perbuatan (fa'il), berkedudukan marfu'.",
 		},
@@ -385,7 +385,7 @@ export const RELATIONS: Record<string, RawGloss> = {
 	obj: {
 		name: "مفعول به",
 		about: {
-			en: "The thing the verb acts on, the mafʿūl bihi, usually accusative.",
+			en: "Object: the thing the verb acts on, the mafʿūl bihi, usually accusative.",
 			ar: "اسم منصوب يدل على ما وقع عليه فعل الفاعل.",
 			id: "Objek penderita (maf'ul bih), berkedudukan manshub.",
 		},
@@ -401,7 +401,7 @@ export const RELATIONS: Record<string, RawGloss> = {
 	pred: {
 		name: "خبر",
 		about: {
-			en: "What is said about the subject, the khabar.",
+			en: "Predicate: what is said about the subject, the khabar.",
 			ar: "الجزء المتمم لمعنى المبتدأ في الجملة الاسمية.",
 			id: "Predikat kalimat nominal (khabar).",
 		},

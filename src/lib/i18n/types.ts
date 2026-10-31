@@ -70,7 +70,6 @@ export interface Translations {
 		step1Question: (wordAr: string) => string;
 		step2Eyebrow: (govLabel: string) => string;
 		step2Question: (govAr: string, wordAr: string) => string;
-		step2Hint: string;
 		step3Eyebrow: string;
 		step3Question: (wordAr: string) => string;
 		step4Eyebrow: string;
@@ -79,14 +78,25 @@ export interface Translations {
 		step5Title: (wordAr: string) => string;
 		backButton: string;
 		editButton: string;
-		revealButton: string;
 		submitButton: string;
 		nextButton: string;
 		exactMatchEyebrow: string;
 		reviewEyebrow: string;
 		classicalHeading: (wordAr: string) => string;
-		notSet: string;
+		formulaEditHint: string;
 		incompleteAlert: string;
+		mutashabih: {
+			fieldWording: string;
+			fieldSurah: string;
+			wordingQuestion: string;
+			wordingHint: string;
+			noWord: string;
+			surahQuestion: string;
+			reviewTitle: string;
+			submitButton: string;
+			placesHeading: string;
+			thisAyah: string;
+		};
 	};
 	settings: {
 		title: string;
@@ -239,6 +249,8 @@ export interface Translations {
 		filterForm: string;
 		filterRelation: string;
 		anyOption: string;
+		noOptionMatch: string;
+		clearFilter: (label: string) => string;
 		wordsFound: (count: number, limit: number) => string;
 		noWordsMatch: string;
 		showMore: string;

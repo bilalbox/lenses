@@ -1,4 +1,10 @@
-import type { QuizCase, QuizLens, QuizRelation, QuizSign } from "./quizCatalog";
+import {
+	type QuizCase,
+	type QuizLens,
+	type QuizRelation,
+	type QuizSign,
+	SIGNS_BY_CASE,
+} from "./quizCatalog";
 import type { QuizPools } from "./quizEngine";
 
 export interface IrabDraft {
@@ -19,10 +25,18 @@ export interface ExamplesDraft {
 	spottedWordNum: number | null;
 }
 
+export interface MutashabihDraft {
+	/** Index of the picked wording. */
+	wording: number | null;
+	/** Number of the picked surah. */
+	surah: number | null;
+}
+
 export interface Drafts {
 	irab: IrabDraft;
 	sarf: SarfDraft;
 	examples: ExamplesDraft;
+	mutashabih: MutashabihDraft;
 }
 
 type Questions = { [L in QuizLens]: QuizPools[L][number] };
@@ -37,8 +51,6 @@ export type WizardStep = 1 | 2 | 3 | 4 | 5;
 export interface Verdict {
 	fields: Partial<Record<DraftField, boolean>>;
 	allCorrect: boolean;
-	/** The answer was shown rather than worked out; never rendered as a win. */
-	revealed: boolean;
 }
 
 export interface QuizSessionState {
@@ -50,7 +62,7 @@ export interface QuizSessionState {
 	animDir: "forward" | "backward";
 	/** Required fields left empty on the last submit; empty once all are answered. */
 	missing: DraftField[];
-	/** Set by a complete submit or a reveal; cleared when the reader edits again. */
+	/** Set by a complete submit; cleared when the reader edits again. */
 	verdict: Verdict | null;
 	/** The current question's outcome is already in the score. */
 	recorded: boolean;
@@ -70,13 +82,14 @@ export type QuizSessionEvent =
 	  }
 	| { type: "goToStep"; step: WizardStep }
 	| { type: "submit" }
-	| { type: "reveal" }
 	| { type: "next"; random: number };
 
 interface LensSpec<L extends QuizLens> {
 	fields: DraftField<L>[];
 	empty: () => Drafts[L];
 	answer: (question: Questions[L]) => Drafts[L];
+	/** Drops answers an edit has made impossible, so a later step is asked again. */
+	normalize?: (draft: Drafts[L]) => Drafts[L];
 }
 
 const LENSES: { [L in QuizLens]: LensSpec<L> } = {
@@ -94,6 +107,12 @@ const LENSES: { [L in QuizLens]: LensSpec<L> } = {
 			grammaticalCase: q.grammaticalCase,
 			sign: q.sign,
 		}),
+		normalize: (draft) =>
+			draft.grammaticalCase &&
+			draft.sign &&
+			!SIGNS_BY_CASE[draft.grammaticalCase].includes(draft.sign)
+				? { ...draft, sign: null }
+				: draft,
 	},
 	sarf: {
 		fields: ["root", "wazn", "classCode", "structureCode"],
@@ -115,6 +134,11 @@ const LENSES: { [L in QuizLens]: LensSpec<L> } = {
 		empty: () => ({ spottedWordNum: null }),
 		answer: (q) => ({ spottedWordNum: q.targetWord.n }),
 	},
+	mutashabih: {
+		fields: ["wording", "surah"],
+		empty: () => ({ wording: null, surah: null }),
+		answer: (q) => ({ wording: q.answer, surah: q.sura }),
+	},
 };
 
 function emptyDrafts(): Drafts {
@@ -122,18 +146,26 @@ function emptyDrafts(): Drafts {
 		irab: LENSES.irab.empty(),
 		sarf: LENSES.sarf.empty(),
 		examples: LENSES.examples.empty(),
+		mutashabih: LENSES.mutashabih.empty(),
 	};
 }
 
+const MAX_STEP: Record<QuizLens, WizardStep> = {
+	irab: 5,
+	sarf: 5,
+	examples: 2,
+	mutashabih: 3,
+};
+
 /** Last wizard step: the check step. */
 export function maxStep(lens: QuizLens): WizardStep {
-	return lens === "examples" ? 2 : 5;
+	return MAX_STEP[lens];
 }
 
 export function initQuizSession(): QuizSessionState {
 	return {
 		lens: "irab",
-		indices: { irab: 0, sarf: 0, examples: 0 },
+		indices: { irab: 0, sarf: 0, examples: 0, mutashabih: 0 },
 		seeded: false,
 		drafts: emptyDrafts(),
 		step: 1,
@@ -174,7 +206,6 @@ export function progress(state: QuizSessionState): {
 function grade(
 	state: QuizSessionState,
 	question: Questions[QuizLens],
-	revealed: boolean,
 ): Verdict {
 	const spec = LENSES[state.lens] as LensSpec<QuizLens>;
 	const correct = spec.answer(question as never) as unknown as Record<
@@ -185,11 +216,7 @@ function grade(
 	const fields: Verdict["fields"] = {};
 	for (const field of spec.fields)
 		fields[field] = draft[field] === correct[field];
-	return {
-		fields,
-		allCorrect: !revealed && Object.values(fields).every(Boolean),
-		revealed,
-	};
+	return { fields, allCorrect: Object.values(fields).every(Boolean) };
 }
 
 function record(state: QuizSessionState, won: boolean): QuizSessionState {
@@ -251,6 +278,7 @@ export function reduceQuizSession(
 					irab: pick("irab"),
 					sarf: pick("sarf"),
 					examples: pick("examples"),
+					mutashabih: pick("mutashabih"),
 				},
 			};
 		}
@@ -260,12 +288,14 @@ export function reduceQuizSession(
 		case "answer": {
 			if (!(LENSES[state.lens].fields as string[]).includes(event.field))
 				return state;
+			const spec = LENSES[state.lens] as LensSpec<QuizLens>;
+			const edited = {
+				...state.drafts[state.lens],
+				[event.field]: event.value,
+			} as Drafts[QuizLens];
 			const drafts = {
 				...state.drafts,
-				[state.lens]: {
-					...state.drafts[state.lens],
-					[event.field]: event.value,
-				},
+				[state.lens]: spec.normalize ? spec.normalize(edited) : edited,
 			};
 			return {
 				...state,
@@ -295,27 +325,8 @@ export function reduceQuizSession(
 				(f) => draft[f] === null,
 			);
 			if (missing.length > 0) return { ...state, missing, verdict: null };
-			const verdict = grade(state, question, false);
+			const verdict = grade(state, question);
 			return record({ ...state, missing: [], verdict }, verdict.allCorrect);
-		}
-		case "reveal": {
-			const question = activeQuestion(state, pools);
-			if (!question) return state;
-			const spec = LENSES[state.lens] as LensSpec<QuizLens>;
-			const revealed = {
-				...state,
-				drafts: {
-					...state.drafts,
-					[state.lens]: spec.answer(question as never),
-				},
-				missing: [],
-				step: maxStep(state.lens),
-				animDir: "forward" as const,
-			};
-			return record(
-				{ ...revealed, verdict: grade(revealed, question, true) },
-				false,
-			);
 		}
 		case "next": {
 			const index = nextIndex(state, pools, event.random);

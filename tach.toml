@@ -17,6 +17,10 @@ path = "build_mutashabih"
 depends_on = []
 
 [[modules]]
+path = "build_mutashabih_quiz"
+depends_on = []
+
+[[modules]]
 path = "build_qurandb_enrichment"
 depends_on = []
 

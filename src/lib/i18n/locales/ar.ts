@@ -61,8 +61,6 @@ export const ar: Translations = {
 		step2Eyebrow: (govLabel: string) => `الخطوة ٢ من ٤ · اختر ${govLabel}`,
 		step2Question: (govAr: string, wordAr: string) =>
 			`أي كلمة في الآية هي ${govAr} لـ ${wordAr}؟`,
-		step2Hint:
-			"اختر الكلمة من القائمة أدناه أو اضغط عليها مباشرة في الآية أعلاه",
 		step3Eyebrow: "الخطوة ٣ من ٤ · الحالة الإعرابية",
 		step3Question: (wordAr: string) => `ما الحالة الإعرابية لكلمة ${wordAr}؟`,
 		step4Eyebrow: "الخطوة ٤ من ٤ · علامة الإعراب",
@@ -71,14 +69,25 @@ export const ar: Translations = {
 		step5Title: (wordAr: string) => `راجع صياغة إعرابك لكلمة ${wordAr}`,
 		backButton: "→ رجوع",
 		editButton: "→ تعديل",
-		revealButton: "إظهار الحل",
 		submitButton: "تحقق واعرض الإعراب الكامل",
 		nextButton: "سؤال جديد ←",
 		exactMatchEyebrow: "إجابة صحيحة · أحسنت",
 		reviewEyebrow: "مراجعة الإعراب · التصويب",
 		classicalHeading: (wordAr: string) => `الإعراب التفصيلي لكلمة ${wordAr}`,
-		notSet: "غير محدد",
+		formulaEditHint: "اضغط على أي جزء لتعديله.",
 		incompleteAlert: "اضغط على الخطوة الناقصة أعلاه لإكمال الإعراب:",
+		mutashabih: {
+			fieldWording: "اللفظ",
+			fieldSurah: "السورة",
+			wordingQuestion: "بأي لفظ تكتمل هذه الآية؟",
+			wordingHint: "كل خيار هو لفظ آية متشابهة في هذا الموضع.",
+			noWord: "لا شيء هنا",
+			surahQuestion: "في أي سورة هذه الآية؟",
+			reviewTitle: "راجع إجابتك",
+			submitButton: "تحقق",
+			placesHeading: "مواضع كل لفظ",
+			thisAyah: "هذه الآية",
+		},
 	},
 	settings: {
 		title: "الإعدادات",
@@ -247,6 +256,8 @@ export const ar: Translations = {
 		filterForm: "الوزن",
 		filterRelation: "العلاقة النحوية",
 		anyOption: "الكل",
+		noOptionMatch: "لا نتائج مطابقة",
+		clearFilter: (label: string) => `مسح ${label}`,
 		wordsFound: (count: number, limit: number) => {
 			const n = formatNum(count, "ar");
 			const wordText =

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type {
 	AsbabData,
 	Manifest,
+	MutashabihQuizFile,
 	RhetoricEntry,
 	SurahFile,
 	SurahMutashabihFile,
@@ -21,6 +22,7 @@ interface CorpusLayers {
 	rhetoric: RhetoricEntry[];
 	asbab: AsbabData;
 	transitions: TransitionsFile;
+	mutashabihQuiz: MutashabihQuizFile;
 }
 
 /** One file per surah, at `/data/quran/{kind}/{nnn}.json`. */

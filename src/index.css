@@ -29,7 +29,8 @@
 	--duration-slow: 0.32s;
 	--slide-distance: 22px;
 	--sans: "Source Sans 3", "Segoe UI", var(--arabic-ui), sans-serif;
-	--serif: Literata, "Iowan Old Style", Georgia, serif;
+	/* Literata is Latin-only; Arabic inside a heading falls through to the bundled Arabic face. */
+	--serif: Literata, "Iowan Old Style", Georgia, var(--arabic-ui), serif;
 	--arabic: "Scheherazade New", "Amiri", serif;
 	--arabic-ui: "Noto Sans Arabic", sans-serif;
 	--radius: 18px;
@@ -1008,40 +1009,131 @@ main {
 	font-size: 0.78rem;
 	color: var(--muted);
 }
-.filter-cards {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-	gap: 0.45rem;
-	max-height: 13.5rem;
-	overflow: auto;
-	padding: 0.15rem 0.05rem 0.2rem;
+.filter-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
 	margin-top: 0.35rem;
 }
-/* Field radius 16, padding ≈ 12 → concentric card 4… use 8 for tap comfort */
-.filter-card {
-	display: grid;
-	gap: 0.2rem;
-	align-content: start;
-	justify-items: start;
-	text-align: start;
-	min-height: 48px;
-	padding: 0.55rem 0.65rem;
+.filter-chip {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.35rem;
+	min-height: 44px;
+	padding: 0.25rem 0.75rem;
 	border: 1px solid var(--line);
-	border-radius: 8px;
+	border-radius: 999px;
 	background: var(--bg);
 	color: var(--ink);
 	transition:
 		background-color var(--duration-fast) ease,
-		border-color var(--duration-fast) ease,
-		box-shadow var(--duration-fast) ease;
+		border-color var(--duration-fast) ease;
 }
-.filter-card b {
+.filter-chip b {
 	font-family: var(--arabic-ui);
-	font-size: 1.05rem;
+	font-size: 1rem;
 	font-weight: 600;
-	line-height: 1.25;
 }
-.filter-card small {
+.filter-chip small {
+	color: var(--muted);
+	font-size: 0.75rem;
+	font-variant-numeric: tabular-nums;
+}
+.filter-chip:hover:not(.is-on) {
+	background: var(--bg-2);
+}
+.filter-chip.is-on {
+	border-color: var(--teal);
+	background: var(--teal-soft);
+}
+.filter-chip:focus-visible {
+	outline: 2px solid var(--teal);
+	outline-offset: 2px;
+}
+/* Type-to-filter single select (Combobox.tsx) */
+.combobox {
+	position: relative;
+	/* Opening near the bottom scrolls the field up to just under the sticky header */
+	scroll-margin-top: 8rem;
+	display: grid;
+	gap: 0.25rem;
+	min-width: 0;
+}
+.combobox-label {
+	font-size: 0.78rem;
+	color: var(--muted);
+}
+.combobox-field {
+	position: relative;
+}
+.filters .combobox input {
+	padding-inline-end: 2.6rem;
+}
+.filters .combobox input.has-value {
+	font-family: var(--arabic-ui);
+	font-weight: 600;
+	border-color: var(--teal);
+	background: var(--teal-soft);
+}
+/* Room to scroll an open list clear of the phone dock on a short page */
+.search-page:has(.combobox-list) {
+	padding-bottom: 50dvh;
+}
+.combobox-clear {
+	position: absolute;
+	inset-block: 0;
+	inset-inline-end: 0.2rem;
+	margin-block: auto;
+	width: 2.2rem;
+	height: 2.2rem;
+	display: grid;
+	place-items: center;
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
+	color: var(--muted);
+	font-size: 1.2rem;
+	line-height: 1;
+}
+.combobox-clear:hover {
+	color: var(--ink);
+	background: var(--bg-2);
+}
+.combobox-clear:focus-visible {
+	outline: 2px solid var(--teal);
+	outline-offset: 1px;
+}
+.combobox-list {
+	position: absolute;
+	inset-inline: 0;
+	top: calc(100% + 0.3rem);
+	z-index: 20;
+	max-height: min(18rem, 50dvh);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 0.3rem;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: var(--paper);
+	box-shadow: var(--shadow);
+}
+.combobox-option {
+	display: grid;
+	gap: 0.1rem;
+	padding: 0.45rem 0.6rem;
+	min-height: 44px;
+	border-radius: 8px;
+	cursor: pointer;
+	text-align: start;
+}
+.combobox-option b {
+	font-family: var(--arabic-ui);
+	font-size: 1rem;
+	font-weight: 600;
+	line-height: 1.3;
+	text-align: start;
+}
+.combobox-option small {
 	color: var(--muted);
 	font-size: 0.78rem;
 	line-height: 1.35;
@@ -1049,20 +1141,20 @@ main {
 	-webkit-line-clamp: 2;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
-	max-width: 65ch;
 	text-align: start;
 }
-.filter-card:hover:not(.is-on) {
+.combobox-option.is-active {
 	background: var(--bg-2);
 }
-.filter-card.is-on {
-	border-color: var(--teal);
+.combobox-option[aria-selected="true"] {
 	background: var(--teal-soft);
 	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--teal) 35%, transparent);
 }
-.filter-card:focus-visible {
-	outline: 2px solid var(--teal);
-	outline-offset: 2px;
+.combobox-empty {
+	margin: 0;
+	padding: 0.6rem;
+	color: var(--muted);
+	font-size: 0.85rem;
 }
 .results {
 	list-style: none;
@@ -1326,10 +1418,6 @@ main {
 	}
 	.results button {
 		grid-template-columns: 1fr;
-	}
-	.filter-cards {
-		grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-		max-height: 11.5rem;
 	}
 	.sheet-backdrop {
 		position: fixed;
@@ -2137,6 +2225,72 @@ main {
 	box-shadow: inset 0 0 0 1.5px var(--teal);
 }
 
+/* Mutashabih lens: the blank where the ayah parts from a similar one */
+.quiz-word-token.quiz-mt-blank {
+	min-width: 4.5rem;
+	border: 1.5px dashed color-mix(in srgb, var(--gold) 70%, var(--line)) !important;
+	background: color-mix(in srgb, var(--gold-soft) 45%, var(--paper));
+}
+
+.quiz-word-token.quiz-mt-blank small {
+	font-family: var(--arabic-ui);
+	font-size: 0.85rem;
+	color: var(--muted);
+}
+
+.quiz-mt-places {
+	display: grid;
+	gap: 0.45rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.quiz-mt-places li {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.4rem 0.75rem;
+	padding: 0.5rem 0.75rem;
+	border-radius: 10px;
+	border: 1px solid var(--line);
+	background: var(--bg-2);
+}
+
+.quiz-mt-places li.is-own {
+	border-color: var(--gold);
+	background: var(--gold-soft);
+}
+
+.quiz-mt-places strong {
+	font-family: var(--arabic);
+	font-size: 1.35rem;
+	font-weight: 400;
+	line-height: 1.6;
+}
+
+.quiz-mt-refs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.quiz-mt-ref {
+	min-height: 36px;
+	padding: 0.2rem 0.6rem;
+	border-radius: 8px;
+	border: 1px solid var(--line);
+	background: var(--paper);
+	color: var(--teal);
+	font-size: 0.8rem;
+	font-weight: 600;
+}
+
+.quiz-mt-ref:hover {
+	border-color: var(--teal);
+}
+
 .quiz-word-token.is-correct-head-hint {
 	border: 1.5px dashed var(--rose) !important;
 	background: color-mix(in srgb, var(--rose) 12%, var(--paper)) !important;
@@ -2238,45 +2392,6 @@ main {
 
 .family-clause .quiz-rich-dot {
 	background: var(--indigo);
-}
-
-.quiz-gov-chip {
-	display: inline-flex;
-	align-items: baseline;
-	gap: 0.35rem;
-	min-height: 48px;
-	min-width: 48px;
-	padding: 0.35rem 0.75rem;
-	border-radius: 10px;
-	border: 1px solid var(--line);
-	background: var(--bg-2);
-	transition:
-		background-color var(--duration-fast) ease,
-		border-color var(--duration-fast) ease,
-		box-shadow var(--duration-fast) ease;
-}
-
-.quiz-gov-chip b {
-	font-family: var(--arabic);
-	font-size: 1.55rem;
-	font-weight: 400;
-}
-
-.quiz-gov-chip small {
-	font-size: 0.78rem;
-	color: var(--muted);
-	font-variant-numeric: tabular-nums;
-}
-
-.quiz-gov-chip:hover {
-	border-color: var(--teal);
-	background: var(--paper);
-}
-
-.quiz-gov-chip.is-selected {
-	background: var(--teal-soft);
-	border-color: var(--teal);
-	box-shadow: inset 0 0 0 1px var(--teal);
 }
 
 .quiz-case-card {
@@ -2635,7 +2750,7 @@ main {
 
 .quiz-wizard-breadcrumbs {
 	display: grid;
-	grid-template-columns: repeat(5, minmax(0, 1fr));
+	grid-template-columns: repeat(var(--quiz-steps, 5), minmax(0, 1fr));
 	gap: 0.35rem;
 }
 
@@ -2874,8 +2989,7 @@ main {
 	text-align: start;
 }
 
-.quiz-back-link,
-.quiz-text-reveal {
+.quiz-back-link {
 	border: 1px solid var(--line);
 	background: var(--bg-2);
 	border-radius: 10px;
@@ -2891,8 +3005,7 @@ main {
 		color var(--duration-fast) ease;
 }
 
-.quiz-back-link:hover,
-.quiz-text-reveal:hover {
+.quiz-back-link:hover {
 	border-color: var(--teal);
 	color: var(--teal);
 }
@@ -2908,21 +3021,6 @@ main {
 .quiz-wizard-grid-roles .quiz-rich-card {
 	min-height: 52px;
 	padding: 0.55rem 0.75rem;
-}
-
-.quiz-wizard-gov-grid {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-	align-content: start;
-	padding-top: 0.15rem;
-	/* Keep chips clear of sticky chrome */
-	padding-bottom: 0.25rem;
-}
-
-.quiz-wizard-gov-chip {
-	min-height: 52px;
-	padding: 0.4rem 0.9rem;
 }
 
 .quiz-wizard-case-list {
@@ -2942,7 +3040,7 @@ main {
 	align-content: start;
 }
 
-/* Step 5: Assembled Formula & Summary Tiles */
+/* Check step: assembled formula; each answer reopens its step */
 .quiz-wizard-formula-preview {
 	padding: 0.7rem 0.9rem;
 	border-radius: 12px;
@@ -2953,45 +3051,60 @@ main {
 	line-height: 1.65;
 	text-align: start;
 	overflow-wrap: anywhere;
+	margin: 0;
 }
 
-.quiz-wizard-summary-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.5rem;
-}
-
-.quiz-summary-tile {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: 0.15rem;
-	padding: 0.55rem 0.75rem;
-	border-radius: 10px;
+.quiz-formula-part {
+	display: inline;
+	font: inherit;
+	color: var(--ink);
+	background: var(--paper);
 	border: 1px solid var(--line);
-	background: var(--bg-2);
-	min-height: 52px;
-	text-align: start;
-	min-width: 0;
+	border-radius: 8px;
+	padding: 0 0.35rem;
+	cursor: pointer;
+	text-decoration: underline dotted
+		color-mix(in srgb, var(--teal) 60%, transparent);
+	text-underline-offset: 0.3em;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+	transition:
+		background-color var(--duration-fast) ease,
+		border-color var(--duration-fast) ease;
 }
 
-.quiz-summary-tile:hover {
+.quiz-formula-part:hover {
 	border-color: var(--teal);
 	background: var(--teal-soft);
 }
 
-.quiz-summary-tile small {
-	font-size: 0.78rem;
-	color: var(--muted);
-	line-height: 1.25;
+.quiz-formula-part:focus-visible {
+	outline: 2px solid var(--teal);
+	outline-offset: 2px;
 }
 
-.quiz-summary-tile strong {
-	font-family: var(--arabic-ui);
-	font-size: 1.05rem;
-	color: var(--ink);
-	line-height: 1.35;
-	overflow-wrap: anywhere;
+.quiz-formula-part.is-empty {
+	color: var(--muted);
+	border-style: dashed;
+	text-decoration: none;
+}
+
+.quiz-role-groups {
+	display: grid;
+	gap: 0.75rem;
+	align-content: start;
+}
+
+.quiz-role-group {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.quiz-role-group-title {
+	margin: 0;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--muted);
 }
 
 .quiz-wizard-submit-row,
@@ -3095,7 +3208,7 @@ main {
 
 .quiz-lens-switcher {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: 0.35rem;
 	padding: 0.22rem;
 	border-radius: 12px;
@@ -3167,10 +3280,6 @@ main {
 		padding: 0.25rem 0.3rem;
 		font-size: 0.78rem;
 	}
-}
-
-.quiz-wizard-breadcrumbs.is-two-steps {
-	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .quiz-meaning-note {

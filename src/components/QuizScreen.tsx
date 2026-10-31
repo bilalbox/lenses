@@ -9,18 +9,24 @@ import {
 import { stripTashkeel } from "../lib/arabic";
 import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
+import type { Locale } from "../lib/i18n/types";
 import { loadLayer } from "../lib/layers";
 import {
+	type MutashabihQuestion,
+	toMutashabihQuestions,
+} from "../lib/mutashabihQuiz";
+import {
 	getCaseMeta,
-	getLensLabel,
 	getRoleMeta,
 	getSignMeta,
 	QUIZ_CASES,
 	QUIZ_ROLES,
-	QUIZ_SIGNS,
 	type QuizLens,
+	type QuizRelation,
+	ROLE_GROUPS,
 	SARF_CLASSES,
 	SARF_STRUCTURES,
+	signsForCase,
 } from "../lib/quizCatalog";
 import {
 	CURATED_SURAHS,
@@ -44,9 +50,14 @@ import {
 	type WizardStep,
 } from "../lib/quizSession";
 import type { ExampleQuery } from "../lib/search";
-import type { Manifest } from "../lib/types";
-
-const LENS_ORDER: QuizLens[] = ["irab", "sarf", "examples"];
+import type { Manifest, MutashabihQuizFile } from "../lib/types";
+import { MutashabihQuiz } from "./MutashabihQuiz";
+import {
+	type QuizCrumb,
+	QuizLensSwitcher,
+	QuizMetaBar,
+	QuizProgressStrip,
+} from "./QuizChrome";
 
 /** A quiz surah's morphology plus its treebank; a missing treebank only costs the iʿrāb questions. */
 async function loadQuizSource(n: number): Promise<QuizSource> {
@@ -73,15 +84,22 @@ export function QuizScreen({
 		hideDiacritics ? stripTashkeel(text) : text;
 	const [loadedFiles, setLoadedFiles] = useState<QuizSource[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [mutashabihBank, setMutashabihBank] =
+		useState<MutashabihQuizFile | null>(null);
 
-	const pools = useRef<QuizPools>({ irab: [], sarf: [], examples: [] });
+	const pools = useRef<QuizPools>({
+		irab: [],
+		sarf: [],
+		examples: [],
+		mutashabih: [],
+	});
 	const [session, dispatch] = useReducer(
 		(state: QuizSessionState, event: QuizSessionEvent) =>
 			reduceQuizSession(state, event, pools.current),
 		undefined,
 		initQuizSession,
 	);
-	const { lens, drafts, verdict, streak, score } = session;
+	const { lens, drafts, verdict } = session;
 	const irabDraft = drafts.irab;
 	const sarfDraft = drafts.sarf;
 	const exDraft = drafts.examples;
@@ -92,10 +110,15 @@ export function QuizScreen({
 	useEffect(() => {
 		if (!manifest) return;
 		let cancel = false;
-		Promise.all(CURATED_SURAHS.map(loadQuizSource))
-			.then((sources) => {
+		Promise.all([
+			Promise.all(CURATED_SURAHS.map(loadQuizSource)),
+			// The mutashabih bank is one small file; without it only that lens is empty.
+			loadLayer("mutashabihQuiz").catch(() => null),
+		])
+			.then(([sources, bank]) => {
 				if (cancel) return;
 				setLoadedFiles(sources);
+				setMutashabihBank(bank);
 				setLoading(false);
 
 				// Wave 2: Load EXTENDED_QUIZ_SURAHS in the background for deeper variety
@@ -123,7 +146,15 @@ export function QuizScreen({
 		};
 	}, [manifest]);
 
-	const quizPools = useMemo(() => extractQuizPools(loadedFiles), [loadedFiles]);
+	const quizPools = useMemo<QuizPools>(
+		() => ({
+			...extractQuizPools(loadedFiles),
+			mutashabih: mutashabihBank
+				? toMutashabihQuestions(mutashabihBank, manifest.units)
+				: [],
+		}),
+		[loadedFiles, mutashabihBank, manifest.units],
+	);
 	pools.current = quizPools;
 	const { irab: irabPool, sarf: sarfPool, examples: examplesPool } = quizPools;
 
@@ -143,6 +174,7 @@ export function QuizScreen({
 					irab: Math.random(),
 					sarf: Math.random(),
 					examples: Math.random(),
+					mutashabih: Math.random(),
 				},
 			});
 		});
@@ -163,7 +195,9 @@ export function QuizScreen({
 	const exQuestion =
 		lens === "examples" ? (question as ExampleHuntQuestion | null) : null;
 
-	const activeQ = question;
+	// The mutashabih lens has its own view (returned below), so the grammar
+	// views here only ever hold a grammar question.
+	const activeQ = question as Exclude<typeof question, MutashabihQuestion>;
 
 	useEffect(() => {
 		if (activeQ?.id || lens) {
@@ -180,7 +214,6 @@ export function QuizScreen({
 	const handleNextRandom = () =>
 		dispatch({ type: "next", random: Math.random() });
 	const handleSubmit = useCallback(() => dispatch({ type: "submit" }), []);
-	const handleRevealAnswer = () => dispatch({ type: "reveal" });
 
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -209,6 +242,19 @@ export function QuizScreen({
 		);
 	}
 
+	if (lens === "mutashabih")
+		return (
+			<MutashabihQuiz
+				question={question as MutashabihQuestion}
+				session={session}
+				dispatch={dispatch}
+				hideDiacritics={hideDiacritics}
+				onOpenInReader={onOpenInReader}
+				onSelectLens={handleSelectLens}
+				onNext={handleNextRandom}
+			/>
+		);
+
 	const isComplete = verdict !== null;
 	const effectiveStep: WizardStep = isComplete ? maxStep(lens) : session.step;
 	const animDir = session.animDir;
@@ -227,11 +273,12 @@ export function QuizScreen({
 		classCode: t.quiz.fieldClass,
 		structureCode: t.quiz.fieldStructure,
 		spottedWordNum: t.quiz.fieldSpotted,
+		wording: t.quiz.mutashabih.fieldWording,
+		surah: t.quiz.mutashabih.fieldSurah,
 	};
 	const missingLabels = session.missing.map((field) => fieldLabels[field]);
 	const ok = (field: DraftField) => verdict?.fields[field] ?? false;
 	const allOk = verdict?.allCorrect ?? false;
-	const progressPct = Math.round((filledSteps / totalSteps) * 100);
 
 	const activeRoleMeta =
 		(lens === "irab" && irabQuestion
@@ -250,12 +297,7 @@ export function QuizScreen({
 			: null;
 
 	// Breadcrumb definitions per lens
-	const breadcrumbs: {
-		stepNum: WizardStep;
-		label: string;
-		isAr?: boolean;
-		filled: boolean;
-	}[] =
+	const breadcrumbs: QuizCrumb[] =
 		lens === "irab"
 			? [
 					{
@@ -369,34 +411,7 @@ export function QuizScreen({
 			 * TOP PANE: Lens Switcher + Pinned Mushaf Ayah
 			 * ==================================================================== */}
 			<section className="quiz-wizard-top" aria-label={t.common.verse}>
-				{/* 3-Lens Switcher */}
-				<div
-					className="quiz-lens-switcher"
-					role="tablist"
-					aria-label={t.quiz.lensesAria}
-				>
-					{LENS_ORDER.map((l) => {
-						const info = getLensLabel(l, locale);
-						const active = lens === l;
-						return (
-							<button
-								key={l}
-								id={`quiz-lens-tab-${l}`}
-								type="button"
-								role="tab"
-								aria-selected={active}
-								aria-controls="quiz-lens-panel"
-								className={`quiz-lens-tab${active ? " is-active" : ""}`}
-								onClick={() => handleSelectLens(l)}
-							>
-								<span className="quiz-lens-badge" lang="ar">
-									{info.badge}
-								</span>
-								<span className="quiz-lens-title">{info.title}</span>
-							</button>
-						);
-					})}
-				</div>
+				<QuizLensSwitcher lens={lens} onSelect={handleSelectLens} />
 
 				{/* Pinned Mushaf Ayah Box */}
 				<div
@@ -407,16 +422,6 @@ export function QuizScreen({
 					{lens === "irab" && effectiveStep === 2 ? (
 						<p className="quiz-wizard-pick-hint" role="status">
 							{t.quiz.pickGovernorHint}
-						</p>
-					) : null}
-
-					{lens === "examples" && effectiveStep === 1 && exQuestion ? (
-						<p className="quiz-wizard-pick-hint" role="status">
-							{locale === "ar"
-								? `انقر على الكلمة التي تمثل: ${exQuestion.facetTitle.ar}`
-								: locale === "id"
-									? `Ketuk kata pada ayat yang merupakan: ${exQuestion.facetTitle.id}`
-									: `Tap the word in the ayah that matches: ${exQuestion.facetTitle.en}`}
 						</p>
 					) : null}
 
@@ -505,95 +510,26 @@ export function QuizScreen({
 				aria-labelledby={`quiz-lens-tab-${lens}`}
 				aria-live="polite"
 			>
-				<div className="quiz-wizard-meta-bar">
-					<div className="quiz-wizard-surah-tag">
-						<span className="quiz-wizard-ref">
-							{activeQ.suraPhonetic} {formatNumber(activeQ.sura)}:
-							{formatNumber(activeQ.verse.v)}
-						</span>
-					</div>
+				<QuizMetaBar
+					place={{
+						phonetic: activeQ.suraPhonetic,
+						sura: activeQ.sura,
+						verse: activeQ.verse.v,
+					}}
+					onOpenReader={() =>
+						onOpenInReader(activeQ.sura, activeQ.verse.v, activeQ.targetWord.n)
+					}
+					session={session}
+					onSkip={handleNextRandom}
+				/>
 
-					<div className="quiz-wizard-stats">
-						<span className="quiz-wizard-stat" title={t.quiz.streakLabel}>
-							<strong>{formatNumber(streak)}</strong>
-							<small>{t.quiz.streakLabel}</small>
-						</span>
-						{score.attempts > 0 ? (
-							<span
-								className="quiz-wizard-stat quiz-wizard-stat-score"
-								title="Solved / attempts"
-							>
-								<strong>
-									{formatNumber(score.solved)}
-									<span className="quiz-stat-sep">/</span>
-									{formatNumber(score.attempts)}
-								</strong>
-							</span>
-						) : null}
-						<button
-							type="button"
-							className="quiz-wizard-skip quiz-wizard-reader"
-							onClick={() =>
-								onOpenInReader(
-									activeQ.sura,
-									activeQ.verse.v,
-									activeQ.targetWord.n,
-								)
-							}
-						>
-							{t.quiz.openReader(activeQ.sura, activeQ.verse.v)}
-						</button>
-						<button
-							type="button"
-							className="quiz-wizard-skip"
-							onClick={handleNextRandom}
-						>
-							{t.quiz.skipButton}
-						</button>
-					</div>
-				</div>
-
-				{/* Endowed Progress Bar + Step Breadcrumb Pills */}
-				<div className="quiz-wizard-progress-strip">
-					<div className="quiz-progress-track" aria-hidden="true">
-						<div
-							className="quiz-progress-fill"
-							style={{ width: `${progressPct}%` }}
-						/>
-					</div>
-					<div
-						className={`quiz-wizard-breadcrumbs${lens === "examples" ? " is-two-steps" : ""}`}
-						role="tablist"
-						aria-label={t.quiz.stepsAria}
-					>
-						{breadcrumbs.map((b, idx) => {
-							const isLast = idx === breadcrumbs.length - 1;
-							return (
-								<button
-									key={b.stepNum}
-									id={`quiz-step-tab-${b.stepNum}`}
-									type="button"
-									role="tab"
-									aria-selected={effectiveStep === b.stepNum}
-									aria-controls="quiz-step-panel"
-									title={b.label}
-									className={`quiz-crumb ${effectiveStep === b.stepNum ? "is-active" : ""} ${b.filled ? "is-filled" : ""}`}
-									onClick={() => goToStep(b.stepNum)}
-								>
-									<span className="quiz-crumb-num">
-										{isLast ? "✓" : formatNumber(idx + 1)}
-									</span>
-									<span
-										className="quiz-crumb-text"
-										lang={b.isAr ? "ar" : undefined}
-									>
-										{b.label}
-									</span>
-								</button>
-							);
-						})}
-					</div>
-				</div>
+				<QuizProgressStrip
+					crumbs={breadcrumbs}
+					filled={filledSteps}
+					total={totalSteps}
+					activeStep={effectiveStep}
+					onGoTo={goToStep}
+				/>
 
 				<div
 					id="quiz-step-panel"
@@ -617,47 +553,20 @@ export function QuizScreen({
 												)}
 											</h2>
 										</div>
-										<button
-											type="button"
-											className="quiz-text-reveal"
-											onClick={handleRevealAnswer}
-										>
-											{t.quiz.revealButton}
-										</button>
 									</header>
 
-									<div className="quiz-wizard-grid-roles">
-										{QUIZ_ROLES.map((r) => {
-											const active = irabDraft.relation === r.code;
-											return (
-												<button
-													key={r.code}
-													type="button"
-													className={`quiz-rich-card family-${r.family}${active ? " is-selected" : ""}`}
-													onClick={() => {
-														dispatch({
-															type: "answer",
-															field: "relation",
-															value: r.code,
-															step: 2,
-														});
-													}}
-												>
-													<div className="quiz-rich-top">
-														<strong lang="ar">{r.ar}</strong>
-														<span className="quiz-rich-dot" />
-													</div>
-													<small>
-														{locale === "id"
-															? r.id
-															: locale === "ar"
-																? r.governorLabel.ar
-																: r.en}
-													</small>
-												</button>
-											);
-										})}
-									</div>
+									<RolePicker
+										value={irabDraft.relation}
+										locale={locale}
+										onPick={(code) =>
+											dispatch({
+												type: "answer",
+												field: "relation",
+												value: code,
+												step: 2,
+											})
+										}
+									/>
 								</div>
 							)}
 
@@ -671,9 +580,6 @@ export function QuizScreen({
 													quranText(irabQuestion.targetWord.a),
 												)}
 											</h2>
-											<p className="quiz-wizard-subprompt">
-												{t.quiz.step2Hint}
-											</p>
 										</div>
 										<button
 											type="button"
@@ -683,32 +589,6 @@ export function QuizScreen({
 											{t.quiz.backButton}
 										</button>
 									</header>
-
-									<div className="quiz-wizard-gov-grid" dir="rtl">
-										{irabQuestion.verse.w
-											.filter((w) => w.n !== irabQuestion.targetWord.n)
-											.map((w) => {
-												const active = irabDraft.headWordNum === w.n;
-												return (
-													<button
-														key={w.n}
-														type="button"
-														className={`quiz-gov-chip quiz-wizard-gov-chip${active ? " is-selected" : ""}`}
-														onClick={() => {
-															dispatch({
-																type: "answer",
-																field: "headWordNum",
-																value: w.n,
-																step: 3,
-															});
-														}}
-													>
-														<b lang="ar">{quranText(w.a)}</b>
-														<small>#{formatNumber(w.n)}</small>
-													</button>
-												);
-											})}
-									</div>
 								</div>
 							)}
 
@@ -782,7 +662,7 @@ export function QuizScreen({
 									</header>
 
 									<div className="quiz-wizard-sign-grid">
-										{QUIZ_SIGNS.map((s) => {
+										{signsForCase(irabDraft.grammaticalCase).map((s) => {
 											const active = irabDraft.sign === s.code;
 											return (
 												<button
@@ -836,7 +716,7 @@ export function QuizScreen({
 												</button>
 											</header>
 
-											<div
+											<p
 												className="quiz-wizard-formula-preview"
 												dir="rtl"
 												lang="ar"
@@ -844,89 +724,47 @@ export function QuizScreen({
 												<strong className="formula-target">
 													{quranText(irabQuestion.targetWord.a)}:
 												</strong>{" "}
-												<span>
-													{irabDraft.relation
-														? getRoleMeta(irabDraft.relation).ar
-														: "—"}
-												</span>{" "}
-												<span>
-													{selectedHeadWord
-														? `لـ ${quranText(selectedHeadWord.a)}`
-														: "—"}
-												</span>{" "}
-												<span>
-													{irabDraft.grammaticalCase
-														? getCaseMeta(irabDraft.grammaticalCase).ar
-														: "—"}
-												</span>{" "}
+												<FormulaPart
+													step={1}
+													label={fieldLabels.relation}
+													value={
+														irabDraft.relation &&
+														getRoleMeta(irabDraft.relation).ar
+													}
+													onEdit={goToStep}
+												/>{" "}
+												<span>لـ</span>{" "}
+												<FormulaPart
+													step={2}
+													label={fieldLabels.headWordNum}
+													value={
+														selectedHeadWord && quranText(selectedHeadWord.a)
+													}
+													onEdit={goToStep}
+												/>{" "}
+												<FormulaPart
+													step={3}
+													label={fieldLabels.grammaticalCase}
+													value={
+														irabDraft.grammaticalCase &&
+														getCaseMeta(irabDraft.grammaticalCase).ar
+													}
+													onEdit={goToStep}
+												/>{" "}
 												<span>وعلامة إعرابه</span>{" "}
-												<span>
-													{irabDraft.sign
-														? getSignMeta(irabDraft.sign).ar
-														: "—"}
-												</span>
+												<FormulaPart
+													step={4}
+													label={fieldLabels.sign}
+													value={
+														irabDraft.sign && getSignMeta(irabDraft.sign).ar
+													}
+													onEdit={goToStep}
+												/>
 												.
-											</div>
-
-											<div className="quiz-wizard-summary-grid">
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(1)}
-												>
-													<small>
-														{formatNumber(1)} · {t.quiz.stepRoleCrumb}
-													</small>
-													<strong lang="ar">
-														{irabDraft.relation
-															? getRoleMeta(irabDraft.relation).ar
-															: t.quiz.notSet}
-													</strong>
-												</button>
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(2)}
-												>
-													<small>
-														{formatNumber(2)} ·{" "}
-														{activeRoleMeta.governorLabel[locale]}
-													</small>
-													<strong lang="ar">
-														{selectedHeadWord
-															? quranText(selectedHeadWord.a)
-															: t.quiz.notSet}
-													</strong>
-												</button>
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(3)}
-												>
-													<small>
-														{formatNumber(3)} · {t.quiz.stepCaseCrumb}
-													</small>
-													<strong lang="ar">
-														{irabDraft.grammaticalCase
-															? getCaseMeta(irabDraft.grammaticalCase).ar
-															: t.quiz.notSet}
-													</strong>
-												</button>
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(4)}
-												>
-													<small>
-														{formatNumber(4)} · {t.quiz.stepSignCrumb}
-													</small>
-													<strong lang="ar">
-														{irabDraft.sign
-															? getSignMeta(irabDraft.sign).ar
-															: t.quiz.notSet}
-													</strong>
-												</button>
-											</div>
+											</p>
+											<p className="quiz-wizard-subprompt">
+												{t.quiz.formulaEditHint}
+											</p>
 
 											{missingLabels.length > 0 && (
 												<div className="quiz-inline-error" role="alert">
@@ -942,13 +780,6 @@ export function QuizScreen({
 													onClick={handleSubmit}
 												>
 													<span>{t.quiz.submitButton}</span>
-												</button>
-												<button
-													type="button"
-													className="quiz-secondary-btn"
-													onClick={handleRevealAnswer}
-												>
-													{t.quiz.revealButton}
 												</button>
 											</div>
 										</>
@@ -1058,13 +889,6 @@ export function QuizScreen({
 														: `What is the lexical root (māddah) of ${quranText(sarfQuestion.targetWord.a)}?`}
 											</h2>
 										</div>
-										<button
-											type="button"
-											className="quiz-text-reveal"
-											onClick={handleRevealAnswer}
-										>
-											{t.quiz.revealButton}
-										</button>
 									</header>
 
 									<div className="quiz-wizard-sign-grid">
@@ -1267,7 +1091,7 @@ export function QuizScreen({
 												</button>
 											</header>
 
-											<div
+											<p
 												className="quiz-wizard-formula-preview"
 												dir="rtl"
 												lang="ar"
@@ -1275,90 +1099,47 @@ export function QuizScreen({
 												<strong className="formula-target">
 													{quranText(sarfQuestion.headAr)}:
 												</strong>{" "}
-												<span>
-													من مادة (
-													{sarfDraft.root
-														? sarfDraft.root.split("").join(" ")
-														: "—"}
-													)
-												</span>
-												، <span>على وزن ({sarfDraft.wazn || "—"})</span>،{" "}
-												<span>
-													{sarfDraft.classCode
-														? SARF_CLASSES[sarfDraft.classCode]?.ar
-														: "—"}
-												</span>
+												<span>من مادة</span>{" "}
+												<FormulaPart
+													step={1}
+													label={fieldLabels.root}
+													value={sarfDraft.root?.split("").join(" ")}
+													onEdit={goToStep}
+												/>
+												، <span>على وزن</span>{" "}
+												<FormulaPart
+													step={2}
+													label={fieldLabels.wazn}
+													value={sarfDraft.wazn}
+													onEdit={goToStep}
+												/>
 												،{" "}
-												<span>
-													{sarfDraft.structureCode
-														? SARF_STRUCTURES[sarfDraft.structureCode]?.ar
-														: "—"}
-												</span>
+												<FormulaPart
+													step={3}
+													label={fieldLabels.classCode}
+													value={
+														sarfDraft.classCode &&
+														(SARF_CLASSES[sarfDraft.classCode]?.ar ??
+															sarfDraft.classCode)
+													}
+													onEdit={goToStep}
+												/>
+												،{" "}
+												<FormulaPart
+													step={4}
+													label={fieldLabels.structureCode}
+													value={
+														sarfDraft.structureCode &&
+														(SARF_STRUCTURES[sarfDraft.structureCode]?.ar ??
+															sarfDraft.structureCode)
+													}
+													onEdit={goToStep}
+												/>
 												.
-											</div>
-
-											<div className="quiz-wizard-summary-grid">
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(1)}
-												>
-													<small>
-														{formatNumber(1)} ·{" "}
-														{locale === "ar" ? "المادة" : "Root"}
-													</small>
-													<strong lang="ar">
-														{sarfDraft.root
-															? sarfDraft.root.split("").join(" ")
-															: t.quiz.notSet}
-													</strong>
-												</button>
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(2)}
-												>
-													<small>
-														{formatNumber(2)} ·{" "}
-														{locale === "ar" ? "الوزن" : "Wazn"}
-													</small>
-													<strong lang="ar">
-														{sarfDraft.wazn || t.quiz.notSet}
-													</strong>
-												</button>
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(3)}
-												>
-													<small>
-														{formatNumber(3)} ·{" "}
-														{locale === "ar" ? "الباب / المشتق" : "Class"}
-													</small>
-													<strong lang="ar">
-														{sarfDraft.classCode
-															? SARF_CLASSES[sarfDraft.classCode]?.ar ||
-																sarfDraft.classCode
-															: t.quiz.notSet}
-													</strong>
-												</button>
-												<button
-													type="button"
-													className="quiz-summary-tile"
-													onClick={() => goToStep(4)}
-												>
-													<small>
-														{formatNumber(4)} ·{" "}
-														{locale === "ar" ? "البنية" : "Structure"}
-													</small>
-													<strong lang="ar">
-														{sarfDraft.structureCode
-															? SARF_STRUCTURES[sarfDraft.structureCode]?.ar ||
-																sarfDraft.structureCode
-															: t.quiz.notSet}
-													</strong>
-												</button>
-											</div>
+											</p>
+											<p className="quiz-wizard-subprompt">
+												{t.quiz.formulaEditHint}
+											</p>
 
 											{missingLabels.length > 0 && (
 												<div className="quiz-inline-error" role="alert">
@@ -1378,13 +1159,6 @@ export function QuizScreen({
 															? "تحقق واكشف التحليل الصرفي"
 															: "Submit & Reveal Classical Ṣarf"}
 													</span>
-												</button>
-												<button
-													type="button"
-													className="quiz-secondary-btn"
-													onClick={handleRevealAnswer}
-												>
-													{t.quiz.revealButton}
 												</button>
 											</div>
 										</>
@@ -1531,38 +1305,7 @@ export function QuizScreen({
 												{exQuestion.facetHint[locale]}
 											</p>
 										</div>
-										<button
-											type="button"
-											className="quiz-text-reveal"
-											onClick={handleRevealAnswer}
-										>
-											{t.quiz.revealButton}
-										</button>
 									</header>
-
-									<div className="quiz-wizard-gov-grid" dir="rtl">
-										{exQuestion.verse.w.map((w) => {
-											const active = exDraft.spottedWordNum === w.n;
-											return (
-												<button
-													key={w.n}
-													type="button"
-													className={`quiz-gov-chip quiz-wizard-gov-chip${active ? " is-selected" : ""}`}
-													onClick={() => {
-														dispatch({
-															type: "answer",
-															field: "spottedWordNum",
-															value: w.n,
-															step: 2,
-														});
-													}}
-												>
-													<b lang="ar">{quranText(w.a)}</b>
-													<small>#{formatNumber(w.n)}</small>
-												</button>
-											);
-										})}
-									</div>
 								</div>
 							)}
 
@@ -1587,7 +1330,7 @@ export function QuizScreen({
 												</button>
 											</header>
 
-											<div
+											<p
 												className="quiz-wizard-formula-preview"
 												dir="rtl"
 												lang="ar"
@@ -1595,10 +1338,13 @@ export function QuizScreen({
 												<strong className="formula-target">
 													{exQuestion.facetTitle.ar}:
 												</strong>{" "}
-												<span>
-													{spottedWord ? `﴿${quranText(spottedWord.a)}﴾` : "—"}
-												</span>
-											</div>
+												<FormulaPart
+													step={1}
+													label={fieldLabels.spottedWordNum}
+													value={spottedWord && `﴿${quranText(spottedWord.a)}﴾`}
+													onEdit={goToStep}
+												/>
+											</p>
 
 											{missingLabels.length > 0 && (
 												<div className="quiz-inline-error" role="alert">
@@ -1618,13 +1364,6 @@ export function QuizScreen({
 															? "تحقق واكشف التحليل"
 															: "Submit & Reveal Analysis"}
 													</span>
-												</button>
-												<button
-													type="button"
-													className="quiz-secondary-btn"
-													onClick={handleRevealAnswer}
-												>
-													{t.quiz.revealButton}
 												</button>
 											</div>
 										</>
@@ -1726,5 +1465,70 @@ export function QuizScreen({
 				</div>
 			</section>
 		</div>
+	);
+}
+
+/** The 13 roles under learner-facing headings, so the list scans in four short groups. */
+function RolePicker({
+	value,
+	locale,
+	onPick,
+}: {
+	value: QuizRelation | null;
+	locale: Locale;
+	onPick: (code: QuizRelation) => void;
+}) {
+	return (
+		<div className="quiz-role-groups">
+			{ROLE_GROUPS.map((group) => (
+				<section key={group.code} className="quiz-role-group">
+					<h3 className="quiz-role-group-title">{group.label[locale]}</h3>
+					<div className="quiz-wizard-grid-roles">
+						{QUIZ_ROLES.filter((r) => r.group === group.code).map((r) => (
+							<button
+								key={r.code}
+								type="button"
+								aria-pressed={value === r.code}
+								className={`quiz-rich-card family-${r.family}${value === r.code ? " is-selected" : ""}`}
+								onClick={() => onPick(r.code)}
+							>
+								<div className="quiz-rich-top">
+									<strong lang="ar">{r.ar}</strong>
+									<span className="quiz-rich-dot" />
+								</div>
+								<small>
+									{locale === "ar" ? r.governorLabel.ar : r[locale]}
+								</small>
+							</button>
+						))}
+					</div>
+				</section>
+			))}
+		</div>
+	);
+}
+
+/** One answer inside the assembled formula; tapping it reopens that step. */
+function FormulaPart({
+	step,
+	label,
+	value,
+	onEdit,
+}: {
+	step: WizardStep;
+	label: string;
+	value: string | null | undefined;
+	onEdit: (step: WizardStep) => void;
+}) {
+	return (
+		<button
+			type="button"
+			className={`quiz-formula-part${value ? "" : " is-empty"}`}
+			aria-label={`${label}: ${value || "—"}`}
+			title={label}
+			onClick={() => onEdit(step)}
+		>
+			{value || "—"}
+		</button>
 	);
 }

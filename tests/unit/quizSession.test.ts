@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { MutashabihQuestion } from "../../src/lib/mutashabihQuiz";
 import type {
 	ExampleHuntQuestion,
 	QuizPools,
@@ -48,10 +49,18 @@ const example = {
 	targetWord: word(4),
 } as ExampleHuntQuestion;
 
+const mutashabih = {
+	id: "m1",
+	sura: 2,
+	verse: { v: 49 },
+	answer: 1,
+} as MutashabihQuestion;
+
 const pools: QuizPools = {
 	irab: [irab("a", 1, 1), irab("b", 1, 1), irab("c", 2, 5)],
 	sarf: [sarf],
 	examples: [example],
+	mutashabih: [mutashabih],
 };
 
 function run(...events: QuizSessionEvent[]): QuizSessionState {
@@ -72,10 +81,15 @@ describe("quizSession: seeding and questions", () => {
 	it("seeds one random question per lens", () => {
 		const state = run({
 			type: "seed",
-			random: { irab: 0.99, sarf: 0, examples: 0.5 },
+			random: { irab: 0.99, sarf: 0, examples: 0.5, mutashabih: 0.5 },
 		});
 		expect(state.seeded).toBe(true);
-		expect(state.indices).toEqual({ irab: 2, sarf: 0, examples: 0 });
+		expect(state.indices).toEqual({
+			irab: 2,
+			sarf: 0,
+			examples: 0,
+			mutashabih: 0,
+		});
 		expect(activeQuestion(state, pools)?.id).toBe("c");
 	});
 
@@ -117,7 +131,6 @@ describe("quizSession: answering and submitting", () => {
 				sign: true,
 			},
 			allCorrect: true,
-			revealed: false,
 		});
 		expect(state.streak).toBe(1);
 		expect(state.score).toEqual({ solved: 1, attempts: 1 });
@@ -174,25 +187,23 @@ describe("quizSession: answering and submitting", () => {
 	});
 });
 
-describe("quizSession: revealing", () => {
-	it("fills the answer, shows the check step, and counts a miss", () => {
-		const state = run({ type: "reveal" });
-		expect(state.drafts.irab).toEqual({
-			relation: "subj",
-			headWordNum: 1,
-			grammaticalCase: "NOM",
-			sign: "damma",
-		});
-		expect(state.step).toBe(5);
-		expect(state.verdict).toMatchObject({ allCorrect: false, revealed: true });
-		expect(state.score).toEqual({ solved: 0, attempts: 1 });
+describe("quizSession: case and sign stay compatible", () => {
+	it("clears a sign the newly chosen case cannot take", () => {
+		const state = run(
+			{ type: "answer", field: "grammaticalCase", value: "NOM" },
+			{ type: "answer", field: "sign", value: "waw" },
+			{ type: "answer", field: "grammaticalCase", value: "GEN" },
+		);
+		expect(state.drafts.irab.sign).toBeNull();
 	});
 
-	it("does not undo a recorded win", () => {
-		const state = run(...fullIrab, { type: "submit" }, { type: "reveal" });
-		expect(state.verdict?.revealed).toBe(true);
-		expect(state.streak).toBe(1);
-		expect(state.score).toEqual({ solved: 1, attempts: 1 });
+	it("keeps a sign both cases share", () => {
+		const state = run(
+			{ type: "answer", field: "grammaticalCase", value: "NOM" },
+			{ type: "answer", field: "sign", value: "muqaddara" },
+			{ type: "answer", field: "grammaticalCase", value: "ACC" },
+		);
+		expect(state.drafts.irab.sign).toBe("muqaddara");
 	});
 });
 
@@ -237,6 +248,22 @@ describe("quizSession: wizard navigation and lenses", () => {
 			fields: { spottedWordNum: true },
 			allCorrect: true,
 		});
+	});
+
+	it("grades the mutashabih lens on wording and surah in three steps", () => {
+		const opened = run({ type: "selectLens", lens: "mutashabih" });
+		expect(progress(opened)).toEqual({ filled: 1, total: 3 });
+		const state = run(
+			{ type: "selectLens", lens: "mutashabih" },
+			{ type: "answer", field: "wording", value: 1, step: 2 },
+			{ type: "answer", field: "surah", value: 7, step: 3 },
+			{ type: "submit" },
+		);
+		expect(state.verdict).toEqual({
+			fields: { wording: true, surah: false },
+			allCorrect: false,
+		});
+		expect(state.score).toEqual({ solved: 0, attempts: 1 });
 	});
 
 	it("grades the ṣarf lens field by field", () => {

@@ -10,7 +10,7 @@ import {
 	type QuizRelation,
 	type QuizSign,
 } from "../../src/lib/quizCatalog";
-import { extractQuizPools, type QuizPools } from "../../src/lib/quizEngine";
+import { extractQuizPools } from "../../src/lib/quizEngine";
 import type { SurahFile, SurahSyntaxFile } from "../../src/lib/types";
 
 describe("quizEngine: metadata lookup", () => {
@@ -151,7 +151,7 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 	});
 
 	it("extracts sarf questions with exactly 4 unique options per dimension and the answer included", () => {
-		const pools: QuizPools = extractQuizPools([{ surah: fatihah }]);
+		const pools = extractQuizPools([{ surah: fatihah }]);
 		expect(pools.sarf.length).toBeGreaterThan(0);
 
 		for (const sq of pools.sarf) {
@@ -179,7 +179,7 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 	});
 
 	it("extracts example hunt questions with valid clues and answer words", () => {
-		const pools: QuizPools = extractQuizPools([{ surah: fatihah }]);
+		const pools = extractQuizPools([{ surah: fatihah }]);
 		expect(pools.examples.length).toBeGreaterThan(0);
 
 		for (const eq of pools.examples) {

@@ -1,4 +1,5 @@
 import { stripDiacritics } from "./arabic";
+import type { MutashabihQuestion } from "./mutashabihQuiz";
 import {
 	type QuizCase,
 	type QuizRelation,
@@ -722,7 +723,11 @@ export interface QuizPools {
 	irab: QuizQuestion[];
 	sarf: SarfQuestion[];
 	examples: ExampleHuntQuestion[];
+	mutashabih: MutashabihQuestion[];
 }
+
+/** The pools built from surah morphology and treebanks; mutashabih comes from its own bank. */
+type GrammarPools = Omit<QuizPools, "mutashabih">;
 
 /** One surah's morphology, with its NoorBayan treebank when loaded (needed for iʿrāb questions). */
 export interface QuizSource {
@@ -738,7 +743,7 @@ function irabPool(sources: QuizSource[]): QuizQuestion[] {
 }
 
 /** Every quiz pool for the loaded surahs: iʿrāb from NoorBayan, ṣarf and examples from morphology. */
-export function extractQuizPools(sources: QuizSource[]): QuizPools {
+export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 	const files = sources.map((source) => source.surah);
 	interface RawEntry {
 		sura: number;

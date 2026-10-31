@@ -36,6 +36,8 @@ export interface RoleMeta {
 	en: string;
 	id: string;
 	family: "core" | "nom" | "clause";
+	/** Learner-facing heading the role is listed under in the quiz picker. */
+	group: RoleGroup;
 	governorLabel: {
 		ar: string;
 		en: string;
@@ -56,6 +58,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Doer (Fāʿil)",
 		id: "Pelaku (Fāʿil)",
 		family: "core",
+		group: "pillars",
 		governorLabel: {
 			ar: "الفعل العامل",
 			en: "Governing Verb (Fiʿl)",
@@ -74,6 +77,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Passive Subject (Nāʾib Fāʿil)",
 		id: "Na'ibul Fa'il (Subjek Pasif)",
 		family: "core",
+		group: "pillars",
 		governorLabel: {
 			ar: "الفعل المبني للمجهول",
 			en: "Passive Verb (Fiʿl Majhūl)",
@@ -92,6 +96,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Direct Object (Mafʿūl bihi)",
 		id: "Objek (Mafʿūl bih)",
 		family: "core",
+		group: "complements",
 		governorLabel: {
 			ar: "الفعل المتعدي",
 			en: "Transitive Verb (Fiʿl)",
@@ -110,6 +115,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Subject / Ism Nāsikh",
 		id: "Mubtada' / Isim Nasikh",
 		family: "core",
+		group: "pillars",
 		governorLabel: {
 			ar: "الناسخ أو المسند",
 			en: "Nāsikh or Predicate Head",
@@ -127,6 +133,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Predicate (Khabar)",
 		id: "Predikat (Khabar)",
 		family: "core",
+		group: "pillars",
 		governorLabel: {
 			ar: "المبتدأ أو الناسخ",
 			en: "Subject (Mubtadaʾ) or Nāsikh",
@@ -144,6 +151,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Annexed Noun (Muḍāf ilayhi)",
 		id: "Mudhaf Ilaih",
 		family: "nom",
+		group: "genitives",
 		governorLabel: {
 			ar: "المضاف",
 			en: "Annexed Head (Muḍāf)",
@@ -162,6 +170,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Prepositional Genitive (Majrūr)",
 		id: "Isim Majrur",
 		family: "nom",
+		group: "genitives",
 		governorLabel: {
 			ar: "حرف الجر",
 			en: "Preposition (Ḥarf Jarr)",
@@ -180,6 +189,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Adjective Follower (Naʿt)",
 		id: "Sifat (Naʿt)",
 		family: "nom",
+		group: "followers",
 		governorLabel: {
 			ar: "المنعوت (الموصوف)",
 			en: "Described Noun (Manʿūt)",
@@ -197,6 +207,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Apposition (Badal)",
 		id: "Badal (Pengganti/Penjelas)",
 		family: "nom",
+		group: "followers",
 		governorLabel: {
 			ar: "المبدل منه",
 			en: "Antecedent Noun (Mubdal minhu)",
@@ -214,6 +225,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Conjoined (Maʿṭūf)",
 		id: "Kata Sambung (Maʿṭūf)",
 		family: "clause",
+		group: "followers",
 		governorLabel: {
 			ar: "المعطوف عليه",
 			en: "Conjoined Head (Maʿṭūf ʿalayhi)",
@@ -231,6 +243,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Circumstantial (Ḥāl)",
 		id: "Keterangan Keadaan (Ḥāl)",
 		family: "clause",
+		group: "complements",
 		governorLabel: {
 			ar: "عامل الحال / صاحبها",
 			en: "Verbal Governor / Owner of State",
@@ -249,6 +262,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Cognate Accusative (Mafʿūl Muṭlaq)",
 		id: "Maf'ul Muthlaq",
 		family: "nom",
+		group: "complements",
 		governorLabel: {
 			ar: "الفعل المؤكَّد",
 			en: "Cognate Verb (Fiʿl)",
@@ -267,6 +281,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		en: "Specification (Tamyīz)",
 		id: "Tamyiz (Penjelas)",
 		family: "nom",
+		group: "complements",
 		governorLabel: {
 			ar: "المميَّز / العامل",
 			en: "Clarified Head (Mumayyaz)",
@@ -401,6 +416,58 @@ export const QUIZ_SIGNS: SignMeta[] = [
 	},
 ];
 
+export type RoleGroup = "pillars" | "complements" | "genitives" | "followers";
+
+/** Headings for the role picker, in display order; each role sits under its `group`. */
+export const ROLE_GROUPS: { code: RoleGroup; label: Record<Locale, string> }[] =
+	[
+		{
+			code: "pillars",
+			label: {
+				ar: "أركان الجملة",
+				en: "Sentence pillars",
+				id: "Pilar kalimat",
+			},
+		},
+		{
+			code: "complements",
+			label: {
+				ar: "المفاعيل والمكمّلات",
+				en: "Objects & complements",
+				id: "Objek & pelengkap",
+			},
+		},
+		{
+			code: "genitives",
+			label: {
+				ar: "الجرّ والإضافة",
+				en: "Genitive & annexation",
+				id: "Jar & idhafah",
+			},
+		},
+		{
+			code: "followers",
+			label: { ar: "التوابع", en: "Followers", id: "Tawābiʿ" },
+		},
+	];
+
+/**
+ * Signs that can mark each case. Every question in the dataset falls inside this
+ * table (checked in tests), so narrowing the sign picker never hides the answer.
+ */
+export const SIGNS_BY_CASE: Record<QuizCase, readonly QuizSign[]> = {
+	NOM: ["damma", "waw", "alif", "muqaddara"],
+	ACC: ["fatha", "ya", "alif", "niyaba_haraka", "muqaddara"],
+	GEN: ["kasra", "ya", "niyaba_haraka", "muqaddara"],
+};
+
+/** The sign choices for a chosen case; every sign while no case is chosen. */
+export function signsForCase(grammaticalCase: QuizCase | null): SignMeta[] {
+	if (!grammaticalCase) return QUIZ_SIGNS;
+	const allowed = SIGNS_BY_CASE[grammaticalCase];
+	return QUIZ_SIGNS.filter((s) => allowed.includes(s.code));
+}
+
 export function getRoleMeta(code: QuizRelation): RoleMeta {
 	return QUIZ_ROLES.find((r) => r.code === code) ?? QUIZ_ROLES[0]!;
 }
@@ -413,7 +480,7 @@ export function getSignMeta(code: QuizSign): SignMeta {
 	return QUIZ_SIGNS.find((s) => s.code === code) ?? QUIZ_SIGNS[0]!;
 }
 
-export type QuizLens = "irab" | "sarf" | "examples";
+export type QuizLens = "irab" | "sarf" | "examples" | "mutashabih";
 
 export const SARF_CLASSES: Record<
 	string,
@@ -694,6 +761,11 @@ export function getLensLabel(
 			en: { title: "Pattern Hunt", badge: "شواهد" },
 			ar: { title: "شواهد وأنماط", badge: "شواهد" },
 			id: { title: "Lacak Pola", badge: "شواهد" },
+		},
+		mutashabih: {
+			en: { title: "Similar Verses", badge: "متشابه" },
+			ar: { title: "المتشابه اللفظي", badge: "متشابه" },
+			id: { title: "Ayat Mirip", badge: "متشابه" },
 		},
 	};
 	return map[lens][locale];

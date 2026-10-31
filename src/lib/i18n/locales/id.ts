@@ -57,7 +57,6 @@ export const id: Translations = {
 			`LANGKAH 2 DARI 4 · PILIH ${govLabel.toUpperCase()}`,
 		step2Question: (govAr: string, wordAr: string) =>
 			`Kata mana pada ayat ini yang menjadi ${govAr} bagi ${wordAr}?`,
-		step2Hint: "Pilih kata di bawah atau ketuk langsung pada teks ayat di atas",
 		step3Eyebrow: "LANGKAH 3 DARI 4 · HUKUM I'RAB (KASUS)",
 		step3Question: (wordAr: string) =>
 			`Apa hukum i'rab (الحالة الإعرابية) dari kata ${wordAr}?`,
@@ -69,14 +68,26 @@ export const id: Translations = {
 			`Tinjau rangkaian i'rab Anda untuk ${wordAr}`,
 		backButton: "← Kembali",
 		editButton: "← Ubah",
-		revealButton: "Lihat Kunci",
 		submitButton: "Periksa & Tampilkan I'rab Klasik",
 		nextButton: "Soal Berikutnya →",
 		exactMatchEyebrow: "TEPAT SEKALI · أحسنت",
 		reviewEyebrow: "TINJAUAN I'RAB · التصويب",
 		classicalHeading: (wordAr: string) => `I'rab Klasik untuk ${wordAr}`,
-		notSet: "Belum dipilih",
+		formulaEditHint: "Ketuk bagian mana pun untuk mengubahnya.",
 		incompleteAlert: "Ketuk langkah yang belum lengkap di atas:",
+		mutashabih: {
+			fieldWording: "Lafaz",
+			fieldSurah: "Surah",
+			wordingQuestion: "Lafaz mana yang melengkapi ayat ini?",
+			wordingHint:
+				"Setiap pilihan adalah bacaan ayat yang mirip di posisi ini.",
+			noWord: "Tidak ada kata",
+			surahQuestion: "Ayat ini ada di surah mana?",
+			reviewTitle: "Tinjau jawabanmu",
+			submitButton: "Periksa",
+			placesHeading: "Letak setiap lafaz",
+			thisAyah: "ayat ini",
+		},
 	},
 	settings: {
 		title: "Pengaturan",
@@ -248,6 +259,8 @@ export const id: Translations = {
 		filterForm: "Wazan verba",
 		filterRelation: "Relasi",
 		anyOption: "Semua",
+		noOptionMatch: "Tidak ada yang cocok",
+		clearFilter: (label: string) => `Hapus ${label}`,
 		wordsFound: (count: number, limit: number) =>
 			`${formatNum(count, "id")} kata${count > limit ? ` · menampilkan ${formatNum(limit, "id")}` : ""}`,
 		noWordsMatch: "Tidak ada kata yang cocok dengan kombinasi ini.",
