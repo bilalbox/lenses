@@ -2,43 +2,33 @@
 	"version": 1,
 	"findings": [
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|1153",
-			"score": 50,
+			"id": "src/components/QuizScreen.tsx|(anonymous)|956",
+			"score": 49,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|1597",
-			"score": 68,
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1392",
+			"score": 67,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|1837",
+			"id": "src/components/QuizScreen.tsx|(anonymous)|1632",
 			"score": 36,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|260",
-			"score": 69,
-			"note": "Added via --update; replace with owning issue note."
-		},
-		{
-			"id": "src/components/QuizScreen.tsx|(anonymous)|614",
+			"id": "src/components/QuizScreen.tsx|(anonymous)|424",
 			"score": 28,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
 			"id": "src/components/QuizScreen.tsx|QuizScreen",
-			"score": 192,
+			"score": 168,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
 			"id": "src/components/RhetoricScreen.tsx|RhetoricScreen",
 			"score": 44,
-			"note": "Added via --update; replace with owning issue note."
-		},
-		{
-			"id": "src/lib/layout.ts|layoutGraph",
-			"score": 75,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
@@ -49,11 +39,6 @@
 		{
 			"id": "src/lib/quizEngine.ts|extractQuizPools",
 			"score": 64,
-			"note": "Added via --update; replace with owning issue note."
-		},
-		{
-			"id": "src/lib/quizEngine.ts|extractQuizQuestionsFromSurah",
-			"score": 139,
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{

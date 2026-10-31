@@ -13,20 +13,22 @@ Emits:
 
 from __future__ import annotations
 
-import argparse
 import json
 import re
-import urllib.request
 from pathlib import Path
 from typing import Any
 
-from paths import ROOT
-
-DEFAULT_CACHE_DIR = ROOT / "data" / "cache"
-DEFAULT_OUT_DIR = ROOT / "public" / "data" / "quran" / "structure"
-DEFAULT_TRANSITIONS_PATH = ROOT / "public" / "data" / "quran" / "transitions.json"
-DEFAULT_MANIFEST_PATH = ROOT / "public" / "data" / "quran" / "manifest.json"
-DEFAULT_NOTICES_PATH = ROOT / "public" / "data" / "NOTICES.txt"
+from pipeline import (
+    CACHE,
+    MANIFEST,
+    OUT,
+    add_notice,
+    edit_manifest,
+    fetch_cached,
+    surah_path,
+    upsert_source,
+    write_json,
+)
 
 MARAYA_URL = "https://maraya.app/assets/index-5WaNZ_Wy.js"
 TANASUQ_URL = "https://files.turath.io/books-v3/9992.json"
@@ -168,16 +170,7 @@ TRANSITION_PAIRS = (("T1", "T3"), ("T3", "T1"))
 
 
 def fetch(url: str, dest: Path) -> Path:
-    """Download url to dest unless a non-trivial cache already exists."""
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    if dest.exists() and dest.stat().st_size > 10_000:
-        return dest
-    print(f"Downloading {url} ...")
-    req = urllib.request.Request(url, headers={"User-Agent": "Lenses/1.0 (structure build)"})
-    with urllib.request.urlopen(req, timeout=120) as resp, open(dest, "wb") as out:
-        out.write(resp.read())
-    print(f"  saved {dest} ({dest.stat().st_size / 1024:.1f} KB)")
-    return dest
+    return fetch_cached(url, dest, user_agent="Lenses/1.0 (structure build)", min_size=10_000)
 
 
 def extract_js_object(js: str, name: str) -> str:
@@ -580,90 +573,66 @@ def compile_surah_file(
     return payload
 
 
-def update_manifest(manifest_path: Path, block_counts: dict[int, int]) -> None:
+SOURCES: list[dict[str, Any]] = [
+    {
+        "id": "maraya-ring-composition",
+        "title": "Maraya Ring Composition Corpus (Ayah Labs)",
+        "kind": "structure",
+        "attribution": "Feras Mansi / Ayah Labs (maraya.app)",
+        "description": (
+            "Full-Quran symmetrical block maps, architectural families, and pivot metadata."
+        ),
+        "license": "Used with attribution for educational research tooling",
+        "url": "https://maraya.app",
+    },
+    {
+        "id": "suyuti-tanasuq-al-durar",
+        "title": "Tanāsuq al-Durar fī Tanāsub al-Suwar (Asrār Tartīb al-Qurʾān)",
+        "kind": "munasabat",
+        "attribution": "Jalāl al-Dīn al-Suyūṭī (Turath Book 9992)",
+        "description": "Classical inter-surah munāsabāt explaining contiguous muṣḥaf order.",
+        "license": "Classical heritage text via Turath.io",
+        "url": "https://app.turath.io/book/9992",
+    },
+]
+
+
+def update_manifest(block_counts: dict[int, int]) -> None:
     """Attach structure block counts and source entries to the catalog."""
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    for unit in manifest["units"]:
-        n = int(unit["n"])
-        unit["structure"] = block_counts.get(n, 0)
 
-    sources = manifest.setdefault("sources", [])
-    by_id = {s.get("id"): s for s in sources if isinstance(s, dict)}
-    sources_spec = [
-        {
-            "id": "maraya-ring-composition",
-            "title": "Maraya Ring Composition Corpus (Ayah Labs)",
-            "kind": "structure",
-            "attribution": "Feras Mansi / Ayah Labs (maraya.app)",
-            "description": (
-                "Full-Quran symmetrical block maps, architectural families, and pivot metadata."
-            ),
-            "license": "Used with attribution for educational research tooling",
-            "url": "https://maraya.app",
-        },
-        {
-            "id": "suyuti-tanasuq-al-durar",
-            "title": "Tanāsuq al-Durar fī Tanāsub al-Suwar (Asrār Tartīb al-Qurʾān)",
-            "kind": "munasabat",
-            "attribution": "Jalāl al-Dīn al-Suyūṭī (Turath Book 9992)",
-            "description": "Classical inter-surah munāsabāt explaining contiguous muṣḥaf order.",
-            "license": "Classical heritage text via Turath.io",
-            "url": "https://app.turath.io/book/9992",
-        },
-    ]
-    for spec in sources_spec:
-        existing = by_id.get(spec["id"])
-        if existing:
-            existing.update(spec)
-        else:
-            sources.append(spec)
+    def edit(manifest: dict[str, Any]) -> None:
+        for unit in manifest["units"]:
+            unit["structure"] = block_counts.get(int(unit["n"]), 0)
+        for source in SOURCES:
+            upsert_source(manifest, source)
+        manifest.setdefault("stats", {}).update(
+            {
+                "structureSurahs": 114,
+                "structureBlocks": sum(block_counts.values()),
+                "munasabatTransitions": 113,
+            }
+        )
 
-    stats = manifest.setdefault("stats", {})
-    stats["structureSurahs"] = 114
-    stats["structureBlocks"] = sum(block_counts.values())
-    stats["munasabatTransitions"] = 113
+    edit_manifest(edit)
 
-    manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, separators=(",", ":")),
-        encoding="utf-8",
+
+def update_notices() -> None:
+    """Attribution blocks for Maraya and Tanāsuq sources."""
+    add_notice(
+        "Maraya Ring Composition Corpus",
+        "Platform: maraya.app (Ayah Labs)\n"
+        "Author: Feras Mansi\n"
+        "URL: https://maraya.app\n"
+        "License / Terms: Educational research use with attribution to Ayah Labs / Maraya.\n"
+        "Used in Lenses for full-Quran symmetrical surah blocks, families, and pivot axes.",
     )
-
-
-def update_notices(notices_path: Path) -> None:
-    """Append attribution blocks for Maraya and Tanāsuq sources."""
-    text = notices_path.read_text(encoding="utf-8")
-    blocks = [
-        (
-            "------------------------------------------------------------\n"
-            "Maraya Ring Composition Corpus\n"
-            "Platform: maraya.app (Ayah Labs)\n"
-            "Author: Feras Mansi\n"
-            "URL: https://maraya.app\n"
-            "License / Terms: Educational research use with attribution to Ayah Labs / Maraya.\n"
-            "Used in Lenses for full-Quran symmetrical surah blocks, families, and pivot axes."
-        ),
-        (
-            "------------------------------------------------------------\n"
-            "Tanāsuq al-Durar fī Tanāsub al-Suwar (Asrār Tartīb al-Qurʾān)\n"
-            "Author: Jalāl al-Dīn al-Suyūṭī (d. 911 AH)\n"
-            "Source: Turath.io Book 9992 (https://files.turath.io/books-v3/9992.json)\n"
-            "License / Terms: Classical heritage text; retained with clear attribution.\n"
-            "Used in Lenses for inter-surah munāsabāt transition exegesis."
-        ),
-    ]
-    to_add = [b for b in blocks if b.split("\n", 1)[0] not in text and b.split("\n")[1] not in text]
-    # dedupe by distinctive title line
-    to_add = []
-    if "Maraya Ring Composition Corpus" not in text:
-        to_add.append(blocks[0])
-    if "Tanāsuq al-Durar fī Tanāsub al-Suwar" not in text:
-        to_add.append(blocks[1])
-    if not to_add:
-        print("NOTICES.txt already up to date.")
-        return
-    separator = "\n\n" if not text.endswith("\n\n") else ""
-    notices_path.write_text(text + separator + "\n\n".join(to_add) + "\n", encoding="utf-8")
-    print("Updated NOTICES.txt.")
+    add_notice(
+        "Tanāsuq al-Durar fī Tanāsub al-Suwar (Asrār Tartīb al-Qurʾān)",
+        "Author: Jalāl al-Dīn al-Suyūṭī (d. 911 AH)\n"
+        "Source: Turath.io Book 9992 (https://files.turath.io/books-v3/9992.json)\n"
+        "License / Terms: Classical heritage text; retained with clear attribution.\n"
+        "Used in Lenses for inter-surah munāsabāt transition exegesis.",
+    )
 
 
 def validate_structure_file(payload: dict[str, Any], unit: dict[str, Any]) -> None:
@@ -693,32 +662,25 @@ def validate_structure_file(payload: dict[str, Any], unit: dict[str, Any]) -> No
         raise RuntimeError(f"surah {payload['sura']}: missing pivot/center block")
 
 
-def build_structure(
-    cache_dir: Path,
-    out_dir: Path,
-    transitions_path: Path,
-    manifest_path: Path,
-    notices_path: Path,
-) -> None:
+def build_structure() -> None:
     """Compile all structure JSON artifacts."""
     print("Step 1: Load manifest...")
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     units: list[dict[str, Any]] = manifest["units"]
     if len(units) != 114:
         raise RuntimeError("manifest must list 114 surahs")
 
     print("Step 2: Load Maraya structural corpus...")
-    maraya = load_maraya(cache_dir)
+    maraya = load_maraya(CACHE)
 
     print("Step 3: Load Tanāsuq al-Durar (Turath 9992)...")
-    tanasuq_path = fetch(TANASUQ_URL, cache_dir / "turath" / "tanasuq-9992.json")
+    tanasuq_path = fetch(TANASUQ_URL, CACHE / "turath" / "tanasuq-9992.json")
     book = json.loads(tanasuq_path.read_text(encoding="utf-8"))
     alias_index = build_alias_index(units)
     sections = extract_tanasuq_sections(book, alias_index)
     print(f"  extracted Tanāsuq sections for {len(sections)} surahs")
 
     print("Step 4: Emit structure/NNN.json ...")
-    out_dir.mkdir(parents=True, exist_ok=True)
     block_counts: dict[int, int] = {}
     transitions: list[dict[str, Any]] = []
     for sura in range(1, 115):
@@ -732,24 +694,14 @@ def build_structure(
                     **payload["transitionToNext"],
                 }
             )
-        (out_dir / f"{sura:03d}.json").write_text(
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
-            encoding="utf-8",
-        )
+        write_json(surah_path("structure", sura), payload)
 
     print("Step 5: Emit transitions.json ...")
-    transitions_path.write_text(
-        json.dumps(
-            {"count": len(transitions), "transitions": transitions},
-            ensure_ascii=False,
-            separators=(",", ":"),
-        ),
-        encoding="utf-8",
-    )
+    write_json(OUT / "transitions.json", {"count": len(transitions), "transitions": transitions})
 
     print("Step 6: Update manifest + notices...")
-    update_manifest(manifest_path, block_counts)
-    update_notices(notices_path)
+    update_manifest(block_counts)
+    update_notices()
 
     print(
         f"Done: {len(block_counts)} surahs, {sum(block_counts.values())} blocks, "
@@ -758,22 +710,7 @@ def build_structure(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Compile Maraya ring composition + munāsabāt transitions."
-    )
-    parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
-    parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
-    parser.add_argument("--transitions", type=Path, default=DEFAULT_TRANSITIONS_PATH)
-    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
-    parser.add_argument("--notices", type=Path, default=DEFAULT_NOTICES_PATH)
-    args = parser.parse_args()
-    build_structure(
-        cache_dir=args.cache_dir,
-        out_dir=args.out_dir,
-        transitions_path=args.transitions,
-        manifest_path=args.manifest,
-        notices_path=args.notices,
-    )
+    build_structure()
 
 
 if __name__ == "__main__":

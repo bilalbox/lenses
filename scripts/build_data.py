@@ -3,7 +3,7 @@
 
 Downloads (cached in data/cache/):
   - Quranic Arabic Corpus morphology 0.4 (GPL, Kais Dukes)
-  - Quranic Arabic Corpus syntactic graphs (kaisdukes/quranic-corpus-api)
+  - NoorBayan treebank dump (Quranpedia), for each word's syntactic relations
   - Tanzil Uthmani text, CC BY-ND 3.0, as distributed with the corpus
   - Indonesian and English Al-Mukhtasar (QuranEnc indonesian_mokhtasar and english_mokhtasar)
   - Lemma glosses shipped with the corpus API
@@ -20,20 +20,28 @@ import re
 import sqlite3
 import sys
 import unicodedata
-import urllib.request
 from collections import defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
-from paths import ROOT
-
-CACHE = ROOT / "data" / "cache"
-OUT = ROOT / "public" / "data" / "quran"
+from pipeline import (
+    CACHE,
+    OUT,
+    add_notice,
+    drop_source,
+    edit_manifest,
+    fetch_cached,
+    load_noorbayan,
+    remove_notice,
+    surah_path,
+    upsert_source,
+    word_relations,
+    write_json,
+)
 
 MORPH_URL = "https://raw.githubusercontent.com/cltk/arabic_morphology_quranic-corpus/master/quranic-corpus-morphology-0.4.txt"
 API = "https://raw.githubusercontent.com/kaisdukes/quranic-corpus-api/main/src/main/resources/data"
-SYNTAX_URL = f"{API}/syntax.txt"
 UTHMANI_URL = f"{API}/quran-uthmani.xml"
 QURANENC_URL = "https://quranenc.com/api/v1/translation/sura/{key}/{sura}"
 MOKHTASAR_VERSION = "V1.0.0"
@@ -145,21 +153,6 @@ ALEF = str.maketrans(
         "ئ": "ي",
     }
 )
-
-
-def download(url: str, dest: Path) -> None:
-    if dest.exists() and dest.stat().st_size > 0:
-        print(f"cache {dest.name}")
-        return
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    print(f"get {url}")
-    req = urllib.request.Request(url, headers={"User-Agent": "lenses-data-build"})
-    with urllib.request.urlopen(req, timeout=180) as resp, dest.open("wb") as out:
-        while True:
-            chunk = resp.read(1 << 20)
-            if not chunk:
-                break
-            out.write(chunk)
 
 
 def sha256(path: Path) -> str:
@@ -362,7 +355,7 @@ def load_quranenc(
     found: dict[tuple[int, int], dict[str, str]] = {}
     for sura, count in expected.items():
         dest = folder / f"{sura:03d}.json"
-        download(QURANENC_URL.format(key=key, sura=sura), dest)
+        fetch_cached(QURANENC_URL.format(key=key, sura=sura), dest)
         payload = json.loads(dest.read_text(encoding="utf-8"))
         rows = payload.get("result")
         if not isinstance(rows, list):
@@ -453,146 +446,6 @@ def align_center(corpus: list[str], center: list[str]) -> list[int | None]:
     return mapping
 
 
-NODE_RE = re.compile(r"^(.+?) = ([A-Za-z]+)\((.*)\)$")
-EDGE_RE = re.compile(r"^([a-z]+)\(n(\d+) - n(\d+)\)$")
-LOC_RE = re.compile(r"(\d+):(\d+):(\d+)")
-
-
-def parse_syntax(path: Path) -> list[dict]:
-    graphs = []
-    lines: list[str] = []
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if line == "go":
-            if lines:
-                graphs.append(lines)
-            lines = []
-            continue
-        if line and not line.startswith("--"):
-            lines.append(line)
-    parsed = []
-    for block in graphs:
-        nodes = []
-        edges = []
-        expected = 1
-        for line in block:
-            if " = " in line:
-                left, right = line.split(" = ", 1)
-                names = [name.strip() for name in left.split(",")]
-                for name in names:
-                    number = int(name[1:])
-                    if number != expected:
-                        raise ValueError(f"expected n{expected} in {line}")
-                    expected += 1
-                match = NODE_RE.match(line)
-                if not match:
-                    raise ValueError(line)
-                count = len(names)
-                kind = match.group(2)
-                value = match.group(3)
-                if kind in ("word", "reference"):
-                    loc = LOC_RE.search(value)
-                    if not loc:
-                        raise ValueError(line)
-                    sura, verse, word = (int(loc.group(i)) for i in range(1, 4))
-                    for _ in range(count):
-                        nodes.append(
-                            {
-                                "t": "seg" if kind == "word" else "ref",
-                                "s": sura,
-                                "v": verse,
-                                "w": word,
-                            }
-                        )
-                elif kind in ("S", "NS", "VS", "CS", "PP", "SC"):
-                    if count != 1:
-                        raise ValueError(line)
-                    ends = [int(n) for n in re.findall(r"n(\d+)", value)]
-                    if len(ends) != 2:
-                        raise ValueError(line)
-                    nodes.append({"t": "ph", "p": kind, "from": ends[0] - 1, "to": ends[1] - 1})
-                else:
-                    if count != 1:
-                        raise ValueError(line)
-                    nodes.append(
-                        {
-                            "t": "elide",
-                            "p": kind,
-                            "a": None if value == "*" else value,
-                        }
-                    )
-            else:
-                match = EDGE_RE.match(line)
-                if not match:
-                    raise ValueError(line)
-                edges.append(
-                    {
-                        "r": match.group(1),
-                        "d": int(match.group(2)) - 1,
-                        "h": int(match.group(3)) - 1,
-                    }
-                )
-        parsed.append({"nodes": nodes, "edges": edges})
-    return parsed
-
-
-def syntax_indexes(segments: list[dict]) -> list[int]:
-    # The published graphs do not give the definite article its own node.
-    return [i for i, seg in enumerate(segments) if seg["p"] != "DET"]
-
-
-def bind_word_nodes(nodes: list[dict], start: int, count: int, segments: list[dict]) -> None:
-    indexes = syntax_indexes(segments)
-    if count < len(indexes):
-        raise ValueError("syntax node count is smaller than non-determiner segments")
-    indexes = indexes + [None] * (count - len(indexes))
-    for offset, seg_index in enumerate(indexes):
-        node = nodes[start + offset]
-        if seg_index is None:
-            node["t"] = "slot" if node["t"] == "seg" else node["t"]
-            if node["t"] == "ref":
-                node["t"] = "ref"
-                node["slot"] = True
-        else:
-            node["si"] = seg_index
-
-
-def attach_graphs(graphs: list[dict], morphology: dict) -> dict[tuple[int, int], list[dict]]:
-    by_verse: dict[tuple[int, int], list[dict]] = defaultdict(list)
-    # Group consecutive raw nodes that were expanded from one annotation line.
-    for graph in graphs:
-        nodes = graph["nodes"]
-        i = 0
-        while i < len(nodes):
-            node = nodes[i]
-            if node["t"] not in ("seg", "ref"):
-                i += 1
-                continue
-            j = i + 1
-            while (
-                j < len(nodes)
-                and nodes[j]["t"] == node["t"]
-                and nodes[j]["s"] == node["s"]
-                and nodes[j]["v"] == node["v"]
-                and nodes[j]["w"] == node["w"]
-            ):
-                j += 1
-            segments = morphology[(node["s"], node["v"], node["w"])]
-            bind_word_nodes(nodes, i, j - i, segments)
-            for node in nodes[i:j]:
-                node["a"] = None  # filled once tokens are known
-            i = j
-        verses = {(n["s"], n["v"]) for n in nodes if n["t"] in ("seg", "slot", "ref") and "s" in n}
-        # A reference alone should not place the graph; use real words.
-        home = {(n["s"], n["v"]) for n in nodes if n["t"] in ("seg", "slot")}
-        targets = home or verses
-        cross = len({(n["s"], n["v"]) for n in nodes if n["t"] in ("seg", "slot")}) > 1
-        payload = {"nodes": nodes, "edges": graph["edges"], "x": cross}
-        for key in targets:
-            by_verse[key].append(payload)
-    return by_verse
-
-
 def compact_segment(seg: dict, arabic: str, glosses: dict[str, str]) -> dict:
     out = {"k": seg["k"], "a": arabic, "p": seg["p"]}
     if "l" in seg:
@@ -624,22 +477,285 @@ def feat_string(seg: dict | None) -> str:
     return " ".join(f"{key}={seg['f'][key]}" for key in order if key in seg["f"])
 
 
+def load_surah_meta(db: Path) -> dict[int, dict[str, Any]]:
+    """Surah goal (maqṣad), revelation order, and class from the Tafsir Center database."""
+    con = sqlite3.connect(db)
+    try:
+        rows = con.execute(
+            """
+            SELECT sc.surahNo, sc.surahGoals, ss.revelationSeq, ss.surahClass
+            FROM surah_content sc
+            JOIN surah_stats ss ON sc.surahNo = ss.surahNo
+            ORDER BY sc.surahNo
+            """
+        ).fetchall()
+    finally:
+        con.close()
+    meta: dict[int, dict[str, Any]] = {}
+    for sura, goal, rev_seq, s_class in rows:
+        entry: dict[str, Any] = {}
+        if goal and goal.strip():
+            entry["goal"] = goal.strip()
+        if rev_seq:
+            entry["revSeq"] = rev_seq
+        if s_class and s_class.strip():
+            entry["surahClass"] = s_class.strip()
+        meta[sura] = entry
+    return meta
+
+
+def merge_units(manifest: dict[str, Any], units: list[dict[str, Any]]) -> None:
+    """Refresh this script's unit fields, keeping fields other scripts attached."""
+    existing = {u["n"]: u for u in manifest.get("units", [])}
+    manifest["units"] = [{**existing.get(u["n"], {}), **u} for u in units]
+
+
+def build_sources() -> list[dict[str, Any]]:
+    """Manifest sources this script owns; other scripts add their own."""
+    return [
+        {
+            "id": "qac-morphology",
+            "title": "Quranic Arabic Corpus morphology 0.4",
+            "kind": "morphology",
+            "attribution": "Kais Dukes and the Quranic Arabic Corpus",
+            "description": "Morphological segments, roots, lemmas, and grammatical features for all words.",
+            "license": "GPL, with permission to use the annotation in an application if the corpus is credited",
+            "url": "https://corpus.quran.com/download/",
+        },
+        {
+            "id": "noorbayan-syntax",
+            "title": "The Quranic Treebank (NoorBayan)",
+            "kind": "syntax",
+            "attribution": (
+                "NoorBayan, building on the Quranic Arabic Corpus of Dr. Kais Dukes "
+                "(may Allah have mercy on him), verified by Quranpedia"
+            ),
+            "description": "Full-Quran dependency and constituency treebank covering all 6,236 verses across 114 surahs.",
+            "license": "MIT",
+            "url": "https://github.com/NoorBayan/Quranic",
+        },
+        {
+            "id": "tanzil",
+            "title": "Tanzil Uthmani Quran text",
+            "kind": "text",
+            "attribution": "Tanzil Project",
+            "description": "Arabic text from Tanzil, CC BY-ND 3.0, unchanged.",
+            "license": "CC BY-ND 3.0.",
+            "url": "https://tanzil.net/",
+        },
+        {
+            "id": "english-mokhtasar",
+            "title": "Al-Mukhtasar in Interpreting the Noble Quran (English)",
+            "kind": "tafsir",
+            "attribution": "Tafsir Center for Quranic Studies, English text via QuranEnc.com",
+            "description": "English translation and commentary of Al-Mukhtasar via QuranEnc.com.",
+            "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com.",
+            "url": "https://quranenc.com/api/v1/translation/sura/english_mokhtasar/1",
+        },
+        {
+            "id": "tafsir-center",
+            "title": "Tafsir Center linguistic analysis",
+            "kind": "classical-irab",
+            "attribution": "Tafsir Center for Quranic Studies",
+            "description": "Traditional morphological description (ṣarf) from the Tafsir Center database, alongside word-level classical iʿrāb and verse-level sentence syntax. A second analysis beside the corpus tree.",
+            "license": "CC BY 4.0",
+            "url": "https://tafsir.net/",
+        },
+        {
+            "id": "indonesian-mokhtasar",
+            "title": "Al-Mukhtasar in Interpreting the Noble Quran (Indonesian)",
+            "kind": "tafsir",
+            "attribution": "Tafsir Center for Quranic Studies, Indonesian text via QuranEnc.com",
+            "description": f"Indonesian translation and commentary of Al-Mukhtasar via QuranEnc.com, edition {MOKHTASAR_VERSION} ({MOKHTASAR_DATE}).",
+            "license": f"QuranEnc republication terms: verbatim text, credit the publisher and QuranEnc.com, and name edition {MOKHTASAR_VERSION} ({MOKHTASAR_DATE}).",
+            "url": "https://quranenc.com/en/browse/indonesian_mokhtasar",
+        },
+        {
+            "id": "arabic-mokhtasar",
+            "title": "Al-Mukhtasar in Interpreting the Noble Quran (Arabic)",
+            "kind": "tafsir",
+            "attribution": "Tafsir Center for Quranic Studies, Arabic text via QuranEnc.com",
+            "description": "Arabic commentary text of Al-Mukhtasar via QuranEnc.com.",
+            "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is arabic_mokhtasar.",
+            "url": "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/1",
+        },
+        {
+            "id": "saheeh-international",
+            "title": "Saheeh International English Translation",
+            "kind": "translation",
+            "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net and QuranEnc.com (english_saheeh)",
+            "description": "Literal and syntax-aligned English translation of the Quran, used for structural and rhetorical analysis alongside the Arabic text.",
+            "license": "Public domain / Open educational distribution with attribution to Saheeh International.",
+            "url": "https://quranenc.com/en/browse/english_saheeh",
+        },
+        {
+            "id": "indonesian-sabiq",
+            "title": "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
+            "kind": "translation",
+            "attribution": "PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad), via QuranEnc.com (indonesian_sabiq)",
+            "description": "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
+            "license": "Distribusi terbuka / QuranEnc republication terms.",
+            "url": "https://quranenc.com/en/browse/indonesian_sabiq",
+        },
+        {
+            "id": "rhetoric-tashbih",
+            "title": "Quranic Similes Dataset (Tashbīh & Tamthīl)",
+            "kind": "rhetoric",
+            "attribution": "Nashir et al. (2026), 'Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus' (arXiv:2601.19972)",
+            "description": "Multi-label expert annotations of Quranic similes deconstructing the 4-element classical formula (mushabbah, adat, mushabbah bihi, wajh ash-shabah) and compound analogies (tamthīlī).",
+            "license": "Academic Open Access (arXiv:2601.19972).",
+            "url": "https://arxiv.org/abs/2601.19972",
+        },
+        {
+            "id": "rhetoric-hadhf",
+            "title": "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
+            "kind": "rhetoric",
+            "attribution": "Hishomudin Ahmad & Norfarhana Ahmad Ghafar (2026) / Elliptical Eloquence Framework (EEF 2025), grounded in Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī) and classical syntactic exegeses",
+            "description": "Catalog of syntactic ellipsis and structural omissions (omitted object, genitive head, apodosis of conditional 'law', and speech verbs) with scholarly reconstructed taqdīr and rhetorical purposes.",
+            "license": "Open Educational & Research Distribution.",
+            "url": "https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir",
+        },
+        {
+            "id": "classical-balagha",
+            "title": "Classical Quranic Balāghah Masterpieces",
+            "kind": "rhetoric",
+            "attribution": "Foundational Classical Treatises: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)",
+            "description": "Curated anatomical breakdowns of pivotal Quranic rhetorical devices across ‘Ilm al-Maʿānī (iltifāt, qasr), ‘Ilm al-Bayān (istiʿārah, kināyah), and ‘Ilm al-Badīʿ (jinās, tibāq, muqābalah).",
+            "license": "Public Domain / Classical Heritage.",
+            "url": "https://quranenc.com/",
+        },
+    ]
+
+
+NOTICE_SECTIONS: list[list[str]] = [
+    [
+        "English Al-Mukhtasar",
+        "Title: Al-Mukhtasar in Interpreting the Noble Quran",
+        "Publisher: Tafsir Center for Quranic Studies",
+        "Source: QuranEnc.com, key english_mokhtasar",
+        "https://quranenc.com/api/v1/translation/sura/english_mokhtasar/{sura}",
+        "QuranEnc’s public edition list does not publish a separate version",
+        "number for this key. The text is the edition that endpoint returns,",
+        "stored verbatim. Republication follows the QuranEnc terms listed",
+        "with the Indonesian Al-Mukhtasar below.",
+    ],
+    [
+        "Tafsir Center linguistic database (quran.db)",
+        "Copyright: Tafsir Center for Quranic Studies (مركز تفسير للدراسات القرآنية)",
+        "License: Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "https://creativecommons.org/licenses/by/4.0/",
+        "Credit: Tafsir Center for Quranic Studies (https://tafsir.net)",
+        "This app uses word-level iʿrāb (irabMushakkal), ṣarf, word meanings,",
+        "and verse-level iʿrāb (irabAyah1). It does not redistribute the tafsir",
+        "book texts stored in the same database.",
+        "Dataset: https://huggingface.co/datasets/tafsircenter/tafsir-mcp-data",
+    ],
+    [
+        "Indonesian Al-Mukhtasar",
+        "Title: Al-Mukhtasar in Interpreting the Noble Quran",
+        "Publisher: Tafsir Center for Quranic Studies",
+        f"Edition: {MOKHTASAR_VERSION} ({MOKHTASAR_DATE})",
+        "Source: QuranEnc.com, key indonesian_mokhtasar",
+        "https://quranenc.com/en/browse/indonesian_mokhtasar",
+        "Republication terms from QuranEnc:",
+        "1. No modification, addition, or deletion of the content.",
+        "2. Clearly refer to the publisher and the source (QuranEnc.com).",
+        "3. Mention the version number when re-publishing.",
+        "4. Keep the transcript information inside the document.",
+        "5. Notify QuranEnc.com of any note on the translation.",
+        "6. Update the translation to the latest version issued by QuranEnc.com.",
+        "7. Do not include inappropriate advertisements when displaying it.",
+        "This app stores each verse paragraph verbatim and does not add to or trim the text.",
+    ],
+    [
+        "Arabic Al-Mukhtasar",
+        "Title: Al-Mukhtasar in Interpreting the Noble Quran",
+        "Publisher: Tafsir Center for Quranic Studies",
+        "Source: QuranEnc.com, key arabic_mokhtasar",
+        "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/{sura}",
+        "License: QuranEnc republication terms: retain verbatim text and attribution.",
+    ],
+    [
+        "Saheeh International English Translation",
+        "Title: The Qur'an: English Meanings",
+        "Translators: Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley)",
+        "Source: Tanzil.net and QuranEnc.com, key english_saheeh",
+        "https://quranenc.com/en/browse/english_saheeh",
+        "License / Terms: Verbatim text retained with clear attribution to Saheeh International.",
+        "Used in Lenses as a literal syntax-aligned translation layer for rhetorical and grammatical study.",
+    ],
+    [
+        "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
+        "Title: Terjemahan Al-Qur'an Al-Karim Bahasa Indonesia",
+        "Publisher: PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad)",
+        "Source: QuranEnc.com, key indonesian_sabiq",
+        "https://quranenc.com/en/browse/indonesian_sabiq",
+        "License / Terms: Verbatim text retained with clear attribution to PT. Sabiq dan Rowwad Translation Center.",
+    ],
+    [
+        "Quranic Similes Dataset (Tashbīh & Tamthīl)",
+        "Paper: Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus",
+        "Authors: Nashir et al. (2026), arXiv:2601.19972",
+        "License / Terms: Open Academic Research Distribution.",
+        "Used in Lenses Rhetoric Studio for multi-element simile structural deconstructions.",
+    ],
+    [
+        "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
+        "Framework: Elliptical Eloquence Framework (EEF 2025)",
+        "Paper: Ahmad & Ghafar (2026), 'Elliptical Eloquence in the Qur'an: A Framework for Rhetorical-Stylistic and Digital Tafsir'",
+        "URL: https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir",
+        "Sources: Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī), Al-Muḥarrar al-Wajīz, Iʿrāb al-Qurʾān",
+        "License / Terms: Open Academic & Educational Distribution.",
+        "Used in Lenses Rhetoric Studio for syntactic ellipsis and omission classification.",
+    ],
+    [
+        "Classical Quranic Balāghah Masterpieces",
+        "Sources: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)",
+        "License / Terms: Public Domain / Classical Heritage.",
+        "Used in Lenses Rhetoric Studio for pivotal figures across Maʿānī, Bayān, and Badīʿ.",
+    ],
+]
+
+
+def write_notices(morph_header: str, uthmani_header: str) -> None:
+    # Older builds wrote both verbatim blocks untitled (the morphology header at the top, the
+    # Uthmani XML header as the first section) and a corpus graphs notice.
+    remove_notice("# PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK")
+    remove_notice('<?xml version="1.0" encoding="utf-8" ?>')
+    remove_notice("Syntactic dependency graphs")
+    add_notice("Quranic Arabic Corpus morphology 0.4 (verbatim notice)", morph_header)
+    add_notice("Tanzil Uthmani Quran text (verbatim notice)", uthmani_header)
+    for title, *body in NOTICE_SECTIONS:
+        add_notice(title, "\n".join(body))
+    add_notice(
+        "The Quranic Treebank (NoorBayan)",
+        "\n".join(
+            [
+                "Project: The Quranic Treebank",
+                "Authors: NoorBayan, building on the Quranic Arabic Corpus of Dr. Kais Dukes (may Allah have mercy on him)",
+                "URL: https://github.com/NoorBayan/Quranic",
+                "Verification & Clean Export: Quranpedia.net (https://quranpedia.net/dumps/syntax.json.gz)",
+                "License: MIT License",
+                "Used in Lenses for full-Quran dependency tree graphs, constituent phrase analysis, and word relations in search.",
+            ]
+        ),
+    )
+
+
 def main() -> None:
     CACHE.mkdir(parents=True, exist_ok=True)
     files = {
         "morph": CACHE / "quranic-corpus-morphology-0.4.txt",
-        "syntax": CACHE / "syntax.txt",
         "uthmani": CACHE / "quran-uthmani.xml",
         "lemmas": CACHE / "lemmas.txt",
         "chapters": CACHE / "chapters.json",
         "db": CACHE / "quran.db",
     }
-    download(MORPH_URL, files["morph"])
-    download(SYNTAX_URL, files["syntax"])
-    download(UTHMANI_URL, files["uthmani"])
-    download(LEMMAS_URL, files["lemmas"])
-    download(CHAPTERS_URL, files["chapters"])
-    download(DB_URL, files["db"])
+    fetch_cached(MORPH_URL, files["morph"])
+    fetch_cached(UTHMANI_URL, files["uthmani"])
+    fetch_cached(LEMMAS_URL, files["lemmas"])
+    fetch_cached(CHAPTERS_URL, files["chapters"])
+    fetch_cached(DB_URL, files["db"])
 
     morph_header, morphology = load_morphology(files["morph"])
     uthmani_header, surahs = load_uthmani(files["uthmani"])
@@ -649,9 +765,14 @@ def main() -> None:
     expected = {surah["n"]: len(surah["verses"]) for surah in surahs}
     english = load_quranenc("english_mokhtasar", "english_mokhtasar", "en", "ef", expected)
     indonesian = load_quranenc("indonesian_mokhtasar", "mokhtasar", "mk", "mf", expected)
-    arabic = load_quranenc("arabic_mokhtasar", "arabic_mokhtasar", "ma", "af", expected)
-    graphs = parse_syntax(files["syntax"])
-    graphs_by_verse = attach_graphs(graphs, morphology)
+    arabic_mokhtasar = load_quranenc("arabic_mokhtasar", "arabic_mokhtasar", "ma", "af", expected)
+    surah_meta = load_surah_meta(files["db"])
+    treebank = load_noorbayan()
+    relations = word_relations(treebank)
+    treebank_verses = {
+        (row["surah"], row["ayah"]): len(row.get("syntax", {}).get("sentences", []))
+        for row in treebank
+    }
 
     slice_fail = 0
     slice_ok = 0
@@ -718,19 +839,7 @@ def main() -> None:
                 for seg in compact:
                     if seg["p"] not in poses:
                         poses.append(seg["p"])
-                rels = []
-                for graph in graphs_by_verse.get((sura, number), []):
-                    owned = {
-                        n_index
-                        for n_index, node in enumerate(graph["nodes"])
-                        if node.get("s") == sura
-                        and node.get("v") == number
-                        and node.get("w") == index
-                        and node["t"] in ("seg", "slot")
-                    }
-                    for edge in graph["edges"]:
-                        if edge["d"] in owned and edge["r"] not in rels:
-                            rels.append(edge["r"])
+                rels = relations.get((sura, number, index), [])
                 word_rows.append(
                     [
                         sura,
@@ -746,19 +855,7 @@ def main() -> None:
                     ]
                 )
 
-            for graph in graphs_by_verse.get((sura, number), []):
-                for node in graph["nodes"]:
-                    if node["t"] in ("seg", "slot", "ref") and not node.get("a"):
-                        node["a"] = surahs[node["s"] - 1]["verses"][node["v"] - 1]["tokens"][
-                            node["w"] - 1
-                        ]
-            verse_graphs = []
-            for graph in graphs_by_verse.get((sura, number), []):
-                item = {"nodes": graph["nodes"], "edges": graph["edges"]}
-                if graph["x"]:
-                    item["x"] = True
-                verse_graphs.append(item)
-            if verse_graphs:
+            if treebank_verses.get((sura, number)):
                 syntax_verse_count += 1
                 coverage[sura] += 1
             built = {
@@ -776,12 +873,10 @@ def main() -> None:
             built["mk"] = note["mk"]
             if "mf" in note:
                 built["mf"] = note["mf"]
-            ar_note = arabic[(sura, number)]
+            ar_note = arabic_mokhtasar[(sura, number)]
             built["ma"] = ar_note["ma"]
             if "af" in ar_note:
                 built["af"] = ar_note["af"]
-            if verse_graphs:
-                built["g"] = verse_graphs
             built_verses.append(built)
             verse_rows.append([sura, number, norm_ar(verse["ar"]), built["en"]])
 
@@ -794,6 +889,7 @@ def main() -> None:
             "rev": meta["city"],
             "verses": len(built_verses),
             "syntax": coverage[sura],
+            **surah_meta.get(sura, {}),
         }
         units.append(unit)
         payload = {
@@ -803,12 +899,10 @@ def main() -> None:
             "title": meta.get("translation") or meta["phonetic"],
             "rev": meta["city"],
             "verses": built_verses,
+            **surah_meta.get(sura, {}),
         }
-        dest = OUT / "surah" / f"{sura:03d}.json"
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
-        )
+        dest = surah_path("surah", sura)
+        write_json(dest, payload)
         if dest.stat().st_size > 12 * 1024 * 1024:
             raise SystemExit(f"{dest.name} exceeds the 12 MB precache limit")
         print(
@@ -825,267 +919,36 @@ def main() -> None:
             "a": lemma_arabic(key) if key else "",
             "g": glosses.get(key, ""),
         }
-    (OUT / "words.json").write_text(
-        json.dumps(
-            {"roots": roots, "lemmas": lemmas, "rows": word_rows},
-            ensure_ascii=False,
-            separators=(",", ":"),
-        ),
-        encoding="utf-8",
-    )
-    (OUT / "verses.json").write_text(
-        json.dumps(verse_rows, ensure_ascii=False, separators=(",", ":")),
-        encoding="utf-8",
-    )
+    write_json(OUT / "words.json", {"roots": roots, "lemmas": lemmas, "rows": word_rows})
+    write_json(OUT / "verses.json", verse_rows)
     partial = [u for u in units if 0 < u["syntax"] < u["verses"]]
     missing = [u["n"] for u in units if u["syntax"] == 0]
-    manifest = {
-        "id": "quran",
-        "title": "The Quran",
-        "language": "ar",
-        "units": units,
-        "stats": {
-            "verses": 6236,
-            "words": len(word_rows),
-            "syntaxVerses": syntax_verse_count,
-            "syntaxGraphs": len(graphs),
-            "partialChapters": [
-                {"n": u["n"], "syntax": u["syntax"], "verses": u["verses"]} for u in partial
-            ],
-            "chaptersWithoutSyntax": missing,
-        },
-        "sources": [
+    sentence_total = sum(treebank_verses.values())
+
+    def edit(manifest: dict[str, Any]) -> None:
+        manifest.update({"id": "quran", "title": "The Quran", "language": "ar"})
+        merge_units(manifest, units)
+        manifest.setdefault("stats", {}).update(
             {
-                "id": "qac-morphology",
-                "title": "Quranic Arabic Corpus morphology 0.4",
-                "kind": "morphology",
-                "attribution": "Kais Dukes and the Quranic Arabic Corpus",
-                "description": "Morphological segments, roots, lemmas, and grammatical features for all words.",
-                "license": "GPL, with permission to use the annotation in an application if the corpus is credited",
-                "url": "https://corpus.quran.com/download/",
-            },
-            {
-                "id": "qac-syntax",
-                "title": "Quranic Arabic Corpus dependency graphs",
-                "kind": "syntax",
-                "attribution": "Kais Dukes, Quranic Arabic Corpus, published in kaisdukes/quranic-corpus-api",
-                "description": "Syntactic dependency graphs from the Quranic Arabic Dependency Treebank.",
-                "license": "Distributed with the open corpus project; the API repository has no separate LICENSE file. Treat it under the corpus terms: credit corpus.quran.com.",
-                "url": "https://github.com/kaisdukes/quranic-corpus-api",
-            },
-            {
-                "id": "tanzil",
-                "title": "Tanzil Uthmani Quran text",
-                "kind": "text",
-                "attribution": "Tanzil Project",
-                "description": "Arabic text from Tanzil, CC BY-ND 3.0, unchanged.",
-                "license": "CC BY-ND 3.0. The Arabic text is stored verbatim.",
-                "url": "https://tanzil.net/",
-            },
-            {
-                "id": "english-mokhtasar",
-                "title": "Al-Mukhtasar in Interpreting the Noble Quran (English)",
-                "kind": "tafsir",
-                "attribution": "Tafsir Center for Quranic Studies, English text via QuranEnc.com",
-                "description": "English translation and commentary of Al-Mukhtasar via QuranEnc.com.",
-                "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is english_mokhtasar.",
-                "url": "https://quranenc.com/api/v1/translation/sura/english_mokhtasar/1",
-            },
-            {
-                "id": "tafsir-center",
-                "title": "Tafsir Center linguistic analysis",
-                "kind": "classical-irab",
-                "attribution": "Tafsir Center for Quranic Studies",
-                "description": "Traditional morphological description (ṣarf) from the Tafsir Center database, alongside word-level classical iʿrāb and verse-level sentence syntax. A second analysis beside the corpus tree.",
-                "license": "CC BY 4.0",
-                "url": "https://tafsir.net/",
-            },
-            {
-                "id": "indonesian-mokhtasar",
-                "title": "Al-Mukhtasar in Interpreting the Noble Quran (Indonesian)",
-                "kind": "tafsir",
-                "attribution": "Tafsir Center for Quranic Studies, Indonesian text via QuranEnc.com",
-                "description": f"Indonesian translation and commentary of Al-Mukhtasar via QuranEnc.com, edition {MOKHTASAR_VERSION} ({MOKHTASAR_DATE}).",
-                "license": f"QuranEnc republication terms: verbatim text, credit the publisher and QuranEnc.com, and name edition {MOKHTASAR_VERSION} ({MOKHTASAR_DATE}).",
-                "url": "https://quranenc.com/en/browse/indonesian_mokhtasar",
-            },
-            {
-                "id": "arabic-mokhtasar",
-                "title": "Al-Mukhtasar in Interpreting the Noble Quran (Arabic)",
-                "kind": "tafsir",
-                "attribution": "Tafsir Center for Quranic Studies, Arabic text via QuranEnc.com",
-                "description": "Arabic commentary text of Al-Mukhtasar via QuranEnc.com.",
-                "license": "QuranEnc republication terms: verbatim text, and credit the publisher and QuranEnc.com. The edition key is arabic_mokhtasar.",
-                "url": "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/1",
-            },
-            {
-                "id": "saheeh-international",
-                "title": "Saheeh International English Translation",
-                "kind": "translation",
-                "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net and QuranEnc.com (english_saheeh)",
-                "description": "Literal and syntax-aligned English translation of the Quran, used for structural and rhetorical analysis alongside the Arabic text.",
-                "license": "Public domain / Open educational distribution with attribution to Saheeh International.",
-                "url": "https://quranenc.com/en/browse/english_saheeh",
-            },
-            {
-                "id": "indonesian-sabiq",
-                "title": "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
-                "kind": "translation",
-                "attribution": "PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad), via QuranEnc.com (indonesian_sabiq)",
-                "description": "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
-                "license": "Distribusi terbuka / QuranEnc republication terms.",
-                "url": "https://quranenc.com/en/browse/indonesian_sabiq",
-            },
-            {
-                "id": "rhetoric-tashbih",
-                "title": "Quranic Similes Dataset (Tashbīh & Tamthīl)",
-                "kind": "rhetoric",
-                "attribution": "Nashir et al. (2026), 'Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus' (arXiv:2601.19972)",
-                "description": "Multi-label expert annotations of Quranic similes deconstructing the 4-element classical formula (mushabbah, adat, mushabbah bihi, wajh ash-shabah) and compound analogies (tamthīlī).",
-                "license": "Academic Open Access (arXiv:2601.19972).",
-                "url": "https://arxiv.org/abs/2601.19972",
-            },
-            {
-                "id": "rhetoric-hadhf",
-                "title": "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
-                "kind": "rhetoric",
-                "attribution": "Hishomudin Ahmad & Norfarhana Ahmad Ghafar (2026) / Elliptical Eloquence Framework (EEF 2025), grounded in Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī) and classical syntactic exegeses",
-                "description": "Catalog of syntactic ellipsis and structural omissions (omitted object, genitive head, apodosis of conditional 'law', and speech verbs) with scholarly reconstructed taqdīr and rhetorical purposes.",
-                "license": "Open Educational & Research Distribution.",
-                "url": "https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir",
-            },
-            {
-                "id": "classical-balagha",
-                "title": "Classical Quranic Balāghah Masterpieces",
-                "kind": "rhetoric",
-                "attribution": "Foundational Classical Treatises: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)",
-                "description": "Curated anatomical breakdowns of pivotal Quranic rhetorical devices across ‘Ilm al-Maʿānī (iltifāt, qasr), ‘Ilm al-Bayān (istiʿārah, kināyah), and ‘Ilm al-Badīʿ (jinās, tibāq, muqābalah).",
-                "license": "Public Domain / Classical Heritage.",
-                "url": "https://quranenc.com/",
-            },
-        ],
-    }
-    (OUT / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    notices = OUT.parent / "NOTICES.txt"
-    notices.write_text(
-        "\n".join(
-            [
-                "Lenses data notices",
-                "==================",
-                "",
-                "This file must stay with the derived data.",
-                "",
-                morph_header.strip(),
-                "",
-                "------------------------------------------------------------",
-                "",
-                uthmani_header.strip(),
-                "",
-                "------------------------------------------------------------",
-                "English Al-Mukhtasar",
-                "Title: Al-Mukhtasar in Interpreting the Noble Quran",
-                "Publisher: Tafsir Center for Quranic Studies",
-                "Source: QuranEnc.com, key english_mokhtasar",
-                "https://quranenc.com/api/v1/translation/sura/english_mokhtasar/{sura}",
-                "QuranEnc’s public edition list does not publish a separate version",
-                "number for this key. The text is the edition that endpoint returns,",
-                "stored verbatim. Republication follows the QuranEnc terms listed",
-                "with the Indonesian Al-Mukhtasar below.",
-                "",
-                "------------------------------------------------------------",
-                "Syntactic dependency graphs",
-                "Source file: syntax.txt in https://github.com/kaisdukes/quranic-corpus-api",
-                "Copyright: Kais Dukes / Quranic Arabic Corpus.",
-                "That repository does not include a LICENSE file. The graphs are the",
-                "Quranic Arabic Dependency Treebank (chapters 1-8, part of 9, and 59-114",
-                "in this export). Credit https://corpus.quran.com and do not present",
-                "the annotation as your own.",
-                "",
-                "------------------------------------------------------------",
-                "Tafsir Center linguistic database (quran.db)",
-                "Copyright: Tafsir Center for Quranic Studies (مركز تفسير للدراسات القرآنية)",
-                "License: Creative Commons Attribution 4.0 International (CC BY 4.0)",
-                "https://creativecommons.org/licenses/by/4.0/",
-                "Credit: Tafsir Center for Quranic Studies (https://tafsir.net)",
-                "This app uses word-level iʿrāb (irabMushakkal), ṣarf, word meanings,",
-                "and verse-level iʿrāb (irabAyah1). It does not redistribute the tafsir",
-                "book texts stored in the same database.",
-                "Dataset: https://huggingface.co/datasets/tafsircenter/tafsir-mcp-data",
-                "",
-                "------------------------------------------------------------",
-                "Indonesian Al-Mukhtasar",
-                "Title: Al-Mukhtasar in Interpreting the Noble Quran",
-                "Publisher: Tafsir Center for Quranic Studies",
-                f"Edition: {MOKHTASAR_VERSION} ({MOKHTASAR_DATE})",
-                "Source: QuranEnc.com, key indonesian_mokhtasar",
-                "https://quranenc.com/en/browse/indonesian_mokhtasar",
-                "Republication terms from QuranEnc:",
-                "1. No modification, addition, or deletion of the content.",
-                "2. Clearly refer to the publisher and the source (QuranEnc.com).",
-                "3. Mention the version number when re-publishing.",
-                "4. Keep the transcript information inside the document.",
-                "5. Notify QuranEnc.com of any note on the translation.",
-                "6. Update the translation to the latest version issued by QuranEnc.com.",
-                "7. Do not include inappropriate advertisements when displaying it.",
-                "This app stores each verse paragraph verbatim and does not add to or trim the text.",
-                "",
-                "------------------------------------------------------------",
-                "Arabic Al-Mukhtasar",
-                "Title: Al-Mukhtasar in Interpreting the Noble Quran",
-                "Publisher: Tafsir Center for Quranic Studies",
-                "Source: QuranEnc.com, key arabic_mokhtasar",
-                "https://quranenc.com/api/v1/translation/sura/arabic_mokhtasar/{sura}",
-                "License: QuranEnc republication terms: retain verbatim text and attribution.",
-                "",
-                "------------------------------------------------------------",
-                "Saheeh International English Translation",
-                "Title: The Qur'an: English Meanings",
-                "Translators: Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley)",
-                "Source: Tanzil.net and QuranEnc.com, key english_saheeh",
-                "https://quranenc.com/en/browse/english_saheeh",
-                "License / Terms: Verbatim text retained with clear attribution to Saheeh International.",
-                "Used in Lenses as a literal syntax-aligned translation layer for rhetorical and grammatical study.",
-                "",
-                "------------------------------------------------------------",
-                "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
-                "Title: Terjemahan Al-Qur'an Al-Karim Bahasa Indonesia",
-                "Publisher: PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad)",
-                "Source: QuranEnc.com, key indonesian_sabiq",
-                "https://quranenc.com/en/browse/indonesian_sabiq",
-                "License / Terms: Verbatim text retained with clear attribution to PT. Sabiq dan Rowwad Translation Center.",
-                "",
-                "------------------------------------------------------------",
-                "Quranic Similes Dataset (Tashbīh & Tamthīl)",
-                "Paper: Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus",
-                "Authors: Nashir et al. (2026), arXiv:2601.19972",
-                "License / Terms: Open Academic Research Distribution.",
-                "Used in Lenses Rhetoric Studio for multi-element simile structural deconstructions.",
-                "",
-                "------------------------------------------------------------",
-                "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
-                "Framework: Elliptical Eloquence Framework (EEF 2025)",
-                "Paper: Ahmad & Ghafar (2026), 'Elliptical Eloquence in the Qur'an: A Framework for Rhetorical-Stylistic and Digital Tafsir'",
-                "URL: https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir",
-                "Sources: Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī), Al-Muḥarrar al-Wajīz, Iʿrāb al-Qurʾān",
-                "License / Terms: Open Academic & Educational Distribution.",
-                "Used in Lenses Rhetoric Studio for syntactic ellipsis and omission classification.",
-                "",
-                "------------------------------------------------------------",
-                "Classical Quranic Balāghah Masterpieces",
-                "Sources: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)",
-                "License / Terms: Public Domain / Classical Heritage.",
-                "Used in Lenses Rhetoric Studio for pivotal figures across Maʿānī, Bayān, and Badīʿ.",
-                "",
-            ]
-        ),
-        encoding="utf-8",
-    )
+                "verses": 6236,
+                "words": len(word_rows),
+                "syntaxVerses": syntax_verse_count,
+                "syntaxGraphs": sentence_total,
+                "partialChapters": [
+                    {"n": u["n"], "syntax": u["syntax"], "verses": u["verses"]} for u in partial
+                ],
+                "chaptersWithoutSyntax": missing,
+            }
+        )
+        drop_source(manifest, "qac-syntax")
+        for source in build_sources():
+            upsert_source(manifest, source)
+
+    edit_manifest(edit)
+    write_notices(morph_header, uthmani_header)
     verify(OUT)
     print(f"slice ok {slice_ok} fail {slice_fail} align-miss verses {align_miss}")
-    print(f"syntax verses {syntax_verse_count} graphs {len(graphs)} words {len(word_rows)}")
+    print(f"syntax verses {syntax_verse_count} sentences {sentence_total} words {len(word_rows)}")
     print("partial", [(u["n"], u["syntax"], u["verses"]) for u in partial])
     print("no syntax", missing)
 
@@ -1115,13 +978,14 @@ def verify(out: Path) -> None:
         raise SystemExit(f"2:31:10 {stem}")
     if not any(seg["p"] == "PRON" for seg in inform["s"]):
         raise SystemExit("2:31:10 missing pronoun suffix")
-    if len(verse["g"]) != 4:
-        raise SystemExit(f"2:31 graphs {len(verse['g'])}")
-    graph = verse["g"][0]
-    if not any(node["t"] == "elide" and node.get("a") == "هُوَ" for node in graph["nodes"]):
-        raise SystemExit("2:31 missing implied huwa")
-    if not any(edge["r"] == "subj" for edge in graph["edges"]):
-        raise SystemExit("2:31 missing subject edge")
+    if "g" in verse:
+        raise SystemExit("2:31 still carries corpus graphs (g)")
+    if not surah.get("goal") or not surah.get("revSeq"):
+        raise SystemExit("002 missing surah goal / revelation order")
+    rows = json.loads((out / "words.json").read_text(encoding="utf-8"))["rows"]
+    adam_row = next(r for r in rows if r[:3] == [2, 31, 2])
+    if "obj" not in adam_row[9].split(","):
+        raise SystemExit(f"2:31:2 relations {adam_row[9]!r}")
     if not verse["en"].startswith("31. To reveal the position of Adam"):
         raise SystemExit(verse["en"][:120])
     if not verse.get("ma"):

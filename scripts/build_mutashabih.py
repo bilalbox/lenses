@@ -20,24 +20,25 @@ import difflib
 import gzip
 import json
 import re
-import urllib.request
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
-from paths import ROOT
-
-DEFAULT_CACHE_DIR = ROOT / "data" / "cache"
-DEFAULT_SURAH_DIR = ROOT / "public" / "data" / "quran" / "surah"
-DEFAULT_OUT_DIR = ROOT / "public" / "data" / "quran" / "mutashabih"
-DEFAULT_MANIFEST_PATH = ROOT / "public" / "data" / "quran" / "manifest.json"
-DEFAULT_NOTICES_PATH = ROOT / "public" / "data" / "NOTICES.txt"
+from pipeline import (
+    CACHE,
+    OUT,
+    add_notice,
+    edit_manifest,
+    fetch_cached,
+    strip_tashkeel,
+    surah_path,
+    upsert_source,
+    write_json,
+)
 
 SIMILAR_DUMP_URL = "https://api.quranpedia.net/dumps/similar.json.gz"
 WAQAR_BASE_URL = "https://raw.githubusercontent.com/Waqar144/Quran_Mutashabihat_Data/master/txts"
-
-TASHKEEL = re.compile(r"[\u064b-\u0652\u0670\u0653-\u065f\u06d6-\u06ed]")
 
 CANONICAL_ENGLISH_NOTES: dict[tuple[tuple[int, int], tuple[int, int]], str] = {
     ((2, 58), (7, 161)): (
@@ -59,27 +60,14 @@ CANONICAL_ENGLISH_NOTES: dict[tuple[tuple[int, int], tuple[int, int]], str] = {
 }
 
 
-def strip_tashkeel(s: str) -> str:
-    """Remove Arabic vocalic diacritics and Qur'anic annotation signs."""
-    return TASHKEEL.sub("", s)
+USER_AGENT = "Lenses/1.0 (dataset build script)"
 
 
 def ensure_similar_dump(cache_dir: Path) -> Path:
     """Ensure the Quranpedia similar.json.gz dump is present in the cache."""
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    dump_path = cache_dir / "similar.json.gz"
-    if dump_path.exists() and dump_path.stat().st_size > 1_000_000:
-        return dump_path
-
-    print(f"Downloading Quranpedia similar dump from {SIMILAR_DUMP_URL}...")
-    req = urllib.request.Request(
-        SIMILAR_DUMP_URL,
-        headers={"User-Agent": "Lenses/1.0 (dataset build script)"},
+    return fetch_cached(
+        SIMILAR_DUMP_URL, cache_dir / "similar.json.gz", user_agent=USER_AGENT, min_size=1_000_000
     )
-    with urllib.request.urlopen(req) as resp, open(dump_path, "wb") as f:
-        f.write(resp.read())
-    print(f"Downloaded {dump_path.stat().st_size / 1024 / 1024:.2f} MB")
-    return dump_path
 
 
 def ensure_waqar_txts(cache_dir: Path) -> Path:
@@ -88,17 +76,9 @@ def ensure_waqar_txts(cache_dir: Path) -> Path:
     txts_dir.mkdir(parents=True, exist_ok=True)
 
     def fetch_one(p: int) -> None:
-        fp = txts_dir / f"{p}.txt"
-        if fp.exists() and fp.stat().st_size > 50:
-            return
-        url = f"{WAQAR_BASE_URL}/{p}.txt"
-        req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "Lenses/1.0 (dataset build script)"},
+        fetch_cached(
+            f"{WAQAR_BASE_URL}/{p}.txt", txts_dir / f"{p}.txt", user_agent=USER_AGENT, min_size=51
         )
-        with urllib.request.urlopen(req) as resp:
-            content = resp.read().decode("utf-8")
-        fp.write_text(content, encoding="utf-8")
 
     with ThreadPoolExecutor(max_workers=8) as ex:
         list(ex.map(fetch_one, range(1, 31)))
@@ -400,116 +380,71 @@ def compile_surah_matches(
     return surah_verses
 
 
-def update_manifest_file(
-    manifest_path: Path,
-    surah_counts: dict[int, int],
-    total_verses: int,
-    total_pairs: int,
-) -> None:
-    """Update manifest.json with mutashabih stats and source metadata."""
-    if not manifest_path.exists():
-        return
+SOURCES: list[dict[str, Any]] = [
+    {
+        "id": "waqar-mutashabihat",
+        "title": "Quran Mutashabihat Dataset (Huffāẓ Pairs)",
+        "kind": "mutashabih",
+        "attribution": "Waqar144 (Quran_Mutashabihat_Data)",
+        "description": "Curated verbal similarity verse pairs across all 30 Juz for Quran memorization retention.",
+        "license": "CC0 1.0 Universal (Public Domain)",
+        "url": "https://github.com/Waqar144/Quran_Mutashabihat_Data",
+    },
+    {
+        "id": "quranpedia-mutashabihat",
+        "title": "Quranpedia Verbal Similarities & Memorization Rules",
+        "kind": "mutashabih",
+        "attribution": "Quranpedia.net (الموسوعة القرآنية)",
+        "description": "Classical Ḍabṭ mnemonic anchors and Tawjīh rhetorical difference exegeses.",
+        "license": "Free to use inside apps and research tools with attribution",
+        "url": "https://quranpedia.net/",
+    },
+]
 
-    with open(manifest_path, encoding="utf-8") as f:
-        manifest = json.load(f)
 
-    for unit in manifest.get("units", []):
-        u_num = int(unit["n"])
-        unit["mutashabih"] = surah_counts.get(u_num, 0)
+def update_manifest_file(surah_counts: dict[int, int], total_verses: int, total_pairs: int) -> None:
+    """Mutashabih counts, stats, and sources in manifest.json."""
 
-    stats = manifest.setdefault("stats", {})
-    stats["mutashabihVerses"] = total_verses
-    stats["mutashabihPairs"] = total_pairs
-
-    sources = manifest.setdefault("sources", [])
-    source_ids = {s.get("id") for s in sources}
-
-    if "waqar-mutashabihat" not in source_ids:
-        sources.append(
-            {
-                "id": "waqar-mutashabihat",
-                "title": "Quran Mutashabihat Dataset (Huffāẓ Pairs)",
-                "kind": "mutashabih",
-                "attribution": "Waqar144 (Quran_Mutashabihat_Data)",
-                "description": "Curated verbal similarity verse pairs across all 30 Juz for Quran memorization retention.",
-                "license": "CC0 1.0 Universal (Public Domain)",
-                "url": "https://github.com/Waqar144/Quran_Mutashabihat_Data",
-            }
+    def edit(manifest: dict[str, Any]) -> None:
+        for unit in manifest.get("units", []):
+            unit["mutashabih"] = surah_counts.get(int(unit["n"]), 0)
+        manifest.setdefault("stats", {}).update(
+            {"mutashabihVerses": total_verses, "mutashabihPairs": total_pairs}
         )
+        for source in SOURCES:
+            upsert_source(manifest, source)
 
-    if "quranpedia-mutashabihat" not in source_ids:
-        sources.append(
-            {
-                "id": "quranpedia-mutashabihat",
-                "title": "Quranpedia Verbal Similarities & Memorization Rules",
-                "kind": "mutashabih",
-                "attribution": "Quranpedia.net (الموسوعة القرآنية)",
-                "description": "Classical Ḍabṭ mnemonic anchors and Tawjīh rhetorical difference exegeses.",
-                "license": "Free to use inside apps and research tools with attribution",
-                "url": "https://quranpedia.net/",
-            }
-        )
-
-    with open(manifest_path, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
-    print("Updated manifest.json.")
+    edit_manifest(edit)
 
 
-def update_notices_file(notices_path: Path) -> None:
-    """Append mutashabih license notices to NOTICES.txt if not already present."""
-    if not notices_path.exists():
-        return
-
-    notices_text = notices_path.read_text(encoding="utf-8")
-    notices_to_append: list[str] = []
-
-    if "Waqar144" not in notices_text:
-        notices_to_append.append(
-            "------------------------------------------------------------\n"
-            "Quran Mutashabihat Dataset (Huffāẓ Pairs)\n"
-            "Author: Waqar144\n"
-            "URL: https://github.com/Waqar144/Quran_Mutashabihat_Data\n"
-            "License: CC0 1.0 Universal (Public Domain)\n"
-            "Used in Lenses for canonical verbal similarity (al-mutashābih al-lafẓī) pairings across all 30 Juz."
-        )
-
-    if "Quranpedia Verbal Similarities" not in notices_text:
-        notices_to_append.append(
-            "------------------------------------------------------------\n"
-            "Quranpedia Verbal Similarities & Memorization Rules\n"
-            "Source: Quranpedia.net (الموسوعة القرآنية)\n"
-            "URL: https://quranpedia.net/\n"
-            "License / Terms: Free to use inside apps and research tools with attribution.\n"
-            "Used in Lenses for classical ḍabṭ mnemonic anchors and tawjīh rhetorical exegesis."
-        )
-
-    if notices_to_append:
-        separator = "\n\n" if not notices_text.endswith("\n\n") else ""
-        notices_path.write_text(
-            notices_text + separator + "\n\n".join(notices_to_append) + "\n",
-            encoding="utf-8",
-        )
-        print("Updated NOTICES.txt.")
+def update_notices_file() -> None:
+    """Notices for the Waqar144 and Quranpedia mutashabih sources."""
+    add_notice(
+        "Quran Mutashabihat Dataset (Huffāẓ Pairs)",
+        "Author: Waqar144\n"
+        "URL: https://github.com/Waqar144/Quran_Mutashabihat_Data\n"
+        "License: CC0 1.0 Universal (Public Domain)\n"
+        "Used in Lenses for canonical verbal similarity (al-mutashābih al-lafẓī) pairings across all 30 Juz.",
+    )
+    add_notice(
+        "Quranpedia Verbal Similarities & Memorization Rules",
+        "Source: Quranpedia.net (الموسوعة القرآنية)\n"
+        "URL: https://quranpedia.net/\n"
+        "License / Terms: Free to use inside apps and research tools with attribution.\n"
+        "Used in Lenses for classical ḍabṭ mnemonic anchors and tawjīh rhetorical exegesis.",
+    )
 
 
-def build_mutashabih(
-    cache_dir: Path,
-    surah_dir: Path,
-    out_dir: Path,
-    manifest_path: Path,
-    notices_path: Path,
-    max_matches: int = 5,
-) -> None:
+def build_mutashabih(max_matches: int = 5) -> None:
     """Build all 114 surah mutashabih JSON files and update manifest and notices."""
     print("Step 1: Loading all surahs...")
-    surah_words = load_all_surahs(surah_dir)
+    surah_words = load_all_surahs(OUT / "surah")
     valid_ayahs = set(surah_words.keys())
     print(f"Loaded {len(valid_ayahs)} verses.")
 
     print("Step 2: Caching/loading raw sources...")
-    dump_path = ensure_similar_dump(cache_dir)
-    txts_dir = ensure_waqar_txts(cache_dir)
+    dump_path = ensure_similar_dump(CACHE)
+    txts_dir = ensure_waqar_txts(CACHE)
 
     print("Step 3: Extracting candidate pairs and classical notes...")
     wq_pairs = load_waqar_pairs(txts_dir, valid_ayahs)
@@ -527,7 +462,6 @@ def build_mutashabih(
         verse_matches_map[a1].add(a2)
         verse_matches_map[a2].add(a1)
 
-    out_dir.mkdir(parents=True, exist_ok=True)
     surah_counts: dict[int, int] = {}
     total_compiled_matches = 0
 
@@ -539,10 +473,7 @@ def build_mutashabih(
         surah_counts[s] = len(surah_verses)
         total_compiled_matches += sum(len(v["matches"]) for v in surah_verses)
 
-        file_data = {"sura": s, "verses": surah_verses}
-        out_file = out_dir / f"{s:03d}.json"
-        with open(out_file, "w", encoding="utf-8") as f:
-            json.dump(file_data, f, separators=(",", ":"), ensure_ascii=False)
+        write_json(surah_path("mutashabih", s), {"sura": s, "verses": surah_verses})
 
     total_verses = sum(surah_counts.values())
     print(
@@ -550,10 +481,10 @@ def build_mutashabih(
     )
 
     print("Step 5: Updating manifest.json...")
-    update_manifest_file(manifest_path, surah_counts, total_verses, len(valid_pairs))
+    update_manifest_file(surah_counts, total_verses, len(valid_pairs))
 
     print("Step 6: Updating NOTICES.txt...")
-    update_notices_file(notices_path)
+    update_notices_file()
 
 
 def main() -> None:
@@ -561,51 +492,9 @@ def main() -> None:
         description="Compile Quran mutashabih dataset into lazy-loaded JSON chunks."
     )
     parser.add_argument(
-        "--cache-dir",
-        type=Path,
-        default=DEFAULT_CACHE_DIR,
-        help="Directory containing cached raw files",
+        "--max-matches", type=int, default=5, help="Maximum counterpart matches per verse"
     )
-    parser.add_argument(
-        "--surah-dir",
-        type=Path,
-        default=DEFAULT_SURAH_DIR,
-        help="Directory containing public/data/quran/surah/*.json",
-    )
-    parser.add_argument(
-        "--out-dir",
-        type=Path,
-        default=DEFAULT_OUT_DIR,
-        help="Output directory for mutashabih/NNN.json files",
-    )
-    parser.add_argument(
-        "--manifest",
-        type=Path,
-        default=DEFAULT_MANIFEST_PATH,
-        help="Path to manifest.json",
-    )
-    parser.add_argument(
-        "--notices",
-        type=Path,
-        default=DEFAULT_NOTICES_PATH,
-        help="Path to NOTICES.txt",
-    )
-    parser.add_argument(
-        "--max-matches",
-        type=int,
-        default=5,
-        help="Maximum counterpart matches per verse",
-    )
-    args = parser.parse_args()
-
-    build_mutashabih(
-        cache_dir=args.cache_dir,
-        surah_dir=args.surah_dir,
-        out_dir=args.out_dir,
-        manifest_path=args.manifest,
-        notices_path=args.notices,
-        max_matches=args.max_matches,
-    )
+    build_mutashabih(max_matches=parser.parse_args().max_matches)
 
 
 if __name__ == "__main__":

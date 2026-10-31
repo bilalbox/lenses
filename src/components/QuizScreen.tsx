@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadSurah } from "../lib/api";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState,
+} from "react";
 import { stripTashkeel } from "../lib/arabic";
 import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
+import { loadLayer } from "../lib/layers";
 import {
-	CURATED_SURAHS,
-	EXTENDED_QUIZ_SURAHS,
-	type ExampleHuntQuestion,
-	extractQuizPools,
-	extractQuizQuestionsFromSurah,
 	getCaseMeta,
 	getLensLabel,
 	getRoleMeta,
@@ -16,39 +18,44 @@ import {
 	QUIZ_CASES,
 	QUIZ_ROLES,
 	QUIZ_SIGNS,
-	type QuizCase,
 	type QuizLens,
-	type QuizQuestion,
-	type QuizRelation,
-	type QuizSign,
 	SARF_CLASSES,
 	SARF_STRUCTURES,
+} from "../lib/quizCatalog";
+import {
+	CURATED_SURAHS,
+	EXTENDED_QUIZ_SURAHS,
+	type ExampleHuntQuestion,
+	extractQuizPools,
+	type QuizPools,
+	type QuizQuestion,
+	type QuizSource,
 	type SarfQuestion,
 } from "../lib/quizEngine";
+import {
+	activeQuestion,
+	type DraftField,
+	initQuizSession,
+	maxStep,
+	progress,
+	type QuizSessionEvent,
+	type QuizSessionState,
+	reduceQuizSession,
+	type WizardStep,
+} from "../lib/quizSession";
 import type { ExampleQuery } from "../lib/search";
-import type { Manifest, SurahFile } from "../lib/types";
-
-interface IrabDraft {
-	relation: QuizRelation | null;
-	headWordNum: number | null;
-	grammaticalCase: QuizCase | null;
-	sign: QuizSign | null;
-}
-
-interface SarfDraft {
-	root: string | null;
-	wazn: string | null;
-	classCode: string | null;
-	structureCode: string | null;
-}
-
-interface ExamplesDraft {
-	spottedWordNum: number | null;
-}
-
-type WizardStep = 1 | 2 | 3 | 4 | 5;
+import type { Manifest } from "../lib/types";
 
 const LENS_ORDER: QuizLens[] = ["irab", "sarf", "examples"];
+
+/** A quiz surah's morphology plus its treebank; a missing treebank only costs the iʿrāb questions. */
+async function loadQuizSource(n: number): Promise<QuizSource> {
+	const [surah, syntax] = await Promise.all([
+		loadLayer("surah", n),
+		loadLayer("syntax", n).catch(() => undefined),
+	]);
+	return { surah, syntax };
+}
 
 export function QuizScreen({
 	manifest,
@@ -64,42 +71,20 @@ export function QuizScreen({
 	const { locale, t, formatNumber } = useI18n();
 	const quranText = (text: string) =>
 		hideDiacritics ? stripTashkeel(text) : text;
-	const [loadedFiles, setLoadedFiles] = useState<SurahFile[]>([]);
+	const [loadedFiles, setLoadedFiles] = useState<QuizSource[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	const [lens, setLens] = useState<QuizLens>("irab");
-
-	const [indices, setIndices] = useState<Record<QuizLens, number>>({
-		irab: 0,
-		sarf: 0,
-		examples: 0,
-	});
-	const [poolsSeeded, setPoolsSeeded] = useState(false);
-
-	const [streak, setStreak] = useState(0);
-	const [score, setScore] = useState({ solved: 0, attempts: 0 });
-
-	const [step, setStep] = useState<WizardStep>(1);
-	const [animDir, setAnimDir] = useState<"forward" | "backward">("forward");
-
-	const [irabDraft, setIrabDraft] = useState<IrabDraft>({
-		relation: null,
-		headWordNum: null,
-		grammaticalCase: null,
-		sign: null,
-	});
-	const [sarfDraft, setSarfDraft] = useState<SarfDraft>({
-		root: null,
-		wazn: null,
-		classCode: null,
-		structureCode: null,
-	});
-	const [exDraft, setExDraft] = useState<ExamplesDraft>({
-		spottedWordNum: null,
-	});
-
-	const [submitted, setSubmitted] = useState(false);
-	const [missingFields, setMissingFields] = useState<string[]>([]);
+	const pools = useRef<QuizPools>({ irab: [], sarf: [], examples: [] });
+	const [session, dispatch] = useReducer(
+		(state: QuizSessionState, event: QuizSessionEvent) =>
+			reduceQuizSession(state, event, pools.current),
+		undefined,
+		initQuizSession,
+	);
+	const { lens, drafts, verdict, streak, score } = session;
+	const irabDraft = drafts.irab;
+	const sarfDraft = drafts.sarf;
+	const exDraft = drafts.examples;
 	const targetBtnRef = useRef<HTMLButtonElement | null>(null);
 	const ayahBoxRef = useRef<HTMLDivElement | null>(null);
 
@@ -107,22 +92,25 @@ export function QuizScreen({
 	useEffect(() => {
 		if (!manifest) return;
 		let cancel = false;
-		Promise.all(CURATED_SURAHS.map((n) => loadSurah(n)))
-			.then((files) => {
+		Promise.all(CURATED_SURAHS.map(loadQuizSource))
+			.then((sources) => {
 				if (cancel) return;
-				setLoadedFiles(files);
+				setLoadedFiles(sources);
 				setLoading(false);
 
 				// Wave 2: Load EXTENDED_QUIZ_SURAHS in the background for deeper variety
 				void Promise.all(
-					EXTENDED_QUIZ_SURAHS.map((n) => loadSurah(n).catch(() => null)),
+					EXTENDED_QUIZ_SURAHS.map((n) => loadQuizSource(n).catch(() => null)),
 				).then((more) => {
 					if (cancel) return;
-					const validMore = more.filter((f): f is SurahFile => f !== null);
+					const validMore = more.filter((f): f is QuizSource => f !== null);
 					if (validMore.length > 0) {
 						setLoadedFiles((prev) => {
-							const seen = new Set(prev.map((p) => p.n));
-							return [...prev, ...validMore.filter((f) => !seen.has(f.n))];
+							const seen = new Set(prev.map((p) => p.surah.n));
+							return [
+								...prev,
+								...validMore.filter((f) => !seen.has(f.surah.n)),
+							];
 						});
 					}
 				});
@@ -135,22 +123,13 @@ export function QuizScreen({
 		};
 	}, [manifest]);
 
-	const irabPool = useMemo(() => {
-		const extracted: QuizQuestion[] = [];
-		for (const f of loadedFiles) {
-			extracted.push(...extractQuizQuestionsFromSurah(f));
-		}
-		return extracted;
-	}, [loadedFiles]);
-
 	const quizPools = useMemo(() => extractQuizPools(loadedFiles), [loadedFiles]);
-
-	const sarfPool = quizPools.sarf;
-	const examplesPool = quizPools.examples;
+	pools.current = quizPools;
+	const { irab: irabPool, sarf: sarfPool, examples: examplesPool } = quizPools;
 
 	// Always open quiz on a random verse (once curated pools are ready).
 	useEffect(() => {
-		if (poolsSeeded || loading) return;
+		if (session.seeded || loading) return;
 		if (
 			irabPool.length === 0 &&
 			sarfPool.length === 0 &&
@@ -158,208 +137,50 @@ export function QuizScreen({
 		)
 			return;
 		const raf = requestAnimationFrame(() => {
-			setIndices({
-				irab: irabPool.length ? Math.floor(Math.random() * irabPool.length) : 0,
-				sarf: sarfPool.length ? Math.floor(Math.random() * sarfPool.length) : 0,
-				examples: examplesPool.length
-					? Math.floor(Math.random() * examplesPool.length)
-					: 0,
+			dispatch({
+				type: "seed",
+				random: {
+					irab: Math.random(),
+					sarf: Math.random(),
+					examples: Math.random(),
+				},
 			});
-			setPoolsSeeded(true);
 		});
 		return () => cancelAnimationFrame(raf);
 	}, [
 		examplesPool.length,
 		irabPool.length,
 		loading,
-		poolsSeeded,
+		session.seeded,
 		sarfPool.length,
 	]);
 
-	const irabQuestion: QuizQuestion | null =
-		irabPool[indices.irab % Math.max(irabPool.length, 1)] ?? null;
-	const sarfQuestion: SarfQuestion | null =
-		sarfPool[indices.sarf % Math.max(sarfPool.length, 1)] ?? null;
-	const exQuestion: ExampleHuntQuestion | null =
-		examplesPool[indices.examples % Math.max(examplesPool.length, 1)] ?? null;
+	const question = activeQuestion(session, pools.current);
+	const irabQuestion =
+		lens === "irab" ? (question as QuizQuestion | null) : null;
+	const sarfQuestion =
+		lens === "sarf" ? (question as SarfQuestion | null) : null;
+	const exQuestion =
+		lens === "examples" ? (question as ExampleHuntQuestion | null) : null;
 
-	const activeQuestion =
-		lens === "irab"
-			? irabQuestion
-			: lens === "sarf"
-				? sarfQuestion
-				: exQuestion;
-
-	const resetDrafts = useCallback(() => {
-		setIrabDraft({
-			relation: null,
-			headWordNum: null,
-			grammaticalCase: null,
-			sign: null,
-		});
-		setSarfDraft({
-			root: null,
-			wazn: null,
-			classCode: null,
-			structureCode: null,
-		});
-		setExDraft({ spottedWordNum: null });
-		setSubmitted(false);
-		setMissingFields([]);
-		setAnimDir("forward");
-		setStep(1);
-	}, []);
+	const activeQ = question;
 
 	useEffect(() => {
-		if (activeQuestion?.id || lens) {
+		if (activeQ?.id || lens) {
 			targetBtnRef.current?.scrollIntoView({
 				behavior: "smooth",
 				block: "nearest",
 				inline: "center",
 			});
 		}
-	}, [activeQuestion?.id, lens]);
+	}, [activeQ?.id, lens]);
 
-	const handleSelectLens = (nextLens: QuizLens) => {
-		if (nextLens === lens) return;
-		setLens(nextLens);
-		resetDrafts();
-	};
-
-	const handleNextRandom = useCallback(() => {
-		const currentPool =
-			lens === "irab" ? irabPool : lens === "sarf" ? sarfPool : examplesPool;
-		if (currentPool.length <= 1 || !activeQuestion) return;
-
-		const otherAyahPool = currentPool.filter(
-			(q) =>
-				q.sura !== activeQuestion.sura || q.verse.v !== activeQuestion.verse.v,
-		);
-		const source = otherAyahPool.length > 0 ? otherAyahPool : currentPool;
-		const picked = source[Math.floor(Math.random() * source.length)];
-		const nextIdx = picked
-			? currentPool.findIndex((q) => q.id === picked.id)
-			: 0;
-		setIndices((prev) => ({ ...prev, [lens]: Math.max(nextIdx, 0) }));
-		resetDrafts();
-	}, [activeQuestion, examplesPool, irabPool, lens, resetDrafts, sarfPool]);
-
-	const recordOutcome = useCallback((isAllCorrect: boolean) => {
-		if (isAllCorrect) {
-			setStreak((s) => s + 1);
-			setScore((prev) => ({
-				solved: prev.solved + 1,
-				attempts: prev.attempts + 1,
-			}));
-		} else {
-			setStreak(0);
-			setScore((prev) => ({ ...prev, attempts: prev.attempts + 1 }));
-		}
-	}, []);
-
-	const handleSubmit = useCallback(() => {
-		if (!activeQuestion) return;
-		if (lens === "irab" && irabQuestion) {
-			const missing: string[] = [];
-			if (!irabDraft.relation) missing.push(t.quiz.stepRoleCrumb);
-			if (!irabDraft.headWordNum)
-				missing.push(getRoleMeta(irabQuestion.relation).governorLabel[locale]);
-			if (!irabDraft.grammaticalCase) missing.push(t.quiz.stepCaseCrumb);
-			if (!irabDraft.sign) missing.push(t.quiz.stepSignCrumb);
-			if (missing.length > 0) {
-				setSubmitted(true);
-				setMissingFields(missing);
-				return;
-			}
-			const allOk =
-				irabDraft.relation === irabQuestion.relation &&
-				irabDraft.headWordNum === irabQuestion.headWord.n &&
-				irabDraft.grammaticalCase === irabQuestion.grammaticalCase &&
-				irabDraft.sign === irabQuestion.sign;
-			setSubmitted(true);
-			setMissingFields([]);
-			recordOutcome(allOk);
-			return;
-		}
-
-		if (lens === "sarf" && sarfQuestion) {
-			const missing: string[] = [];
-			if (!sarfDraft.root) missing.push(locale === "ar" ? "المادة" : "Root");
-			if (!sarfDraft.wazn) missing.push(locale === "ar" ? "الوزن" : "Wazn");
-			if (!sarfDraft.classCode)
-				missing.push(locale === "ar" ? "الباب/المشتق" : "Class");
-			if (!sarfDraft.structureCode)
-				missing.push(locale === "ar" ? "البنية" : "Structure");
-			if (missing.length > 0) {
-				setSubmitted(true);
-				setMissingFields(missing);
-				return;
-			}
-			const allOk =
-				sarfDraft.root === sarfQuestion.rootRaw &&
-				sarfDraft.wazn === sarfQuestion.wazn &&
-				sarfDraft.classCode === sarfQuestion.classCode &&
-				sarfDraft.structureCode === sarfQuestion.structureCode;
-			setSubmitted(true);
-			setMissingFields([]);
-			recordOutcome(allOk);
-			return;
-		}
-
-		if (lens === "examples" && exQuestion) {
-			const missing: string[] = [];
-			if (!exDraft.spottedWordNum)
-				missing.push(locale === "ar" ? "الشاهد في الآية" : "Word in Ayah");
-			if (missing.length > 0) {
-				setSubmitted(true);
-				setMissingFields(missing);
-				return;
-			}
-			const allOk = exDraft.spottedWordNum === exQuestion.targetWord.n;
-			setSubmitted(true);
-			setMissingFields([]);
-			recordOutcome(allOk);
-		}
-	}, [
-		activeQuestion,
-		exDraft,
-		exQuestion,
-		irabDraft,
-		irabQuestion,
-		lens,
-		locale,
-		recordOutcome,
-		sarfDraft,
-		sarfQuestion,
-		t.quiz,
-	]);
-
-	const handleRevealAnswer = useCallback(() => {
-		if (!activeQuestion) return;
-		if (lens === "irab" && irabQuestion) {
-			setIrabDraft({
-				relation: irabQuestion.relation,
-				headWordNum: irabQuestion.headWord.n,
-				grammaticalCase: irabQuestion.grammaticalCase,
-				sign: irabQuestion.sign,
-			});
-		} else if (lens === "sarf" && sarfQuestion) {
-			setSarfDraft({
-				root: sarfQuestion.rootRaw,
-				wazn: sarfQuestion.wazn,
-				classCode: sarfQuestion.classCode,
-				structureCode: sarfQuestion.structureCode,
-			});
-		} else if (lens === "examples" && exQuestion) {
-			setExDraft({
-				spottedWordNum: exQuestion.targetWord.n,
-			});
-		}
-		setSubmitted(true);
-		setMissingFields([]);
-		setAnimDir("forward");
-		setStep(lens === "examples" ? 2 : 5);
-	}, [activeQuestion, exQuestion, irabQuestion, lens, sarfQuestion]);
+	const handleSelectLens = (nextLens: QuizLens) =>
+		dispatch({ type: "selectLens", lens: nextLens });
+	const handleNextRandom = () =>
+		dispatch({ type: "next", random: Math.random() });
+	const handleSubmit = useCallback(() => dispatch({ type: "submit" }), []);
+	const handleRevealAnswer = () => dispatch({ type: "reveal" });
 
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -373,12 +194,12 @@ export function QuizScreen({
 	}, [handleSubmit]);
 
 	useEffect(() => {
-		if (lens || activeQuestion?.id) {
+		if (lens || activeQ?.id) {
 			ayahBoxRef.current?.scrollTo({ top: 0 });
 		}
-	}, [lens, activeQuestion?.id]);
+	}, [lens, activeQ?.id]);
 
-	if (loading || !poolsSeeded || !activeQuestion) {
+	if (loading || !session.seeded || !activeQ) {
 		return (
 			<div className="skeleton page-skeleton" aria-hidden="true">
 				<span />
@@ -388,39 +209,28 @@ export function QuizScreen({
 		);
 	}
 
-	const maxStep: WizardStep = lens === "examples" ? 2 : 5;
-	const isComplete = submitted && missingFields.length === 0;
-	const effectiveStep: WizardStep = isComplete ? maxStep : step;
-
-	const goToStep = (next: WizardStep) => {
-		setAnimDir(next >= effectiveStep ? "forward" : "backward");
-		if (isComplete && next < maxStep) {
-			setSubmitted(false);
-		}
-		setStep(next);
+	const isComplete = verdict !== null;
+	const effectiveStep: WizardStep = isComplete ? maxStep(lens) : session.step;
+	const animDir = session.animDir;
+	const goToStep = (next: WizardStep) =>
+		dispatch({ type: "goToStep", step: next });
+	const { filled: filledSteps, total: totalSteps } = progress(session);
+	const fieldLabels: Record<DraftField, string> = {
+		relation: t.quiz.stepRoleCrumb,
+		headWordNum: irabQuestion
+			? getRoleMeta(irabQuestion.relation).governorLabel[locale]
+			: t.quiz.headBadge,
+		grammaticalCase: t.quiz.stepCaseCrumb,
+		sign: t.quiz.stepSignCrumb,
+		root: t.quiz.fieldRoot,
+		wazn: t.quiz.fieldWazn,
+		classCode: t.quiz.fieldClass,
+		structureCode: t.quiz.fieldStructure,
+		spottedWordNum: t.quiz.fieldSpotted,
 	};
-
-	// Compute progress percentage across the active mode's steps
-	let filledSteps = 1;
-	let totalSteps = 5;
-	if (lens === "irab") {
-		filledSteps =
-			1 +
-			(irabDraft.relation ? 1 : 0) +
-			(irabDraft.headWordNum ? 1 : 0) +
-			(irabDraft.grammaticalCase ? 1 : 0) +
-			(irabDraft.sign ? 1 : 0);
-	} else if (lens === "sarf") {
-		filledSteps =
-			1 +
-			(sarfDraft.root ? 1 : 0) +
-			(sarfDraft.wazn ? 1 : 0) +
-			(sarfDraft.classCode ? 1 : 0) +
-			(sarfDraft.structureCode ? 1 : 0);
-	} else {
-		totalSteps = 2;
-		filledSteps = 1 + (exDraft.spottedWordNum ? 1 : 0);
-	}
+	const missingLabels = session.missing.map((field) => fieldLabels[field]);
+	const ok = (field: DraftField) => verdict?.fields[field] ?? false;
+	const allOk = verdict?.allCorrect ?? false;
 	const progressPct = Math.round((filledSteps / totalSteps) * 100);
 
 	const activeRoleMeta =
@@ -590,7 +400,7 @@ export function QuizScreen({
 
 				{/* Pinned Mushaf Ayah Box */}
 				<div
-					key={`${lens}:${activeQuestion.id}`}
+					key={`${lens}:${activeQ.id}`}
 					ref={ayahBoxRef}
 					className={`quiz-wizard-ayah-box anim-soft-enter ${isPickingWordInAyah ? "is-picking-governor" : ""}`}
 				>
@@ -611,11 +421,11 @@ export function QuizScreen({
 					) : null}
 
 					<p className="verse-line quiz-wizard-verse-line" dir="rtl" lang="ar">
-						{activeQuestion.verse.w.map((w) => {
+						{activeQ.verse.w.map((w) => {
 							const isTarget =
 								lens === "examples"
-									? isComplete && w.n === activeQuestion.targetWord.n
-									: w.n === activeQuestion.targetWord.n;
+									? isComplete && w.n === activeQ.targetWord.n
+									: w.n === activeQ.targetWord.n;
 							const isHead =
 								lens === "irab"
 									? irabDraft.headWordNum === w.n
@@ -637,11 +447,7 @@ export function QuizScreen({
 							return (
 								<button
 									key={w.n}
-									ref={
-										w.n === activeQuestion.targetWord.n
-											? targetBtnRef
-											: undefined
-									}
+									ref={w.n === activeQ.targetWord.n ? targetBtnRef : undefined}
 									type="button"
 									className={[
 										"quiz-word-token",
@@ -657,20 +463,20 @@ export function QuizScreen({
 									onClick={() => {
 										if (isComplete) return;
 										if (lens === "irab") {
-											if (w.n === activeQuestion.targetWord.n) return;
-											setIrabDraft((prev) => ({ ...prev, headWordNum: w.n }));
-											setSubmitted(false);
-											if (effectiveStep === 2) {
-												setAnimDir("forward");
-												setStep(3);
-											}
+											if (w.n === activeQ.targetWord.n) return;
+											dispatch({
+												type: "answer",
+												field: "headWordNum",
+												value: w.n,
+												step: effectiveStep === 2 ? 3 : undefined,
+											});
 										} else if (lens === "examples") {
-											setExDraft({ spottedWordNum: w.n });
-											setSubmitted(false);
-											if (effectiveStep === 1) {
-												setAnimDir("forward");
-												setStep(2);
-											}
+											dispatch({
+												type: "answer",
+												field: "spottedWordNum",
+												value: w.n,
+												step: effectiveStep === 1 ? 2 : undefined,
+											});
 										}
 									}}
 								>
@@ -684,9 +490,7 @@ export function QuizScreen({
 								</button>
 							);
 						})}
-						<span className="ayah-mark">
-							{formatNumber(activeQuestion.verse.v)}
-						</span>
+						<span className="ayah-mark">{formatNumber(activeQ.verse.v)}</span>
 					</p>
 				</div>
 			</section>
@@ -704,8 +508,8 @@ export function QuizScreen({
 				<div className="quiz-wizard-meta-bar">
 					<div className="quiz-wizard-surah-tag">
 						<span className="quiz-wizard-ref">
-							{activeQuestion.suraPhonetic} {formatNumber(activeQuestion.sura)}:
-							{formatNumber(activeQuestion.verse.v)}
+							{activeQ.suraPhonetic} {formatNumber(activeQ.sura)}:
+							{formatNumber(activeQ.verse.v)}
 						</span>
 					</div>
 
@@ -731,13 +535,13 @@ export function QuizScreen({
 							className="quiz-wizard-skip quiz-wizard-reader"
 							onClick={() =>
 								onOpenInReader(
-									activeQuestion.sura,
-									activeQuestion.verse.v,
-									activeQuestion.targetWord.n,
+									activeQ.sura,
+									activeQ.verse.v,
+									activeQ.targetWord.n,
 								)
 							}
 						>
-							{t.quiz.openReader(activeQuestion.sura, activeQuestion.verse.v)}
+							{t.quiz.openReader(activeQ.sura, activeQ.verse.v)}
 						</button>
 						<button
 							type="button"
@@ -793,7 +597,7 @@ export function QuizScreen({
 
 				<div
 					id="quiz-step-panel"
-					key={`${lens}:${activeQuestion.id}-step-${effectiveStep}`}
+					key={`${lens}:${activeQ.id}-step-${effectiveStep}`}
 					className={`quiz-wizard-pane anim-${animDir}`}
 					role="tabpanel"
 					aria-labelledby={`quiz-step-tab-${effectiveStep}`}
@@ -831,13 +635,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-rich-card family-${r.family}${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setIrabDraft((prev) => ({
-															...prev,
-															relation: r.code,
-														}));
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(2);
+														dispatch({
+															type: "answer",
+															field: "relation",
+															value: r.code,
+															step: 2,
+														});
 													}}
 												>
 													<div className="quiz-rich-top">
@@ -892,13 +695,12 @@ export function QuizScreen({
 														type="button"
 														className={`quiz-gov-chip quiz-wizard-gov-chip${active ? " is-selected" : ""}`}
 														onClick={() => {
-															setIrabDraft((prev) => ({
-																...prev,
-																headWordNum: w.n,
-															}));
-															setSubmitted(false);
-															setAnimDir("forward");
-															setStep(3);
+															dispatch({
+																type: "answer",
+																field: "headWordNum",
+																value: w.n,
+																step: 3,
+															});
 														}}
 													>
 														<b lang="ar">{quranText(w.a)}</b>
@@ -938,13 +740,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-case-card quiz-wizard-case-card${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setIrabDraft((prev) => ({
-															...prev,
-															grammaticalCase: c.code,
-														}));
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(4);
+														dispatch({
+															type: "answer",
+															field: "grammaticalCase",
+															value: c.code,
+															step: 4,
+														});
 													}}
 												>
 													<div className="quiz-case-row">
@@ -989,10 +790,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-sign-card quiz-wizard-sign-card${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setIrabDraft((prev) => ({ ...prev, sign: s.code }));
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(5);
+														dispatch({
+															type: "answer",
+															field: "sign",
+															value: s.code,
+															step: 5,
+														});
 													}}
 												>
 													<div>
@@ -1125,10 +928,10 @@ export function QuizScreen({
 												</button>
 											</div>
 
-											{submitted && missingFields.length > 0 && (
+											{missingLabels.length > 0 && (
 												<div className="quiz-inline-error" role="alert">
 													<strong>{t.quiz.incompleteAlert}</strong>{" "}
-													{missingFields.join(" · ")}
+													{missingLabels.join(" · ")}
 												</div>
 											)}
 
@@ -1151,15 +954,11 @@ export function QuizScreen({
 										</>
 									) : (
 										(() => {
-											const relOk =
-												irabDraft.relation === irabQuestion.relation;
-											const headOk =
-												irabDraft.headWordNum === irabQuestion.headWord.n;
-											const caseOk =
-												irabDraft.grammaticalCase ===
-												irabQuestion.grammaticalCase;
-											const signOk = irabDraft.sign === irabQuestion.sign;
-											const allOk = relOk && headOk && caseOk && signOk;
+											const relOk = ok("relation");
+											const headOk = ok("headWordNum");
+											const caseOk = ok("grammaticalCase");
+											const signOk = ok("sign");
+
 											return (
 												<div
 													className={`quiz-wizard-reveal-card ${allOk ? "is-correct" : "is-review"}`}
@@ -1277,13 +1076,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-sign-card quiz-wizard-sign-card${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setSarfDraft((prev) => ({
-															...prev,
-															root: opt.code,
-														}));
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(2);
+														dispatch({
+															type: "answer",
+															field: "root",
+															value: opt.code,
+															step: 2,
+														});
 													}}
 												>
 													<div>
@@ -1327,13 +1125,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-sign-card quiz-wizard-sign-card${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setSarfDraft((prev) => ({
-															...prev,
-															wazn: opt.code,
-														}));
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(3);
+														dispatch({
+															type: "answer",
+															field: "wazn",
+															value: opt.code,
+															step: 3,
+														});
 													}}
 												>
 													<div>
@@ -1379,13 +1176,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-case-card quiz-wizard-case-card${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setSarfDraft((prev) => ({
-															...prev,
-															classCode: opt.code,
-														}));
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(4);
+														dispatch({
+															type: "answer",
+															field: "classCode",
+															value: opt.code,
+															step: 4,
+														});
 													}}
 												>
 													<div className="quiz-case-row">
@@ -1431,13 +1227,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-case-card quiz-wizard-case-card${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setSarfDraft((prev) => ({
-															...prev,
-															structureCode: opt.code,
-														}));
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(5);
+														dispatch({
+															type: "answer",
+															field: "structureCode",
+															value: opt.code,
+															step: 5,
+														});
 													}}
 												>
 													<div className="quiz-case-row">
@@ -1565,10 +1360,10 @@ export function QuizScreen({
 												</button>
 											</div>
 
-											{submitted && missingFields.length > 0 && (
+											{missingLabels.length > 0 && (
 												<div className="quiz-inline-error" role="alert">
 													<strong>{t.quiz.incompleteAlert}</strong>{" "}
-													{missingFields.join(" · ")}
+													{missingLabels.join(" · ")}
 												</div>
 											)}
 
@@ -1595,13 +1390,11 @@ export function QuizScreen({
 										</>
 									) : (
 										(() => {
-											const rootOk = sarfDraft.root === sarfQuestion.rootRaw;
-											const waznOk = sarfDraft.wazn === sarfQuestion.wazn;
-											const clsOk =
-												sarfDraft.classCode === sarfQuestion.classCode;
-											const strOk =
-												sarfDraft.structureCode === sarfQuestion.structureCode;
-											const allOk = rootOk && waznOk && clsOk && strOk;
+											const rootOk = ok("root");
+											const waznOk = ok("wazn");
+											const clsOk = ok("classCode");
+											const strOk = ok("structureCode");
+
 											return (
 												<div
 													className={`quiz-wizard-reveal-card ${allOk ? "is-correct" : "is-review"}`}
@@ -1756,10 +1549,12 @@ export function QuizScreen({
 													type="button"
 													className={`quiz-gov-chip quiz-wizard-gov-chip${active ? " is-selected" : ""}`}
 													onClick={() => {
-														setExDraft({ spottedWordNum: w.n });
-														setSubmitted(false);
-														setAnimDir("forward");
-														setStep(2);
+														dispatch({
+															type: "answer",
+															field: "spottedWordNum",
+															value: w.n,
+															step: 2,
+														});
 													}}
 												>
 													<b lang="ar">{quranText(w.a)}</b>
@@ -1805,10 +1600,10 @@ export function QuizScreen({
 												</span>
 											</div>
 
-											{submitted && missingFields.length > 0 && (
+											{missingLabels.length > 0 && (
 												<div className="quiz-inline-error" role="alert">
 													<strong>{t.quiz.incompleteAlert}</strong>{" "}
-													{missingFields.join(" · ")}
+													{missingLabels.join(" · ")}
 												</div>
 											)}
 
@@ -1835,8 +1630,7 @@ export function QuizScreen({
 										</>
 									) : (
 										(() => {
-											const spotOk =
-												exDraft.spottedWordNum === exQuestion.targetWord.n;
+											const spotOk = allOk;
 											return (
 												<div
 													className={`quiz-wizard-reveal-card ${spotOk ? "is-correct" : "is-review"}`}

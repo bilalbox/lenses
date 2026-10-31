@@ -1,4 +1,5 @@
 import { homeVerse } from "./home";
+import { layerUrl } from "./layers";
 import type { Manifest } from "./types";
 
 export interface LibraryProgress {
@@ -9,10 +10,6 @@ export interface LibraryProgress {
 const listeners = new Set<(progress: LibraryProgress) => void>();
 let latest: LibraryProgress | null = null;
 let started = false;
-
-function surahUrl(sura: number) {
-	return `/data/quran/surah/${String(sura).padStart(3, "0")}.json`;
-}
 
 function publish(progress: LibraryProgress) {
 	latest = progress;
@@ -42,9 +39,9 @@ async function fill(manifest: Manifest) {
 		return a - b;
 	});
 	const urls = [
-		...surahs.map(surahUrl),
-		"/data/quran/verses.json",
-		"/data/quran/words.json",
+		...surahs.map((sura) => layerUrl("surah", sura)),
+		layerUrl("verses"),
+		layerUrl("words"),
 	];
 	let cursor = 0;
 	let done = 0;

@@ -5,28 +5,13 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import {
-	loadAsbab,
-	loadSurah,
-	loadSurahMutashabih,
-	loadSurahSyntax,
-	loadVerseTranslation,
-} from "../lib/api";
 import { normalizeDigits } from "../lib/i18n/format";
 import { useI18n } from "../lib/i18n/I18nContext";
-import { type ReaderPrefs, rhetoricFetchEnabled } from "../lib/readerPrefs";
-import { useRhetoric } from "../lib/rhetoric";
-import type {
-	AsbabData,
-	Manifest,
-	SurahFile,
-	SurahMutashabihFile,
-	SurahSyntaxFile,
-	SyntaxGraph,
-	Verse,
-	VerseSyntax,
-} from "../lib/types";
-import { DependencyTree } from "./DependencyTree";
+import { findVerse, useLayer } from "../lib/layers";
+import { sentenceOfWord } from "../lib/noorBayan";
+import { useReaderLayers } from "../lib/readerLayers";
+import type { ReaderPrefs } from "../lib/readerPrefs";
+import type { Manifest, Verse, VerseRef, VerseSyntax } from "../lib/types";
 import { NoorBayanTree } from "./NoorBayanTree";
 import { VerseSecondaryLayers } from "./VerseSecondaryLayers";
 import { WordSheet } from "./WordSheet";
@@ -37,7 +22,7 @@ interface Props {
 	verseNumber: number;
 	wordNumber?: number;
 	tab?: string;
-	target?: string;
+	target?: VerseRef;
 	readerPrefs: ReaderPrefs;
 	onNavigate: (
 		sura: number,
@@ -60,30 +45,9 @@ export function VerseScreen({
 	onSearchRoot,
 }: Props) {
 	const { t } = useI18n();
-	const [file, setFile] = useState<SurahFile | null>(null);
-	const [error, setError] = useState("");
+	const { data: file, error } = useLayer("surah", sura);
 	const [jump, setJump] = useState(`${sura}:${verseNumber}`);
 	const [segment, setSegment] = useState<number | undefined>(undefined);
-
-	useEffect(() => {
-		let cancel = false;
-		setError("");
-		loadSurah(sura)
-			.then((next) => {
-				if (!cancel) setFile(next);
-			})
-			.catch((reason: unknown) => {
-				if (!cancel)
-					setError(
-						reason instanceof Error
-							? reason.message
-							: "Could not load this surah.",
-					);
-			});
-		return () => {
-			cancel = true;
-		};
-	}, [sura]);
 
 	useEffect(() => {
 		if (wordNumber !== undefined || sura || verseNumber) {
@@ -93,7 +57,7 @@ export function VerseScreen({
 	}, [sura, verseNumber, wordNumber]);
 
 	const unit = manifest.units.find((item) => item.n === sura);
-	const verse = file?.verses.find((item) => item.v === verseNumber) ?? null;
+	const verse = (file && findVerse(file, verseNumber)) ?? null;
 	const word = verse?.w.find((item) => item.n === wordNumber);
 
 	const goJump = (event: FormEvent) => {
@@ -186,7 +150,6 @@ export function VerseScreen({
 							sura={sura}
 							verse={verse}
 							selected={word?.n}
-							selectedSegment={segment}
 							onSelect={(wordIndex, segmentIndex) => {
 								setSegment(segmentIndex);
 								onNavigate(sura, verse.v, wordIndex);
@@ -207,6 +170,7 @@ export function VerseScreen({
 					sura={sura}
 					verse={verse}
 					word={word}
+					qiraatEnabled={readerPrefs.qiraat}
 					segmentIndex={segment}
 					onSelectSegment={setSegment}
 					onClose={() => onNavigate(sura, verse.v)}
@@ -225,7 +189,6 @@ function VerseBody({
 	sura,
 	verse,
 	selected,
-	selectedSegment,
 	onSelect,
 	goal,
 	revSeq,
@@ -243,13 +206,12 @@ function VerseBody({
 	sura: number;
 	verse: Verse;
 	selected?: number;
-	selectedSegment?: number;
 	onSelect: (word: number, segment?: number) => void;
 	goal?: string;
 	revSeq?: number;
 	surahClass?: string;
 	tab?: string;
-	target?: string;
+	target?: VerseRef;
 	readerPrefs: ReaderPrefs;
 	onNavigate?: (
 		sura: number,
@@ -259,103 +221,10 @@ function VerseBody({
 	) => void;
 }) {
 	const { locale, t, formatNumber } = useI18n();
-	const graphs = verse.g ?? [];
-	const frozen = selected !== undefined;
-	const narrow = useNarrow();
+	// One clause index for the ayah line and the NoorBayan tree.
 	const [clauseIndex, setClauseIndex] = useState(0);
-	const [clauseEdgeHint, setClauseEdgeHint] = useState("");
-	const [irabOpen, setIrabOpen] = useState(false);
-
-	const [asbabData, setAsbabData] = useState<AsbabData | null>(null);
-	const [syntaxFile, setSyntaxFile] = useState<SurahSyntaxFile | null>(null);
-	const [mutashabihFile, setMutashabihFile] =
-		useState<SurahMutashabihFile | null>(null);
-	const [asbabOpen, setAsbabOpen] = useState(
-		() => tab === "asbab" || window.location.search.includes("asbab=1"),
-	);
-	const [mutashabihOpen, setMutashabihOpen] = useState(
-		() => tab === "mutashabih",
-	);
-	const [balaghaOpen, setBalaghaOpen] = useState(() => tab === "balagha");
-	const [syntaxClauseIndex, setSyntaxClauseIndex] = useState(0);
-
-	useEffect(() => {
-		if (tab === "mutashabih") setMutashabihOpen(true);
-		if (tab === "asbab") setAsbabOpen(true);
-		if (tab === "balagha") setBalaghaOpen(true);
-	}, [tab]);
-
-	useEffect(() => {
-		if (!readerPrefs.mutashabih) return;
-		let cancelled = false;
-		loadSurahMutashabih(sura)
-			.then((data) => {
-				if (!cancelled) {
-					setMutashabihFile(data);
-					if (
-						tab === "mutashabih" ||
-						window.location.search.includes("mutashabih=1")
-					) {
-						setMutashabihOpen(true);
-					}
-				}
-			})
-			.catch(() => {
-				if (!cancelled) setMutashabihFile(null);
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [sura, tab, readerPrefs.mutashabih]);
-
-	useEffect(() => {
-		if (!readerPrefs.asbab) return;
-		let cancelled = false;
-		loadAsbab()
-			.then((data) => {
-				if (!cancelled) {
-					setAsbabData(data);
-					if (tab === "asbab" || window.location.search.includes("asbab=1")) {
-						setAsbabOpen(true);
-					}
-				}
-			})
-			.catch(() => {});
-		return () => {
-			cancelled = true;
-		};
-	}, [tab, readerPrefs.asbab]);
-
-	useEffect(() => {
-		if (!readerPrefs.nahw) return;
-		let cancelled = false;
-		setSyntaxClauseIndex(0);
-		loadSurahSyntax(sura)
-			.then((data) => {
-				if (!cancelled) setSyntaxFile(data);
-			})
-			.catch(() => {});
-		return () => {
-			cancelled = true;
-		};
-	}, [sura, readerPrefs.nahw]);
-
-	const verseAsbab = useMemo(() => {
-		if (!asbabData) return [];
-		return asbabData[`${sura}:${verse.v}`] ?? [];
-	}, [asbabData, sura, verse.v]);
-
-	const verseSyntax = useMemo(() => {
-		if (!syntaxFile) return null;
-		return syntaxFile.verses.find((item) => item.v === verse.v) ?? null;
-	}, [syntaxFile, verse.v]);
-
-	const verseMutashabih = useMemo(() => {
-		if (!mutashabihFile) return null;
-		return mutashabihFile.verses.find((item) => item.v === verse.v) ?? null;
-	}, [mutashabihFile, verse.v]);
-
-	const mutashabihMatches = verseMutashabih?.matches ?? [];
+	const layers = useReaderLayers(readerPrefs, sura, verse, locale, tab);
+	const verseAsbab = layers.asbab.narrations;
 
 	const scrollToLayer = useCallback((selector: string) => {
 		window.setTimeout(() => {
@@ -365,99 +234,22 @@ function VerseBody({
 		}, 50);
 	}, []);
 
+	const { drawers, setDrawer } = layers;
 	const handleOpenAsbab = useCallback(() => {
-		setAsbabOpen((open) => {
-			const next = !open;
-			if (next) scrollToLayer(".asbab-block");
-			return next;
-		});
-	}, [scrollToLayer]);
+		const next = !drawers.asbab;
+		setDrawer("asbab", next);
+		if (next) scrollToLayer(".asbab-block");
+	}, [drawers.asbab, setDrawer, scrollToLayer]);
 
+	const sentences = layers.nahw.syntax?.sentences;
 	const membership = useMemo(
-		() => clauseMembership(graphs, sura, verse.v),
-		[graphs, sura, verse.v],
+		() => sentenceOfWord(sentences ?? []),
+		[sentences],
 	);
 	const segments = useMemo(
 		() => groupWords(verse.w, membership),
 		[verse.w, membership],
 	);
-	useEffect(() => {
-		if (sura || verse.v) {
-			setClauseIndex(0);
-			setClauseEdgeHint("");
-			setIrabOpen(false);
-			setMutashabihOpen(tab === "mutashabih");
-			setAsbabOpen(tab === "asbab");
-			setBalaghaOpen(tab === "balagha");
-		}
-	}, [sura, verse.v, tab]);
-	useEffect(() => {
-		if (!clauseEdgeHint) return;
-		const timer = window.setTimeout(() => setClauseEdgeHint(""), 2200);
-		return () => window.clearTimeout(timer);
-	}, [clauseEdgeHint]);
-	const openClause = (index: number) => {
-		setClauseIndex(index);
-		setClauseEdgeHint("");
-		if (!narrow)
-			document
-				.getElementById(`clause-${index}`)
-				?.scrollIntoView({ behavior: "smooth", block: "start" });
-	};
-	const stepClause = (delta: number) => {
-		const next = clauseIndex + delta;
-		if (next < 0) {
-			setClauseEdgeHint(t.verse.firstClause);
-			return;
-		}
-		if (next >= graphs.length) {
-			setClauseEdgeHint(t.verse.lastClause);
-			return;
-		}
-		openClause(next);
-	};
-	const { entries: rhetoricEntries } = useRhetoric(
-		rhetoricFetchEnabled(readerPrefs),
-	);
-	const classicalBalagha = useMemo(
-		() =>
-			rhetoricEntries.find(
-				(e) =>
-					e.dataset === "classical-balagha" &&
-					e.sura === sura &&
-					e.verse === verse.v,
-			),
-		[rhetoricEntries, sura, verse.v],
-	);
-	const rhetoricForTranslation = useMemo(
-		() => rhetoricEntries.find((e) => e.sura === sura && e.verse === verse.v),
-		[rhetoricEntries, sura, verse.v],
-	);
-
-	const [fetchedTranslation, setFetchedTranslation] = useState<string>("");
-
-	useEffect(() => {
-		if (locale === "ar") {
-			setFetchedTranslation("");
-			return;
-		}
-		const key = locale === "id" ? "indonesian_sabiq" : "english_saheeh";
-		const preloaded =
-			locale === "id"
-				? rhetoricForTranslation?.indonesianAyah
-				: rhetoricForTranslation?.englishAyah;
-		if (preloaded) {
-			setFetchedTranslation(preloaded);
-			return;
-		}
-		let cancelled = false;
-		loadVerseTranslation(key, sura, verse.v).then((text) => {
-			if (!cancelled) setFetchedTranslation(text);
-		});
-		return () => {
-			cancelled = true;
-		};
-	}, [locale, sura, verse.v, rhetoricForTranslation]);
 	return (
 		<>
 			<VerseHeaderCard
@@ -471,7 +263,7 @@ function VerseBody({
 				surahClass={surahClass}
 				showAsbab={readerPrefs.asbab && verseAsbab.length > 0}
 				asbabCount={verseAsbab.length}
-				asbabOpen={asbabOpen}
+				asbabOpen={drawers.asbab}
 				onOpenAsbab={handleOpenAsbab}
 			/>
 			<p className="verse-line" dir="rtl" lang="ar">
@@ -499,7 +291,7 @@ function VerseBody({
 									className={selected === word.n ? "is-on" : ""}
 									onClick={() => {
 										onSelect(word.n);
-										openClause(segment.clause as number);
+										setClauseIndex(segment.clause as number);
 									}}
 								>
 									{word.a}
@@ -521,79 +313,27 @@ function VerseBody({
 				manifest={manifest}
 				sura={sura}
 				verse={verse}
-				readerPrefs={readerPrefs}
-				fetchedTranslation={fetchedTranslation}
-				irabOpen={irabOpen}
-				onIrabToggle={setIrabOpen}
-				mutashabihMatches={mutashabihMatches}
-				mutashabihOpen={mutashabihOpen}
-				onMutashabihToggle={setMutashabihOpen}
-				tab={tab}
+				layers={layers}
 				target={target}
 				onSelect={onSelect}
 				onNavigate={onNavigate}
-				verseAsbab={verseAsbab}
-				asbabOpen={asbabOpen}
-				onAsbabToggle={setAsbabOpen}
-				classicalBalagha={classicalBalagha}
-				balaghaOpen={balaghaOpen}
-				onBalaghaToggle={setBalaghaOpen}
 				nahwPanel={
-					readerPrefs.nahw ? (
+					layers.nahw.enabled ? (
 						<NahwSyntaxSection
-							verseSyntax={verseSyntax}
-							graphs={graphs}
-							narrow={narrow}
+							verseSyntax={layers.nahw.syntax}
+							loading={layers.nahw.loading}
 							sura={sura}
 							verse={verse}
 							selected={selected}
-							selectedSegment={selectedSegment}
-							frozen={frozen}
 							clauseIndex={clauseIndex}
-							syntaxClauseIndex={syntaxClauseIndex}
-							onSelectClause={openClause}
-							onSelectSyntaxClause={setSyntaxClauseIndex}
-							onStepClause={stepClause}
+							onSelectClause={setClauseIndex}
 							onSelectWord={onSelect}
-							clauseEdgeHint={clauseEdgeHint}
 						/>
 					) : null
 				}
 			/>
 		</>
 	);
-}
-
-function useNarrow() {
-	const [narrow, setNarrow] = useState(false);
-	useEffect(() => {
-		const query = window.matchMedia("(max-width: 720px)");
-		const apply = () => setNarrow(query.matches);
-		apply();
-		query.addEventListener("change", apply);
-		return () => query.removeEventListener("change", apply);
-	}, []);
-	return narrow;
-}
-
-function clauseMembership(
-	graphs: NonNullable<Verse["g"]>,
-	sura: number,
-	verse: number,
-) {
-	const membership = new Map<number, number>();
-	graphs.forEach((graph, index) => {
-		for (const node of graph.nodes) {
-			if (
-				node.s === sura &&
-				node.v === verse &&
-				node.w &&
-				!membership.has(node.w)
-			)
-				membership.set(node.w, index);
-		}
-	});
-	return membership;
 }
 
 function groupWords(words: Verse["w"], membership: Map<number, number>) {
@@ -678,42 +418,28 @@ function VerseHeaderCard({
 
 function NahwSyntaxSection({
 	verseSyntax,
-	graphs,
-	narrow,
+	loading,
 	sura,
 	verse,
 	selected,
-	selectedSegment,
-	frozen,
 	clauseIndex,
-	syntaxClauseIndex,
 	onSelectClause,
-	onSelectSyntaxClause,
-	onStepClause,
 	onSelectWord,
-	clauseEdgeHint,
 }: {
 	verseSyntax: VerseSyntax | null;
-	graphs: SyntaxGraph[];
-	narrow: boolean;
+	loading: boolean;
 	sura: number;
 	verse: Verse;
 	selected?: number;
-	selectedSegment?: number;
-	frozen: boolean;
 	clauseIndex: number;
-	syntaxClauseIndex: number;
 	onSelectClause: (index: number) => void;
-	onSelectSyntaxClause: (index: number) => void;
-	onStepClause: (delta: number) => void;
 	onSelectWord: (word: number, segment?: number) => void;
-	clauseEdgeHint: string;
 }) {
-	const { t, formatNumber } = useI18n();
+	const { t } = useI18n();
 
 	if (verseSyntax?.sentences && verseSyntax.sentences.length > 0) {
 		const activeSentence =
-			verseSyntax.sentences[syntaxClauseIndex] ?? verseSyntax.sentences[0]!;
+			verseSyntax.sentences[clauseIndex] ?? verseSyntax.sentences[0]!;
 		return (
 			<section className="noorbayan-nahw-section">
 				<div className="noorbayan-nahw-header">
@@ -741,8 +467,8 @@ function NahwSyntaxSection({
 								<button
 									key={sent.id}
 									type="button"
-									className={`noorbayan-clause-btn${idx === syntaxClauseIndex ? " is-active" : ""}`}
-									onClick={() => onSelectSyntaxClause(idx)}
+									className={`noorbayan-clause-btn${idx === clauseIndex ? " is-active" : ""}`}
+									onClick={() => onSelectClause(idx)}
 								>
 									{t.verse.clauseCount(idx, verseSyntax.sentences.length)}
 								</button>
@@ -762,84 +488,19 @@ function NahwSyntaxSection({
 		);
 	}
 
-	if (!graphs.length) {
+	if (loading) {
 		return (
-			<div className="banner">
-				<strong>{t.verse.noTreeTitle}</strong>
+			<div className="skeleton" aria-hidden="true">
+				<span />
+				<span />
+				<span />
 			</div>
 		);
 	}
 
-	const show = narrow
-		? graphs.filter((_, index) => index === clauseIndex)
-		: graphs;
-
 	return (
-		<>
-			{graphs.length > 1 ? (
-				<div className="tree-tools">
-					<nav
-						className="clause-outline"
-						dir="rtl"
-						aria-label={t.verse.clausesAria}
-					>
-						{graphs.map((_, index) => (
-							<button
-								key={index}
-								type="button"
-								className={index === clauseIndex ? "is-on" : ""}
-								onClick={() => onSelectClause(index)}
-							>
-								{formatNumber(index + 1)}
-							</button>
-						))}
-					</nav>
-				</div>
-			) : null}
-			{show.map((graph) => {
-				const index = graphs.indexOf(graph);
-				return (
-					<DependencyTree
-						key={index}
-						graph={graph}
-						index={index}
-						total={graphs.length}
-						sura={sura}
-						verse={verse.v}
-						words={verse.w}
-						selectedWord={selected}
-						selectedSegment={selectedSegment}
-						frozen={frozen}
-						current={index === clauseIndex}
-						onSelectWord={(nextSura, nextVerse, word, segmentIndex) => {
-							if (nextSura === sura && nextVerse === verse.v)
-								onSelectWord(word, segmentIndex);
-							else window.location.hash = `#/${nextSura}/${nextVerse}/${word}`;
-						}}
-					/>
-				);
-			})}
-			{narrow && graphs.length > 1 ? (
-				<div className="clause-stepper">
-					<button
-						type="button"
-						onClick={() => onStepClause(-1)}
-						aria-label={t.common.previous}
-					>
-						{t.common.previous}
-					</button>
-					<span className={clauseEdgeHint ? "is-edge-hint" : ""} role="status">
-						{clauseEdgeHint || t.verse.clauseCount(clauseIndex, graphs.length)}
-					</span>
-					<button
-						type="button"
-						onClick={() => onStepClause(1)}
-						aria-label={t.common.next}
-					>
-						{t.common.next}
-					</button>
-				</div>
-			) : null}
-		</>
+		<div className="banner">
+			<strong>{t.verse.noTreeTitle}</strong>
+		</div>
 	);
 }

@@ -1,14 +1,9 @@
 import type { ReactNode } from "react";
 import { formatIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
-import type { ReaderPrefs } from "../lib/readerPrefs";
-import type {
-	AsbabNarration,
-	Manifest,
-	MutashabihMatch,
-	RhetoricEntry,
-	Verse,
-} from "../lib/types";
+import type { ReaderLayers } from "../lib/readerLayers";
+import { verseRefParam } from "../lib/route";
+import type { Manifest, Verse, VerseRef } from "../lib/types";
 import { AsbabSection } from "./AsbabSection";
 import { ClassicalBalaghaSection } from "./ClassicalBalaghaSection";
 import { MutashabihSection } from "./MutashabihSection";
@@ -169,15 +164,8 @@ interface Props {
 	manifest: Manifest;
 	sura: number;
 	verse: Verse;
-	readerPrefs: ReaderPrefs;
-	fetchedTranslation: string;
-	irabOpen: boolean;
-	onIrabToggle: (open: boolean) => void;
-	mutashabihMatches: MutashabihMatch[];
-	mutashabihOpen: boolean;
-	onMutashabihToggle: (open: boolean) => void;
-	tab?: string;
-	target?: string;
+	layers: ReaderLayers;
+	target?: VerseRef;
 	onSelect: (word: number, segment?: number) => void;
 	onNavigate?: (
 		sura: number,
@@ -185,12 +173,6 @@ interface Props {
 		word?: number,
 		params?: Record<string, string>,
 	) => void;
-	verseAsbab: AsbabNarration[];
-	asbabOpen: boolean;
-	onAsbabToggle: (open: boolean) => void;
-	classicalBalagha?: RhetoricEntry;
-	balaghaOpen: boolean;
-	onBalaghaToggle: (open: boolean) => void;
 	nahwPanel?: ReactNode;
 }
 
@@ -198,56 +180,46 @@ export function VerseSecondaryLayers({
 	manifest,
 	sura,
 	verse,
-	readerPrefs,
-	fetchedTranslation,
-	irabOpen,
-	onIrabToggle,
-	mutashabihMatches,
-	mutashabihOpen,
-	onMutashabihToggle,
-	tab,
+	layers,
 	target,
 	onSelect,
 	onNavigate,
-	verseAsbab,
-	asbabOpen,
-	onAsbabToggle,
-	classicalBalagha,
-	balaghaOpen,
-	onBalaghaToggle,
 	nahwPanel,
 }: Props) {
 	const { locale, t } = useI18n();
-	const showClassicalIrab = readerPrefs.irab && Boolean(verse.ir);
+	const { drawers, setDrawer } = layers;
+	const classicalIrab = layers.irab.classical;
+	const mutashabihMatches = layers.mutashabih.matches;
+	const verseAsbab = layers.asbab.narrations;
+	const classicalBalagha = layers.balagha.entry;
 	const showNahw = Boolean(nahwPanel);
-	const showIrabDrawer = showClassicalIrab || showNahw;
 
 	return (
 		<>
-			{readerPrefs.meaning ? (
+			{layers.meaning.enabled ? (
 				<VerseMeaningPanel
 					verse={verse}
 					locale={locale}
-					fetchedTranslation={fetchedTranslation}
+					fetchedTranslation={layers.meaning.translation}
 				/>
 			) : null}
 
-			{showIrabDrawer ? (
+			{classicalIrab || showNahw ? (
 				<details
 					className="verse-layer irab-block"
-					open={irabOpen}
-					onToggle={(event) => onIrabToggle(event.currentTarget.open)}
+					open={drawers.irab}
+					onToggle={(event) => setDrawer("irab", event.currentTarget.open)}
 				>
 					<summary>
 						<span className="verse-layer-title">{t.verse.irabTitle}</span>
 						<span className="verse-layer-meta">
-							{showClassicalIrab
+							{classicalIrab
 								? t.common.tafsirCenterSource
 								: t.verse.treebankNoorBayan}
 						</span>
 					</summary>
 					<div className="verse-layer-body">
-						{showClassicalIrab && verse.ir ? (
+						{classicalIrab ? (
 							<>
 								<p className="source-line">
 									{t.common.tafsirCenterSource} ·{" "}
@@ -260,13 +232,13 @@ export function VerseSecondaryLayers({
 									</a>
 								</p>
 								<div className="prose irab-prose" dir="rtl" lang="ar">
-									{formatIrabText(verse.ir)}
+									{formatIrabText(classicalIrab)}
 								</div>
 							</>
 						) : null}
 						{showNahw ? (
 							<div
-								className={`irab-nahw-embed${showClassicalIrab ? " has-classical" : ""}`}
+								className={`irab-nahw-embed${classicalIrab ? " has-classical" : ""}`}
 							>
 								{nahwPanel}
 							</div>
@@ -275,11 +247,13 @@ export function VerseSecondaryLayers({
 				</details>
 			) : null}
 
-			{readerPrefs.mutashabih && mutashabihMatches.length > 0 ? (
+			{mutashabihMatches.length > 0 ? (
 				<details
 					className="verse-layer mutashabih-block"
-					open={mutashabihOpen}
-					onToggle={(event) => onMutashabihToggle(event.currentTarget.open)}
+					open={drawers.mutashabih}
+					onToggle={(event) =>
+						setDrawer("mutashabih", event.currentTarget.open)
+					}
 				>
 					<summary>
 						<span className="verse-layer-title">
@@ -291,6 +265,7 @@ export function VerseSecondaryLayers({
 					</summary>
 					<div className="verse-layer-body">
 						<MutashabihSection
+							key={`${sura}:${verse.v}:${target?.sura}:${target?.verse}`}
 							manifest={manifest}
 							sura={sura}
 							verseNumber={verse.v}
@@ -301,23 +276,25 @@ export function VerseSecondaryLayers({
 							onNavigateAyah={(targetSura, targetAyah) =>
 								onNavigate?.(targetSura, targetAyah, 1, {
 									tab: "mutashabih",
-									target: `${sura}:${verse.v}`,
+									target: verseRefParam({ sura, verse: verse.v }),
 								})
 							}
 						/>
 					</div>
 				</details>
-			) : readerPrefs.mutashabih && (tab === "mutashabih" || mutashabihOpen) ? (
+			) : layers.mutashabih.enabled &&
+				!layers.mutashabih.loading &&
+				drawers.mutashabih ? (
 				<div className="mutashabih-empty-card" role="status">
 					<p>{t.verse.mutashabihEmptyState}</p>
 				</div>
 			) : null}
 
-			{readerPrefs.asbab && verseAsbab.length > 0 ? (
+			{verseAsbab.length > 0 ? (
 				<details
 					className="verse-layer asbab-block"
-					open={asbabOpen}
-					onToggle={(event) => onAsbabToggle(event.currentTarget.open)}
+					open={drawers.asbab}
+					onToggle={(event) => setDrawer("asbab", event.currentTarget.open)}
 				>
 					<summary>
 						<span className="verse-layer-title">
@@ -333,11 +310,11 @@ export function VerseSecondaryLayers({
 				</details>
 			) : null}
 
-			{readerPrefs.balagha && classicalBalagha ? (
+			{classicalBalagha ? (
 				<details
 					className="verse-layer balagha-block"
-					open={balaghaOpen}
-					onToggle={(event) => onBalaghaToggle(event.currentTarget.open)}
+					open={drawers.balagha}
+					onToggle={(event) => setDrawer("balagha", event.currentTarget.open)}
 				>
 					<summary>
 						<span className="verse-layer-title">
@@ -350,7 +327,7 @@ export function VerseSecondaryLayers({
 					<div className="verse-layer-body">
 						<ClassicalBalaghaSection
 							entry={classicalBalagha}
-							showStudioLink={readerPrefs.rhetoricStudio}
+							showStudioLink={layers.balagha.studioLink}
 						/>
 					</div>
 				</details>

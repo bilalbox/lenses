@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { loadSurahStructure } from "../lib/api";
 import { useI18n } from "../lib/i18n/I18nContext";
-import type { Manifest, SurahStructureFile } from "../lib/types";
+import { useLayer } from "../lib/layers";
+import type { Manifest } from "../lib/types";
 import { StructureSection } from "./structure/StructureSection";
 
 interface Props {
@@ -21,9 +21,6 @@ export function MunasabatScreen({
 	const initialSura =
 		targetSura && targetSura >= 1 && targetSura <= 114 ? targetSura : 1;
 	const [sura, setSura] = useState(initialSura);
-	const [structure, setStructure] = useState<SurahStructureFile | null>(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
 
 	useEffect(() => {
 		if (targetSura && targetSura >= 1 && targetSura <= 114) {
@@ -31,30 +28,7 @@ export function MunasabatScreen({
 		}
 	}, [targetSura]);
 
-	useEffect(() => {
-		let cancelled = false;
-		setLoading(true);
-		setError("");
-		loadSurahStructure(sura)
-			.then((data) => {
-				if (!cancelled) {
-					setStructure(data);
-					setLoading(false);
-				}
-			})
-			.catch((reason: unknown) => {
-				if (!cancelled) {
-					setStructure(null);
-					setLoading(false);
-					setError(
-						reason instanceof Error ? reason.message : t.munasabat.emptyState,
-					);
-				}
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [sura, t.munasabat.emptyState]);
+	const { data: structure, loading, error } = useLayer("structure", sura);
 
 	const unitsWithStructure = useMemo(
 		() =>

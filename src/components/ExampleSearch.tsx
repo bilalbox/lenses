@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { loadVerses, loadWordIndex } from "../lib/api";
 import { stripDiacritics } from "../lib/arabic";
 import {
 	FORMS,
@@ -11,6 +10,7 @@ import {
 } from "../lib/glossary";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type { Locale } from "../lib/i18n/types";
+import { useLayer } from "../lib/layers";
 import { useRhetoric } from "../lib/rhetoric";
 import {
 	countExamples,
@@ -19,7 +19,6 @@ import {
 	featureSummary,
 	searchExamples,
 } from "../lib/search";
-import type { VerseRow, WordIndex } from "../lib/types";
 
 const empty: ExampleQuery = {
 	root: "",
@@ -48,9 +47,8 @@ export function ExampleSearch({
 }: Props) {
 	const { locale, t, formatNumber } = useI18n();
 	const { entries: rhetoricEntries } = useRhetoric(rhetoricEnabled);
-	const [index, setIndex] = useState<WordIndex | null>(null);
-	const [verses, setVerses] = useState<VerseRow[] | null>(null);
-	const [error, setError] = useState("");
+	const { data: index, error } = useLayer("words");
+	const { data: verses } = useLayer("verses");
 	const [query, setQuery] = useState<ExampleQuery>({ ...empty, ...initial });
 	const [limit, setLimit] = useState(40);
 
@@ -98,21 +96,6 @@ export function ExampleSearch({
 	useEffect(() => {
 		if (initial) setQuery({ ...empty, ...initial });
 	}, [initial]);
-
-	useEffect(() => {
-		loadWordIndex()
-			.then(setIndex)
-			.catch((reason: unknown) =>
-				setError(
-					reason instanceof Error
-						? reason.message
-						: "Could not load the index.",
-				),
-			);
-		loadVerses()
-			.then(setVerses)
-			.catch(() => setVerses(null));
-	}, []);
 
 	const active = Boolean(
 		query.root || query.lemma || query.pos || query.form || query.relation,

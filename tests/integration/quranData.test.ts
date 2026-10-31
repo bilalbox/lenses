@@ -14,6 +14,7 @@ import type {
 	SurahSyntaxFile,
 	TransitionsFile,
 	VerseRow,
+	WordIndex,
 } from "../../src/lib/types";
 
 describe("integration: Quran dataset integrity", () => {
@@ -91,18 +92,28 @@ describe("integration: Quran dataset integrity", () => {
 					}
 				}
 
-				// If syntax graph exists, check edge bounds
-				if (verse.g) {
-					for (const graph of verse.g) {
-						expect(graph.nodes.length).toBeGreaterThan(0);
-						for (const edge of graph.edges) {
-							expect(edge.d).toBeLessThan(graph.nodes.length);
-							expect(edge.h).toBeLessThan(graph.nodes.length);
-							expect(edge.r).toBeTruthy();
-						}
-					}
-				}
+				// Syntax lives in the NoorBayan syntax/ files, not in the surah files.
+				expect(verse).not.toHaveProperty("g");
 			}
+		}
+	});
+
+	it("word index carries NoorBayan relations for words across the whole Quran", () => {
+		const index: WordIndex = JSON.parse(
+			fs.readFileSync(path.join(dataDir, "words.json"), "utf-8"),
+		);
+		const versesWithRelations = new Set<string>();
+		for (const row of index.rows) {
+			if (row[9]) versesWithRelations.add(`${row[0]}:${row[1]}`);
+		}
+		// The corpus graphs covered 2,436 ayahs; NoorBayan covers every ayah.
+		expect(versesWithRelations.size).toBeGreaterThan(6000);
+		const relations = new Set(index.rows.flatMap((row) => row[9].split(",")));
+		for (const code of ["subj", "obj", "subjx", "predx", "gen", "poss"]) {
+			expect(relations.has(code), code).toBe(true);
+		}
+		for (const raw of ["Subj", "nonrel", "root"]) {
+			expect(relations.has(raw), raw).toBe(false);
 		}
 	});
 

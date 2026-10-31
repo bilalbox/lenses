@@ -4,7 +4,7 @@ source_roots = ["scripts"]
 exclude = ["**/check-quiz-mobile-scroll.py", "**/__pycache__"]
 
 [[modules]]
-path = "paths"
+path = "pipeline"
 depends_on = []
 utility = true
 
@@ -30,8 +30,4 @@ depends_on = []
 
 [[modules]]
 path = "build_syntax"
-depends_on = []
-
-[[modules]]
-path = "enrich_arabic_mokhtasar"
 depends_on = []

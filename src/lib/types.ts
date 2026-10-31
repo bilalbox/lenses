@@ -33,31 +33,6 @@ export interface Word {
 	m?: string;
 }
 
-export interface GraphNode {
-	t: "seg" | "slot" | "elide" | "ref" | "ph";
-	s?: number;
-	v?: number;
-	w?: number;
-	si?: number;
-	a?: string | null;
-	p?: string;
-	from?: number;
-	to?: number;
-	slot?: boolean;
-}
-
-export interface GraphEdge {
-	r: string;
-	d: number;
-	h: number;
-}
-
-export interface SyntaxGraph {
-	nodes: GraphNode[];
-	edges: GraphEdge[];
-	x?: boolean;
-}
-
 export interface Verse {
 	v: number;
 	ar: string;
@@ -75,7 +50,6 @@ export interface Verse {
 	ma?: string;
 	/** Footnote supplied with the Arabic paragraph, when QuranEnc sends one. */
 	af?: string;
-	g?: SyntaxGraph[];
 }
 
 export interface SurahFile {
@@ -166,6 +140,8 @@ export interface WordIndex {
 
 export type VerseRow = [number, number, string, string];
 
+export type VerseRef = { sura: number; verse: number };
+
 export interface Route {
 	page:
 		| "verse"
@@ -179,7 +155,8 @@ export interface Route {
 	verse: number;
 	word?: number;
 	tab?: string;
-	target?: string;
+	/** Counterpart ayah a Mutashābih jump came from (`?target=2:58`). */
+	target?: VerseRef;
 }
 
 export type RhetoricDatasetKey =

@@ -56,6 +56,11 @@ export interface Translations {
 		stepCaseCrumb: string;
 		stepSignCrumb: string;
 		stepCheckCrumb: string;
+		fieldRoot: string;
+		fieldWazn: string;
+		fieldClass: string;
+		fieldStructure: string;
+		fieldSpotted: string;
 		targetBadge: string;
 		headBadge: string;
 		legendTarget: (wordAr: string) => string;
@@ -108,6 +113,7 @@ export interface Translations {
 			mutashabih: string;
 			asbab: string;
 			balagha: string;
+			qiraat: string;
 		};
 		featureOffTitle: (feature: string) => string;
 		featureOffBody: string;
@@ -133,9 +139,6 @@ export interface Translations {
 		irabTitle: string;
 		clauseCount: (index: number, total: number) => string;
 		clausesAria: string;
-		firstClause: string;
-		lastClause: string;
-		clauseNoteContinues: string;
 		noTreeTitle: string;
 		classicalIrabShort: string;
 		surahGoalLabel: string;

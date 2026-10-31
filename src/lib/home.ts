@@ -1,9 +1,9 @@
+import type { VerseRef } from "./types";
+
 /** First-visit opening verse. Al-Hashr 59:18 — look ahead at what one has sent forth. */
 export const homeVerse = { sura: 59, verse: 18 } as const;
 
 const LAST_VERSE_KEY = "lenses-last-verse";
-
-export type VerseRef = { sura: number; verse: number };
 
 /** Last viewed verse when present; otherwise the first-visit default (59:18). */
 export function getOpeningVerse(): VerseRef {

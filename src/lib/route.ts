@@ -1,5 +1,5 @@
 import { getOpeningVerse, openingPath } from "./home";
-import type { Route } from "./types";
+import type { Route, VerseRef } from "./types";
 
 const SIMPLE_PAGES = new Set(["quiz", "search", "surahs", "sources"] as const);
 
@@ -8,16 +8,33 @@ type SimplePage = "quiz" | "search" | "surahs" | "sources";
 function parseTab(params: URLSearchParams): string | undefined {
 	const explicit = params.get("tab");
 	if (explicit) return explicit;
-	if (params.has("mutashabih")) return "mutashabih";
+	// Legacy flag params (`?asbab=1`) predate `tab=`.
+	for (const legacy of ["mutashabih", "asbab", "balagha"]) {
+		if (params.has(legacy)) return legacy;
+	}
 	if (params.has("structure")) return "structure";
 	return undefined;
+}
+
+/** `2:58` ↔ `{ sura: 2, verse: 58 }`; the format of the `target` query param. */
+export function verseRefParam(ref: VerseRef): string {
+	return `${ref.sura}:${ref.verse}`;
+}
+
+function parseVerseRef(value: string | null): VerseRef | undefined {
+	const match = value?.trim().match(/^(\d{1,3}):(\d{1,3})$/);
+	if (!match) return undefined;
+	const sura = Number(match[1]);
+	const verse = Number(match[2]);
+	if (sura < 1 || sura > 114 || verse < 1) return undefined;
+	return { sura, verse };
 }
 
 function parseStudioRoute(
 	parts: string[],
 	fallback: { sura: number; verse: number },
 	tab?: string,
-	target?: string,
+	target?: VerseRef,
 ): Route | null {
 	const head = parts[0];
 	if (head === "rhetoric" || head === "balagha") {
@@ -54,7 +71,9 @@ export function parseRoute(hash: string): Route {
 	const parts = cleanHash.split("/").filter(Boolean);
 	const params = new URLSearchParams(queryString);
 	const tab = parseTab(params);
-	const target = params.get("target") ?? params.get("counterpart") ?? undefined;
+	const target = parseVerseRef(
+		params.get("target") ?? params.get("counterpart"),
+	);
 	const head = parts[0];
 
 	if (head && (SIMPLE_PAGES as Set<string>).has(head)) {

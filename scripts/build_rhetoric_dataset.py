@@ -6,18 +6,14 @@ from QuranEnc (english_saheeh and indonesian_sabiq).
 
 import json
 import time
-import urllib.request
 
-from paths import ROOT
+from pipeline import CACHE, MANIFEST, OUT, fetch_cached, surah_path, write_json
 
-SURAH_DIR = ROOT / "public" / "data" / "quran" / "surah"
-MANIFEST_FILE = ROOT / "public" / "data" / "quran" / "manifest.json"
-CACHE_DIR = ROOT / "data" / "cache" / "quranenc_translations"
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
-OUT_FILE = ROOT / "public" / "data" / "quran" / "rhetoric.json"
+CACHE_DIR = CACHE / "quranenc_translations"
+OUT_FILE = OUT / "rhetoric.json"
 
 # Load surah metadata
-manifest = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
+manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
 unit_map = {u["n"]: u for u in manifest["units"]}
 
 # Cache surah files
@@ -26,8 +22,7 @@ surah_files = {}
 
 def get_arabic_ayah(sura: int, verse: int) -> str:
     if sura not in surah_files:
-        p = SURAH_DIR / f"{sura:03d}.json"
-        surah_files[sura] = json.loads(p.read_text(encoding="utf-8"))
+        surah_files[sura] = json.loads(surah_path("surah", sura).read_text(encoding="utf-8"))
     for v in surah_files[sura]["verses"]:
         if v["v"] == verse:
             return v["ar"]
@@ -36,26 +31,19 @@ def get_arabic_ayah(sura: int, verse: int) -> str:
 
 def fetch_quranenc_translation(key: str, sura: int, verse: int) -> str:
     cache_path = CACHE_DIR / f"{key}_{sura:03d}_{verse:03d}.json"
-    if cache_path.exists():
-        d = json.loads(cache_path.read_text(encoding="utf-8"))
-        return d["result"]["translation"]
-
     url = f"https://quranenc.com/api/v1/translation/aya/{key}/{sura}/{verse}"
-    req = urllib.request.Request(
-        url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    )
-    print(f"Fetching {key} for {sura}:{verse}...")
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                cache_path.write_text(
-                    json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
-                )
-                time.sleep(0.1)
-                return data["result"]["translation"]
+            fetch_cached(
+                url,
+                cache_path,
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                timeout=15,
+            )
+            return json.loads(cache_path.read_text(encoding="utf-8"))["result"]["translation"]
         except Exception as e:
-            print(f"  Attempt {attempt + 1} failed: {e}")
+            cache_path.unlink(missing_ok=True)
+            print(f"  Attempt {attempt + 1} for {key} {sura}:{verse} failed: {e}")
             time.sleep(1)
     raise RuntimeError(f"Could not fetch {key} for {sura}:{verse}")
 
@@ -1251,7 +1239,7 @@ def build():
             }
         )
 
-    OUT_FILE.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_json(OUT_FILE, entries)
     print(
         f"Successfully generated {OUT_FILE} with {len(entries)} entries ({OUT_FILE.stat().st_size} bytes)"
     )

@@ -1,35 +1,20 @@
-import type { Locale } from "./i18n/types";
+import { stripDiacritics } from "./arabic";
+import {
+	type QuizCase,
+	type QuizRelation,
+	type QuizSign,
+	SARF_CLASSES,
+	SARF_STRUCTURES,
+} from "./quizCatalog";
 import type { ExampleQuery } from "./search";
-import type { SurahFile, Verse, Word } from "./types";
-
-export type QuizRelation =
-	| "subj"
-	| "obj"
-	| "pass"
-	| "subjx"
-	| "pred"
-	| "predx"
-	| "gen"
-	| "poss"
-	| "adj"
-	| "app"
-	| "conj"
-	| "circ"
-	| "cog"
-	| "spec";
-
-export type QuizCase = "NOM" | "ACC" | "GEN";
-
-export type QuizSign =
-	| "damma"
-	| "fatha"
-	| "kasra"
-	| "muqaddara"
-	| "niyaba_haraka"
-	| "ya"
-	| "waw"
-	| "alif"
-	| "mabni";
+import type {
+	SurahFile,
+	SurahSyntaxFile,
+	SyntaxSentence,
+	SyntaxToken,
+	Verse,
+	Word,
+} from "./types";
 
 export interface QuizQuestion {
 	id: string;
@@ -47,377 +32,6 @@ export interface QuizQuestion {
 	classicalIrab: string;
 	clauseWords: Word[];
 }
-
-export interface RoleMeta {
-	code: QuizRelation;
-	ar: string;
-	en: string;
-	id: string;
-	family: "core" | "nom" | "clause";
-	governorLabel: {
-		ar: string;
-		en: string;
-		id: string;
-	};
-	governorPrompt: {
-		ar: string;
-		en: string;
-		id: string;
-	};
-	defaultCase?: QuizCase;
-}
-
-export const QUIZ_ROLES: RoleMeta[] = [
-	{
-		code: "subj",
-		ar: "فاعل",
-		en: "Doer (Fāʿil)",
-		id: "Pelaku (Fāʿil)",
-		family: "core",
-		governorLabel: {
-			ar: "الفعل العامل",
-			en: "Governing Verb (Fiʿl)",
-			id: "Fi'il Pengampu",
-		},
-		governorPrompt: {
-			ar: "اختر الفعل الذي رَفَع هذا الفاعل من الآية",
-			en: "Select the verb (fiʿl) in the ayah for which this word is the fāʿil",
-			id: "Pilih kata kerja (fi'il) pada ayat yang menjadi pengampu fa'il ini",
-		},
-		defaultCase: "NOM",
-	},
-	{
-		code: "pass",
-		ar: "نائب فاعل",
-		en: "Passive Subject (Nāʾib Fāʿil)",
-		id: "Na'ibul Fa'il (Subjek Pasif)",
-		family: "core",
-		governorLabel: {
-			ar: "الفعل المبني للمجهول",
-			en: "Passive Verb (Fiʿl Majhūl)",
-			id: "Fi'il Majhul",
-		},
-		governorPrompt: {
-			ar: "اختر الفعل المبني للمجهول (أو الوصف) الذي رَفَع نائب الفاعل",
-			en: "Select the passive verb that raised this nāʾib fāʿil",
-			id: "Pilih kata kerja pasif (fi'il majhul) yang merafa'kan na'ibul fa'il ini",
-		},
-		defaultCase: "NOM",
-	},
-	{
-		code: "obj",
-		ar: "مفعول به",
-		en: "Direct Object (Mafʿūl bihi)",
-		id: "Objek (Mafʿūl bih)",
-		family: "core",
-		governorLabel: {
-			ar: "الفعل المتعدي",
-			en: "Transitive Verb (Fiʿl)",
-			id: "Fi'il Transitif",
-		},
-		governorPrompt: {
-			ar: "اختر الفعل الذي نَصَب هذا المفعول به",
-			en: "Select the verb (fiʿl) that acts upon this mafʿūl bihi",
-			id: "Pilih fi'il yang menashabkan maf'ul bih ini",
-		},
-		defaultCase: "ACC",
-	},
-	{
-		code: "subjx",
-		ar: "مبتدأ / اسم ناسخ",
-		en: "Subject / Ism Nāsikh",
-		id: "Mubtada' / Isim Nasikh",
-		family: "core",
-		governorLabel: {
-			ar: "الناسخ أو المسند",
-			en: "Nāsikh or Predicate Head",
-			id: "Amil Nasikh / Khabar",
-		},
-		governorPrompt: {
-			ar: "اختر الحرف الناسخ أو الفعل الناسخ أو الركن المرتبط به",
-			en: "Select the governing particle/verb (e.g., inna/kāna) or linked pillar",
-			id: "Pilih partikel/fi'il nasikh (inna/kana) yang mengampunya",
-		},
-	},
-	{
-		code: "pred",
-		ar: "خبر",
-		en: "Predicate (Khabar)",
-		id: "Predikat (Khabar)",
-		family: "core",
-		governorLabel: {
-			ar: "المبتدأ أو الناسخ",
-			en: "Subject (Mubtadaʾ) or Nāsikh",
-			id: "Mubtada' atau Nasikh",
-		},
-		governorPrompt: {
-			ar: "اختر المبتدأ أو الناسخ الذي أُخبر عنه بهذا الخبر",
-			en: "Select the mubtadaʾ or nāsikh for which this is the khabar",
-			id: "Pilih mubtada' atau nasikh dari khabar ini",
-		},
-	},
-	{
-		code: "poss",
-		ar: "مضاف إليه",
-		en: "Annexed Noun (Muḍāf ilayhi)",
-		id: "Mudhaf Ilaih",
-		family: "nom",
-		governorLabel: {
-			ar: "المضاف",
-			en: "Annexed Head (Muḍāf)",
-			id: "Kata Sandaran (Muḍāf)",
-		},
-		governorPrompt: {
-			ar: "اختر الاسم المضاف الذي جَرّ هذا المضاف إليه",
-			en: "Select the first noun of annexation (muḍāf) governing this word",
-			id: "Pilih isim mudhaf di depannya yang memajrurkan kata ini",
-		},
-		defaultCase: "GEN",
-	},
-	{
-		code: "gen",
-		ar: "اسم مجرور",
-		en: "Prepositional Genitive (Majrūr)",
-		id: "Isim Majrur",
-		family: "nom",
-		governorLabel: {
-			ar: "حرف الجر",
-			en: "Preposition (Ḥarf Jarr)",
-			id: "Huruf Jar",
-		},
-		governorPrompt: {
-			ar: "اختر حرف الجر العامل في هذا الاسم",
-			en: "Select the preposition (ḥarf jarr) governing this noun",
-			id: "Pilih huruf jar yang memajrurkan isim ini",
-		},
-		defaultCase: "GEN",
-	},
-	{
-		code: "adj",
-		ar: "نعت (صفة)",
-		en: "Adjective Follower (Naʿt)",
-		id: "Sifat (Naʿt)",
-		family: "nom",
-		governorLabel: {
-			ar: "المنعوت (الموصوف)",
-			en: "Described Noun (Manʿūt)",
-			id: "Kata yang Disifati (Manʿūt)",
-		},
-		governorPrompt: {
-			ar: "اختر المنعوت الذي يتبعه هذا النعت في الإعراب",
-			en: "Select the described noun (manʿūt) that this naʿt follows",
-			id: "Pilih kata benda (man'ut) yang diikuti oleh na'at ini",
-		},
-	},
-	{
-		code: "app",
-		ar: "بدل",
-		en: "Apposition (Badal)",
-		id: "Badal (Pengganti/Penjelas)",
-		family: "nom",
-		governorLabel: {
-			ar: "المبدل منه",
-			en: "Antecedent Noun (Mubdal minhu)",
-			id: "Mubdal Minhu",
-		},
-		governorPrompt: {
-			ar: "اختر المبدل منه الذي يتبعه هذا البدل في الإعراب",
-			en: "Select the antecedent word (mubdal minhu) that this badal clarifies",
-			id: "Pilih kata sebelumnya (mubdal minhu) yang dijelaskan oleh badal ini",
-		},
-	},
-	{
-		code: "conj",
-		ar: "معطوف",
-		en: "Conjoined (Maʿṭūf)",
-		id: "Kata Sambung (Maʿṭūf)",
-		family: "clause",
-		governorLabel: {
-			ar: "المعطوف عليه",
-			en: "Conjoined Head (Maʿṭūf ʿalayhi)",
-			id: "Ma'thuf 'Alaih",
-		},
-		governorPrompt: {
-			ar: "اختر المعطوف عليه الذي يتبعه هذا الاسم في الإعراب",
-			en: "Select the earlier word (maʿṭūf ʿalayhi) this word is conjoined to",
-			id: "Pilih kata sebelumnya (ma'thuf 'alaih) yang diikuti i'rabnya",
-		},
-	},
-	{
-		code: "circ",
-		ar: "حال",
-		en: "Circumstantial (Ḥāl)",
-		id: "Keterangan Keadaan (Ḥāl)",
-		family: "clause",
-		governorLabel: {
-			ar: "عامل الحال / صاحبها",
-			en: "Verbal Governor / Owner of State",
-			id: "Amil / Shahibul Hal",
-		},
-		governorPrompt: {
-			ar: "اختر الفعل أو العامل الذي نَصَب هذه الحال",
-			en: "Select the verb or governing word for which this word describes the state (ḥāl)",
-			id: "Pilih kata kerja atau pengampu yang menashabkan hal ini",
-		},
-		defaultCase: "ACC",
-	},
-	{
-		code: "cog",
-		ar: "مفعول مطلق",
-		en: "Cognate Accusative (Mafʿūl Muṭlaq)",
-		id: "Maf'ul Muthlaq",
-		family: "nom",
-		governorLabel: {
-			ar: "الفعل المؤكَّد",
-			en: "Cognate Verb (Fiʿl)",
-			id: "Fi'il yang Ditegaskan",
-		},
-		governorPrompt: {
-			ar: "اختر الفعل الذي أُخذ منه هذا المصدر ونُصب مفعولاً مطلقاً",
-			en: "Select the verb emphasized or specified by this cognate maṣdar",
-			id: "Pilih kata kerja yang ditegaskan oleh maf'ul muthlaq ini",
-		},
-		defaultCase: "ACC",
-	},
-	{
-		code: "spec",
-		ar: "تمييز",
-		en: "Specification (Tamyīz)",
-		id: "Tamyiz (Penjelas)",
-		family: "nom",
-		governorLabel: {
-			ar: "المميَّز / العامل",
-			en: "Clarified Head (Mumayyaz)",
-			id: "Kata yang Dijelaskan (Mumayyaz)",
-		},
-		governorPrompt: {
-			ar: "اختر الكلمة أو الفعل الذي أزال هذا التمييز إبهامه",
-			en: "Select the word or verb whose ambiguity this tamyīz resolves",
-			id: "Pilih kata atau fi'il yang diperjelas maknanya oleh tamyiz ini",
-		},
-		defaultCase: "ACC",
-	},
-];
-
-export interface CaseMeta {
-	code: QuizCase;
-	ar: string;
-	en: string;
-	id: string;
-	shortDesc: { ar: string; en: string; id: string };
-}
-
-export const QUIZ_CASES: CaseMeta[] = [
-	{
-		code: "NOM",
-		ar: "مرفوع",
-		en: "Marfūʿ (Nominative)",
-		id: "Marfūʿ (Rafa')",
-		shortDesc: {
-			ar: "حالة الرفع (الفاعل، نائب الفاعل، المبتدأ، الخبر، التابع للمرفوع)",
-			en: "State of rafʿ — subjects, passive subjects, predicates, and nominative followers",
-			id: "Kedudukan rafa' — subjek, na'ibul fa'il, predikat, atau pengikut marfu'",
-		},
-	},
-	{
-		code: "ACC",
-		ar: "منصوب",
-		en: "Manṣūb (Accusative)",
-		id: "Manṣūb (Nashab)",
-		shortDesc: {
-			ar: "حالة النصب (المفاعيل، الحال، التمييز، اسم إنّ، خبر كان، التابع للمنصوب)",
-			en: "State of naṣb — objects, ḥāl, tamyīz, ism inna, khabar kāna, and accusative followers",
-			id: "Kedudukan nashab — objek, hal, tamyiz, isim inna, khabar kana, atau pengikut manshub",
-		},
-	},
-	{
-		code: "GEN",
-		ar: "مجرور",
-		en: "Majrūr (Genitive)",
-		id: "Majrūr (Jar)",
-		shortDesc: {
-			ar: "حالة الجر (المسبوق بحرف جر، المضاف إليه، التابع للمجرور)",
-			en: "State of jarr — after prepositions, in iḍāfa, and genitive followers",
-			id: "Kedudukan jar — setelah huruf jar, mudhaf ilaih, atau pengikut majrur",
-		},
-	},
-];
-
-export interface SignMeta {
-	code: QuizSign;
-	ar: string;
-	arSub: string;
-	en: string;
-	id: string;
-	category: "primary" | "secondary";
-}
-
-export const QUIZ_SIGNS: SignMeta[] = [
-	{
-		code: "damma",
-		ar: "الضمة الظاهرة",
-		arSub: "علامة رفع أصلية (ـُ)",
-		en: "Visible Ḍamma (ـُ)",
-		id: "Dhammah Zhahirah (ـُ)",
-		category: "primary",
-	},
-	{
-		code: "fatha",
-		ar: "الفتحة الظاهرة",
-		arSub: "علامة نصب أصلية (ـَ)",
-		en: "Visible Fatḥa (ـَ)",
-		id: "Fathah Zhahirah (ـَ)",
-		category: "primary",
-	},
-	{
-		code: "kasra",
-		ar: "الكسرة الظاهرة",
-		arSub: "علامة جر أصلية (ـِ)",
-		en: "Visible Kasra (ـِ)",
-		id: "Kasrah Zhahirah (ـِ)",
-		category: "primary",
-	},
-	{
-		code: "muqaddara",
-		ar: "حركة مقدرة",
-		arSub: "للتعذر أو الثقل أو المناسبة",
-		en: "Estimated Vowel (Muqaddara)",
-		id: "Harakat Muqaddarah",
-		category: "secondary",
-	},
-	{
-		code: "niyaba_haraka",
-		ar: "حركة فرعية (نيابة)",
-		arSub: "الفتحة في الممنوع من الصرف أو الكسرة في جمع المؤنث",
-		en: "Secondary Vowel (Diptote / Fem. Pl.)",
-		id: "Harakat Pengganti (Ghairu Munsharif / Jamak Muannats)",
-		category: "secondary",
-	},
-	{
-		code: "ya",
-		ar: "الياء",
-		arSub: "في المثنى وجمع المذكر السالم والأسماء الخمسة",
-		en: "Al-Yāʾ (Dual / Sound Pl.)",
-		id: "Huruf Yāʾ (Mutsanna / Jamak)",
-		category: "secondary",
-	},
-	{
-		code: "waw",
-		ar: "الواو",
-		arSub: "في جمع المذكر السالم والأسماء الخمسة",
-		en: "Al-Wāw (Sound Masc. Pl. / 5 Nouns)",
-		id: "Huruf Wāw (Jamak Mudzakkar / Asmaul Khamsah)",
-		category: "secondary",
-	},
-	{
-		code: "alif",
-		ar: "الألف",
-		arSub: "في المثنى والأسماء الخمسة",
-		en: "Al-Alif (Dual / Five Nouns)",
-		id: "Huruf Alif (Mutsanna / Asmaul Khamsah)",
-		category: "secondary",
-	},
-];
 
 /** Fast initial surahs loaded immediately on quiz open */
 export const CURATED_SURAHS = [
@@ -693,157 +307,196 @@ function normalizeRelation(raw: string): QuizRelation | null {
 	return valid.includes(raw as QuizRelation) ? (raw as QuizRelation) : null;
 }
 
-export function extractQuizQuestionsFromSurah(file: SurahFile): QuizQuestion[] {
-	const questions: QuizQuestion[] = [];
+/** One dependent → head pair from a treebank, before checking it against the classical iʿrāb. */
+interface IrabCandidate {
+	targetWordNum: number;
+	headWordNum: number;
+	/** Treebank relation, already mapped onto the quiz vocabulary. */
+	relation: QuizRelation;
+	/** Index into the target word's morphology segments. */
+	segIndex: number;
+	clauseWordNums: Set<number>;
+	/** For a multi-khabar adj chain: the word of the mubtada / nāsikh it ultimately predicates. */
+	predicateHead: () => number | undefined;
+}
 
-	for (const verse of file.verses) {
-		if (!verse.g || verse.g.length === 0) continue;
+/**
+ * Treebank relations a word's classical role may refine; the classical role
+ * wins. Any other disagreement drops the question.
+ */
+const CLASSICAL_REFINES: Partial<Record<QuizRelation, QuizRelation[]>> = {
+	adj: ["app"],
+	cog: ["obj", "circ"],
+	poss: ["gen"],
+	subjx: ["subj"],
+	circ: ["obj", "cog"],
+	obj: ["spec", "circ"],
+};
 
-		for (const graph of verse.g) {
-			// Collect words in this clause graph
-			const clauseWordNums = new Set<number>();
-			for (const node of graph.nodes) {
-				if (
-					node.t === "seg" &&
-					node.s === file.n &&
-					node.v === verse.v &&
-					node.w
-				) {
-					clauseWordNums.add(node.w);
-				}
-			}
-			const clauseWords = verse.w.filter((w) => clauseWordNums.has(w.n));
+/** Role and head the question asks for, or null when treebank and classical iʿrāb disagree. */
+function reconcileRole(
+	c: IrabCandidate,
+	meta: ExtractedIrabMeta,
+): { relation: QuizRelation; headWordNum: number } | null {
+	const tb = c.relation;
+	const role = meta.stemRole;
+	if (!role || role === tb) return { relation: tb, headWordNum: c.headWordNum };
+	if (meta.hasElidedGovernor) return null;
+	if (CLASSICAL_REFINES[role as QuizRelation]?.includes(tb))
+		return { relation: role as QuizRelation, headWordNum: c.headWordNum };
+	if (tb === "adj" && role === "pred" && meta.isMultiKhabar) {
+		const head = c.predicateHead();
+		if (head === undefined || head === c.targetWordNum) return null;
+		return { relation: "pred", headWordNum: head };
+	}
+	return null;
+}
 
-			for (const edge of graph.edges) {
-				const depNode = graph.nodes[edge.d];
-				const headNode = graph.nodes[edge.h];
-				if (!depNode || !headNode) continue;
-				if (depNode.t !== "seg" || headNode.t !== "seg") continue;
-				if (depNode.s !== file.n || depNode.v !== verse.v) continue;
-				if (headNode.s !== file.n || headNode.v !== verse.v) continue;
-				if (!depNode.w || !headNode.w || depNode.w === headNode.w) continue;
+/**
+ * Whether a نعت's classical iʿrāb (`نَعْتٌ لِـ﴿سَبْعَ﴾ …`) names a different word
+ * of this ayah as the described noun than the treebank's head. Only the opening
+ * mention counts: later ones are about attachment or clause position. A mention
+ * that matches no word here (another verse) is not a contradiction.
+ */
+function classicalNamesOtherHead(irab: string, verse: Verse, head: Word) {
+	const named = irab.match(/^نَعْتٌ لِـ?﴿([^﴾]+)﴾/)?.[1];
+	if (!named) return false;
+	const bare = stripDiacritics(named);
+	const matches = verse.w.filter((w) => stripDiacritics(w.a) === bare);
+	return matches.length > 0 && !matches.some((w) => w.n === head.n);
+}
 
-				const tbRelation = normalizeRelation(edge.r);
-				if (!tbRelation) continue;
+/**
+ * Turn a treebank pair into a question when it agrees with the word's classical
+ * iʿrāb; disagreeing or unsupported analyses are dropped.
+ */
+function reconcileIrab(
+	file: SurahFile,
+	verse: Verse,
+	c: IrabCandidate,
+): QuizQuestion | null {
+	const targetWord = verse.w.find((w) => w.n === c.targetWordNum);
+	if (!targetWord?.i) return null;
 
-				const targetWord = verse.w.find((w) => w.n === depNode.w);
-				let headWord = verse.w.find((w) => w.n === headNode.w);
-				if (!targetWord || !headWord || !targetWord.i) continue;
-
-				// Avoid words whose stem is a pronoun or مبني where sign is not standard declension
-				if (targetWord.i.includes("مَبْنِيٌّ") && !targetWord.i.includes("وَعَلَامَةُ")) {
-					continue;
-				}
-
-				const segIndex = depNode.si ?? 0;
-				const seg =
-					targetWord.s[segIndex] ??
-					targetWord.s.find((s) => s.k === "m") ??
-					targetWord.s[0];
-				const rawCase = seg?.f?.case as QuizCase | undefined;
-				if (!rawCase || !["NOM", "ACC", "GEN"].includes(rawCase)) continue;
-
-				const meta = extractIrabMeta(targetWord.i, rawCase);
-				if (!meta || meta.stemRole === "SKIP") continue;
-
-				let relation: QuizRelation = tbRelation;
-				if (meta.stemRole && meta.stemRole !== tbRelation) {
-					if (meta.hasElidedGovernor) {
-						continue;
-					}
-					if (
-						(tbRelation === "app" && meta.stemRole === "adj") ||
-						((tbRelation === "obj" || tbRelation === "circ") &&
-							meta.stemRole === "cog") ||
-						(tbRelation === "gen" && meta.stemRole === "poss") ||
-						(tbRelation === "subj" && meta.stemRole === "subjx") ||
-						((tbRelation === "obj" || tbRelation === "cog") &&
-							meta.stemRole === "circ") ||
-						((tbRelation === "spec" || tbRelation === "circ") &&
-							meta.stemRole === "obj")
-					) {
-						relation = meta.stemRole;
-					} else if (
-						tbRelation === "adj" &&
-						meta.stemRole === "pred" &&
-						meta.isMultiKhabar
-					) {
-						// Walk up the adj chain to find the governing mubtada / nasikh
-						let curNodeIdx = edge.h;
-						let resolvedHead: Word | undefined;
-						for (let depth = 0; depth < 5; depth++) {
-							const parentEdge = graph.edges.find((e) => e.d === curNodeIdx);
-							if (!parentEdge) break;
-							const pRel = normalizeRelation(parentEdge.r);
-							const pHeadNode = graph.nodes[parentEdge.h];
-							if (
-								pRel === "pred" &&
-								pHeadNode?.t === "seg" &&
-								pHeadNode.s === file.n &&
-								pHeadNode.v === verse.v &&
-								pHeadNode.w
-							) {
-								resolvedHead = verse.w.find((w) => w.n === pHeadNode.w);
-								break;
-							}
-							if (pRel === "adj") {
-								curNodeIdx = parentEdge.h;
-							} else {
-								break;
-							}
-						}
-						if (!resolvedHead || resolvedHead.n === targetWord.n) continue;
-						headWord = resolvedHead;
-						relation = "pred";
-					} else {
-						// Incompatible syntactic analysis between treebank and classical i'rab
-						continue;
-					}
-				}
-
-				const id = `${file.n}:${verse.v}:${targetWord.n}:${relation}`;
-				if (questions.some((q) => q.id === id)) continue;
-
-				questions.push({
-					id,
-					sura: file.n,
-					suraName: file.name,
-					suraPhonetic: file.phonetic,
-					verse,
-					targetWord,
-					headWord,
-					relation,
-					grammaticalCase: meta.grammaticalCase,
-					sign: meta.sign,
-					signDetailAr: meta.detailAr,
-					classicalIrab: targetWord.i,
-					clauseWords: clauseWords.length > 0 ? clauseWords : verse.w,
-				});
-			}
-		}
+	// Avoid words whose stem is a pronoun or مبني where sign is not standard declension
+	if (targetWord.i.includes("مَبْنِيٌّ") && !targetWord.i.includes("وَعَلَامَةُ")) {
+		return null;
 	}
 
+	const seg =
+		targetWord.s[c.segIndex] ??
+		targetWord.s.find((s) => s.k === "m") ??
+		targetWord.s[0];
+	const rawCase = seg?.f?.case as QuizCase | undefined;
+	if (!rawCase || !["NOM", "ACC", "GEN"].includes(rawCase)) return null;
+
+	const meta = extractIrabMeta(targetWord.i, rawCase);
+	if (!meta || meta.stemRole === "SKIP") return null;
+	const role = reconcileRole(c, meta);
+	const headWord = role && verse.w.find((w) => w.n === role.headWordNum);
+	if (!role || !headWord) return null;
+	if (classicalNamesOtherHead(targetWord.i, verse, headWord)) return null;
+
+	const clauseWords = verse.w.filter((w) => c.clauseWordNums.has(w.n));
+	return {
+		id: `${file.n}:${verse.v}:${targetWord.n}:${role.relation}`,
+		sura: file.n,
+		suraName: file.name,
+		suraPhonetic: file.phonetic,
+		verse,
+		targetWord,
+		headWord,
+		relation: role.relation,
+		grammaticalCase: meta.grammaticalCase,
+		sign: meta.sign,
+		signDetailAr: meta.detailAr,
+		classicalIrab: targetWord.i,
+		clauseWords: clauseWords.length > 0 ? clauseWords : verse.w,
+	};
+}
+
+function pushUnique(questions: QuizQuestion[], q: QuizQuestion | null) {
+	if (q && !questions.some((other) => other.id === q.id)) questions.push(q);
+}
+
+/** NoorBayan codes (`Subj`, `subj<<in>>`, `pred <<kan>>`) onto the quiz vocabulary. */
+function normalizeNoorBayanRelation(raw: string): QuizRelation | null {
+	const rel = raw.toLowerCase().replace(/\s+/g, "");
+	if (rel.startsWith("subj<<")) return "subjx";
+	if (rel.startsWith("pred<<")) return "pred";
+	return normalizeRelation(rel);
+}
+
+type TokenHead = NonNullable<SyntaxToken["head"]>;
+
+/** Up an adj chain of NoorBayan tokens to the head of the `pred` relation it hangs from. */
+function noorBayanPredicateHead(
+	tokens: Map<string, SyntaxToken>,
+	start: TokenHead,
+	local: (head: SyntaxToken["head"]) => TokenHead | null,
+): number | undefined {
+	let cur = tokens.get(`${start[2]}:${start[3]}`);
+	for (let depth = 0; depth < 5 && cur; depth++) {
+		const rel = normalizeNoorBayanRelation(cur.rel);
+		const head = local(cur.head);
+		if (!head) return undefined;
+		if (rel === "pred") return head[2];
+		if (rel !== "adj") return undefined;
+		cur = tokens.get(`${head[2]}:${head[3]}`);
+	}
+	return undefined;
+}
+
+function noorBayanCandidates(
+	sentence: SyntaxSentence,
+	sura: number,
+	verse: number,
+): IrabCandidate[] {
+	const clauseWordNums = new Set(sentence.words.map((w) => w.w));
+	const local = (head: SyntaxToken["head"]) =>
+		head !== null && head[0] === sura && head[1] === verse ? head : null;
+	const tokens = new Map<string, SyntaxToken>();
+	const flat = sentence.words.flatMap((word) =>
+		word.tokens.map((tok) => {
+			tokens.set(`${word.w}:${tok.tok}`, tok);
+			return { word: word.w, tok };
+		}),
+	);
+	const candidates: IrabCandidate[] = [];
+	for (const { word, tok } of flat) {
+		const head = local(tok.head);
+		const relation = normalizeNoorBayanRelation(tok.rel);
+		if (!head || !relation || head[2] === word) continue;
+		candidates.push({
+			targetWordNum: word,
+			headWordNum: head[2],
+			relation,
+			segIndex: tok.tok - 1,
+			clauseWordNums,
+			predicateHead: () => noorBayanPredicateHead(tokens, head, local),
+		});
+	}
+	return candidates;
+}
+
+/** iʿrāb questions from the NoorBayan treebank, reconciled with each word's classical iʿrāb. */
+function extractIrabQuestions(
+	file: SurahFile,
+	syntax: SurahSyntaxFile,
+): QuizQuestion[] {
+	const questions: QuizQuestion[] = [];
+	const byVerse = new Map(syntax.verses.map((v) => [v.v, v]));
+	for (const verse of file.verses)
+		for (const sentence of byVerse.get(verse.v)?.sentences ?? [])
+			for (const c of noorBayanCandidates(sentence, file.n, verse.v))
+				pushUnique(questions, reconcileIrab(file, verse, c));
 	return questions;
-}
-
-export function getRoleMeta(code: QuizRelation): RoleMeta {
-	return QUIZ_ROLES.find((r) => r.code === code) ?? QUIZ_ROLES[0]!;
-}
-
-export function getCaseMeta(code: QuizCase): CaseMeta {
-	return QUIZ_CASES.find((c) => c.code === code) ?? QUIZ_CASES[0]!;
-}
-
-export function getSignMeta(code: QuizSign): SignMeta {
-	return QUIZ_SIGNS.find((s) => s.code === code) ?? QUIZ_SIGNS[0]!;
 }
 
 function spaceRootLetters(text: string): string {
 	const bare = stripHarakat(text).replace(/\s+/g, "");
 	return [...bare].join(" ");
 }
-
-export type QuizLens = "irab" | "sarf" | "examples";
 
 interface ChoiceOption {
 	code: string;
@@ -893,263 +546,6 @@ export interface ExampleHuntQuestion {
 	classicalMeaning?: string;
 	searchSeed: Partial<ExampleQuery>;
 }
-
-export const SARF_CLASSES: Record<
-	string,
-	{ ar: string; arSub: string; en: string; id: string; kind: "verb" | "noun" }
-> = {
-	"نَصَرَ يَنْصُرُ": {
-		ar: "باب نَصَرَ يَنْصُرُ",
-		arSub: "ثلاثي مجرد · فَعَلَ يَفْعُلُ",
-		en: "Form I · faʿala yafʿulu (u-vowel)",
-		id: "Bab nashara yanshuru (fathah-dhammah)",
-		kind: "verb",
-	},
-	"ضَرَبَ يَضْرِبُ": {
-		ar: "باب ضَرَبَ يَضْرِبُ",
-		arSub: "ثلاثي مجرد · فَعَلَ يَفْعِلُ",
-		en: "Form I · faʿala yafʿilu (i-vowel)",
-		id: "Bab dharaba yadhribu (fathah-kasrah)",
-		kind: "verb",
-	},
-	"فَتَحَ يَفْتَحُ": {
-		ar: "باب فَتَحَ يَفْتَحُ",
-		arSub: "ثلاثي مجرد · فَعَلَ يَفْعَلُ",
-		en: "Form I · faʿala yafʿalu (a-vowel)",
-		id: "Bab fataha yaftahu (fathah-fathah)",
-		kind: "verb",
-	},
-	"عَلِمَ يَعْلَمُ": {
-		ar: "باب عَلِمَ يَعْلَمُ",
-		arSub: "ثلاثي مجرد · فَعِلَ يَفْعَلُ",
-		en: "Form I · faʿila yafʿalu (stative)",
-		id: "Bab 'alima ya'lamu (kasrah-fathah)",
-		kind: "verb",
-	},
-	"شَرُفَ يَشْرُفُ": {
-		ar: "باب شَرُفَ يَشْرُفُ",
-		arSub: "ثلاثي مجرد · فَعُلَ يَفْعُلُ",
-		en: "Form I · faʿula yafʿulu (innate quality)",
-		id: "Bab syarufa yasyrufu (dhammah-dhammah)",
-		kind: "verb",
-	},
-	"وَرِثَ يَرِثُ": {
-		ar: "باب وَرِثَ يَرِثُ (حَسِبَ يَحْسِبُ)",
-		arSub: "ثلاثي مجرد · فَعِلَ يَفْعِلُ",
-		en: "Form I · faʿila yafʿilu",
-		id: "Bab waritsa yaritsu (kasrah-kasrah)",
-		kind: "verb",
-	},
-	أَفْعَلَ: {
-		ar: "باب أَفْعَلَ",
-		arSub: "ثلاثي مزيد بالهمزة (للتعدية غالباً)",
-		en: "Form IV · Afʿala (causative)",
-		id: "Wazan IV · Af'ala (kausatif/transitif)",
-		kind: "verb",
-	},
-	فَعَّلَ: {
-		ar: "باب فَعَّلَ",
-		arSub: "ثلاثي مزيد بتضعيف العين (للتكثير)",
-		en: "Form II · Faʿʿala (intensive/causative)",
-		id: "Wazan II · Fa''ala (intensif/transitif)",
-		kind: "verb",
-	},
-	فَاعَلَ: {
-		ar: "باب فَاعَلَ",
-		arSub: "ثلاثي مزيد بالألف (للمشاركة)",
-		en: "Form III · Fāʿala (mutual/associative)",
-		id: "Wazan III · Fa'ala (resiprokal)",
-		kind: "verb",
-	},
-	افْتَعَلَ: {
-		ar: "باب افْتَعَلَ",
-		arSub: "خماسي مزيد بالألف والتاء",
-		en: "Form VIII · Iftaʿala (reflexive/middle)",
-		id: "Wazan VIII · Ifta'ala (refleksif)",
-		kind: "verb",
-	},
-	تَفَعَّلَ: {
-		ar: "باب تَفَعَّلَ",
-		arSub: "خماسي مزيد بالتاء والتضعيف",
-		en: "Form V · Tafaʿʿala (reflexive of II)",
-		id: "Wazan V · Tafa''ala (refleksif pola II)",
-		kind: "verb",
-	},
-	تَفَاعَلَ: {
-		ar: "باب تَفَاعَلَ",
-		arSub: "خماسي مزيد بالتاء والألف (للتشارك)",
-		en: "Form VI · Tafāʿala (mutual reflexive)",
-		id: "Wazan VI · Tafa'ala (saling/refleksif)",
-		kind: "verb",
-	},
-	انْفَعَلَ: {
-		ar: "باب انْفَعَلَ",
-		arSub: "خماسي مزيد بالألف والنون (للمطاوعة)",
-		en: "Form VII · Infaʿala (mediopassive)",
-		id: "Wazan VII · Infa'ala (mutawa'ah/pasif)",
-		kind: "verb",
-	},
-	اسْتَفْعَلَ: {
-		ar: "باب اسْتَفْعَلَ",
-		arSub: "سداسي مزيد بالسين والتاء (للطلب)",
-		en: "Form X · Istafʿala (seeking/deeming)",
-		id: "Wazan X · Istaf'ala (memohon/mencari)",
-		kind: "verb",
-	},
-	"اسم فاعل": {
-		ar: "اسم فاعل",
-		arSub: "مشتق يدل على من قام بالفعل",
-		en: "Active Participle (Ism Fāʿil)",
-		id: "Isim Fa'il (Partisipel Aktif)",
-		kind: "noun",
-	},
-	"اسم مفعول": {
-		ar: "اسم مفعول",
-		arSub: "مشتق يدل على من وقع عليه الفعل",
-		en: "Passive Participle (Ism Mafʿūl)",
-		id: "Isim Maf'ul (Partisipel Pasif)",
-		kind: "noun",
-	},
-	"صفة مشبهة": {
-		ar: "صفة مشبهة",
-		arSub: "مشتق يدل على ثبوت الصفة في صاحبها",
-		en: "Assimilated Adjective (Ṣifa Mushabbaha)",
-		id: "Sifat Musyabbahah (Sifat Tetap)",
-		kind: "noun",
-	},
-	"صيغة مبالغة": {
-		ar: "صيغة مبالغة",
-		arSub: "مشتق يدل على الكثرة والمبالغة في الوصف",
-		en: "Intensive Noun (Ṣīghat Mubālagha)",
-		id: "Shighah Mubalaghah (Bentuk Intensif)",
-		kind: "noun",
-	},
-	"أفعل التفضيل": {
-		ar: "أفعل التفضيل",
-		arSub: "مشتق يدل على المشاركة والزيادة في الصفة",
-		en: "Elative / Comparative (Ism Tafḍīl)",
-		id: "Isim Tafdhil (Komparatif/Superlatif)",
-		kind: "noun",
-	},
-	مصدر: {
-		ar: "مصدر (حدث)",
-		arSub: "ما دلّ على الحدث مجرداً من الزمان",
-		en: "Verbal Noun (Maṣdar)",
-		id: "Masdar (Nomina Verbal)",
-		kind: "noun",
-	},
-	"اسم مكان / زمان": {
-		ar: "اسم مكان أو زمان",
-		arSub: "مشتق يدل على موضع الفعل أو زمانه",
-		en: "Noun of Place or Time (Ism Makān/Zamān)",
-		id: "Isim Makan / Zaman (Tempat/Waktu)",
-		kind: "noun",
-	},
-	"اسم جامد": {
-		ar: "اسم جامد",
-		arSub: "اسم غير مأخوذ من فعل (ذات أو معنى)",
-		en: "Primitive / Underived Noun (Jāmid)",
-		id: "Isim Jamid (Bukan Kata Turunan)",
-		kind: "noun",
-	},
-};
-
-export const SARF_STRUCTURES: Record<
-	string,
-	{ ar: string; arSub: string; en: string; id: string; kind: "verb" | "noun" }
-> = {
-	"صحيح سالم": {
-		ar: "صحيح سالم",
-		arSub: "خلت أصوله من الهمز والتضعيف والعلة",
-		en: "Sound Root (Ṣaḥīḥ Sālim — no weak/hamza/geminate)",
-		id: "Shahih Salim (Tanpa huruf illat/hamzah/tadh'if)",
-		kind: "verb",
-	},
-	"صحيح مهموز": {
-		ar: "صحيح مهموز",
-		arSub: "أحد حروفه الأصلية همزة",
-		en: "Hamzated Sound Root (Mahmūz)",
-		id: "Shahih Mahmuz (Berhuruf akar hamzah)",
-		kind: "verb",
-	},
-	"صحيح مضعف": {
-		ar: "صحيح مضعف",
-		arSub: "عينه ولامه من جنس واحد",
-		en: "Geminate Root (Muḍaʿʿaf — 2nd & 3rd identical)",
-		id: "Shahih Mudha''af (Ain & Lam fi'il kembar)",
-		kind: "verb",
-	},
-	"معتل مثال": {
-		ar: "معتل مثال (الفاء)",
-		arSub: "فاؤه حرف علة (واو أو ياء)",
-		en: "Assimilated Weak 1st Radical (Mithāl — و/ي)",
-		id: "Mu'tal Mitsal (Huruf illat di awal/fa' fi'il)",
-		kind: "verb",
-	},
-	"معتل أجوف": {
-		ar: "معتل أجوف (العين)",
-		arSub: "عينه حرف علة (مثل: قَالَ، كَانَ)",
-		en: "Hollow Weak 2nd Radical (Ajwaf — و/ي)",
-		id: "Mu'tal Ajwaf (Huruf illat di tengah/'ain fi'il)",
-		kind: "verb",
-	},
-	"معتل ناقص": {
-		ar: "معتل ناقص (اللام)",
-		arSub: "لامه حرف علة (مثل: دَعَا، هَدَى)",
-		en: "Defective Weak 3rd Radical (Nāqiṣ — و/ي)",
-		id: "Mu'tal Naqish (Huruf illat di akhir/lam fi'il)",
-		kind: "verb",
-	},
-	"معتل لفيف": {
-		ar: "معتل لفيف (حرفا علة)",
-		arSub: "اجتمع في أصوله حرفا علة (مقرون أو مفروق)",
-		en: "Doubly Weak Root (Lafīf — two weak radicals)",
-		id: "Mu'tal Lafif (Dua huruf illat dalam akar)",
-		kind: "verb",
-	},
-	مفرد: {
-		ar: "مفرد",
-		arSub: "ما دلّ على واحد أو واحدة",
-		en: "Singular Noun (Mufrad)",
-		id: "Mufrad (Tunggal)",
-		kind: "noun",
-	},
-	مثنى: {
-		ar: "مثنى",
-		arSub: "ما دلّ على اثنين بزيادة ألف ونون أو ياء ونون",
-		en: "Dual Noun (Muthannā)",
-		id: "Mutsanna (Dual)",
-		kind: "noun",
-	},
-	"جمع مذكر سالم": {
-		ar: "جمع مذكر سالم",
-		arSub: "ما جُمع بواو ونون أو ياء ونون",
-		en: "Sound Masculine Plural (-ūna / -īna)",
-		id: "Jamak Mudzakkar Salim",
-		kind: "noun",
-	},
-	"جمع مؤنث سالم": {
-		ar: "جمع مؤنث سالم",
-		arSub: "ما جُمع بألف وتاء مزيدتين",
-		en: "Sound Feminine Plural (-āt)",
-		id: "Jamak Muannats Salim",
-		kind: "noun",
-	},
-	"جمع تكسير للقلة": {
-		ar: "جمع تكسير للقلة",
-		arSub: "تغيرت صورة مفرده (أَفْعَال / أَفْعُل / أَفْعِلَة / فِعْلَة)",
-		en: "Broken Plural of Paucity (Jamʿ Qilla)",
-		id: "Jamak Taksir Qillah (أفعال / أفعل / أفعلة / فعلة)",
-		kind: "noun",
-	},
-	"جمع تكسير للكثرة": {
-		ar: "جمع تكسير للكثرة",
-		arSub: "تغيرت فيه بنية المفرد لأوزان الكثرة",
-		en: "Broken Plural of Multitude (Jamʿ Kathra)",
-		id: "Jamak Taksir Katsrah (Pola internal berubah)",
-		kind: "noun",
-	},
-};
 
 const BLOCK_RE = /\{([^}]*)\}:\s*([^{]*)/g;
 const PAREN_RE = /\(([^)]*)\)/;
@@ -1323,11 +719,27 @@ function sharedLettersCount(a: string, b: string): number {
 }
 
 export interface QuizPools {
+	irab: QuizQuestion[];
 	sarf: SarfQuestion[];
 	examples: ExampleHuntQuestion[];
 }
 
-export function extractQuizPools(files: SurahFile[]): QuizPools {
+/** One surah's morphology, with its NoorBayan treebank when loaded (needed for iʿrāb questions). */
+export interface QuizSource {
+	surah: SurahFile;
+	syntax?: SurahSyntaxFile;
+}
+
+function irabPool(sources: QuizSource[]): QuizQuestion[] {
+	const questions: QuizQuestion[] = [];
+	for (const { surah, syntax } of sources)
+		if (syntax) questions.push(...extractIrabQuestions(surah, syntax));
+	return questions;
+}
+
+/** Every quiz pool for the loaded surahs: iʿrāb from NoorBayan, ṣarf and examples from morphology. */
+export function extractQuizPools(sources: QuizSource[]): QuizPools {
+	const files = sources.map((source) => source.surah);
 	interface RawEntry {
 		sura: number;
 		suraName: string;
@@ -1783,34 +1195,8 @@ export function extractQuizPools(files: SurahFile[]): QuizPools {
 	}
 
 	return {
+		irab: irabPool(sources),
 		sarf: sarfQuestions,
 		examples: exampleQuestions,
 	};
-}
-
-export function getLensLabel(
-	lens: QuizLens,
-	locale: Locale,
-): { title: string; badge: string } {
-	const map: Record<
-		QuizLens,
-		Record<Locale, { title: string; badge: string }>
-	> = {
-		irab: {
-			en: { title: "Iʿrāb Syntax", badge: "إعراب" },
-			ar: { title: "النحو والإعراب", badge: "إعراب" },
-			id: { title: "Sintaksis Iʿrāb", badge: "إعراب" },
-		},
-		sarf: {
-			en: { title: "Ṣarf & Mīzān", badge: "صرف" },
-			ar: { title: "الميزان الصرفي", badge: "صرف" },
-			id: { title: "Sharaf & Wazan", badge: "صرف" },
-		},
-		examples: {
-			en: { title: "Pattern Hunt", badge: "شواهد" },
-			ar: { title: "شواهد وأنماط", badge: "شواهد" },
-			id: { title: "Lacak Pola", badge: "شواهد" },
-		},
-	};
-	return map[lens][locale];
 }

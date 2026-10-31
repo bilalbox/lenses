@@ -1,33 +1,29 @@
 #!/usr/bin/env python3
-"""Extract Asbab al-Nuzul, Surah Maqasid, and Per-Word Qira'at from quran.db.
+"""Extract Asbab al-Nuzul and per-word Qira'at from quran.db.
 
 Reads from data/cache/quran.db (Tafsir Center database):
   - ayah_content_nozool (Dr. Khalid al-Muzayni, 201 ayahs, 326 narrations with gradings)
-  - surah_content & surah_stats (surahGoals, revelationSeq 1..114, surahClass)
   - qeraat_info & word_content_rasm (ten canonical readings, 29,605 words with variants)
 
 Emits:
   - public/data/quran/asbab.json (lazy-loaded Asbab al-Nuzul narrations)
   - public/data/quran/qiraat/001.json .. 114.json (per-surah canonical readings)
-  - Updates public/data/quran/manifest.json (goals, revSeq, surahClass, stats, sources)
-  - Enriches public/data/quran/surah/001.json .. 114.json (goals, revSeq, surahClass)
+  - Updates public/data/quran/manifest.json (asbab / qiraat stats and sources)
   - Updates public/data/NOTICES.txt
+
+Surah goals, revelation order, and class come from the same database but belong to the
+surah files, so build_data.py writes them.
 """
 
 from __future__ import annotations
 
-import argparse
-import json
 import re
 import sqlite3
-from pathlib import Path
 from typing import Any
 
-from paths import ROOT
+from pipeline import CACHE, OUT, add_notice, edit_manifest, surah_path, upsert_source, write_json
 
-DEFAULT_DB_PATH = ROOT / "data" / "cache" / "quran.db"
-DEFAULT_DATA_DIR = ROOT / "public" / "data" / "quran"
-DEFAULT_NOTICES_PATH = ROOT / "public" / "data" / "NOTICES.txt"
+DB_PATH = CACHE / "quran.db"
 
 
 def parse_nozool_narrations(text: str) -> list[dict[str, Any]]:
@@ -158,7 +154,7 @@ def map_seq_w_to_lenses(s: int, a: int, db_w: int) -> int:
     return db_w
 
 
-def extract_asbab(con: sqlite3.Connection, out_path: Path) -> dict[str, list[dict[str, Any]]]:
+def extract_asbab(con: sqlite3.Connection) -> dict[str, list[dict[str, Any]]]:
     """Extract ayah_content_nozool and write public/data/quran/asbab.json."""
     cursor = con.cursor()
     cursor.execute(
@@ -171,41 +167,13 @@ def extract_asbab(con: sqlite3.Connection, out_path: Path) -> dict[str, list[dic
         key = f"{sura}:{ayah}"
         asbab_map[key] = parse_nozool_narrations(text)
 
-    out_path.write_text(
-        json.dumps(asbab_map, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(f"Wrote {len(asbab_map)} ayahs with Asbab al-Nuzul to {out_path}.")
+    write_json(OUT / "asbab.json", asbab_map)
+    print(f"Wrote {len(asbab_map)} ayahs with Asbab al-Nuzul.")
     return asbab_map
 
 
-def extract_surah_meta(con: sqlite3.Connection) -> dict[int, dict[str, Any]]:
-    """Extract surahGoals, revelationSeq, and surahClass for all 114 surahs."""
-    cursor = con.cursor()
-    cursor.execute(
-        """
-        SELECT sc.surahNo, sc.surahGoals, ss.revelationSeq, ss.surahClass
-        FROM surah_content sc
-        JOIN surah_stats ss ON sc.surahNo = ss.surahNo
-        ORDER BY sc.surahNo
-        """
-    )
-    meta = {}
-    for sura, goal, rev_seq, s_class in cursor.fetchall():
-        meta[sura] = {
-            "goal": goal.strip() if goal else "",
-            "revSeq": rev_seq,
-            "surahClass": s_class.strip() if s_class else "",
-        }
-    return meta
-
-
-def extract_qiraat(
-    con: sqlite3.Connection,
-    out_dir: Path,
-) -> tuple[int, int]:
+def extract_qiraat(con: sqlite3.Connection) -> tuple[int, int]:
     """Extract qeraat_info joining on rowid and write per-surah JSON chunks."""
-    out_dir.mkdir(parents=True, exist_ok=True)
     cursor = con.cursor()
 
     cursor.execute(
@@ -259,193 +227,88 @@ def extract_qiraat(
         verses_list = [{"v": a, "words": words} for a, words in sorted(ayahs.items())]
         file_payload = {"surah": s, "verses": verses_list}
 
-        out_file = out_dir / f"{s:03d}.json"
-        out_file.write_text(
-            json.dumps(file_payload, ensure_ascii=False, separators=(",", ":")),
-            encoding="utf-8",
-        )
+        write_json(surah_path("qiraat", s), file_payload)
 
     print(
-        f"Wrote 114 Qira'at files to {out_dir} "
+        f"Wrote 114 Qira'at files "
         f"({total_words_with_variants} words across {len(total_verses_with_variants)} verses)."
     )
     return total_words_with_variants, len(total_verses_with_variants)
 
 
-def update_manifest(
-    manifest_path: Path,
-    surah_meta: dict[int, dict[str, Any]],
-    asbab_count: int,
-    qiraat_words: int,
-    qiraat_verses: int,
-) -> None:
-    """Enrich manifest.json with goals, revSeq, surahClass, asbab, and qiraat stats."""
-    if not manifest_path.exists():
-        return
+def update_manifest(asbab_count: int, qiraat_words: int, qiraat_verses: int) -> None:
+    """Asbab and qiraat stats and sources in manifest.json."""
 
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    def edit(manifest: dict[str, Any]) -> None:
+        manifest.setdefault("stats", {}).update(
+            {
+                "asbabVerses": asbab_count,
+                "qiraatWords": qiraat_words,
+                "qiraatVerses": qiraat_verses,
+            }
+        )
+        for source in SOURCES:
+            upsert_source(manifest, source)
 
-    # Enrich unit summaries
-    for unit in manifest.get("units", []):
-        s_num = unit["n"]
-        meta = surah_meta.get(s_num, {})
-        if "goal" in meta:
-            unit["goal"] = meta["goal"]
-        if "revSeq" in meta:
-            unit["revSeq"] = meta["revSeq"]
-        if "surahClass" in meta:
-            unit["surahClass"] = meta["surahClass"]
-
-    # Enrich stats
-    stats = manifest.setdefault("stats", {})
-    stats["asbabVerses"] = asbab_count
-    stats["qiraatWords"] = qiraat_words
-    stats["qiraatVerses"] = qiraat_verses
-
-    # Add source attributions
-    sources: list[dict[str, Any]] = manifest.get("sources", [])
-    new_sources = [
-        {
-            "id": "asbab-muharrar",
-            "title": "Al-Muḥarrar fī Asbāb Nuzūl al-Qur'ān",
-            "kind": "asbab",
-            "attribution": "Dr. Khālid ibn Sulaymān al-Muzaynī (Tafsir Center for Quranic Studies / Dār Ibn al-Jawzī)",
-            "description": "Critical investigation of authentic causes of revelation across the nine primary hadith books, with isnād evaluation and hadith grading.",
-            "license": "CC BY 4.0",
-            "url": "https://tafsir.net/",
-        },
-        {
-            "id": "canonical-qiraat",
-            "title": "Ten Canonical Qirāʾāt Variants & Exegesis",
-            "kind": "qiraat",
-            "attribution": "Tafsir Center for Quranic Studies, based on Al-Nashr fī al-Qirā'āt al-'Ashr (Ibn al-Jazarī)",
-            "description": "Per-word canonical reading variants across the 10 Qurrā' and 20 Ruwāt with linguistic and semantic explanatory notes.",
-            "license": "CC BY 4.0",
-            "url": "https://tafsir.net/",
-        },
-    ]
-
-    existing_ids = {s.get("id") for s in sources}
-    for ns in new_sources:
-        if ns["id"] not in existing_ids:
-            sources.append(ns)
-
-    manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(f"Updated manifest at {manifest_path} with surah goals, revSeq, and stats.")
+    edit_manifest(edit)
 
 
-def enrich_surah_files(
-    surah_dir: Path,
-    surah_meta: dict[int, dict[str, Any]],
-) -> None:
-    """Enrich public/data/quran/surah/NNN.json files with goal, revSeq, and surahClass."""
-    if not surah_dir.exists():
-        return
-
-    updated_count = 0
-    for s_num, meta in surah_meta.items():
-        surah_file = surah_dir / f"{s_num:03d}.json"
-        if not surah_file.exists():
-            continue
-
-        surah_data = json.loads(surah_file.read_text(encoding="utf-8"))
-        changed = False
-
-        if meta.get("goal") and surah_data.get("goal") != meta["goal"]:
-            surah_data["goal"] = meta["goal"]
-            changed = True
-        if meta.get("revSeq") and surah_data.get("revSeq") != meta["revSeq"]:
-            surah_data["revSeq"] = meta["revSeq"]
-            changed = True
-        if meta.get("surahClass") and surah_data.get("surahClass") != meta["surahClass"]:
-            surah_data["surahClass"] = meta["surahClass"]
-            changed = True
-
-        if changed:
-            surah_file.write_text(
-                json.dumps(surah_data, ensure_ascii=False, indent=2) + "\n",
-                encoding="utf-8",
-            )
-            updated_count += 1
-
-    print(f"Enriched {updated_count} surah files in {surah_dir} with goal and metadata.")
+SOURCES: list[dict[str, Any]] = [
+    {
+        "id": "asbab-muharrar",
+        "title": "Al-Muḥarrar fī Asbāb Nuzūl al-Qur'ān",
+        "kind": "asbab",
+        "attribution": "Dr. Khālid ibn Sulaymān al-Muzaynī (Tafsir Center for Quranic Studies / Dār Ibn al-Jawzī)",
+        "description": "Critical investigation of authentic causes of revelation across the nine primary hadith books, with isnād evaluation and hadith grading.",
+        "license": "CC BY 4.0",
+        "url": "https://tafsir.net/",
+    },
+    {
+        "id": "canonical-qiraat",
+        "title": "Ten Canonical Qirāʾāt Variants & Exegesis",
+        "kind": "qiraat",
+        "attribution": "Tafsir Center for Quranic Studies, based on Al-Nashr fī al-Qirā'āt al-'Ashr (Ibn al-Jazarī)",
+        "description": "Per-word canonical reading variants across the 10 Qurrā' and 20 Ruwāt with linguistic and semantic explanatory notes.",
+        "license": "CC BY 4.0",
+        "url": "https://tafsir.net/",
+    },
+]
 
 
-def update_notices(notices_path: Path) -> None:
-    """Append legal notices for Al-Muḥarrar and Canonical Qira'at to NOTICES.txt."""
-    if not notices_path.exists():
-        return
-
-    content = notices_path.read_text(encoding="utf-8")
-    if "Al-Muḥarrar fī Asbāb Nuzūl al-Qur'ān" in content:
-        return
-
-    notice_block = (
-        "\n------------------------------------------------------------\n"
-        "Al-Muḥarrar fī Asbāb Nuzūl al-Qur'ān\n"
+def update_notices() -> None:
+    """Notices for Al-Muḥarrar and the canonical qirāʾāt data."""
+    add_notice(
+        "Al-Muḥarrar fī Asbāb Nuzūl al-Qur'ān",
         "Author: Dr. Khālid ibn Sulaymān al-Muzaynī\n"
         "Publisher: Tafsir Center for Quranic Studies / Dār Ibn al-Jawzī\n"
         "Source: Tafsir Center quran.db (CC BY 4.0)\n"
         "URL: https://tafsir.net/\n"
         "License / Terms: CC BY 4.0 Open Cultural License.\n"
-        "Used in Lenses for authentic causes of revelation, isnād critique, and hadith gradings.\n"
-        "\n------------------------------------------------------------\n"
-        "Ten Canonical Qirāʾāt Variants & Exegesis\n"
+        "Used in Lenses for authentic causes of revelation, isnād critique, and hadith gradings.",
+    )
+    add_notice(
+        "Ten Canonical Qirāʾāt Variants & Exegesis",
         "Source: Tafsir Center for Quranic Studies (quran.db)\n"
         "Based on: Al-Nashr fī al-Qirā'āt al-'Ashr (Ibn al-Jazarī)\n"
         "URL: https://tafsir.net/\n"
         "License / Terms: CC BY 4.0 Open Cultural License.\n"
-        "Used in Lenses for per-word canonical variant readings, phonetic rules, and semantic notes.\n"
+        "Used in Lenses for per-word canonical variant readings, phonetic rules, and semantic notes.",
     )
-
-    notices_path.write_text(content.rstrip() + "\n" + notice_block, encoding="utf-8")
-    print(f"Appended Asbab and Qira'at notices to {notices_path}.")
 
 
 def main() -> None:
-    """Main extraction and enrichment pipeline."""
-    parser = argparse.ArgumentParser(
-        description="Extract Asbab, Surah Goals, and Qira'at from quran.db."
-    )
-    parser.add_argument("--db", type=Path, default=DEFAULT_DB_PATH, help="Path to quran.db")
-    parser.add_argument(
-        "--data-dir", type=Path, default=DEFAULT_DATA_DIR, help="Output data directory"
-    )
-    parser.add_argument(
-        "--notices", type=Path, default=DEFAULT_NOTICES_PATH, help="Path to NOTICES.txt"
-    )
-    args = parser.parse_args()
+    """Main extraction pipeline."""
+    if not DB_PATH.exists():
+        raise SystemExit(f"Error: {DB_PATH} not found. Run build_data.py first to cache it.")
 
-    if not args.db.exists():
-        raise SystemExit(f"Error: {args.db} not found. Please ensure quran.db is cached.")
-
-    print(f"Connecting to {args.db}...")
-    con = sqlite3.connect(args.db)
-
-    # 1. Asbab al-Nuzul
-    asbab_path = args.data_dir / "asbab.json"
-    asbab_data = extract_asbab(con, asbab_path)
-
-    # 2. Surah Meta & Goals
-    surah_meta = extract_surah_meta(con)
-
-    # 3. Qira'at Variants
-    qiraat_dir = args.data_dir / "qiraat"
-    q_words, q_verses = extract_qiraat(con, qiraat_dir)
-
+    print(f"Connecting to {DB_PATH}...")
+    con = sqlite3.connect(DB_PATH)
+    asbab_data = extract_asbab(con)
+    q_words, q_verses = extract_qiraat(con)
     con.close()
 
-    # 4. Update manifest, surah files, and notices
-    manifest_path = args.data_dir / "manifest.json"
-    update_manifest(manifest_path, surah_meta, len(asbab_data), q_words, q_verses)
-
-    surah_dir = args.data_dir / "surah"
-    enrich_surah_files(surah_dir, surah_meta)
-
-    update_notices(args.notices)
+    update_manifest(len(asbab_data), q_words, q_verses)
+    update_notices()
     print("quran.db enrichment complete!")
 
 

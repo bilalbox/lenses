@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { ar } from "../../src/lib/i18n/locales/ar";
-import { en } from "../../src/lib/i18n/locales/en";
-import { id } from "../../src/lib/i18n/locales/id";
+import { surahTitle } from "../../src/lib/manifest";
+import {
+	counterpartSelectionReducer,
+	initCounterpartSelection,
+	isLinked,
+} from "../../src/lib/mutashabihNav";
+import { parseRoute, verseRefParam } from "../../src/lib/route";
 import type {
 	Manifest,
 	MutashabihMatch,
-	WordDiffStatus,
 	WordDiffToken,
 } from "../../src/lib/types";
 
@@ -38,52 +41,51 @@ describe("mutashabihNav: symmetric counterpart hovering", () => {
 		{ w: 10, s: "exact", cw: 11 }, // وادخلوا
 	];
 
-	function isLinked(
-		wordIndex: number,
+	const linked = (
+		word: number,
 		tokens: WordDiffToken[],
-		isTargetCard: boolean,
+		onTargetCard: boolean,
 		hovered: { word: number; isTarget: boolean } | null,
-	): boolean {
-		if (!hovered) return false;
-		if (hovered.isTarget === isTargetCard) {
-			return hovered.word === wordIndex;
-		}
-		const tok = tokens.find((t) => t.w === wordIndex);
-		return tok?.cw === hovered.word;
-	}
+	) =>
+		isLinked(
+			hovered,
+			word,
+			tokens.find((t) => t.w === word),
+			onTargetCard,
+		);
+
+	it("highlights nothing without a hover", () => {
+		expect(linked(3, srcTokens, false, null)).toBe(false);
+	});
 
 	it("highlights source word directly on source card hover", () => {
 		const hovered = { word: 3, isTarget: false };
-		expect(isLinked(3, srcTokens, false, hovered)).toBe(true);
-		expect(isLinked(4, srcTokens, false, hovered)).toBe(false);
+		expect(linked(3, srcTokens, false, hovered)).toBe(true);
+		expect(linked(4, srcTokens, false, hovered)).toBe(false);
 	});
 
 	it("symmetrically highlights counterpart word on target card when source is hovered", () => {
 		const hovered = { word: 3, isTarget: false };
-		// On target card, word 3 points to cw: 3
-		expect(isLinked(3, targetTokens, true, hovered)).toBe(true);
-		expect(isLinked(4, targetTokens, true, hovered)).toBe(false);
+		expect(linked(3, targetTokens, true, hovered)).toBe(true);
+		expect(linked(4, targetTokens, true, hovered)).toBe(false);
 	});
 
 	it("symmetrically highlights counterpart word on source card when target is hovered", () => {
 		const hovered = { word: 10, isTarget: true }; // target word 10 (وادخلوا)
-		// On source card, word 11 points to cw: 10
-		expect(isLinked(11, srcTokens, false, hovered)).toBe(true);
-		expect(isLinked(10, srcTokens, false, hovered)).toBe(false); // word 10 is 'رغدا' without cw
+		expect(linked(11, srcTokens, false, hovered)).toBe(true);
+		expect(linked(10, srcTokens, false, hovered)).toBe(false); // رغدا has no cw
 	});
 
 	it("handles extra words without counterparts gracefully", () => {
-		// Hovering 'رغدا' (source word 10, no cw)
-		const hovered = { word: 10, isTarget: false };
-		expect(isLinked(10, srcTokens, false, hovered)).toBe(true);
-		// No word on target card should link to source word 10
+		const hovered = { word: 10, isTarget: false }; // رغدا
+		expect(linked(10, srcTokens, false, hovered)).toBe(true);
 		for (const tok of targetTokens) {
-			expect(isLinked(tok.w, targetTokens, true, hovered)).toBe(false);
+			expect(linked(tok.w, targetTokens, true, hovered)).toBe(false);
 		}
 	});
 });
 
-describe("mutashabihNav: target coordination resolution", () => {
+describe("mutashabihNav: counterpart selection", () => {
 	const sampleMatches: MutashabihMatch[] = [
 		{
 			sura: 7,
@@ -105,74 +107,95 @@ describe("mutashabihNav: target coordination resolution", () => {
 		},
 	];
 
-	function resolveActiveIndex(
-		matches: MutashabihMatch[],
-		targetParam?: string,
-	): number {
-		if (!targetParam) return 0;
-		const [s, a] = targetParam.split(":").map(Number);
-		const idx = matches.findIndex((m) => m.sura === s && m.ayah === a);
-		return Math.max(idx, 0);
-	}
-
-	it("defaults to index 0 when no targetParam is provided", () => {
-		expect(resolveActiveIndex(sampleMatches)).toBe(0);
+	it("defaults to the best match when no target is given", () => {
+		expect(initCounterpartSelection(sampleMatches)).toEqual({
+			active: 0,
+			count: 2,
+			hovered: null,
+		});
 	});
 
-	it("selects matching counterpart when targetParam matches", () => {
-		expect(resolveActiveIndex(sampleMatches, "2:123")).toBe(1);
-		expect(resolveActiveIndex(sampleMatches, "7:161")).toBe(0);
+	it("selects the target counterpart when it is among the matches", () => {
+		expect(
+			initCounterpartSelection(sampleMatches, { sura: 2, verse: 123 }).active,
+		).toBe(1);
+		expect(
+			initCounterpartSelection(sampleMatches, { sura: 7, verse: 161 }).active,
+		).toBe(0);
 	});
 
-	it("falls back to 0 when targetParam does not match any counterpart", () => {
-		expect(resolveActiveIndex(sampleMatches, "99:99")).toBe(0);
+	it("falls back to the best match when the target matches no counterpart", () => {
+		expect(
+			initCounterpartSelection(sampleMatches, { sura: 99, verse: 99 }).active,
+		).toBe(0);
+	});
+
+	it("steps with wraparound and clears the hover", () => {
+		const start = {
+			...initCounterpartSelection(sampleMatches),
+			hovered: { word: 3, isTarget: false },
+		};
+		const back = counterpartSelectionReducer(start, {
+			type: "step",
+			delta: -1,
+		});
+		expect(back).toEqual({ active: 1, count: 2, hovered: null });
+		expect(
+			counterpartSelectionReducer(back, { type: "step", delta: 1 }).active,
+		).toBe(0);
+	});
+
+	it("selects by index, ignoring out-of-range indices", () => {
+		const start = initCounterpartSelection(sampleMatches);
+		expect(
+			counterpartSelectionReducer(start, { type: "select", index: 1 }).active,
+		).toBe(1);
+		expect(
+			counterpartSelectionReducer(start, { type: "select", index: 5 }),
+		).toBe(start);
+	});
+
+	it("tracks the hovered word", () => {
+		const hovered = { word: 4, isTarget: true };
+		const next = counterpartSelectionReducer(
+			initCounterpartSelection(sampleMatches),
+			{ type: "hover", hovered },
+		);
+		expect(next.hovered).toEqual(hovered);
+		expect(next.active).toBe(0);
 	});
 });
 
-describe("mutashabihNav: i18n completeness across locales", () => {
-	const locales = [
-		{ key: "en", bundle: en },
-		{ key: "ar", bundle: ar },
-		{ key: "id", bundle: id },
-	] as const;
+describe("mutashabihNav: target query param", () => {
+	it("round-trips through the verse route", () => {
+		const target = { sura: 2, verse: 58 };
+		const route = parseRoute(
+			`#/7/161?tab=mutashabih&target=${verseRefParam(target)}`,
+		);
+		expect(route).toMatchObject({
+			page: "verse",
+			sura: 7,
+			verse: 161,
+			tab: "mutashabih",
+			target,
+		});
+	});
 
-	const statuses: WordDiffStatus[] = ["exact", "haraka", "diff", "extra"];
+	it("accepts the legacy counterpart param", () => {
+		expect(parseRoute("#/7/161?counterpart=2:58").target).toEqual({
+			sura: 2,
+			verse: 58,
+		});
+	});
 
-	it("provides localized legend labels and non-empty strings in all 3 languages", () => {
-		for (const { key, bundle } of locales) {
-			expect(
-				bundle.verse.mutashabihLegendExact.length,
-				`exact in ${key}`,
-			).toBeGreaterThan(0);
-			expect(
-				bundle.verse.mutashabihLegendHaraka.length,
-				`haraka in ${key}`,
-			).toBeGreaterThan(0);
-			expect(
-				bundle.verse.mutashabihLegendDiff.length,
-				`diff in ${key}`,
-			).toBeGreaterThan(0);
-			expect(
-				bundle.verse.mutashabihLegendExtra.length,
-				`extra in ${key}`,
-			).toBeGreaterThan(0);
-			expect(
-				bundle.verse.mutashabihEmptyState.length,
-				`empty in ${key}`,
-			).toBeGreaterThan(0);
-			expect(
-				bundle.verse.mutashabihReturnToAyah("2:58"),
-				`return in ${key}`,
-			).toContain("2:58");
+	it("drops malformed or out-of-range targets", () => {
+		for (const bad of ["2", "2:", "abc", "0:5", "115:1", "2:0"]) {
+			expect(parseRoute(`#/7/161?target=${bad}`).target, bad).toBeUndefined();
 		}
 	});
-
-	it("covers all 4 diff status categories", () => {
-		expect(statuses).toEqual(["exact", "haraka", "diff", "extra"]);
-	});
 });
 
-describe("mutashabihNav: manifest surah title resolution", () => {
+describe("manifest: surah title resolution", () => {
 	const mockManifest: Manifest = {
 		id: "quran-standard",
 		title: "Quran Corpus",
@@ -217,27 +240,18 @@ describe("mutashabihNav: manifest surah title resolution", () => {
 		sources: [],
 	};
 
-	function getSurahTitle(
-		manifest: Manifest | undefined,
-		suraId: number,
-		locale: string,
-	): string {
-		const unit = manifest?.units.find((u) => u.n === suraId);
-		if (!unit) return `S${suraId}`;
-		return locale === "ar" ? unit.name : unit.phonetic;
-	}
-
 	it("resolves Arabic name when locale is 'ar'", () => {
-		expect(getSurahTitle(mockManifest, 7, "ar")).toBe("الأعراف");
-		expect(getSurahTitle(mockManifest, 2, "ar")).toBe("البقرة");
+		expect(surahTitle(mockManifest, 7, "ar")).toBe("الأعراف");
+		expect(surahTitle(mockManifest, 2, "ar")).toBe("البقرة");
 	});
 
 	it("resolves Phonetic transliteration when locale is not 'ar'", () => {
-		expect(getSurahTitle(mockManifest, 7, "en")).toBe("Al-A'raaf");
-		expect(getSurahTitle(mockManifest, 2, "id")).toBe("Al-Baqara");
+		expect(surahTitle(mockManifest, 7, "en")).toBe("Al-A'raaf");
+		expect(surahTitle(mockManifest, 2, "id")).toBe("Al-Baqara");
 	});
 
 	it("falls back to S{id} when surah is not in manifest", () => {
-		expect(getSurahTitle(mockManifest, 999, "en")).toBe("S999");
+		expect(surahTitle(mockManifest, 999, "en")).toBe("S999");
+		expect(surahTitle(undefined, 2, "en")).toBe("S2");
 	});
 });

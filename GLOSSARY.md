@@ -24,6 +24,10 @@ _Avoid_: Recitation, pronunciation variant
 A set of verses across different surahs that share a distinctive sequence of words with nuanced lexical or structural variations.
 _Avoid_: Duplicate ayahs, identical verses
 
+**Counterpart**:
+Another ayah in the same Mutashābih Group as the ayah being read, compared word by word (exact, ḥaraka, diff, extra). A jump to a Counterpart carries the origin as `?target=sura:ayah` so the reader can return.
+_Avoid_: Match, similar verse
+
 **Ḍabṭ**:
 A mnemonic rule or memorization anchor formulated to prevent confusion between similar verses.
 _Avoid_: Memorization tip, memory trick
@@ -51,3 +55,13 @@ _Avoid_: Surah summary, theme
 **Sabab al-Nuzūl**:
 A specific documented historical event or inquiry that prompted the revelation of one or more verses, accompanied by its chain takhrīj and authenticity grading.
 _Avoid_: Background story, revelation context
+
+### Reading Surface
+
+**Reader Layer**:
+One optional lens shown with an ayah (meaning, iʿrāb, nahw, mutashābih, asbāb, balāgha, qirāʾāt), switched on or off in Settings. A layer that is off fetches nothing. Most appear as drawers under the ayah; qirāʾāt appears in the word sheet.
+_Avoid_: Panel, section, feature (feature means a whole page such as the Rhetoric Studio or Munāsabāt)
+
+**Data Layer**:
+One static JSON dataset the client loads, either for the whole corpus (`manifest`, `verses`, `words`, `rhetoric`, `asbab`, `transitions`) or for each surah (`surah`, `syntax`, `qiraat`, `mutashabih`, `structure`). A Reader Layer reads from one or more Data Layers.
+_Avoid_: Endpoint, API, file kind

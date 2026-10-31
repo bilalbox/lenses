@@ -8,11 +8,11 @@ import {
 	SearchIcon,
 } from "./components/Icons";
 import { SettingsModal } from "./components/SettingsModal";
-import { loadManifest, loadVerses } from "./lib/api";
 import { stripDiacritics } from "./lib/arabic";
 import { openingPath, rememberVerse } from "./lib/home";
 import { normalizeDigits } from "./lib/i18n/format";
 import { useI18n } from "./lib/i18n/I18nContext";
+import { loadLayer, useLayer } from "./lib/layers";
 import {
 	type LibraryProgress,
 	startLibrary,
@@ -72,8 +72,7 @@ function stepAdjacentVerse(
 export function App() {
 	const { t, dir } = useI18n();
 	const [route, setRoute] = useState(() => parseRoute(location.hash));
-	const [manifest, setManifest] = useState<Manifest | null>(null);
-	const [error, setError] = useState("");
+	const { data: manifest, error } = useLayer("manifest");
 	const [theme, setTheme] = useState(
 		() => document.documentElement.dataset.theme || "light",
 	);
@@ -104,18 +103,6 @@ export function App() {
 	useEffect(() => {
 		if (route.page === "verse") rememberVerse(route.sura, route.verse);
 	}, [route.page, route.sura, route.verse]);
-
-	useEffect(() => {
-		loadManifest()
-			.then(setManifest)
-			.catch((reason: unknown) =>
-				setError(
-					reason instanceof Error
-						? reason.message
-						: "Could not load the catalog.",
-				),
-			);
-	}, []);
 
 	useEffect(() => {
 		return watchLibrary((progress) => {
@@ -165,7 +152,7 @@ export function App() {
 			return;
 		}
 		let cancel = false;
-		loadVerses()
+		loadLayer("verses")
 			.then((rows) => {
 				if (cancel) return;
 				const found = searchVerses(rows, trimmed);

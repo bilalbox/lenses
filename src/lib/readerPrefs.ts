@@ -4,7 +4,8 @@ export type ReaderLayerKey =
 	| "nahw"
 	| "mutashabih"
 	| "asbab"
-	| "balagha";
+	| "balagha"
+	| "qiraat";
 
 export type FeaturePrefKey = "rhetoricStudio" | "munasabat";
 
@@ -19,6 +20,7 @@ export const READER_LAYER_KEYS: ReaderLayerKey[] = [
 	"mutashabih",
 	"asbab",
 	"balagha",
+	"qiraat",
 ];
 
 export const FEATURE_PREF_KEYS: FeaturePrefKey[] = [
@@ -38,6 +40,7 @@ export const DEFAULT_READER_PREFS: ReaderPrefs = {
 	mutashabih: false,
 	asbab: false,
 	balagha: false,
+	qiraat: false,
 	rhetoricStudio: false,
 	munasabat: false,
 };

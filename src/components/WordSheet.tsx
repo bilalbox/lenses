@@ -1,22 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadSurahQiraat } from "../lib/api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { spaceLetters } from "../lib/arabic";
 import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import { kindGloss } from "../lib/glossary";
 import { useI18n } from "../lib/i18n/I18nContext";
-import type {
-	QiraatRule,
-	SurahQiraatFile,
-	Verse,
-	Word,
-	WordQiraat,
-} from "../lib/types";
+import { useVerseLayer } from "../lib/layers";
+import type { QiraatRule, Verse, Word, WordQiraat } from "../lib/types";
 import { CloseIcon } from "./Icons";
 
 interface Props {
 	sura: number;
 	verse: Verse;
 	word: Word;
+	/** Reader pref: when off the qirāʾāt file is not fetched. */
+	qiraatEnabled: boolean;
 	segmentIndex?: number;
 	onSelectSegment: (index: number) => void;
 	onClose: () => void;
@@ -27,6 +23,7 @@ export function WordSheet({
 	sura,
 	verse,
 	word,
+	qiraatEnabled,
 	segmentIndex,
 	onSelectSegment,
 	onClose,
@@ -47,27 +44,12 @@ export function WordSheet({
 	const closingTimerRef = useRef<number | null>(null);
 	const sheetRef = useRef<HTMLElement | null>(null);
 	const triggerRef = useRef<HTMLElement | null>(null);
-	const [qiraatFile, setQiraatFile] = useState<SurahQiraatFile | null>(null);
-
-	useEffect(() => {
-		let cancelled = false;
-		loadSurahQiraat(sura)
-			.then((data) => {
-				if (!cancelled) setQiraatFile(data);
-			})
-			.catch(() => {
-				// Non-fatal if surah has no qiraat file
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [sura]);
-
-	const wordQiraat = useMemo(() => {
-		if (!qiraatFile) return null;
-		const verseQ = qiraatFile.verses.find((item) => item.v === verse.v);
-		return verseQ?.words.find((item) => item.w === word.n) ?? null;
-	}, [qiraatFile, verse.v, word.n]);
+	// A surah without a qirāʾāt file just shows no variants.
+	const { data: verseQiraat } = useVerseLayer("qiraat", sura, verse.v, {
+		enabled: qiraatEnabled,
+	});
+	const wordQiraat =
+		verseQiraat?.words.find((item) => item.w === word.n) ?? null;
 
 	useEffect(() => {
 		triggerRef.current = document.activeElement as HTMLElement | null;

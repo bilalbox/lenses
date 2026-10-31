@@ -2,19 +2,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-	extractQuizPools,
-	extractQuizQuestionsFromSurah,
 	getCaseMeta,
 	getLensLabel,
 	getRoleMeta,
 	getSignMeta,
 	type QuizCase,
-	type QuizPools,
-	type QuizQuestion,
 	type QuizRelation,
 	type QuizSign,
-} from "../../src/lib/quizEngine";
-import type { SurahFile } from "../../src/lib/types";
+} from "../../src/lib/quizCatalog";
+import { extractQuizPools, type QuizPools } from "../../src/lib/quizEngine";
+import type { SurahFile, SurahSyntaxFile } from "../../src/lib/types";
 
 describe("quizEngine: metadata lookup", () => {
 	it("returns correct metadata for grammatical roles", () => {
@@ -121,9 +118,12 @@ describe("quizEngine: metadata lookup", () => {
 describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () => {
 	const fatihahPath = path.resolve("public/data/quran/surah/001.json");
 	const fatihah: SurahFile = JSON.parse(fs.readFileSync(fatihahPath, "utf-8"));
+	const syntax: SurahSyntaxFile = JSON.parse(
+		fs.readFileSync(path.resolve("public/data/quran/syntax/001.json"), "utf-8"),
+	);
 
-	it("extracts iʿrāb quiz questions with valid options and relations", () => {
-		const questions: QuizQuestion[] = extractQuizQuestionsFromSurah(fatihah);
+	it("extracts iʿrāb quiz questions from the NoorBayan treebank", () => {
+		const { irab: questions } = extractQuizPools([{ surah: fatihah, syntax }]);
 		expect(questions.length).toBeGreaterThan(0);
 
 		for (const q of questions) {
@@ -146,8 +146,12 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 		}
 	});
 
+	it("asks no iʿrāb questions without a treebank", () => {
+		expect(extractQuizPools([{ surah: fatihah }]).irab).toEqual([]);
+	});
+
 	it("extracts sarf questions with exactly 4 unique options per dimension and the answer included", () => {
-		const pools: QuizPools = extractQuizPools([fatihah]);
+		const pools: QuizPools = extractQuizPools([{ surah: fatihah }]);
 		expect(pools.sarf.length).toBeGreaterThan(0);
 
 		for (const sq of pools.sarf) {
@@ -175,7 +179,7 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 	});
 
 	it("extracts example hunt questions with valid clues and answer words", () => {
-		const pools: QuizPools = extractQuizPools([fatihah]);
+		const pools: QuizPools = extractQuizPools([{ surah: fatihah }]);
 		expect(pools.examples.length).toBeGreaterThan(0);
 
 		for (const eq of pools.examples) {
@@ -188,5 +192,40 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 			expect(eq.targetWazn).toBeTruthy();
 			expect(eq.searchSeed).toBeDefined();
 		}
+	});
+});
+
+describe("quizEngine: iʿrāb questions from NoorBayan (real surahs)", () => {
+	const load = <T>(kind: string, n: number): T =>
+		JSON.parse(
+			fs.readFileSync(
+				path.resolve(
+					`public/data/quran/${kind}/${String(n).padStart(3, "0")}.json`,
+				),
+				"utf-8",
+			),
+		);
+	const irabFor = (n: number) =>
+		extractQuizPools([
+			{
+				surah: load<SurahFile>("surah", n),
+				syntax: load<SurahSyntaxFile>("syntax", n),
+			},
+		]).irab;
+
+	it("maps nāsikh subjects onto subjx (اسم إن / كان)", () => {
+		const relations = new Set(irabFor(67).map((q) => q.relation));
+		expect(relations.has("subjx")).toBe(true);
+		expect(relations.has("predx" as QuizRelation)).toBe(false);
+	});
+
+	it("drops a نعت whose classical iʿrāb names a different noun than the treebank", () => {
+		// 67:3 طِبَاقًا — «نعت لـ﴿سبع﴾», NoorBayan attaches it to سماوات
+		expect(irabFor(67).some((q) => q.id === "67:3:5:adj")).toBe(false);
+	});
+
+	it("keeps a نعت whose classical iʿrāb agrees with the treebank head", () => {
+		const adjs = irabFor(67).filter((q) => q.relation === "adj");
+		expect(adjs.length).toBeGreaterThan(0);
 	});
 });

@@ -37,6 +37,7 @@ describe("readerPrefs", () => {
 		expect(DEFAULT_READER_PREFS.mutashabih).toBe(false);
 		expect(DEFAULT_READER_PREFS.asbab).toBe(false);
 		expect(DEFAULT_READER_PREFS.balagha).toBe(false);
+		expect(DEFAULT_READER_PREFS.qiraat).toBe(false);
 		expect(DEFAULT_READER_PREFS.rhetoricStudio).toBe(false);
 		expect(DEFAULT_READER_PREFS.munasabat).toBe(false);
 	});
