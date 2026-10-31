@@ -23,7 +23,6 @@ export const id: Translations = {
 		chapterAndVerse: "Surah dan ayat",
 		open: "Buka",
 		verse: "Ayat",
-		tanzilSource: "Tanzil",
 		tafsirCenterSource: "Markaz Tafsir untuk Studi Al-Qur'an",
 		corpusSource: "Quranic Arabic Corpus",
 	},

@@ -41,7 +41,6 @@ export interface Translations {
 		chapterAndVerse: string;
 		open: string;
 		verse: string;
-		tanzilSource: string;
 		tafsirCenterSource: string;
 		corpusSource: string;
 	};

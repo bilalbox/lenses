@@ -24,7 +24,6 @@ export const en: Translations = {
 		chapterAndVerse: "Chapter and verse",
 		open: "Open",
 		verse: "Verse",
-		tanzilSource: "Tanzil",
 		tafsirCenterSource: "Tafsir Center for Quranic Studies",
 		corpusSource: "Quranic Arabic Corpus",
 	},

@@ -220,7 +220,7 @@ function VerseBody({
 		params?: Record<string, string>,
 	) => void;
 }) {
-	const { locale, t, formatNumber } = useI18n();
+	const { locale, formatNumber } = useI18n();
 	// One clause index for the ayah line and the NoorBayan tree.
 	const [clauseIndex, setClauseIndex] = useState(0);
 	const layers = useReaderLayers(readerPrefs, sura, verse, locale, tab);
@@ -301,12 +301,6 @@ function VerseBody({
 					),
 				)}
 				<span className="ayah-mark">{formatNumber(verse.v)}</span>
-			</p>
-			<p className="source-line">
-				{t.common.tanzilSource} ·{" "}
-				<a href="https://tanzil.net/" target="_blank" rel="noreferrer">
-					tanzil.net
-				</a>
 			</p>
 
 			<VerseSecondaryLayers

@@ -29,7 +29,6 @@ export const ar: Translations = {
 		chapterAndVerse: "السورة والآية",
 		open: "فتح",
 		verse: "الآية",
-		tanzilSource: "تنزيل",
 		tafsirCenterSource: "مركز تفسير للدراسات القرآنية",
 		corpusSource: "المدونة القرآنية",
 	},
