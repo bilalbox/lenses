@@ -28,6 +28,12 @@ export function watchLibrary(listener: (progress: LibraryProgress) => void) {
 export function startLibrary(manifest: Manifest) {
 	if (started) return;
 	started = true;
+	// Data Saver on: skip the ~90 MB bulk download; surahs still cache as opened.
+	if (
+		(navigator as { connection?: { saveData?: boolean } }).connection?.saveData
+	) {
+		return;
+	}
 	void fill(manifest);
 }
 

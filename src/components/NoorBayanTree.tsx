@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type KeyboardEvent, useMemo, useState } from "react";
 import { arcTouches, layoutSentence, TOKEN_WIDTH } from "../lib/noorBayan";
 import type { SyntaxSentence } from "../lib/types";
 
@@ -18,9 +18,33 @@ export function NoorBayanTree({
 	onSelectWord,
 }: Props) {
 	const [hoveredTokenId, setHoveredTokenId] = useState<string | null>(null);
-	const { width, height, baseline, tokens, arcs, constituents } =
-		layoutSentence(sentence, sura, verseNumber);
+	// Hover only changes highlight state, so the layout is computed once per sentence.
+	const layout = useMemo(
+		() => layoutSentence(sentence, sura, verseNumber),
+		[sentence, sura, verseNumber],
+	);
+	const { width, height, baseline, tokens, arcs, constituents } = layout;
 	const muqaddarTokens = tokens.filter((tok) => tok.muqaddar);
+	// Spoken name per node: word, part of speech, and its relation to its head.
+	const tokenLabels = useMemo(
+		() =>
+			layout.tokens.map((tok, index) => {
+				const arc = layout.arcs.find((item) => item.dep === index);
+				const head =
+					arc && arc.head !== null
+						? layout.tokens[arc.head]?.text
+						: arc?.carriedText;
+				const parts = [tok.text || "مقدَّر", tok.pos];
+				if (arc) parts.push(head ? `${arc.label} ← ${head}` : arc.label);
+				return parts.filter(Boolean).join("، ");
+			}),
+		[layout],
+	);
+	const selectByKey = (event: KeyboardEvent, wordNum: number) => {
+		if (event.key !== "Enter" && event.key !== " ") return;
+		event.preventDefault();
+		onSelectWord?.(wordNum);
+	};
 
 	return (
 		<div className="noorbayan-tree-container" dir="rtl">
@@ -44,7 +68,8 @@ export function NoorBayanTree({
 					height={height}
 					viewBox={`0 0 ${width} ${height}`}
 					className="noorbayan-tree-svg"
-					role="img"
+					role="group"
+					aria-label="شجرة إعراب الآية"
 				>
 					<title>شجرة إعراب الآية</title>
 					<defs>
@@ -128,7 +153,7 @@ export function NoorBayanTree({
 					})}
 
 					{/* Layer 2: opaque fills (nodes + pills) so lines never cross text */}
-					{tokens.map((tok) => {
+					{tokens.map((tok, index) => {
 						const x = tok.x;
 						const isWordSelected = selectedWord === tok.wordNum;
 						const isHovered = hoveredTokenId === tok.id;
@@ -139,9 +164,16 @@ export function NoorBayanTree({
 								key={tok.id}
 								className={`noorbayan-token-node${isActive ? " is-active" : ""}`}
 								cursor="pointer"
+								role="button"
+								tabIndex={0}
+								aria-pressed={isWordSelected}
+								aria-label={tokenLabels[index]}
 								onMouseEnter={() => setHoveredTokenId(tok.id)}
 								onMouseLeave={() => setHoveredTokenId(null)}
+								onFocus={() => setHoveredTokenId(tok.id)}
+								onBlur={() => setHoveredTokenId(null)}
 								onClick={() => onSelectWord?.(tok.wordNum)}
+								onKeyDown={(event) => selectByKey(event, tok.wordNum)}
 							>
 								<rect
 									x={x - TOKEN_WIDTH / 2}
@@ -188,7 +220,7 @@ export function NoorBayanTree({
 									x={x}
 									y={baseline + 30}
 									textAnchor="middle"
-									fontSize="10"
+									fontSize="11"
 									fontWeight="600"
 									fill="var(--teal, #0f6e66)"
 									className="noorbayan-pos-text"

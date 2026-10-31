@@ -15,6 +15,8 @@
 	--gold-ink: #6e451c;
 	--rose: #8c3d4b;
 	--indigo: #2c4c7c;
+	/* Text on solid accent fills (teal / gold). */
+	--on-accent: var(--paper);
 	/* Layered elevation: contact edge + ambient diffuse (avoids muddy single shadows) */
 	--shadow:
 		0 1px 2px rgba(60, 42, 20, 0.05), 0 10px 28px -6px rgba(60, 42, 20, 0.1);
@@ -26,7 +28,7 @@
 	--duration-med: 0.24s;
 	--duration-slow: 0.32s;
 	--slide-distance: 22px;
-	--sans: "Source Sans 3", "Segoe UI", sans-serif;
+	--sans: "Source Sans 3", "Segoe UI", var(--arabic-ui), sans-serif;
 	--serif: Literata, "Iowan Old Style", Georgia, serif;
 	--arabic: "Scheherazade New", "Amiri", serif;
 	--arabic-ui: "Noto Sans Arabic", sans-serif;
@@ -49,6 +51,7 @@
 	--gold-ink: #f0c878;
 	--rose: #e08a96;
 	--indigo: #9eb6de;
+	--on-accent: #10211e;
 	--shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 12px 32px -6px rgba(0, 0, 0, 0.45);
 	--shadow-soft:
 		0 1px 2px rgba(0, 0, 0, 0.22), 0 6px 14px -4px rgba(0, 0, 0, 0.35);
@@ -286,7 +289,7 @@ select option {
 :root[data-theme="dark"] .install,
 :root[data-theme="dark"] .install-button,
 :root[data-theme="dark"] .verse-toolbar button[type="submit"] {
-	color: #10211e;
+	color: var(--on-accent);
 }
 main {
 	width: min(1180px, calc(100% - 1.5rem));
@@ -367,7 +370,7 @@ main {
 	font-weight: 600;
 	font-size: clamp(1.8rem, 3vw, 2.6rem);
 }
-.verse-title h1 span {
+.verse-title h1 > span {
 	font-family: var(--arabic);
 	font-weight: 700;
 	margin-inline-end: 0.4rem;
@@ -1040,7 +1043,7 @@ main {
 }
 .filter-card small {
 	color: var(--muted);
-	font-size: 0.75rem;
+	font-size: 0.78rem;
 	line-height: 1.35;
 	display: -webkit-box;
 	-webkit-line-clamp: 2;
@@ -1204,6 +1207,7 @@ main {
 	list-style: none;
 	padding: 0;
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	gap: 0.85rem;
 }
 .source-cards li {
@@ -1225,7 +1229,7 @@ main {
 	font-size: 1.15rem;
 }
 .source-kind-pill {
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
@@ -1254,6 +1258,7 @@ main {
 }
 .source-cards a {
 	font-size: 0.85rem;
+	overflow-wrap: anywhere;
 }
 .skeleton {
 	display: grid;
@@ -1660,7 +1665,7 @@ main {
 	min-width: 0;
 }
 .clause-stepper span.is-edge-hint {
-	color: var(--gold);
+	color: var(--gold-ink);
 	font-weight: 600;
 }
 .sheet-handle {
@@ -2258,7 +2263,7 @@ main {
 }
 
 .quiz-gov-chip small {
-	font-size: 0.75rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	font-variant-numeric: tabular-nums;
 }
@@ -2371,7 +2376,7 @@ main {
 
 .quiz-sign-card small {
 	display: block;
-	font-size: 0.76rem;
+	font-size: 0.78rem;
 	line-height: 1.3;
 	color: var(--muted);
 }
@@ -2410,7 +2415,7 @@ main {
 }
 
 :root[data-theme="dark"] .quiz-submit-btn {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .quiz-submit-btn kbd {
@@ -2468,7 +2473,7 @@ main {
 
 .quiz-verdict-status-pill.is-review {
 	background: color-mix(in srgb, var(--gold) 15%, transparent);
-	color: var(--gold);
+	color: var(--gold-ink);
 	border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
 }
 
@@ -2484,11 +2489,11 @@ main {
 }
 
 :root[data-theme="dark"] .quiz-next-cta {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .formula-target {
-	color: var(--gold);
+	color: var(--gold-ink);
 }
 
 /* ============================================================================
@@ -2550,7 +2555,7 @@ main {
 
 .quiz-wizard-ref {
 	white-space: nowrap;
-	color: var(--gold);
+	color: var(--gold-ink);
 	font-size: 0.8rem;
 	font-weight: 700;
 	letter-spacing: 0.04em;
@@ -2569,7 +2574,7 @@ main {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.25rem;
-	font-size: 0.75rem;
+	font-size: 0.78rem;
 	padding: 0.15rem 0.5rem;
 	border-radius: 8px;
 	background: var(--bg-2);
@@ -2586,7 +2591,7 @@ main {
 
 .quiz-wizard-stat small {
 	color: var(--muted);
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 }
 
 .quiz-stat-sep {
@@ -2675,7 +2680,7 @@ main {
 	color: var(--ink);
 	display: inline-grid;
 	place-items: center;
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	flex-shrink: 0;
 	font-variant-numeric: tabular-nums;
@@ -2691,7 +2696,7 @@ main {
 }
 
 :root[data-theme="dark"] .quiz-crumb.is-active .quiz-crumb-num {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .quiz-crumb-text {
@@ -2976,7 +2981,7 @@ main {
 }
 
 .quiz-summary-tile small {
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	line-height: 1.25;
 }
@@ -3132,7 +3137,7 @@ main {
 
 .quiz-lens-badge {
 	font-family: var(--arabic-ui);
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	padding: 0.1rem 0.42rem;
 	border-radius: 6px;
@@ -3147,7 +3152,7 @@ main {
 }
 
 :root[data-theme="dark"] .quiz-lens-tab.is-active .quiz-lens-badge {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .quiz-lens-title {
@@ -3160,7 +3165,7 @@ main {
 		flex-direction: column;
 		gap: 0.12rem;
 		padding: 0.25rem 0.3rem;
-		font-size: 0.7rem;
+		font-size: 0.78rem;
 	}
 }
 
@@ -3275,7 +3280,7 @@ main {
 
 .rhetoric-pill {
 	font-family: var(--sans);
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -3304,7 +3309,12 @@ main {
 	border-radius: var(--radius);
 	text-align: start;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease,
+		color 0.2s ease,
+		box-shadow 0.2s ease,
+		transform 0.2s ease;
 }
 
 .rhetoric-ds-tab:hover {
@@ -3319,7 +3329,7 @@ main {
 }
 
 .rhetoric-tab-tag {
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	color: var(--teal);
@@ -3335,14 +3345,19 @@ main {
 }
 
 .rhetoric-tab-count-badge {
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	padding: 0.05rem 0.45rem;
 	border-radius: 999px;
 	background: var(--bg-2);
 	color: var(--muted);
 	border: 1px solid var(--line);
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .rhetoric-ds-tab.is-active .rhetoric-tab-count-badge {
@@ -3351,7 +3366,7 @@ main {
 	border-color: var(--teal);
 }
 :root[data-theme="dark"] .rhetoric-ds-tab.is-active .rhetoric-tab-count-badge {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .rhetoric-tab-title {
@@ -3362,7 +3377,7 @@ main {
 }
 
 .rhetoric-tab-cite {
-	font-size: 0.75rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	margin-top: 0.25rem;
 }
@@ -3418,7 +3433,7 @@ main {
 	color: var(--teal);
 }
 .rhetoric-formula-box.is-tool .rhetoric-formula-role {
-	color: var(--gold);
+	color: var(--gold-ink);
 }
 .rhetoric-formula-box.is-veh .rhetoric-formula-role {
 	color: var(--rose);
@@ -3451,7 +3466,7 @@ main {
 
 .rhetoric-formula-plus,
 .rhetoric-formula-arrow {
-	font-weight: 800;
+	font-weight: 700;
 	color: var(--muted);
 	font-size: 1.1rem;
 }
@@ -3516,7 +3531,7 @@ main {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	padding: 0 0.15rem;
 }
@@ -3586,7 +3601,12 @@ main {
 	background: var(--paper);
 	text-align: start;
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .rhetoric-entry-item:hover {
@@ -3609,14 +3629,14 @@ main {
 }
 
 .rhetoric-ref-pill {
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	color: var(--muted);
 }
 
 .rhetoric-device-chip {
 	font-family: var(--arabic-ui);
-	font-size: 0.76rem;
+	font-size: 0.78rem;
 	padding: 0.08rem 0.45rem;
 	border-radius: 999px;
 	background: var(--gold-soft);
@@ -3641,7 +3661,7 @@ main {
 
 .rhetoric-meta-tag {
 	font-family: var(--arabic-ui);
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	background: var(--bg-2);
 	padding: 0.08rem 0.45rem;
@@ -3693,7 +3713,12 @@ main {
 	background: var(--bg);
 	color: var(--teal);
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .rhetoric-reader-jump-btn:hover {
@@ -3702,7 +3727,7 @@ main {
 	border-color: var(--teal);
 }
 :root[data-theme="dark"] .rhetoric-reader-jump-btn:hover {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .rhetoric-stage-ayah {
@@ -3721,7 +3746,7 @@ main {
 }
 
 .rhetoric-snippet-source {
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	margin: 0 0 1rem;
 }
@@ -3836,7 +3861,7 @@ main {
 }
 
 .rhetoric-note-src {
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	color: var(--muted);
 	text-transform: uppercase;
@@ -3874,7 +3899,12 @@ main {
 	color: var(--ink);
 	border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
 	text-decoration: none;
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .verse-balagha-deep-link:hover {
@@ -3883,12 +3913,12 @@ main {
 	transform: translateY(-1px);
 }
 :root[data-theme="dark"] .verse-balagha-deep-link:hover {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .verse-balagha-icon {
 	font-family: var(--arabic-ui);
-	font-weight: 800;
+	font-weight: 700;
 	color: var(--gold);
 }
 
@@ -3896,7 +3926,7 @@ main {
 	color: #fffdf8;
 }
 :root[data-theme="dark"] .verse-balagha-deep-link:hover .verse-balagha-icon {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .preset-rhetoric-chip {
@@ -3912,7 +3942,12 @@ main {
 	color: var(--ink);
 	border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
 	text-decoration: none;
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .preset-rhetoric-chip:hover {
@@ -3920,17 +3955,17 @@ main {
 	color: #fffdf8;
 }
 :root[data-theme="dark"] .preset-rhetoric-chip:hover {
-	color: #10211e;
+	color: var(--on-accent);
 }
 
 .loc-balagha-tag {
 	font-family: var(--arabic-ui);
-	font-size: 0.68rem;
-	font-weight: 800;
+	font-size: 0.78rem;
+	font-weight: 700;
 	padding: 0.05rem 0.35rem;
 	border-radius: 4px;
 	background: var(--gold-soft);
-	color: var(--gold);
+	color: var(--gold-ink);
 	margin-inline-start: 0.35rem;
 }
 
@@ -3962,7 +3997,7 @@ main {
 
 .verse-meaning-badge {
 	font-family: var(--sans);
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -4043,7 +4078,12 @@ main {
 	color: var(--teal);
 	border: 1px solid color-mix(in srgb, var(--teal) 30%, transparent);
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .asbab-badge-button:hover {
@@ -4147,7 +4187,7 @@ main {
 
 .asbab-grade-badge {
 	font-family: var(--arabic-ui, var(--sans));
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	padding: 0.15rem 0.6rem;
 	border-radius: 999px;
@@ -4197,7 +4237,7 @@ main {
 .asbab-takhrij-label {
 	font-family: var(--arabic-ui, var(--sans));
 	font-weight: 700;
-	font-size: 0.76rem;
+	font-size: 0.78rem;
 	color: var(--teal);
 	margin-bottom: 0.25rem;
 }
@@ -4219,7 +4259,7 @@ main {
 .asbab-citation {
 	margin: 0;
 	font-family: var(--arabic-ui, var(--sans));
-	font-size: 0.76rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 	text-align: center;
 }
@@ -4273,13 +4313,18 @@ main {
 	font-weight: 600;
 	color: var(--muted);
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .noorbayan-clause-btn.is-active,
 .noorbayan-clause-btn:hover {
 	background: var(--teal);
-	color: #ffffff;
+	color: var(--on-accent);
 	border-color: var(--teal);
 }
 
@@ -4311,7 +4356,7 @@ main {
 
 .noorbayan-badge {
 	font-family: var(--arabic-ui, var(--sans));
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	padding: 0.2rem 0.6rem;
 	border-radius: 6px;
@@ -4322,24 +4367,36 @@ main {
 
 .noorbayan-carried-badge {
 	font-family: var(--arabic-ui, var(--sans));
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	font-weight: 600;
 	padding: 0.2rem 0.55rem;
 	border-radius: 6px;
 	background: color-mix(in srgb, var(--gold) 12%, var(--paper));
-	color: var(--gold);
+	color: var(--gold-ink);
 	border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
 .noorbayan-tree-canvas-scroll {
 	overflow-x: auto;
+	overscroll-behavior-x: contain;
 	padding: 1.5rem 1rem;
 	display: flex;
-	justify-content: center;
+	/* safe: once the tree overflows, keep its RTL start reachable. */
+	justify-content: safe center;
 }
 
 .noorbayan-tree-svg {
 	display: block;
+	/* Never shrink to fit: a scaled tree drops labels to ~4px on phones. */
+	flex: none;
+}
+
+.noorbayan-token-node {
+	outline: none;
+}
+.noorbayan-token-node:focus-visible .noorbayan-node-bg {
+	stroke: var(--teal);
+	stroke-width: 3;
 }
 
 .noorbayan-tree-svg text {
@@ -4407,7 +4464,7 @@ main {
 
 .qiraat-reader-pill {
 	font-family: var(--arabic-ui, var(--sans));
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	padding: 0.12rem 0.5rem;
 	border-radius: 999px;
@@ -4472,14 +4529,19 @@ main {
 	gap: 0.4rem;
 	padding: 0.4rem 0.75rem;
 	min-height: 44px;
-	font-size: 0.76rem;
+	font-size: 0.78rem;
 	font-weight: 600;
 	color: var(--teal);
 	background: color-mix(in srgb, var(--teal) 10%, var(--paper));
 	border: 1px solid color-mix(in srgb, var(--teal) 28%, transparent);
 	border-radius: 999px;
 	cursor: pointer;
-	transition: all var(--duration-fast) ease;
+	transition:
+		background-color var(--duration-fast) ease,
+		border-color var(--duration-fast) ease,
+		color var(--duration-fast) ease,
+		box-shadow var(--duration-fast) ease,
+		transform var(--duration-fast) ease;
 }
 
 .mutashabih-badge-button:hover {
@@ -4490,7 +4552,7 @@ main {
 
 .mutashabih-badge-button.is-active {
 	background: var(--teal);
-	color: #fff;
+	color: var(--on-accent);
 	border-color: var(--teal);
 }
 
@@ -4526,7 +4588,7 @@ main {
 }
 
 .mutashabih-match-badge {
-	font-size: 0.76rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	padding: 0.2rem 0.6rem;
 	border-radius: 999px;
@@ -4554,7 +4616,12 @@ main {
 	color: var(--ink-soft);
 	font-size: 0.78rem;
 	cursor: pointer;
-	transition: all var(--duration-fast) ease;
+	transition:
+		background-color var(--duration-fast) ease,
+		border-color var(--duration-fast) ease,
+		color var(--duration-fast) ease,
+		box-shadow var(--duration-fast) ease,
+		transform var(--duration-fast) ease;
 }
 
 .mutashabih-pill:hover {
@@ -4564,7 +4631,7 @@ main {
 
 .mutashabih-pill.is-active {
 	background: var(--teal);
-	color: #fff;
+	color: var(--on-accent);
 	border-color: var(--teal);
 	font-weight: 600;
 }
@@ -4575,7 +4642,7 @@ main {
 }
 
 .mutashabih-pill-score {
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	opacity: 0.85;
 }
 
@@ -4617,7 +4684,7 @@ main {
 }
 
 .mutashabih-verse-tag {
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -4661,7 +4728,12 @@ main {
 	border: 1px solid var(--line);
 	color: var(--teal);
 	cursor: pointer;
-	transition: all var(--duration-fast) ease;
+	transition:
+		background-color var(--duration-fast) ease,
+		border-color var(--duration-fast) ease,
+		color var(--duration-fast) ease,
+		box-shadow var(--duration-fast) ease,
+		transform var(--duration-fast) ease;
 }
 
 .mutashabih-jump-btn.is-return {
@@ -4674,7 +4746,7 @@ main {
 .mutashabih-jump-btn:hover,
 .mutashabih-jump-btn.is-return:hover {
 	background: var(--teal);
-	color: #fff;
+	color: var(--on-accent);
 	border-color: var(--teal);
 }
 
@@ -4695,7 +4767,12 @@ main {
 	background: transparent;
 	border: 1px solid transparent;
 	cursor: pointer;
-	transition: all var(--duration-fast) ease;
+	transition:
+		background-color var(--duration-fast) ease,
+		border-color var(--duration-fast) ease,
+		color var(--duration-fast) ease,
+		box-shadow var(--duration-fast) ease,
+		transform var(--duration-fast) ease;
 }
 
 .mutashabih-word-chip .word-text {
@@ -4744,7 +4821,7 @@ main {
 	gap: 1.25rem;
 	flex-wrap: wrap;
 	padding: 0.3rem 0;
-	font-size: 0.74rem;
+	font-size: 0.78rem;
 	color: var(--ink-soft);
 }
 
@@ -4888,7 +4965,7 @@ main {
 	gap: 0.4rem;
 }
 .structure-summary-count {
-	font-size: 0.75rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	color: var(--indigo);
 }
@@ -4939,7 +5016,7 @@ main {
 }
 .diptych-hemisphere header small {
 	color: var(--muted);
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 }
 .diptych-hemisphere ol {
 	list-style: none;
@@ -4977,12 +5054,12 @@ main {
 }
 .diptych-id {
 	grid-area: id;
-	font-weight: 800;
+	font-weight: 700;
 	font-size: 0.95rem;
 }
 .diptych-range {
 	grid-area: range;
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	color: color-mix(in srgb, var(--ink) 58%, var(--muted));
 	justify-self: end;
 }
@@ -4998,7 +5075,7 @@ main {
 }
 .diptych-pair {
 	grid-area: pair;
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	color: var(--muted);
 }
 .diptych-keystone {
@@ -5034,11 +5111,11 @@ main {
 }
 .diptych-keystone-inner small {
 	color: var(--muted);
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 }
 .diptych-keystone-inner em {
 	font-style: normal;
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	color: var(--gold-ink);
@@ -5083,7 +5160,7 @@ main {
 }
 .munasabat-eyebrow {
 	margin: 0;
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	color: var(--muted);
@@ -5102,7 +5179,7 @@ main {
 }
 .munasabat-bridge-badge {
 	align-self: flex-start;
-	font-size: 0.7rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	padding: 0.25rem 0.55rem;
 	border-radius: 999px;
@@ -5136,12 +5213,12 @@ main {
 	gap: 0.5rem;
 }
 .munasabat-source-badge {
-	font-size: 0.72rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 }
 .munasabat-quote header small {
 	color: color-mix(in srgb, var(--ink) 58%, var(--muted));
-	font-size: 0.75rem;
+	font-size: 0.78rem;
 }
 .munasabat-quote-ar {
 	margin: 0;
@@ -5210,7 +5287,12 @@ main {
 	color: var(--teal);
 	border: 1px solid color-mix(in srgb, var(--teal) 30%, transparent);
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
 }
 
 .balagha-badge-button:hover {

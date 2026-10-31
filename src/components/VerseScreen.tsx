@@ -383,7 +383,6 @@ function VerseHeaderCard({
 		phonetic,
 		goal ? t.verse.surahGoalLabel : null,
 		revSeq ? t.verse.revelationOrder(revSeq) : null,
-		surahClass || null,
 	].filter(Boolean);
 
 	return (
@@ -391,7 +390,15 @@ function VerseHeaderCard({
 			<div className="verse-title-header-row">
 				<h1>
 					<span lang="ar">{unitName}</span>
-					<small>{metaParts.join(" · ")}</small>
+					<small>
+						{metaParts.join(" · ")}
+						{surahClass ? (
+							<>
+								{" · "}
+								<span lang="ar">{surahClass}</span>
+							</>
+						) : null}
+					</small>
 				</h1>
 				{showAsbab ? (
 					<div className="verse-actions-header">

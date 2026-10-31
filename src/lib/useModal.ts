@@ -8,6 +8,10 @@ export function useModalLifecycle(
 	const [rendered, setRendered] = useState(isOpen);
 	const [isClosing, setIsClosing] = useState(false);
 	const triggerRef = useRef<HTMLElement | null>(null);
+	// Callers pass inline closures; reading through a ref keeps the trap effect
+	// from re-running (and re-focusing the first control) on every parent render.
+	const onCloseRef = useRef(onClose);
+	onCloseRef.current = onClose;
 
 	useEffect(() => {
 		if (isOpen) {
@@ -52,7 +56,7 @@ export function useModalLifecycle(
 		const onKeyDown = (event: KeyboardEvent) => {
 			if (event.key === "Escape") {
 				event.preventDefault();
-				onClose();
+				onCloseRef.current();
 				return;
 			}
 			if (event.key === "Tab") {
@@ -73,7 +77,7 @@ export function useModalLifecycle(
 		};
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [rendered, isClosing, onClose, dialogRef]);
+	}, [rendered, isClosing, dialogRef]);
 
 	return { rendered, isClosing };
 }

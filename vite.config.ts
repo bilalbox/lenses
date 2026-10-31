@@ -46,12 +46,26 @@ export default defineConfig({
 				clientsClaim: true,
 				runtimeCaching: [
 					{
-						urlPattern: ({ url }) => url.pathname.startsWith("/data/quran/"),
+						// The offline library (surah files + corpus-wide JSON) that
+						// startLibrary prefetches. Uncapped: an LRU limit here would let
+						// layer visits evict the surahs the reader promises offline.
+						urlPattern: ({ url }) =>
+							/^\/data\/quran\/(surah\/[^/]+|[^/]+)\.json$/.test(url.pathname),
 						handler: "StaleWhileRevalidate",
 						options: {
 							cacheName: "lenses-quran",
 							cacheableResponse: { statuses: [200] },
-							expiration: { maxEntries: 130 },
+						},
+					},
+					{
+						// Opt-in per-surah layers (syntax, qirāʾāt, mutashabih, structure),
+						// cached as they are opened. Sized above 4 × 114 files.
+						urlPattern: ({ url }) => url.pathname.startsWith("/data/quran/"),
+						handler: "StaleWhileRevalidate",
+						options: {
+							cacheName: "lenses-quran-layers",
+							cacheableResponse: { statuses: [200] },
+							expiration: { maxEntries: 600 },
 						},
 					},
 					{
