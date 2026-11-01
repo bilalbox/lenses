@@ -76,7 +76,6 @@ export interface UnitSummary {
 	goal?: string;
 	surahClass?: string;
 	mutashabih?: number;
-	structure?: number;
 }
 
 export interface SourceMeta {
@@ -106,9 +105,6 @@ export interface Manifest {
 		qiraatVerses?: number;
 		mutashabihVerses?: number;
 		mutashabihPairs?: number;
-		structureSurahs?: number;
-		structureBlocks?: number;
-		munasabatTransitions?: number;
 	};
 	sources: SourceMeta[];
 }
@@ -143,78 +139,13 @@ export type VerseRow = [number, number, string, string];
 export type VerseRef = { sura: number; verse: number };
 
 export interface Route {
-	page:
-		| "verse"
-		| "search"
-		| "surahs"
-		| "sources"
-		| "quiz"
-		| "rhetoric"
-		| "munasabat";
+	page: "verse" | "search" | "surahs" | "sources" | "quiz";
 	sura: number;
 	verse: number;
 	word?: number;
 	tab?: string;
 	/** Counterpart ayah a Mutashābih jump came from (`?target=2:58`). */
 	target?: VerseRef;
-}
-
-export type RhetoricDatasetKey =
-	| "dataset-a-tashbih"
-	| "dataset-b-hadhf"
-	| "classical-balagha";
-
-export type RhetoricBranch = "maani" | "bayan" | "badi";
-
-export interface TashbihDetails {
-	tamthili: boolean; // composite multi-element scene analogy
-	adat: string; // e.g. "كَمَثَلِ", "كَـ", "كَأَنَّ", or "none (محذوفة)"
-	adatType: "mursal" | "muakkad";
-	mushabbah: string; // the subject compared
-	mushabbahBihi: string; // the vehicle compared to
-	wajh: string; // point of similarity
-	wajhType: "mufassal" | "mujmal";
-	baligh: boolean; // tool & wajh omitted
-	classificationAr: string; // e.g. "تمثيلي مرسل مجمل", "بليغ"
-	classificationEn: string;
-}
-
-export interface HadhfDetails {
-	category: "ism" | "harf" | "fil" | "jumlah";
-	categoryAr: string; // "حذف اسم / مفعول / مضاف" | "حذف حرف" | "حذف فعل" | "حذف جملة / جواب شرط"
-	slotAr: string; // "حذف المفعول به" | "حذف المضاف" | "حذف جواب الشرط" | "حذف مقول القول"
-	slotEn: string;
-	taqdirAr: string; // e.g. "[مَا قَدَّمَتْهُ مِنْ عَمَلٍ]"
-	taqdirEn: string; // e.g. "[Whatever deeds she put forward]"
-	omissionMarker: string; // context phrase with [ ] marker
-	purposeAr: string; // e.g. "للتعميم والشمول واستيعاب سائر الأعمال"
-	purposeEn: string; // e.g. "Universal generalization to encompass all deeds without limitation"
-}
-
-export interface RhetoricEntry {
-	id: string;
-	sura: number;
-	verse: number;
-	surahNameAr: string;
-	surahNameEn: string;
-	dataset: RhetoricDatasetKey;
-	datasetBadge: string;
-	branch: RhetoricBranch;
-	branchAr: string;
-	branchEn: string;
-	deviceAr: string;
-	deviceEn: string;
-	subtypes: string[];
-	arabicAyah: string;
-	englishAyah: string;
-	indonesianAyah: string;
-	highlightArabic: string;
-	tashbih?: TashbihDetails;
-	hadhf?: HadhfDetails;
-	scholarlyNote?: {
-		source: string;
-		text: string;
-	};
 }
 
 export interface SyntaxConstituent {
@@ -359,83 +290,4 @@ export interface MutashabihQuizEntry {
 export interface MutashabihQuizFile {
 	version: number;
 	questions: MutashabihQuizEntry[];
-}
-
-export type StructureRole =
-	| "outer_frame_open"
-	| "outer_frame_close"
-	| "inner_frame_open"
-	| "inner_frame_close"
-	| "frame"
-	| "body"
-	| "pivot"
-	| "center"
-	| "center_flank_left"
-	| "center_flank_right"
-	| "close"
-	| "narrative_1"
-	| "narrative_2"
-	| "narrative_3"
-	| "narrative_4"
-	| "narrative_5"
-	| "narrative_6"
-	| "narrative_7"
-	| "transition_1"
-	| "transition_2"
-	| "transition_3"
-	| "seam"
-	| "hinge"
-	| "addendum";
-
-export interface StructureBlock {
-	id: string;
-	v: [number, number];
-	role: StructureRole;
-	label: string;
-	labelAr?: string;
-	pairId?: string;
-}
-
-export interface SurahStructureFile {
-	sura: number;
-	nameAr: string;
-	nameEn: string;
-	verseCount: number;
-	family: {
-		id: number;
-		name: string;
-		description: string;
-	};
-	pivot: {
-		verse: string;
-		offset: number;
-		centerLogic: "single_concentration" | "compound_seam";
-		function: string;
-	};
-	form: "compressed" | "distributed";
-	semantic: "concentrated" | "diffuse" | "transitional";
-	blocks: StructureBlock[];
-	transitionToNext?: {
-		targetSura: number;
-		targetNameAr: string;
-		targetNameEn: string;
-		suyutiLinkAr: string;
-		suyutiLinkEn: string;
-		biqaiSummaryAr?: string;
-		biqaiSummaryEn?: string;
-	};
-}
-
-export interface TransitionsFile {
-	count: number;
-	transitions: Array<{
-		fromSura: number;
-		targetSura: number;
-		targetNameAr: string;
-		targetNameEn: string;
-		suyutiLinkAr: string;
-		suyutiLinkEn: string;
-		biqaiSummaryAr?: string;
-		biqaiSummaryEn?: string;
-	}>;
 }

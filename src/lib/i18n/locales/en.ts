@@ -13,8 +13,6 @@ export const en: Translations = {
 		surahsNav: "Surahs",
 		examplesNav: "Examples",
 		quizNav: "Quiz",
-		rhetoricNav: "Rhetoric",
-		munasabatNav: "Munāsabāt",
 		previous: "Previous",
 		next: "Next",
 		search: "Search",
@@ -107,13 +105,6 @@ export const en: Translations = {
 					"Add ẓarf, mustathnā, mafʿūl li-ajlih and tawkīd to the iʿrāb roles, and ask the ayahs that have them.",
 			},
 		},
-		featuresSection: "Features",
-		featuresSectionHint:
-			"Optional studios stay off until you enable them. Turning a feature off hides it; downloaded data stays on device.",
-		features: {
-			rhetoricStudio: "Rhetoric studio",
-			munasabat: "Munāsabāt",
-		},
 		readerSection: "Reader layers",
 		readerSectionHint:
 			"Hide layers you are not studying. Disabled layers leave the verse reader entirely and are not downloaded until enabled.",
@@ -123,13 +114,8 @@ export const en: Translations = {
 			nahw: "Nahw & syntax tree",
 			mutashabih: "Verbal similarities",
 			asbab: "Causes of revelation",
-			balagha: "Classical balāghah",
 			qiraat: "Ten readings (qirāʾāt) in the word sheet",
 		},
-		featureOffTitle: (feature: string) => `${feature} is turned off`,
-		featureOffBody:
-			"Enable this feature in Settings to open it. Nothing is deleted when you turn it off again.",
-		featureOffOpenSettings: "Open Settings",
 		sourcesLink: "Data Sources",
 		sourcesDescription: "Explore corpus data sources and licenses.",
 		installApp: "Install App",
@@ -160,11 +146,6 @@ export const en: Translations = {
 			`Cause of Revelation (${formatNum(count, "en")})`,
 		asbabDrawerTitle: "Causes of Revelation (Asbāb al-Nuzūl)",
 		asbabSectionTitle: "Asbāb al-Nuzūl (Causes of Revelation)",
-		balaghaBadge: "Classical Balāghah",
-		balaghaSectionTitle: "Classical Balāghah",
-		balaghaStudioLink: "Open in Balāghah Studio",
-		balaghaBranchLabel: "Branch",
-		balaghaDeviceLabel: "Figure",
 		nahwTabTitle: "Nahw & Syntax Tree",
 		treebankNoorBayan: "NoorBayan Quranic Treebank",
 		mutashabihBadge: (count: number) =>
@@ -191,29 +172,6 @@ export const en: Translations = {
 		mutashabihEmptyState:
 			"No verbal similarities (mutashābihāt) are recorded for this verse.",
 		mutashabihReturnToAyah: (coord: string) => `Return to ${coord}`,
-		structureBadge: (count: number) =>
-			`Surah Structure (${formatNum(count, "en")})`,
-		structureSectionTitle: "Munāsabāt & Surah Structure",
-		structureEmptyState:
-			"No ring-composition structure is recorded for this surah.",
-		structurePivotLabel: "Pivot / central axis",
-		structureOpeningHemisphere: "Opening hemisphere",
-		structureClosingHemisphere: "Closing hemisphere",
-		structureJumpToBlock: "Jump to this block",
-		structureVerseRange: (start: number, end: number) =>
-			start === end
-				? `v. ${formatNum(start, "en")}`
-				: `vv. ${formatNum(start, "en")}–${formatNum(end, "en")}`,
-		structurePairHint:
-			"Focus or hover a panel to light its symmetrical partner across the fold.",
-		munasabatCardTitle: "Munāsabāt · مناسبة السور",
-		munasabatBridgeBadge: "Thematic bridge",
-		munasabatSuyutiLabel: "al-Suyūṭī",
-		munasabatSuyutiWork: "Tanāsuq al-Durar",
-		munasabatBiqaiLabel: "al-Biqāʿī",
-		munasabatBiqaiWork: "Naẓm al-Durar",
-		munasabatJumpNext: (name: string, number: string) =>
-			`Jump to ${name} (${number}) ↗`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -233,25 +191,6 @@ export const en: Translations = {
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "en")} surahs`,
 		pageTitle: "Browse the Quran",
-		metaLinksLabel: "Surah layers",
-		structureLink: "Structure",
-		munasabatLink: "Munāsabāt",
-		balaghaLink: "Balāghah",
-		balaghaLinkTitle: (count: number) =>
-			`${formatNum(count, "en")} rhetorical analyses in Balāghah Studio`,
-	},
-	munasabat: {
-		pageTitle: "Munāsabāt Studio",
-		lead: "Explore each surah’s ring composition and the classical transitions that link it to its neighbors.",
-		surahPickerLabel: "Surah",
-		emptyState: "No structure data for this surah.",
-		openInReader: (sura: number, verse: number) =>
-			`Open ${formatNum(sura, "en")}:${formatNum(verse, "en")} in reader ↗`,
-	},
-	rhetoric: {
-		datasetsAria: "Rhetoric datasets",
-		filterSurahAria: "Filter by surah",
-		searchAria: "Filter verses or devices",
 	},
 	examples: {
 		pageTitle: "Find the pattern",
@@ -291,9 +230,6 @@ export const en: Translations = {
 			chStart && chEnd
 				? `Morphology covers all ${formatNum(words, "en")} words. The dependency treebank covers ${formatNum(syntaxVerses, "en")} verses${partialText}. Chapters ${formatNum(chStart, "en")}–${formatNum(chEnd, "en")} have no corpus syntax in this export. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`
 				: `Morphology covers all ${formatNum(words, "en")} words. The NoorBayan dependency treebank covers all 114 surahs (${formatNum(syntaxVerses, "en")} verses) with full dependency and constituent tree analysis. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`,
-		rhetoricCoverageHeading: "Rhetorical Anatomy Coverage",
-		rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
-			`The Rhetoric Anatomy Studio covers ${formatNum(versesCount, "en")} analyzed verses across ${formatNum(surasCount, "en")} surahs. This includes compound similes deconstructed into 4-element formulas (Nashir et al. 2026), syntactic ellipsis with scholarly reconstructed taqdīr (EEF 2025), and classical balāghah masterpieces across ‘Ilm al-Maʿānī, al-Bayān, and al-Badīʿ.`,
 		partialSnippet: (syntax: number, total: number, surah: number) =>
 			`, including ${formatNum(syntax, "en")} of ${formatNum(total, "en")} verses in surah ${formatNum(surah, "en")}`,
 		licenseLabel: "License:",
@@ -304,7 +240,6 @@ export const en: Translations = {
 			"classical-irab": "Classical Iʿrāb",
 			tafsir: "Commentary (Tafsir)",
 			translation: "Translation",
-			rhetoric: "Rhetoric (Balāghah)",
 		},
 		items: {},
 	},

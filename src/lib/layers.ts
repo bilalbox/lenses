@@ -4,13 +4,10 @@ import type {
 	AsbabData,
 	Manifest,
 	MutashabihQuizFile,
-	RhetoricEntry,
 	SurahFile,
 	SurahMutashabihFile,
 	SurahQiraatFile,
-	SurahStructureFile,
 	SurahSyntaxFile,
-	TransitionsFile,
 	VerseRow,
 	WordIndex,
 } from "./types";
@@ -20,9 +17,7 @@ interface CorpusLayers {
 	manifest: Manifest;
 	verses: VerseRow[];
 	words: WordIndex;
-	rhetoric: RhetoricEntry[];
 	asbab: AsbabData;
-	transitions: TransitionsFile;
 	mutashabihQuiz: MutashabihQuizFile;
 	quizBank: QuizBankFile;
 }
@@ -33,7 +28,6 @@ interface SurahLayers {
 	syntax: SurahSyntaxFile;
 	qiraat: SurahQiraatFile;
 	mutashabih: SurahMutashabihFile;
-	structure: SurahStructureFile;
 }
 
 type CorpusLayer = keyof CorpusLayers;

@@ -27,11 +27,6 @@
 			"note": "Added via --update; replace with owning issue note."
 		},
 		{
-			"id": "src/components/RhetoricScreen.tsx|RhetoricScreen",
-			"score": 44,
-			"note": "Added via --update; replace with owning issue note."
-		},
-		{
 			"id": "src/lib/quizEngine.ts|extractIrabMeta",
 			"score": 32,
 			"note": "Added via --update; replace with owning issue note."

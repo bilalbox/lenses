@@ -33,8 +33,6 @@ export interface Translations {
 		surahsNav: string;
 		examplesNav: string;
 		quizNav: string;
-		rhetoricNav: string;
-		munasabatNav: string;
 		previous: string;
 		next: string;
 		search: string;
@@ -108,12 +106,6 @@ export interface Translations {
 		themeDark: string;
 		quizSection: string;
 		quizPrefs: Record<QuizPrefKey, { label: string; description: string }>;
-		featuresSection: string;
-		featuresSectionHint: string;
-		features: {
-			rhetoricStudio: string;
-			munasabat: string;
-		};
 		readerSection: string;
 		readerSectionHint: string;
 		readerLayers: {
@@ -122,12 +114,8 @@ export interface Translations {
 			nahw: string;
 			mutashabih: string;
 			asbab: string;
-			balagha: string;
 			qiraat: string;
 		};
-		featureOffTitle: (feature: string) => string;
-		featureOffBody: string;
-		featureOffOpenSettings: string;
 		sourcesLink: string;
 		sourcesDescription: string;
 		installApp: string;
@@ -156,11 +144,6 @@ export interface Translations {
 		asbabBadge: (count: number) => string;
 		asbabDrawerTitle: string;
 		asbabSectionTitle: string;
-		balaghaBadge: string;
-		balaghaSectionTitle: string;
-		balaghaStudioLink: string;
-		balaghaBranchLabel: string;
-		balaghaDeviceLabel: string;
 		nahwTabTitle: string;
 		treebankNoorBayan: string;
 		mutashabihBadge: (count: number) => string;
@@ -183,22 +166,6 @@ export interface Translations {
 		mutashabihSurahDistance: (count: number) => string;
 		mutashabihEmptyState: string;
 		mutashabihReturnToAyah: (coord: string) => string;
-		structureBadge: (count: number) => string;
-		structureSectionTitle: string;
-		structureEmptyState: string;
-		structurePivotLabel: string;
-		structureOpeningHemisphere: string;
-		structureClosingHemisphere: string;
-		structureJumpToBlock: string;
-		structureVerseRange: (start: number, end: number) => string;
-		structurePairHint: string;
-		munasabatCardTitle: string;
-		munasabatBridgeBadge: string;
-		munasabatSuyutiLabel: string;
-		munasabatSuyutiWork: string;
-		munasabatBiqaiLabel: string;
-		munasabatBiqaiWork: string;
-		munasabatJumpNext: (name: string, number: string) => string;
 	};
 	sheet: {
 		analysisAria: (wordNumber: number) => string;
@@ -217,23 +184,6 @@ export interface Translations {
 	surahs: {
 		countEyebrow: (count: number) => string;
 		pageTitle: string;
-		metaLinksLabel: string;
-		structureLink: string;
-		munasabatLink: string;
-		balaghaLink: string;
-		balaghaLinkTitle: (count: number) => string;
-	};
-	munasabat: {
-		pageTitle: string;
-		lead: string;
-		surahPickerLabel: string;
-		emptyState: string;
-		openInReader: (sura: number, verse: number) => string;
-	};
-	rhetoric: {
-		datasetsAria: string;
-		filterSurahAria: string;
-		searchAria: string;
 	};
 	examples: {
 		pageTitle: string;
@@ -268,8 +218,6 @@ export interface Translations {
 			chEnd: number,
 		) => string;
 		partialSnippet: (syntax: number, total: number, surah: number) => string;
-		rhetoricCoverageHeading: string;
-		rhetoricCoverageBody: (versesCount: number, surasCount: number) => string;
 		licenseLabel: string;
 		kinds: Record<string, string>;
 		items: Record<string, SourceItemTranslation>;

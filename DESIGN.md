@@ -99,7 +99,7 @@ padding: "0.55rem 0.9rem"
 
 **Creative North Star: "The Linguistic Observatory"**
 
-Lenses is a precision instrument designed for the deep, contemplative study of Quranic Arabic grammar (_naḥw_), morphology (_ṣarf_), and rhetoric (_balāghah_). Like astronomical instrumentation mapping the celestial sphere, the interface maps linguistic structure with quiet, disciplined clarity. Syntactic dependencies, morphological segments, and classical _iʿrāb_ layers are rendered as crisp, interconnected nodes that invite focused intellectual inquiry without visual distraction.
+Lenses is a precision instrument designed for the deep, contemplative study of Quranic Arabic grammar (_naḥw_) and morphology (_ṣarf_). Like astronomical instrumentation mapping the celestial sphere, the interface maps linguistic structure with quiet, disciplined clarity. Syntactic dependencies, morphological segments, and classical _iʿrāb_ layers are rendered as crisp, interconnected nodes that invite focused intellectual inquiry without visual distraction.
 
 The interface adheres to an aesthetic of deliberate restraint: warm parchment and obsidian canvas surfaces, fine hairline structural boundaries, and refined classical typography. Controls and cards do not announce themselves as software chrome; they remain minimal and unobtrusive, allowing the sacred Uthmani text and analytical diagrams to command the reader's full attention.
 
@@ -119,7 +119,7 @@ The Modern Semantic Studio palette draws inspiration from classical botanical in
 
 ### Secondary
 
-- **Grammar Amber** (`#9a6432` in light, `#e0b15a` in dark): Used for secondary grammatical roles, nominal relations, rhetorical highlights (_tashbīh_, _ḥadhf_), and classical citation badges.
+- **Grammar Amber** (`#9a6432` in light, `#e0b15a` in dark): Used for secondary grammatical roles, nominal relations, and classical citation badges.
 
 ### Tertiary
 

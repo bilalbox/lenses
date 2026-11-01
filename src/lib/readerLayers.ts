@@ -1,19 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Locale } from "./i18n/types";
 import { useLayer, useVerseLayer } from "./layers";
-import { type ReaderPrefs, rhetoricFetchEnabled } from "./readerPrefs";
-import { useRhetoric } from "./rhetoric";
+import type { ReaderPrefs } from "./readerPrefs";
 import { loadVerseTranslation } from "./translation";
 import type {
 	AsbabNarration,
 	MutashabihMatch,
-	RhetoricEntry,
 	Verse,
 	VerseSyntax,
 } from "./types";
 
 /** Reader layers shown as collapsible drawers under the ayah. */
-export type DrawerKey = "irab" | "mutashabih" | "asbab" | "balagha";
+export type DrawerKey = "irab" | "mutashabih" | "asbab";
 export type Drawers = Record<DrawerKey, boolean>;
 
 /**
@@ -25,7 +23,6 @@ export function drawersForTab(tab?: string): Drawers {
 		irab: false,
 		mutashabih: tab === "mutashabih",
 		asbab: tab === "asbab",
-		balagha: tab === "balagha",
 	};
 }
 
@@ -43,7 +40,6 @@ export interface ReaderLayers {
 		matches: MutashabihMatch[];
 	};
 	asbab: { narrations: AsbabNarration[] };
-	balagha: { entry: RhetoricEntry | undefined; studioLink: boolean };
 	drawers: Drawers;
 	setDrawer: (key: DrawerKey, open: boolean) => void;
 }
@@ -51,12 +47,11 @@ export interface ReaderLayers {
 const NO_MATCHES: MutashabihMatch[] = [];
 const NO_NARRATIONS: AsbabNarration[] = [];
 
-/** Translation for the meaning layer: preloaded rhetoric text first, then QuranEnc. */
+/** Translation for the meaning layer, from QuranEnc. */
 function useVerseTranslation(
 	enabled: boolean,
 	sura: number,
 	verse: number,
-	preloaded: RhetoricEntry | undefined,
 	locale: Locale,
 ): string {
 	const [translation, setTranslation] = useState("");
@@ -64,12 +59,6 @@ function useVerseTranslation(
 	useEffect(() => {
 		if (!enabled || locale === "ar") {
 			setTranslation("");
-			return;
-		}
-		const known =
-			locale === "id" ? preloaded?.indonesianAyah : preloaded?.englishAyah;
-		if (known) {
-			setTranslation(known);
 			return;
 		}
 		const key = locale === "id" ? "indonesian_sabiq" : "english_saheeh";
@@ -80,7 +69,7 @@ function useVerseTranslation(
 		return () => {
 			cancelled = true;
 		};
-	}, [enabled, locale, sura, verse, preloaded]);
+	}, [enabled, locale, sura, verse]);
 
 	return translation;
 }
@@ -132,18 +121,7 @@ export function useReaderLayers(
 	const mutashabih = useVerseLayer("mutashabih", sura, verse.v, {
 		enabled: prefs.mutashabih,
 	});
-	const { entries: rhetoric } = useRhetoric(rhetoricFetchEnabled(prefs));
-	const verseRhetoric = useMemo(
-		() => rhetoric.filter((e) => e.sura === sura && e.verse === verse.v),
-		[rhetoric, sura, verse.v],
-	);
-	const translation = useVerseTranslation(
-		prefs.meaning,
-		sura,
-		verse.v,
-		verseRhetoric[0],
-		locale,
-	);
+	const translation = useVerseTranslation(prefs.meaning, sura, verse.v, locale);
 	const { drawers, setDrawer } = useDrawers(tab);
 
 	return {
@@ -161,12 +139,6 @@ export function useReaderLayers(
 		},
 		asbab: {
 			narrations: asbab.data?.[`${sura}:${verse.v}`] ?? NO_NARRATIONS,
-		},
-		balagha: {
-			entry: prefs.balagha
-				? verseRhetoric.find((e) => e.dataset === "classical-balagha")
-				: undefined,
-			studioLink: prefs.rhetoricStudio,
 		},
 		drawers,
 		setDrawer,

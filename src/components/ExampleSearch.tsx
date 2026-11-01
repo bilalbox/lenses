@@ -11,7 +11,6 @@ import {
 import { useI18n } from "../lib/i18n/I18nContext";
 import type { Locale } from "../lib/i18n/types";
 import { useLayer } from "../lib/layers";
-import { useRhetoric } from "../lib/rhetoric";
 import {
 	countExamples,
 	type ExampleQuery,
@@ -36,17 +35,11 @@ const isVerbPos = (pos: string) => pos.split(",").includes("V");
 
 interface Props {
 	initial?: Partial<ExampleQuery>;
-	rhetoricEnabled?: boolean;
 	onOpen: (sura: number, verse: number, word: number) => void;
 }
 
-export function ExampleSearch({
-	initial,
-	rhetoricEnabled = false,
-	onOpen,
-}: Props) {
+export function ExampleSearch({ initial, onOpen }: Props) {
 	const { locale, t, formatNumber } = useI18n();
-	const { entries: rhetoricEntries } = useRhetoric(rhetoricEnabled);
 	const { data: index, error } = useLayer("words");
 	const { data: verses } = useLayer("verses");
 	const [query, setQuery] = useState<ExampleQuery>({ ...empty, ...initial });
@@ -148,9 +141,6 @@ export function ExampleSearch({
 						{preset.label}
 					</button>
 				))}
-				<a href="#/rhetoric" className="preset-rhetoric-chip">
-					شواهد البلاغة (تشبيه / حذف) ↗
-				</a>
 			</div>
 			<form
 				className="filters"
@@ -257,9 +247,6 @@ export function ExampleSearch({
 						{hits.map((hit) => {
 							const snippet = verseOf.get(`${hit.sura}:${hit.verse}`) ?? "";
 							const needle = stripDiacritics(hit.arabic);
-							const hasBalagha = rhetoricEntries.some(
-								(e) => e.sura === hit.sura && e.verse === hit.verse,
-							);
 							return (
 								<li key={`${hit.sura}:${hit.verse}:${hit.word}`}>
 									<button
@@ -269,9 +256,6 @@ export function ExampleSearch({
 										<span className="loc">
 											{formatNumber(hit.sura)}:{formatNumber(hit.verse)}:
 											{formatNumber(hit.word)}
-											{hasBalagha && (
-												<span className="loc-balagha-tag">بلاغة</span>
-											)}
 										</span>
 										<span className="hit-ar" lang="ar" dir="rtl">
 											{hit.arabic}

@@ -5,7 +5,6 @@ import type { ReaderLayers } from "../lib/readerLayers";
 import { verseRefParam } from "../lib/route";
 import type { Manifest, Verse, VerseRef } from "../lib/types";
 import { AsbabSection } from "./AsbabSection";
-import { ClassicalBalaghaSection } from "./ClassicalBalaghaSection";
 import { MutashabihSection } from "./MutashabihSection";
 
 interface MeaningProps {
@@ -191,7 +190,6 @@ export function VerseSecondaryLayers({
 	const classicalIrab = layers.irab.classical;
 	const mutashabihMatches = layers.mutashabih.matches;
 	const verseAsbab = layers.asbab.narrations;
-	const classicalBalagha = layers.balagha.entry;
 	const showNahw = Boolean(nahwPanel);
 
 	return (
@@ -306,29 +304,6 @@ export function VerseSecondaryLayers({
 					</summary>
 					<div className="verse-layer-body">
 						<AsbabSection narrations={verseAsbab} />
-					</div>
-				</details>
-			) : null}
-
-			{classicalBalagha ? (
-				<details
-					className="verse-layer balagha-block"
-					open={drawers.balagha}
-					onToggle={(event) => setDrawer("balagha", event.currentTarget.open)}
-				>
-					<summary>
-						<span className="verse-layer-title">
-							{t.verse.balaghaSectionTitle}
-						</span>
-						<span className="verse-layer-meta">
-							{classicalBalagha.deviceAr}
-						</span>
-					</summary>
-					<div className="verse-layer-body">
-						<ClassicalBalaghaSection
-							entry={classicalBalagha}
-							showStudioLink={layers.balagha.studioLink}
-						/>
 					</div>
 				</details>
 			) : null}

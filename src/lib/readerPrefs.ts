@@ -4,14 +4,10 @@ export type ReaderLayerKey =
 	| "nahw"
 	| "mutashabih"
 	| "asbab"
-	| "balagha"
 	| "qiraat";
 
-export type FeaturePrefKey = "rhetoricStudio" | "munasabat";
-
-export type ReaderPrefKey = ReaderLayerKey | FeaturePrefKey;
-
-export type ReaderPrefs = Record<ReaderPrefKey, boolean>;
+/** The reader's layer switches; every pref is one layer under the ayah. */
+export type ReaderPrefs = Record<ReaderLayerKey, boolean>;
 
 export const READER_LAYER_KEYS: ReaderLayerKey[] = [
 	"meaning",
@@ -19,18 +15,7 @@ export const READER_LAYER_KEYS: ReaderLayerKey[] = [
 	"nahw",
 	"mutashabih",
 	"asbab",
-	"balagha",
 	"qiraat",
-];
-
-export const FEATURE_PREF_KEYS: FeaturePrefKey[] = [
-	"rhetoricStudio",
-	"munasabat",
-];
-
-export const ALL_READER_PREF_KEYS: ReaderPrefKey[] = [
-	...READER_LAYER_KEYS,
-	...FEATURE_PREF_KEYS,
 ];
 
 export const DEFAULT_READER_PREFS: ReaderPrefs = {
@@ -39,17 +24,10 @@ export const DEFAULT_READER_PREFS: ReaderPrefs = {
 	nahw: false,
 	mutashabih: false,
 	asbab: false,
-	balagha: false,
 	qiraat: false,
-	rhetoricStudio: false,
-	munasabat: false,
 };
 
 const STORAGE_KEY = "lenses-reader-prefs";
-
-export function rhetoricFetchEnabled(prefs: ReaderPrefs): boolean {
-	return prefs.balagha || prefs.rhetoricStudio;
-}
 
 export function loadReaderPrefs(): ReaderPrefs {
 	try {
@@ -57,7 +35,8 @@ export function loadReaderPrefs(): ReaderPrefs {
 		if (!raw) return { ...DEFAULT_READER_PREFS };
 		const parsed = JSON.parse(raw) as Partial<ReaderPrefs>;
 		const next = { ...DEFAULT_READER_PREFS };
-		for (const key of ALL_READER_PREF_KEYS) {
+		// Keys of removed layers (balagha, rhetoricStudio, munasabat) are dropped.
+		for (const key of READER_LAYER_KEYS) {
 			if (typeof parsed[key] === "boolean") next[key] = parsed[key];
 		}
 		return next;

@@ -1,6 +1,5 @@
 import { type ReactNode, Suspense, useEffect, useState } from "react";
 import { AppPages, navigateHash } from "./components/AppPages";
-import { FeatureNavLinks } from "./components/FeatureNavLinks";
 import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
@@ -26,11 +25,11 @@ import {
 } from "./lib/quizPrefs";
 import {
 	loadReaderPrefs,
-	type ReaderPrefKey,
+	type ReaderLayerKey,
 	type ReaderPrefs,
 	saveReaderPrefs,
 } from "./lib/readerPrefs";
-import { parseRoute } from "./lib/route";
+import { parseRoute, retiredPageRedirect } from "./lib/route";
 import { type ExampleQuery, searchVerses, type VerseHit } from "./lib/search";
 import type { Manifest } from "./lib/types";
 
@@ -97,7 +96,12 @@ export function App() {
 
 	useEffect(() => {
 		if (!location.hash) location.replace(`#${openingPath()}`);
-		const onHash = () => setRoute(parseRoute(location.hash));
+		const onHash = () => {
+			const redirect = retiredPageRedirect(location.hash);
+			if (redirect) location.replace(`#${redirect}`);
+			setRoute(parseRoute(location.hash));
+		};
+		onHash();
 		window.addEventListener("hashchange", onHash);
 		return () => window.removeEventListener("hashchange", onHash);
 	}, []);
@@ -169,12 +173,6 @@ export function App() {
 		};
 	}, [query]);
 
-	useEffect(() => {
-		if (route.page === "verse" && route.tab === "structure") {
-			navigateHash(`/munasabat/${route.sura}`);
-		}
-	}, [route.page, route.tab, route.sura]);
-
 	const selectTheme = (next: "light" | "dark") => {
 		document.documentElement.dataset.theme = next;
 		localStorage.setItem("lenses-theme", next);
@@ -193,7 +191,7 @@ export function App() {
 		saveQuizPref(key, next);
 	};
 
-	const toggleReaderPref = (key: ReaderPrefKey, next: boolean) => {
+	const toggleReaderPref = (key: ReaderLayerKey, next: boolean) => {
 		setReaderPrefs((prev) => {
 			const updated = { ...prev, [key]: next };
 			saveReaderPrefs(updated);
@@ -213,7 +211,7 @@ export function App() {
 		setSearchOpen(false);
 	};
 
-	const showDock = route.page !== "quiz" && route.page !== "munasabat";
+	const showDock = route.page !== "quiz";
 
 	return (
 		<div className="app">
@@ -290,7 +288,6 @@ export function App() {
 					>
 						{t.common.quizNav}
 					</a>
-					<FeatureNavLinks route={route} readerPrefs={readerPrefs} />
 					<button
 						type="button"
 						className="icon-button settings-toggle-button"
@@ -334,7 +331,6 @@ export function App() {
 							seed={seed}
 							quizPrefs={quizPrefs}
 							openSearch={openSearch}
-							openSettings={() => setSettingsOpen(true)}
 						/>
 					) : null}
 				</Suspense>

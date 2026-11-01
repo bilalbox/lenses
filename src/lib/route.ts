@@ -9,10 +9,9 @@ function parseTab(params: URLSearchParams): string | undefined {
 	const explicit = params.get("tab");
 	if (explicit) return explicit;
 	// Legacy flag params (`?asbab=1`) predate `tab=`.
-	for (const legacy of ["mutashabih", "asbab", "balagha"]) {
+	for (const legacy of ["mutashabih", "asbab"]) {
 		if (params.has(legacy)) return legacy;
 	}
-	if (params.has("structure")) return "structure";
 	return undefined;
 }
 
@@ -30,35 +29,28 @@ function parseVerseRef(value: string | null): VerseRef | undefined {
 	return { sura, verse };
 }
 
-function parseStudioRoute(
-	parts: string[],
-	fallback: { sura: number; verse: number },
-	tab?: string,
-	target?: VerseRef,
-): Route | null {
-	const head = parts[0];
-	if (head === "rhetoric" || head === "balagha") {
-		const sura = parts[1] ? Number(parts[1]) : undefined;
-		const verse = parts[2] ? Number(parts[2]) : undefined;
-		return {
-			page: "rhetoric",
-			sura: sura || fallback.sura,
-			verse: verse || fallback.verse,
-			tab,
-			target,
-		};
-	}
-	if (head === "munasabat" || head === "munasabaat" || head === "structure") {
-		const sura = parts[1] ? Number(parts[1]) : undefined;
-		return {
-			page: "munasabat",
-			sura: sura && sura >= 1 && sura <= 114 ? sura : fallback.sura,
-			verse: fallback.verse,
-			tab,
-			target,
-		};
-	}
-	return null;
+/** Pages that were removed; their old links open the same surah and verse in the reader. */
+const RETIRED_PAGES = new Set([
+	"rhetoric",
+	"balagha",
+	"munasabat",
+	"munasabaat",
+	"structure",
+]);
+
+/** The reader path an old link to a removed page should show instead, if it is one. */
+export function retiredPageRedirect(hash: string): string | null {
+	const head = hash.replace(/^#\/?/, "").split(/[/?]/)[0] ?? "";
+	if (!RETIRED_PAGES.has(head)) return null;
+	const route = parseRoute(hash);
+	return `/${route.sura}/${route.verse}`;
+}
+
+function retiredPageRoute(parts: string[], fallback: VerseRef): Route | null {
+	if (!parts[0] || !RETIRED_PAGES.has(parts[0])) return null;
+	const sura = Number(parts[1]);
+	if (!sura || sura < 1 || sura > 114) return { page: "verse", ...fallback };
+	return { page: "verse", sura, verse: Number(parts[2]) || 1 };
 }
 
 export function parseRoute(hash: string): Route {
@@ -80,8 +72,8 @@ export function parseRoute(hash: string): Route {
 		return { page: head as SimplePage, ...fallback, tab, target };
 	}
 
-	const studio = parseStudioRoute(parts, fallback, tab, target);
-	if (studio) return studio;
+	const retired = retiredPageRoute(parts, fallback);
+	if (retired) return retired;
 
 	const sura = Number(parts[0]);
 	const verse = Number(parts[1]);

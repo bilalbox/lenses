@@ -57,7 +57,7 @@ Translators: Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley
 Source: Tanzil.net and QuranEnc.com, key english_saheeh
 https://quranenc.com/en/browse/english_saheeh
 License / Terms: Verbatim text retained with clear attribution to Saheeh International.
-Used in Lenses as a literal syntax-aligned translation layer for rhetorical and grammatical study.
+Used in Lenses as the literal syntax-aligned translation in the reader's meaning layer.
 
 ------------------------------------------------------------
 Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)
@@ -66,28 +66,6 @@ Publisher: PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad)
 Source: QuranEnc.com, key indonesian_sabiq
 https://quranenc.com/en/browse/indonesian_sabiq
 License / Terms: Verbatim text retained with clear attribution to PT. Sabiq dan Rowwad Translation Center.
-
-------------------------------------------------------------
-Quranic Similes Dataset (Tashbīh & Tamthīl)
-Paper: Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus
-Authors: Nashir et al. (2026), arXiv:2601.19972
-License / Terms: Open Academic Research Distribution.
-Used in Lenses Rhetoric Studio for multi-element simile structural deconstructions.
-
-------------------------------------------------------------
-Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)
-Framework: Elliptical Eloquence Framework (EEF 2025)
-Paper: Ahmad & Ghafar (2026), 'Elliptical Eloquence in the Qur'an: A Framework for Rhetorical-Stylistic and Digital Tafsir'
-URL: https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir
-Sources: Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī), Al-Muḥarrar al-Wajīz, Iʿrāb al-Qurʾān
-License / Terms: Open Academic & Educational Distribution.
-Used in Lenses Rhetoric Studio for syntactic ellipsis and omission classification.
-
-------------------------------------------------------------
-Classical Quranic Balāghah Masterpieces
-Sources: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)
-License / Terms: Public Domain / Classical Heritage.
-Used in Lenses Rhetoric Studio for pivotal figures across Maʿānī, Bayān, and Badīʿ.
 
 ------------------------------------------------------------
 The Quranic Treebank (NoorBayan)
@@ -128,21 +106,6 @@ Source: Quranpedia.net (الموسوعة القرآنية)
 URL: https://quranpedia.net/
 License / Terms: Free to use inside apps and research tools with attribution.
 Used in Lenses for classical ḍabṭ mnemonic anchors and tawjīh rhetorical exegesis.
-
-------------------------------------------------------------
-Maraya Ring Composition Corpus
-Platform: maraya.app (Ayah Labs)
-Author: Feras Mansi
-URL: https://maraya.app
-License / Terms: Educational research use with attribution to Ayah Labs / Maraya.
-Used in Lenses for full-Quran symmetrical surah blocks, families, and pivot axes.
-
-------------------------------------------------------------
-Tanāsuq al-Durar fī Tanāsub al-Suwar (Asrār Tartīb al-Qurʾān)
-Author: Jalāl al-Dīn al-Suyūṭī (d. 911 AH)
-Source: Turath.io Book 9992 (https://files.turath.io/books-v3/9992.json)
-License / Terms: Classical heritage text; retained with clear attribution.
-Used in Lenses for inter-surah munāsabāt transition exegesis.
 
 ------------------------------------------------------------
 Quranic Arabic Corpus morphology 0.4 (verbatim notice)

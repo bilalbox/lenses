@@ -58,7 +58,7 @@ export default defineConfig({
 						},
 					},
 					{
-						// Opt-in per-surah layers (syntax, qirāʾāt, mutashabih, structure),
+						// Opt-in per-surah layers (syntax, qirāʾāt, mutashabih),
 						// cached as they are opened. Sized above 4 × 114 files.
 						urlPattern: ({ url }) => url.pathname.startsWith("/data/quran/"),
 						handler: "StaleWhileRevalidate",

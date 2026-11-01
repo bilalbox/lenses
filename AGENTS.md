@@ -18,6 +18,6 @@ A task is not complete until `pnpm gate:fast` passes cleanly.
 
 ## Architecture
 
-- Client: `src/` (Vite + React 19 SPA, SVG dependency tree, quiz engine, rhetoric studio).
-- Data: `public/data/quran/` (static JSON files for surahs, morphology, iʿrāb, rhetoric).
+- Client: `src/` (Vite + React 19 SPA, SVG dependency tree, reader layers, quiz).
+- Data: `public/data/quran/` (static JSON files for surahs, morphology, iʿrāb, syntax, layers, quiz bank).
 - Pipeline: `scripts/` (Python ingestion, dataset building, validation).

@@ -7,9 +7,8 @@ import {
 	type QuizPrefs,
 } from "../lib/quizPrefs";
 import {
-	FEATURE_PREF_KEYS,
 	READER_LAYER_KEYS,
-	type ReaderPrefKey,
+	type ReaderLayerKey,
 	type ReaderPrefs,
 } from "../lib/readerPrefs";
 import { useModalLifecycle } from "../lib/useModal";
@@ -23,7 +22,7 @@ interface Props {
 	quizPrefs: QuizPrefs;
 	onToggleQuizPref: (key: QuizPrefKey, next: boolean) => void;
 	readerPrefs: ReaderPrefs;
-	onToggleReaderPref: (key: ReaderPrefKey, next: boolean) => void;
+	onToggleReaderPref: (key: ReaderLayerKey, next: boolean) => void;
 	canInstall: boolean;
 	onInstall: () => void;
 }
@@ -134,38 +133,6 @@ export function SettingsModal({
 							<MoonIcon />
 							<span>{t.settings.themeDark}</span>
 						</button>
-					</div>
-				</section>
-
-				<section className="settings-section">
-					<h3>{t.settings.featuresSection}</h3>
-					<p className="settings-section-hint">
-						{t.settings.featuresSectionHint}
-					</p>
-					<div className="settings-switch-stack">
-						{FEATURE_PREF_KEYS.map((key) => {
-							const on = readerPrefs[key];
-							return (
-								<button
-									key={key}
-									type="button"
-									role="switch"
-									aria-checked={on}
-									className="settings-switch-card"
-									onClick={() => onToggleReaderPref(key, !on)}
-								>
-									<span className="settings-switch-content">
-										<strong>{t.settings.features[key]}</strong>
-									</span>
-									<span
-										className={`settings-switch${on ? " is-on" : ""}`}
-										aria-hidden="true"
-									>
-										<span className="settings-switch-thumb" />
-									</span>
-								</button>
-							);
-						})}
 					</div>
 				</section>
 

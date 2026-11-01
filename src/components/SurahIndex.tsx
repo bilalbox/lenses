@@ -1,36 +1,13 @@
-import { useMemo } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
-import { useRhetoric } from "../lib/rhetoric";
 import type { Manifest } from "../lib/types";
 
 interface Props {
 	manifest: Manifest;
-	showMunasabat: boolean;
-	showRhetoricStudio: boolean;
 	onOpen: (sura: number) => void;
 }
 
-export function SurahIndex({
-	manifest,
-	showMunasabat,
-	showRhetoricStudio,
-	onOpen,
-}: Props) {
+export function SurahIndex({ manifest, onOpen }: Props) {
 	const { t, formatNumber } = useI18n();
-	const { entries: rhetoricEntries } = useRhetoric(showRhetoricStudio);
-	const rhetoricBySura = useMemo(() => {
-		const map = new Map<number, { count: number; firstVerse: number }>();
-		for (const entry of rhetoricEntries) {
-			const existing = map.get(entry.sura);
-			if (existing) {
-				existing.count += 1;
-			} else {
-				map.set(entry.sura, { count: 1, firstVerse: entry.verse });
-			}
-		}
-		return map;
-	}, [rhetoricEntries]);
-
 	return (
 		<div className="surah-page anim-soft-enter">
 			<header className="page-intro">
@@ -41,11 +18,6 @@ export function SurahIndex({
 			</header>
 			<ol className="surah-grid">
 				{manifest.units.map((unit) => {
-					const rhetoric = rhetoricBySura.get(unit.n);
-					const hasStructure =
-						showMunasabat && unit.structure != null && unit.structure > 0;
-					const hasBalagha =
-						showRhetoricStudio && rhetoric != null && rhetoric.count > 0;
 					return (
 						<li key={unit.n} className="surah-item">
 							<div className="surah-card">
@@ -66,36 +38,6 @@ export function SurahIndex({
 										</small>
 									</span>
 								</button>
-								{(hasStructure || hasBalagha) && (
-									<nav
-										className="surah-meta"
-										aria-label={t.surahs.metaLinksLabel}
-									>
-										{hasStructure ? (
-											<a
-												href={`#/munasabat/${unit.n}`}
-												className="surah-meta-link"
-												title={t.munasabat.pageTitle}
-											>
-												{t.surahs.munasabatLink}
-											</a>
-										) : null}
-										{hasStructure && hasBalagha ? (
-											<span className="surah-meta-sep" aria-hidden="true">
-												·
-											</span>
-										) : null}
-										{hasBalagha && rhetoric ? (
-											<a
-												href={`#/rhetoric/${unit.n}/${rhetoric.firstVerse}`}
-												className="surah-meta-link"
-												title={t.surahs.balaghaLinkTitle(rhetoric.count)}
-											>
-												{t.surahs.balaghaLink}
-											</a>
-										) : null}
-									</nav>
-								)}
 							</div>
 						</li>
 					);

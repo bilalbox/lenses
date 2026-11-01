@@ -1,10 +1,8 @@
-import { lazy, type ReactNode } from "react";
-import { useI18n } from "../lib/i18n/I18nContext";
+import { lazy } from "react";
 import type { QuizPrefs } from "../lib/quizPrefs";
-import { type ReaderPrefs, rhetoricFetchEnabled } from "../lib/readerPrefs";
+import type { ReaderPrefs } from "../lib/readerPrefs";
 import type { ExampleQuery } from "../lib/search";
 import type { Manifest, Route } from "../lib/types";
-import { FeatureOffPanel } from "./FeatureOffPanel";
 import { VerseScreen } from "./VerseScreen";
 
 const ExampleSearch = lazy(() =>
@@ -21,16 +19,6 @@ const SurahIndex = lazy(() =>
 const QuizScreen = lazy(() =>
 	import("./QuizScreen").then((m) => ({ default: m.QuizScreen })),
 );
-const RhetoricScreen = lazy(() =>
-	import("./RhetoricScreen").then((m) => ({
-		default: m.RhetoricScreen,
-	})),
-);
-const MunasabatScreen = lazy(() =>
-	import("./MunasabatScreen").then((m) => ({
-		default: m.MunasabatScreen,
-	})),
-);
 
 export function navigateHash(path: string) {
 	if (location.hash !== `#${path}`) location.hash = path;
@@ -40,18 +28,6 @@ function openVersePath(sura: number, verse: number, word?: number) {
 	navigateHash(word ? `/${sura}/${verse}/${word}` : `/${sura}/${verse}`);
 }
 
-function gatedFeature(
-	enabled: boolean,
-	featureName: string,
-	openSettings: () => void,
-	screen: ReactNode,
-): ReactNode {
-	if (enabled) return screen;
-	return (
-		<FeatureOffPanel featureName={featureName} onOpenSettings={openSettings} />
-	);
-}
-
 interface Props {
 	manifest: Manifest;
 	route: Route;
@@ -59,7 +35,6 @@ interface Props {
 	seed?: Partial<ExampleQuery>;
 	quizPrefs: QuizPrefs;
 	openSearch: (next?: Partial<ExampleQuery>) => void;
-	openSettings: () => void;
 }
 
 export function AppPages({
@@ -69,10 +44,7 @@ export function AppPages({
 	seed,
 	quizPrefs,
 	openSearch,
-	openSettings,
 }: Props) {
-	const { t } = useI18n();
-
 	switch (route.page) {
 		case "verse":
 			return (
@@ -96,29 +68,16 @@ export function AppPages({
 				/>
 			);
 		case "search":
-			return (
-				<ExampleSearch
-					initial={seed}
-					rhetoricEnabled={rhetoricFetchEnabled(readerPrefs)}
-					onOpen={openVersePath}
-				/>
-			);
+			return <ExampleSearch initial={seed} onOpen={openVersePath} />;
 		case "surahs":
 			return (
 				<SurahIndex
 					manifest={manifest}
-					showMunasabat={readerPrefs.munasabat}
-					showRhetoricStudio={readerPrefs.rhetoricStudio}
 					onOpen={(sura) => navigateHash(`/${sura}/1`)}
 				/>
 			);
 		case "sources":
-			return (
-				<SourcesPage
-					manifest={manifest}
-					rhetoricEnabled={rhetoricFetchEnabled(readerPrefs)}
-				/>
-			);
+			return <SourcesPage manifest={manifest} />;
 		case "quiz":
 			return (
 				<QuizScreen
@@ -128,29 +87,6 @@ export function AppPages({
 					hideDiacritics={quizPrefs.hideDiacritics}
 					extendedRoles={quizPrefs.extendedRoles}
 				/>
-			);
-		case "rhetoric":
-			return gatedFeature(
-				readerPrefs.rhetoricStudio,
-				t.settings.features.rhetoricStudio,
-				openSettings,
-				<RhetoricScreen
-					targetSura={route.sura}
-					targetVerse={route.verse}
-					onOpenVerse={openVersePath}
-				/>,
-			);
-		case "munasabat":
-			return gatedFeature(
-				readerPrefs.munasabat,
-				t.settings.features.munasabat,
-				openSettings,
-				<MunasabatScreen
-					manifest={manifest}
-					targetSura={route.sura}
-					onOpenVerse={(sura, verse) => openVersePath(sura, verse)}
-					onSelectSurah={(sura) => navigateHash(`/munasabat/${sura}`)}
-				/>,
 			);
 		default:
 			return null;

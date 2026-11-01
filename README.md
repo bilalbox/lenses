@@ -44,7 +44,7 @@ pnpm deploy:preview    # branch Preview (does not replace production)
 
 ## Data and licenses
 
-`pnpm data:all` runs the pipeline scripts in `scripts/` in order: `build_data.py` (surah files, verse and word indexes, the manifest's core), then the syntax, structure, mutashābih, `quran.db` enrichment, and rhetoric builds. Each downloads public files into `data/cache/` (gitignored) and writes compact JSON through `scripts/pipeline.py`, which also owns `manifest.json` and `public/data/NOTICES.txt`: every script edits only its own keys and notice sections, so any script can be rerun on its own. Nothing scrapes corpus.quran.com or tafsir.app.
+`pnpm data:all` runs the pipeline scripts in `scripts/` in order: `build_data.py` (surah files, verse and word indexes, the manifest's core), then the syntax, mutashābih, and `quran.db` enrichment builds, and last the quiz bank (`build_quiz_bank.ts`, which reads the surah and syntax files). Each downloads public files into `data/cache/` (gitignored) and writes compact JSON through `scripts/pipeline.py`, which also owns `manifest.json` and `public/data/NOTICES.txt`: every script edits only its own keys and notice sections, so any script can be rerun on its own. Nothing scrapes corpus.quran.com or tafsir.app.
 
 | Source                                                                                   | What it contributes                                    | License                                                                                                                                                                        |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -74,7 +74,7 @@ Word alignment between the corpus tokenization and the Center’s rasm is done i
 ```
 src/components/   verse screen, dependency tree, word sheet, example search
 src/lib/          data layers, search, Arabic normalization, glossary, tree layout, quiz
-public/data/quran surah JSON, syntax/structure/mutashabih/qiraat layers, indexes, manifest
+public/data/quran surah JSON, syntax/mutashabih/qiraat layers, indexes, quiz bank, manifest
 scripts/          data pipeline (pipeline.py shared IO, build_*.py per source)
 ```
 

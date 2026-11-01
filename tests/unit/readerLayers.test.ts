@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { drawersForTab, nextDrawers } from "../../src/lib/readerLayers";
-import { parseRoute } from "../../src/lib/route";
+import { parseRoute, retiredPageRedirect } from "../../src/lib/route";
 
 describe("readerLayers: drawers on arrival", () => {
 	it("opens nothing without a deep link", () => {
@@ -8,12 +8,11 @@ describe("readerLayers: drawers on arrival", () => {
 			irab: false,
 			mutashabih: false,
 			asbab: false,
-			balagha: false,
 		});
 	});
 
 	it("opens only the deep-linked drawer", () => {
-		for (const tab of ["mutashabih", "asbab", "balagha"] as const) {
+		for (const tab of ["mutashabih", "asbab"] as const) {
 			const drawers = drawersForTab(tab);
 			expect(drawers[tab], tab).toBe(true);
 			expect(
@@ -46,9 +45,9 @@ describe("readerLayers: drawer transitions", () => {
 
 	it("resets to the new tab's defaults when the deep link changes", () => {
 		const toggled = nextDrawers(arrived, "asbab", { key: "irab", open: true });
-		expect(nextDrawers(toggled, "balagha")).toEqual({
-			tab: "balagha",
-			drawers: drawersForTab("balagha"),
+		expect(nextDrawers(toggled, "mutashabih")).toEqual({
+			tab: "mutashabih",
+			drawers: drawersForTab("mutashabih"),
 		});
 	});
 
@@ -73,10 +72,45 @@ describe("readerLayers: deep-link tab from the route", () => {
 	it("maps legacy flag params to a tab", () => {
 		expect(parseRoute("#/2/58?asbab=1").tab).toBe("asbab");
 		expect(parseRoute("#/2/58?mutashabih=1").tab).toBe("mutashabih");
-		expect(parseRoute("#/2/58?balagha=1").tab).toBe("balagha");
 	});
 
 	it("prefers an explicit tab over legacy flags", () => {
-		expect(parseRoute("#/2/58?tab=balagha&asbab=1").tab).toBe("balagha");
+		expect(parseRoute("#/2/58?tab=mutashabih&asbab=1").tab).toBe("mutashabih");
+	});
+});
+
+describe("route: links to removed pages open the reader", () => {
+	it("opens the linked verse for an old balāghah link", () => {
+		expect(parseRoute("#/rhetoric/2/58")).toMatchObject({
+			page: "verse",
+			sura: 2,
+			verse: 58,
+		});
+		expect(parseRoute("#/balagha/36/39")).toMatchObject({
+			page: "verse",
+			sura: 36,
+			verse: 39,
+		});
+	});
+
+	it("opens a surah's first verse for an old munāsabāt link", () => {
+		for (const head of ["munasabat", "munasabaat", "structure"])
+			expect(parseRoute(`#/${head}/5`)).toMatchObject({
+				page: "verse",
+				sura: 5,
+				verse: 1,
+			});
+	});
+
+	it("rewrites an old link to the reader path, and leaves other links alone", () => {
+		expect(retiredPageRedirect("#/rhetoric/2/58")).toBe("/2/58");
+		expect(retiredPageRedirect("#/munasabat/5")).toBe("/5/1");
+		expect(retiredPageRedirect("#/2/58")).toBeNull();
+		expect(retiredPageRedirect("#/quiz")).toBeNull();
+	});
+
+	it("falls back to the opening verse without a surah", () => {
+		expect(parseRoute("#/munasabat").page).toBe("verse");
+		expect(parseRoute("#/rhetoric/999").page).toBe("verse");
 	});
 });

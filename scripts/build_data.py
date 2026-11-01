@@ -504,6 +504,45 @@ def load_surah_meta(db: Path) -> dict[int, dict[str, Any]]:
     return meta
 
 
+# Layers removed from the app (balāghah studio and reader layer, munāsabāt and
+# surah structure). Merging keeps whatever earlier builds wrote, so their
+# manifest entries and notices are dropped explicitly.
+RETIRED_SOURCES = (
+    "rhetoric-tashbih",
+    "rhetoric-hadhf",
+    "classical-balagha",
+    "maraya-ring-composition",
+    "suyuti-tanasuq-al-durar",
+)
+RETIRED_STATS = ("structureSurahs", "structureBlocks", "munasabatTransitions")
+RETIRED_UNIT_FIELDS = ("structure",)
+RETIRED_NOTICES = (
+    "Quranic Similes Dataset (Tashbīh & Tamthīl)",
+    "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
+    "Classical Quranic Balāghah Masterpieces",
+    "Maraya Ring Composition Corpus",
+    "Tanāsuq al-Durar fī Tanāsub al-Suwar (Asrār Tartīb al-Qurʾān)",
+)
+
+
+def retire_layers(manifest: dict[str, Any]) -> None:
+    """Drop the manifest entries of removed layers."""
+    for source_id in RETIRED_SOURCES:
+        drop_source(manifest, source_id)
+    stats = manifest.get("stats", {})
+    for key in RETIRED_STATS:
+        stats.pop(key, None)
+    for unit in manifest.get("units", []):
+        for field in RETIRED_UNIT_FIELDS:
+            unit.pop(field, None)
+
+
+def retire_notices() -> None:
+    """Drop the NOTICES.txt sections of removed layers."""
+    for title in RETIRED_NOTICES:
+        remove_notice(title)
+
+
 def merge_units(manifest: dict[str, Any], units: list[dict[str, Any]]) -> None:
     """Refresh this script's unit fields, keeping fields other scripts attached."""
     existing = {u["n"]: u for u in manifest.get("units", [])}
@@ -584,7 +623,7 @@ def build_sources() -> list[dict[str, Any]]:
             "title": "Saheeh International English Translation",
             "kind": "translation",
             "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net and QuranEnc.com (english_saheeh)",
-            "description": "Literal and syntax-aligned English translation of the Quran, used for structural and rhetorical analysis alongside the Arabic text.",
+            "description": "Literal and syntax-aligned English translation of the Quran, shown in the reader's meaning layer beside the Arabic text.",
             "license": "Public domain / Open educational distribution with attribution to Saheeh International.",
             "url": "https://quranenc.com/en/browse/english_saheeh",
         },
@@ -596,33 +635,6 @@ def build_sources() -> list[dict[str, Any]]:
             "description": "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
             "license": "Distribusi terbuka / QuranEnc republication terms.",
             "url": "https://quranenc.com/en/browse/indonesian_sabiq",
-        },
-        {
-            "id": "rhetoric-tashbih",
-            "title": "Quranic Similes Dataset (Tashbīh & Tamthīl)",
-            "kind": "rhetoric",
-            "attribution": "Nashir et al. (2026), 'Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus' (arXiv:2601.19972)",
-            "description": "Multi-label expert annotations of Quranic similes deconstructing the 4-element classical formula (mushabbah, adat, mushabbah bihi, wajh ash-shabah) and compound analogies (tamthīlī).",
-            "license": "Academic Open Access (arXiv:2601.19972).",
-            "url": "https://arxiv.org/abs/2601.19972",
-        },
-        {
-            "id": "rhetoric-hadhf",
-            "title": "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
-            "kind": "rhetoric",
-            "attribution": "Hishomudin Ahmad & Norfarhana Ahmad Ghafar (2026) / Elliptical Eloquence Framework (EEF 2025), grounded in Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī) and classical syntactic exegeses",
-            "description": "Catalog of syntactic ellipsis and structural omissions (omitted object, genitive head, apodosis of conditional 'law', and speech verbs) with scholarly reconstructed taqdīr and rhetorical purposes.",
-            "license": "Open Educational & Research Distribution.",
-            "url": "https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir",
-        },
-        {
-            "id": "classical-balagha",
-            "title": "Classical Quranic Balāghah Masterpieces",
-            "kind": "rhetoric",
-            "attribution": "Foundational Classical Treatises: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)",
-            "description": "Curated anatomical breakdowns of pivotal Quranic rhetorical devices across ‘Ilm al-Maʿānī (iltifāt, qasr), ‘Ilm al-Bayān (istiʿārah, kināyah), and ‘Ilm al-Badīʿ (jinās, tibāq, muqābalah).",
-            "license": "Public Domain / Classical Heritage.",
-            "url": "https://quranenc.com/",
         },
     ]
 
@@ -682,7 +694,7 @@ NOTICE_SECTIONS: list[list[str]] = [
         "Source: Tanzil.net and QuranEnc.com, key english_saheeh",
         "https://quranenc.com/en/browse/english_saheeh",
         "License / Terms: Verbatim text retained with clear attribution to Saheeh International.",
-        "Used in Lenses as a literal syntax-aligned translation layer for rhetorical and grammatical study.",
+        "Used in Lenses as the literal syntax-aligned translation in the reader's meaning layer.",
     ],
     [
         "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
@@ -691,28 +703,6 @@ NOTICE_SECTIONS: list[list[str]] = [
         "Source: QuranEnc.com, key indonesian_sabiq",
         "https://quranenc.com/en/browse/indonesian_sabiq",
         "License / Terms: Verbatim text retained with clear attribution to PT. Sabiq dan Rowwad Translation Center.",
-    ],
-    [
-        "Quranic Similes Dataset (Tashbīh & Tamthīl)",
-        "Paper: Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus",
-        "Authors: Nashir et al. (2026), arXiv:2601.19972",
-        "License / Terms: Open Academic Research Distribution.",
-        "Used in Lenses Rhetoric Studio for multi-element simile structural deconstructions.",
-    ],
-    [
-        "Elliptical Eloquence Dataset (Ḥadhf & Iʿjāz)",
-        "Framework: Elliptical Eloquence Framework (EEF 2025)",
-        "Paper: Ahmad & Ghafar (2026), 'Elliptical Eloquence in the Qur'an: A Framework for Rhetorical-Stylistic and Digital Tafsir'",
-        "URL: https://www.researchgate.net/publication/407249688_Elliptical_Eloquence_in_the_Quran_A_Framework_for_Rhetorical-Stylistic_and_Digital_Tafsir",
-        "Sources: Dalāʾil al-Iʿjāz (ʿAbd al-Qāhir al-Jurjānī), Al-Muḥarrar al-Wajīz, Iʿrāb al-Qurʾān",
-        "License / Terms: Open Academic & Educational Distribution.",
-        "Used in Lenses Rhetoric Studio for syntactic ellipsis and omission classification.",
-    ],
-    [
-        "Classical Quranic Balāghah Masterpieces",
-        "Sources: Al-Jurjānī (Dalāʾil al-Iʿjāz), Al-Zamakhsharī (Al-Kashshāf), Al-Sakkākī (Miftāḥ al-ʿUlūm), Al-Suyūṭī (Al-Itqān)",
-        "License / Terms: Public Domain / Classical Heritage.",
-        "Used in Lenses Rhetoric Studio for pivotal figures across Maʿānī, Bayān, and Badīʿ.",
     ],
 ]
 
@@ -725,6 +715,7 @@ def write_notices(morph_header: str, uthmani_header: str) -> None:
     remove_notice("Syntactic dependency graphs")
     add_notice("Quranic Arabic Corpus morphology 0.4 (verbatim notice)", morph_header)
     add_notice("Tanzil Uthmani Quran text (verbatim notice)", uthmani_header)
+    retire_notices()
     for title, *body in NOTICE_SECTIONS:
         add_notice(title, "\n".join(body))
     add_notice(
@@ -941,6 +932,7 @@ def main() -> None:
             }
         )
         drop_source(manifest, "qac-syntax")
+        retire_layers(manifest)
         for source in build_sources():
             upsert_source(manifest, source)
 

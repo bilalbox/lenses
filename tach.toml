@@ -25,13 +25,5 @@ path = "build_qurandb_enrichment"
 depends_on = []
 
 [[modules]]
-path = "build_rhetoric_dataset"
-depends_on = []
-
-[[modules]]
-path = "build_structure"
-depends_on = []
-
-[[modules]]
 path = "build_syntax"
 depends_on = []

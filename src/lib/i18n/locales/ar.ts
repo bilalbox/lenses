@@ -18,8 +18,6 @@ export const ar: Translations = {
 		surahsNav: "السور",
 		examplesNav: "أمثلة",
 		quizNav: "اختبار",
-		rhetoricNav: "البلاغة",
-		munasabatNav: "المناسبات",
 		previous: "السابق",
 		next: "التالي",
 		search: "بحث",
@@ -107,13 +105,6 @@ export const ar: Translations = {
 					"أضف الظرف والمستثنى والمفعول لأجله والتوكيد إلى مواقع الإعراب، واسأل عنها حيث وردت.",
 			},
 		},
-		featuresSection: "الميزات",
-		featuresSectionHint:
-			"تبقى الاستوديوهات الاختيارية معطّلة حتى تفعّلها. إيقاف الميزة يخفيها دون حذف البيانات المحمّلة.",
-		features: {
-			rhetoricStudio: "مختبر البلاغة",
-			munasabat: "المناسبات",
-		},
 		readerSection: "طبقات القارئ",
 		readerSectionHint:
 			"أخفِ الطبقات التي لا تدرسها. الطبقات المعطّلة تُزال من شاشة الآية ولا تُحمَّل حتى تُفعَّل.",
@@ -123,13 +114,8 @@ export const ar: Translations = {
 			nahw: "النحو وشجرة الإعراب",
 			mutashabih: "المتشابه اللفظي",
 			asbab: "أسباب النزول",
-			balagha: "البلاغة الكلاسيكية",
 			qiraat: "القراءات العشر في بطاقة الكلمة",
 		},
-		featureOffTitle: (feature: string) => `${feature} معطّل`,
-		featureOffBody:
-			"فعّل هذه الميزة من الإعدادات لفتحها. إيقافها لاحقاً لا يحذف شيئاً.",
-		featureOffOpenSettings: "فتح الإعدادات",
 		sourcesLink: "مصادر البيانات",
 		sourcesDescription: "استكشف مصادر البيانات اللغوية وتراخيصها.",
 		installApp: "تثبيت التطبيق",
@@ -159,11 +145,6 @@ export const ar: Translations = {
 		asbabBadge: (count: number) => `سبب النزول (${formatNum(count, "ar")})`,
 		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
 		asbabSectionTitle: "أسباب النزول",
-		balaghaBadge: "البلاغة الكلاسيكية",
-		balaghaSectionTitle: "البلاغة الكلاسيكية",
-		balaghaStudioLink: "فتح في مختبر البلاغة",
-		balaghaBranchLabel: "الفرع",
-		balaghaDeviceLabel: "الفن",
 		nahwTabTitle: "النحو وشجرة الإعراب",
 		treebankNoorBayan: "شجرة نور البيان القرآنية",
 		mutashabihBadge: (count: number) =>
@@ -189,28 +170,6 @@ export const ar: Translations = {
 			`البعد: ${formatNum(count, "ar")} سور`,
 		mutashabihEmptyState: "لا توجد مواضع متشابه لفظي مسجلة لهذه الآية.",
 		mutashabihReturnToAyah: (coord: string) => `العودة إلى ${coord}`,
-		structureBadge: (count: number) =>
-			`بنية السورة (${formatNum(count, "ar")})`,
-		structureSectionTitle: "المناسبات وبنية السورة",
-		structureEmptyState: "لا توجد بنية حلقية مسجّلة لهذه السورة.",
-		structurePivotLabel: "المحور والمركز",
-		structureOpeningHemisphere: "نصف الافتتاح",
-		structureClosingHemisphere: "نصف الختام",
-		structureJumpToBlock: "الانتقال إلى هذا المقطع",
-		structureVerseRange: (start: number, end: number) =>
-			start === end
-				? `آية ${formatNum(start, "ar")}`
-				: `الآيات ${formatNum(start, "ar")}–${formatNum(end, "ar")}`,
-		structurePairHint:
-			"ركّز على مقطع أو مرّر المؤشر فوقه ليُضاء قرينه المتناظر عبر الطيّة.",
-		munasabatCardTitle: "المناسبات · مناسبة السور",
-		munasabatBridgeBadge: "جسر موضوعي",
-		munasabatSuyutiLabel: "السيوطي",
-		munasabatSuyutiWork: "تناسق الدرر",
-		munasabatBiqaiLabel: "البقاعي",
-		munasabatBiqaiWork: "نظم الدرر",
-		munasabatJumpNext: (name: string, number: string) =>
-			`الانتقال إلى ${name} (${number}) ↗`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -230,25 +189,6 @@ export const ar: Translations = {
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "ar")} سورة`,
 		pageTitle: "تصفح القرآن الكريم",
-		metaLinksLabel: "طبقات السورة",
-		structureLink: "البنية",
-		munasabatLink: "المناسبات",
-		balaghaLink: "البلاغة",
-		balaghaLinkTitle: (count: number) =>
-			`${formatNum(count, "ar")} تحليل بلاغي في استوديو البلاغة`,
-	},
-	munasabat: {
-		pageTitle: "مختبر المناسبات وبنية السور",
-		lead: "استكشف التركيب الدائري لكل سورة والروابط الكلاسيكية التي تصلها بما قبلها وبعدها.",
-		surahPickerLabel: "السورة",
-		emptyState: "لا تتوفر بيانات بنية لهذه السورة.",
-		openInReader: (sura: number, verse: number) =>
-			`فتح ${formatNum(sura, "ar")}:${formatNum(verse, "ar")} في القارئ ↗`,
-	},
-	rhetoric: {
-		datasetsAria: "مجموعات البلاغة",
-		filterSurahAria: "تصفية حسب السورة",
-		searchAria: "تصفية الآيات والشواهد",
 	},
 	examples: {
 		pageTitle: "استكشف الأنماط النحوية",
@@ -298,9 +238,6 @@ export const ar: Translations = {
 			chStart && chEnd
 				? `يغطي التحليل الصرفي كامل كلمات القرآن البالغة ${formatNum(words, "ar")} كلمة. وتشمل شجرة الإعراب ${formatNum(syntaxVerses, "ar")} آية${partialText}. السور ${formatNum(chStart, "ar")}–${formatNum(chEnd, "ar")} لم تكتمل شجرتها في هذا التصدير بعد. يتوفر الإعراب والصرف من مركز تفسير لجميع الكلمات.`
 				: `يغطي التحليل الصرفي كامل كلمات القرآن البالغة ${formatNum(words, "ar")} كلمة. وتشمل شجرة الإعراب الكاملة (نور البيان) جميع سور القرآن الكريم الـ 114 (${formatNum(syntaxVerses, "ar")} آية) بنسبة 100% بكامل علاقات التبعية والأقواس التركيبية للجمل وأشباه الجمل. يتوفر الإعراب والصرف من مركز تفسير لجميع الكلمات.`,
-		rhetoricCoverageHeading: "تغطية مختبر البلاغة والتراكيب",
-		rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
-			`يغطي مختبر البلاغة ${formatNum(versesCount, "ar")} شاهداً تحليلياً في ${formatNum(surasCount, "ar")} سورة، تشمل تشريح التشبيه التمثيلي والمفرد وفق معادلة الأركان الأربعة (ناشر وآخرون 2026)، وبلاغة الحذف والتقدير النحوي المسند (إطار إيجاز الحذف 2025)، وشواهد البلاغة الكبرى في المعاني والبيان والبديع.`,
 		partialSnippet: (syntax: number, total: number, surah: number) =>
 			`، بما فيها ${formatNum(syntax, "ar")} من أصل ${formatNum(total, "ar")} آية في سورة ${formatNum(surah, "ar")}`,
 		licenseLabel: "الترخيص:",
@@ -311,7 +248,6 @@ export const ar: Translations = {
 			"classical-irab": "الإعراب القديم",
 			tafsir: "التفسير",
 			translation: "الترجمة",
-			rhetoric: "علم البلاغة",
 			asbab: "أسباب النزول",
 			qiraat: "القراءات العشر",
 		},
@@ -408,30 +344,6 @@ export const ar: Translations = {
 				description:
 					"ترجمة معاصرة ودقيقة لمعاني القرآن الكريم باللغة الإندونيسية تتميز بالإيجاز والوضوح والتدقيق الدوري.",
 				license: "توزيع مفتوح وفق شروط منصة QuranEnc.",
-			},
-			"rhetoric-tashbih": {
-				title: "بيانات التشبيه والتمثيل البلاغي في القرآن",
-				attribution:
-					"ناشر وآخرون (2026)، 'قاعدة بيانات التشبيه في القرآن الكريم' (arXiv:2601.19972)",
-				description:
-					"تفكيك تحليلي متقدم لأركان التشبيه الأربعة (المشبه، أداة التشبيه، المشبه به، وجه الشبه) وتصنيف التشبيه التمثيلي المركب.",
-				license: "رخصة أكاديمية مفتوحة (arXiv:2601.19972).",
-			},
-			"rhetoric-hadhf": {
-				title: "بيانات إيجاز الحذف والبلاغة التركيبية",
-				attribution:
-					"هشام الدين أحمد ونور فرحانة أحمد غفار (2026) / إطار إيجاز الحذف (EEF 2025)، استناداً إلى دلائل الإعجاز لعبد القاهر الجرجاني وكتب الإعراب",
-				description:
-					"فهرسة مواضع الحذف البلاغي (حذف المفعول، المضاف، وجواب الشرط، والقول) مع بيان التقدير النحوي والسر البلاغي.",
-				license: "توزيع مفتوح للأغراض التعليمية والبحثية.",
-			},
-			"classical-balagha": {
-				title: "شواهد أمهات كتب البلاغة القرآنية",
-				attribution:
-					"أمهات المصادر: الجرجاني (دلائل الإعجاز)، الزمخشري (الكشاف)، السكاكي (مفتاح العلوم)، السيوطي (الإتقان)",
-				description:
-					"تحليل بلاغي لأهم الشواهد والأساليب القرآنية الموزعة على علوم البلاغة الثلاثة: المعاني (الالتفات، القصر)، والبيان (الاستعارة، الكناية)، والبديع (الجناس، الطباق).",
-				license: "ملك عام / التراث الإسلامي الخالد.",
 			},
 		},
 	},

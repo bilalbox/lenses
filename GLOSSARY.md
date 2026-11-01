@@ -1,6 +1,6 @@
 # Lenses Domain Model
 
-Lenses (عدسات) is a Quranic study workbench providing deep morphological, syntactic, rhetorical, and structural views of the Quranic text.
+Lenses (عدسات) is a Quranic study workbench providing deep morphological and syntactic views of the Quranic text, with verse-level context layers.
 
 ## Language
 
@@ -36,15 +36,7 @@ _Avoid_: Memorization tip, memory trick
 The exegetical, rhetorical, or grammatical rationale explaining why a specific phrasing variation occurs in its context.
 _Avoid_: Difference rationale, tafsir note
 
-### Structural Coherence (Munāsabāt & Surah Structure)
-
-**Munāsaba**:
-The thematic, rhetorical, or logical transition linking an ayah to its predecessor, or linking a surah opening to the conclusion of the preceding surah.
-_Avoid_: Connection, cohesion note
-
-**Ring Composition**:
-The bilateral concentric symmetry of a surah structured around a central pivot, partitioned into corresponding frame, body, and pivot blocks.
-_Avoid_: Mirror structure, chiasmus
+### Surah Context
 
 **Surah Maqṣad**:
 The overarching core purpose or central thesis of a surah as formulated by classical and contemporary exegetes.
@@ -59,9 +51,9 @@ _Avoid_: Background story, revelation context
 ### Reading Surface
 
 **Reader Layer**:
-One optional lens shown with an ayah (meaning, iʿrāb, nahw, mutashābih, asbāb, balāgha, qirāʾāt), switched on or off in Settings. A layer that is off fetches nothing. Most appear as drawers under the ayah; qirāʾāt appears in the word sheet.
-_Avoid_: Panel, section, feature (feature means a whole page such as the Rhetoric Studio or Munāsabāt)
+One optional lens shown with an ayah (meaning, iʿrāb, nahw, mutashābih, asbāb, qirāʾāt), switched on or off in Settings. A layer that is off fetches nothing. Most appear as drawers under the ayah; qirāʾāt appears in the word sheet.
+_Avoid_: Panel, section, feature (a page such as the quiz or example search is not a layer)
 
 **Data Layer**:
-One static JSON dataset the client loads, either for the whole corpus (`manifest`, `verses`, `words`, `rhetoric`, `asbab`, `transitions`) or for each surah (`surah`, `syntax`, `qiraat`, `mutashabih`, `structure`). A Reader Layer reads from one or more Data Layers.
+One static JSON dataset the client loads, either for the whole corpus (`manifest`, `verses`, `words`, `asbab`, `mutashabihQuiz`, `quizBank`) or for each surah (`surah`, `syntax`, `qiraat`, `mutashabih`). A Reader Layer reads from one or more Data Layers.
 _Avoid_: Endpoint, API, file kind

@@ -163,14 +163,6 @@
 			"css": ".ds-search-input { width: 100%; border: 1px solid #e3d9c8; background: #fffdf8; color: #1c1915; font-size: 1rem; border-radius: 999px; padding: 0.55rem 0.9rem; transition: border-color 0.15s ease, outline 0.15s ease; } .ds-search-input:focus-visible { border-color: #0f6e66; outline: 2px solid #0f6e66; outline-offset: 1px; }"
 		},
 		{
-			"name": "Balāghah Deep Link Chip",
-			"kind": "chip",
-			"refersTo": "chip-grammar",
-			"description": "Direct navigational deep link jumping into Rhetoric Studio.",
-			"html": "<a class=\"ds-balagha-chip\" href=\"#\"><span class=\"ds-balagha-icon\">بلاغة</span> · Rhetoric Studio ↗</a>",
-			"css": ".ds-balagha-chip { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.75rem; min-height: 38px; border-radius: 999px; background: #f6ead7; color: #1c1915; border: 1px solid #dfc39a; text-decoration: none; transition: background 0.15s ease, color 0.15s ease; } .ds-balagha-chip:hover { background: #9a6432; color: #fffdf8; } .ds-balagha-icon { font-weight: 800; color: #9a6432; } .ds-balagha-chip:hover .ds-balagha-icon { color: #fffdf8; }"
-		},
-		{
 			"name": "Surface Card Container",
 			"kind": "card",
 			"refersTo": "card-surface",
@@ -181,7 +173,7 @@
 	],
 	"narrative": {
 		"northStar": "The Linguistic Observatory",
-		"overview": "Lenses is a precision instrument designed for the deep, contemplative study of Quranic Arabic grammar (naḥw), morphology (ṣarf), and rhetoric (balāghah). Like astronomical instrumentation mapping the celestial sphere, the interface maps linguistic structure with quiet, disciplined clarity. Controls and cards do not announce themselves as software chrome; they remain minimal and unobtrusive, allowing the sacred Uthmani text and analytical diagrams to command the reader's full attention.",
+		"overview": "Lenses is a precision instrument designed for the deep, contemplative study of Quranic Arabic grammar (naḥw) and morphology (ṣarf). Like astronomical instrumentation mapping the celestial sphere, the interface maps linguistic structure with quiet, disciplined clarity. Controls and cards do not announce themselves as software chrome; they remain minimal and unobtrusive, allowing the sacred Uthmani text and analytical diagrams to command the reader's full attention.",
 		"keyCharacteristics": [
 			"Analytical Clarity: Grammar relations, dependencies, and phonetic features are prioritized as first-class visual data.",
 			"Minimal Chrome: Controls and containers recede; no decorative borders, no drop-shadow noise, and no artificial gradients.",

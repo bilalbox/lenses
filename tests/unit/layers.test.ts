@@ -75,8 +75,8 @@ describe("layers: request cache", () => {
 		fetchMock
 			.mockRejectedValueOnce(new TypeError("offline"))
 			.mockResolvedValueOnce(jsonResponse([]));
-		await expect(layers.loadLayer("rhetoric")).rejects.toThrow("offline");
-		await expect(layers.loadLayer("rhetoric")).resolves.toEqual([]);
+		await expect(layers.loadLayer("asbab")).rejects.toThrow("offline");
+		await expect(layers.loadLayer("asbab")).resolves.toEqual([]);
 	});
 });
 

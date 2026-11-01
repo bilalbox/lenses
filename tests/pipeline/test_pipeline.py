@@ -90,7 +90,7 @@ def test_write_json_is_compact_unless_pretty(tmp_path: Path) -> None:
 
 def test_edit_manifest_keeps_other_scripts_keys(tmp_path: Path) -> None:
     path = tmp_path / "manifest.json"
-    path.write_text(json.dumps({"stats": {"structureBlocks": 9}, "sources": [{"id": "a"}]}))
+    path.write_text(json.dumps({"stats": {"asbabVerses": 9}, "sources": [{"id": "a"}]}))
 
     def edit(manifest: dict) -> None:
         manifest["stats"]["words"] = 3
@@ -99,7 +99,7 @@ def test_edit_manifest_keeps_other_scripts_keys(tmp_path: Path) -> None:
 
     edit_manifest(edit, path)
     manifest = json.loads(path.read_text())
-    assert manifest["stats"] == {"structureBlocks": 9, "words": 3}
+    assert manifest["stats"] == {"asbabVerses": 9, "words": 3}
     assert manifest["sources"] == [{"id": "a", "title": "new"}, {"id": "b"}]
 
     edit_manifest(lambda m: drop_source(m, "a"), path)

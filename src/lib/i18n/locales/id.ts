@@ -12,8 +12,6 @@ export const id: Translations = {
 		surahsNav: "Surah",
 		examplesNav: "Contoh",
 		quizNav: "Kuis",
-		rhetoricNav: "Balaghah",
-		munasabatNav: "Munasabat",
 		previous: "Sebelumnya",
 		next: "Berikutnya",
 		search: "Cari",
@@ -109,13 +107,6 @@ export const id: Translations = {
 					"Tambahkan zharaf, mustatsna, maf'ul li ajlih, dan taukid ke pilihan i'rab, dan tanyakan ayat yang memuatnya.",
 			},
 		},
-		featuresSection: "Fitur",
-		featuresSectionHint:
-			"Studio opsional tetap mati sampai Anda mengaktifkannya. Mematikan fitur hanya menyembunyikannya; data yang sudah diunduh tetap di perangkat.",
-		features: {
-			rhetoricStudio: "Studio retorika",
-			munasabat: "Munasabat",
-		},
 		readerSection: "Lapisan pembaca",
 		readerSectionHint:
 			"Sembunyikan lapisan yang tidak Anda pelajari. Lapisan yang dimatikan hilang dari tampilan ayat dan tidak diunduh sebelum diaktifkan.",
@@ -125,13 +116,8 @@ export const id: Translations = {
 			nahw: "Nahwu & pohon sintaksis",
 			mutashabih: "Kesamaan verbal",
 			asbab: "Sebab turun",
-			balagha: "Balaghah klasik",
 			qiraat: "Sepuluh qira'at di lembar kata",
 		},
-		featureOffTitle: (feature: string) => `${feature} dimatikan`,
-		featureOffBody:
-			"Aktifkan fitur ini di Pengaturan untuk membukanya. Mematikannya lagi tidak menghapus data.",
-		featureOffOpenSettings: "Buka Pengaturan",
 		sourcesLink: "Sumber Data",
 		sourcesDescription: "Jelajahi sumber data korpus dan lisensi",
 		installApp: "Pasang Aplikasi",
@@ -161,11 +147,6 @@ export const id: Translations = {
 		asbabBadge: (count: number) => `Sebab Turun (${formatNum(count, "id")})`,
 		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
 		asbabSectionTitle: "Asbabun Nuzul (Sebab Turunnya Ayat)",
-		balaghaBadge: "Balaghah Klasik",
-		balaghaSectionTitle: "Balaghah Klasik",
-		balaghaStudioLink: "Buka di Studio Balaghah",
-		balaghaBranchLabel: "Cabang",
-		balaghaDeviceLabel: "Tokoh retoris",
 		nahwTabTitle: "Nahwu & Pohon Sintaksis",
 		treebankNoorBayan: "Treebank Al-Qur'an NoorBayan",
 		mutashabihBadge: (count: number) =>
@@ -192,29 +173,6 @@ export const id: Translations = {
 		mutashabihEmptyState:
 			"Tidak ada ayat mutasyabih lafzhi yang tercatat untuk ayat ini.",
 		mutashabihReturnToAyah: (coord: string) => `Kembali ke ${coord}`,
-		structureBadge: (count: number) =>
-			`Struktur Surah (${formatNum(count, "id")})`,
-		structureSectionTitle: "Munasabat & Struktur Surah",
-		structureEmptyState:
-			"Tidak ada struktur komposisi cincin yang tercatat untuk surah ini.",
-		structurePivotLabel: "Poros / sumbu tengah",
-		structureOpeningHemisphere: "Hemisfer pembuka",
-		structureClosingHemisphere: "Hemisfer penutup",
-		structureJumpToBlock: "Lompat ke blok ini",
-		structureVerseRange: (start: number, end: number) =>
-			start === end
-				? `ay. ${formatNum(start, "id")}`
-				: `ay. ${formatNum(start, "id")}–${formatNum(end, "id")}`,
-		structurePairHint:
-			"Fokuskan atau arahkan kursor ke panel untuk menyorot pasangan simetrisnya di lipatan.",
-		munasabatCardTitle: "Munasabat · مناسبة السور",
-		munasabatBridgeBadge: "Jembatan tematik",
-		munasabatSuyutiLabel: "al-Suyūṭī",
-		munasabatSuyutiWork: "Tanāsuq al-Durar",
-		munasabatBiqaiLabel: "al-Biqāʿī",
-		munasabatBiqaiWork: "Naẓm al-Durar",
-		munasabatJumpNext: (name: string, number: string) =>
-			`Lompat ke ${name} (${number}) ↗`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -234,25 +192,6 @@ export const id: Translations = {
 	surahs: {
 		countEyebrow: (count: number) => `${formatNum(count, "id")} surah`,
 		pageTitle: "Jelajahi Al-Qur'an",
-		metaLinksLabel: "Lapisan surah",
-		structureLink: "Struktur",
-		munasabatLink: "Munasabat",
-		balaghaLink: "Balaghah",
-		balaghaLinkTitle: (count: number) =>
-			`${formatNum(count, "id")} analisis retorika di Studio Balaghah`,
-	},
-	munasabat: {
-		pageTitle: "Studio Munasabat",
-		lead: "Jelajahi komposisi cincin setiap surah dan hubungan klasik yang menghubungkannya dengan tetangga.",
-		surahPickerLabel: "Surah",
-		emptyState: "Tidak ada data struktur untuk surah ini.",
-		openInReader: (sura: number, verse: number) =>
-			`Buka ${formatNum(sura, "id")}:${formatNum(verse, "id")} di pembaca ↗`,
-	},
-	rhetoric: {
-		datasetsAria: "Dataset balaghah",
-		filterSurahAria: "Filter menurut surah",
-		searchAria: "Filter ayat atau perangkat",
 	},
 	examples: {
 		pageTitle: "Temukan pola",
@@ -292,9 +231,6 @@ export const id: Translations = {
 			chStart && chEnd
 				? `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis mencakup ${formatNum(syntaxVerses, "id")} ayat${partialText}. Surah ${formatNum(chStart, "id")}–${formatNum(chEnd, "id")} belum memiliki sintaksis korpus. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`
 				: `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis lengkap NoorBayan mencakup seluruh 114 surah (${formatNum(syntaxVerses, "id")} ayat) dengan analisis relasi dependensi dan frasa konstituen lengkap. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`,
-		rhetoricCoverageHeading: "Cakupan Studio Retorika (Balaghah)",
-		rhetoricCoverageBody: (versesCount: number, surasCount: number) =>
-			`Studio Anatomi Retorika mencakup ${formatNum(versesCount, "id")} ayat teranalisis di ${formatNum(surasCount, "id")} surah, meliputi dekonstruksi formula 4 rukun tamsil perumpamaan (Nashir dkk. 2026), elipsis sintaksis dengan taqdir teruji (EEF 2025), serta karya retorika klasik dalam ilmu Ma'ani, Bayan, dan Badi'.`,
 		partialSnippet: (syntax: number, total: number, surah: number) =>
 			`, termasuk ${formatNum(syntax, "id")} dari ${formatNum(total, "id")} ayat di surah ${formatNum(surah, "id")}`,
 		licenseLabel: "Lisensi:",
@@ -305,7 +241,6 @@ export const id: Translations = {
 			"classical-irab": "I'rab Klasik",
 			tafsir: "Tafsir",
 			translation: "Terjemahan",
-			rhetoric: "Retorika (Balaghah)",
 			asbab: "Asbabun Nuzul",
 			qiraat: "Qira'at Asyrah",
 		},
@@ -406,30 +341,6 @@ export const id: Translations = {
 				description:
 					"Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
 				license: "Distribusi terbuka / Ketentuan publikasi ulang QuranEnc.",
-			},
-			"rhetoric-tashbih": {
-				title: "Dataset Tamsil & Perumpamaan Al-Qur'an (Tashbih)",
-				attribution:
-					"Nashir dkk. (2026), 'Arabic Simile Dataset: A Fine-Grained Quranic Metaphor and Simile Corpus' (arXiv:2601.19972)",
-				description:
-					"Anotasi pakar dekonstruksi formula 4 rukun perumpamaan klasik (musyabbah, adat, musyabbah bihi, wajh syabah) dan tamsil majemuk.",
-				license: "Akses Terbuka Akademik (arXiv:2601.19972).",
-			},
-			"rhetoric-hadhf": {
-				title: "Dataset Retorika Elipsis & Peringkasan (Hadhf & I'jaz)",
-				attribution:
-					"Hishomudin Ahmad & Norfarhana Ahmad Ghafar (2026) / Elliptical Eloquence Framework (EEF 2025), bersumber dari Dalail al-I'jaz (Al-Jurjani) dan kitab-kitab i'rab klasik",
-				description:
-					"Katalog elipsis sintaksis dan penghilangan struktur (maf'ul, mudhaf, jawab syarat law, ujaran) beserta rekonstruksi taqdir ilmiah.",
-				license: "Distribusi Pendidikan & Riset Terbuka.",
-			},
-			"classical-balagha": {
-				title: "Mahakarya Balaghah Klasik Al-Qur'an",
-				attribution:
-					"Kitab Rujukan Klasik: Al-Jurjani (Dalail al-I'jaz), Az-Zamakhsyari (Al-Kashshaf), As-Sakkaki (Miftah al-'Ulum), As-Suyuthi (Al-Itqan)",
-				description:
-					"Bedah anatomi perangkat retorika utama Al-Qur'an dalam tiga cabang ilmu: Ilmu Ma'ani (iltifat, qashr), Ilmu Bayan (isti'arah, kinayah), dan Ilmu Badi' (jinas, thibaq, muqabalah).",
-				license: "Domain Publik / Warisan Khazanah Klasik.",
 			},
 		},
 	},
