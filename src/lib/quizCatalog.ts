@@ -15,7 +15,11 @@ export type QuizRelation =
 	| "conj"
 	| "circ"
 	| "cog"
-	| "spec";
+	| "spec"
+	| "adv"
+	| "prp"
+	| "exc"
+	| "emph";
 
 export type QuizCase = "NOM" | "ACC" | "GEN";
 
@@ -38,6 +42,8 @@ export interface RoleMeta {
 	family: "core" | "nom" | "clause";
 	/** Learner-facing heading the role is listed under in the quiz picker. */
 	group: RoleGroup;
+	/** Asked only when the reader turns on the extended iʿrāb roles. */
+	extended?: boolean;
 	governorLabel: {
 		ar: string;
 		en: string;
@@ -294,6 +300,85 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		},
 		defaultCase: "ACC",
 	},
+	{
+		code: "adv",
+		ar: "ظرف (مفعول فيه)",
+		en: "Adverb of Time/Place (Ẓarf)",
+		id: "Zharaf (Maf'ul Fih)",
+		family: "clause",
+		group: "complements",
+		extended: true,
+		governorLabel: {
+			ar: "المتعلَّق به",
+			en: "Attached Governor (Mutaʿallaq bihi)",
+			id: "Muta'allaq Bih",
+		},
+		governorPrompt: {
+			ar: "اختر الفعل أو ما يشبهه الذي يتعلق به هذا الظرف",
+			en: "Select the verb (or verb-like word) this ẓarf attaches to",
+			id: "Pilih fi'il (atau yang serupa) tempat zharaf ini bergantung",
+		},
+		defaultCase: "ACC",
+	},
+	{
+		code: "prp",
+		ar: "مفعول لأجله",
+		en: "Object of Purpose (Mafʿūl li-ajlih)",
+		id: "Maf'ul Li Ajlih",
+		family: "nom",
+		group: "complements",
+		extended: true,
+		governorLabel: {
+			ar: "الفعل المعلَّل",
+			en: "Explained Verb (Fiʿl)",
+			id: "Fi'il yang Dijelaskan Sebabnya",
+		},
+		governorPrompt: {
+			ar: "اختر الفعل الذي بيَّن هذا المفعول لأجله سببه",
+			en: "Select the verb whose reason this mafʿūl li-ajlih gives",
+			id: "Pilih fi'il yang dijelaskan sebabnya oleh maf'ul li ajlih ini",
+		},
+		defaultCase: "ACC",
+	},
+	{
+		code: "exc",
+		ar: "مستثنى",
+		en: "Excepted Noun (Mustathnā)",
+		id: "Mustatsna",
+		family: "nom",
+		group: "complements",
+		extended: true,
+		governorLabel: {
+			ar: "أداة الاستثناء",
+			en: "Exception Particle (Adāt al-Istithnāʾ)",
+			id: "Adat Istitsna'",
+		},
+		governorPrompt: {
+			ar: "اختر أداة الاستثناء (إلا ونحوها) العاملة في هذا المستثنى",
+			en: "Select the exception particle (e.g. illā) governing this mustathnā",
+			id: "Pilih adat istitsna' (seperti illa) yang mengampu mustatsna ini",
+		},
+		defaultCase: "ACC",
+	},
+	{
+		code: "emph",
+		ar: "توكيد",
+		en: "Emphatic Follower (Tawkīd)",
+		id: "Taukid (Penegas)",
+		family: "nom",
+		group: "followers",
+		extended: true,
+		governorLabel: {
+			ar: "المؤكَّد",
+			en: "Emphasized Word (Muʾakkad)",
+			id: "Kata yang Ditegaskan (Mu'akkad)",
+		},
+		governorPrompt: {
+			ar: "اختر الكلمة التي يؤكدها هذا التوكيد ويتبعها في الإعراب",
+			en: "Select the word this tawkīd emphasizes and follows in case",
+			id: "Pilih kata yang ditegaskan dan diikuti i'rabnya oleh taukid ini",
+		},
+	},
 ];
 
 export interface CaseMeta {
@@ -466,6 +551,11 @@ export function signsForCase(grammaticalCase: QuizCase | null): SignMeta[] {
 	if (!grammaticalCase) return QUIZ_SIGNS;
 	const allowed = SIGNS_BY_CASE[grammaticalCase];
 	return QUIZ_SIGNS.filter((s) => allowed.includes(s.code));
+}
+
+/** Roles the picker offers: the core set, plus the extended ones when turned on. */
+export function rolesFor(extended: boolean): RoleMeta[] {
+	return extended ? QUIZ_ROLES : QUIZ_ROLES.filter((r) => !r.extended);
 }
 
 export function getRoleMeta(code: QuizRelation): RoleMeta {

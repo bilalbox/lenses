@@ -97,9 +97,18 @@ export const id: Translations = {
 		themeLight: "Terang",
 		themeDark: "Gelap",
 		quizSection: "Kuis",
-		quizDiacriticsLabel: "Sembunyikan harakat di kuis",
-		quizDiacriticsDescription:
-			"Tampilkan ayat Al-Qur'an tanpa harakat untuk tantangan yang lebih sulit.",
+		quizPrefs: {
+			hideDiacritics: {
+				label: "Sembunyikan harakat di kuis",
+				description:
+					"Tampilkan ayat Al-Qur'an tanpa harakat untuk tantangan yang lebih sulit.",
+			},
+			extendedRoles: {
+				label: "Kedudukan i'rab tambahan",
+				description:
+					"Tambahkan zharaf, mustatsna, maf'ul li ajlih, dan taukid ke pilihan i'rab, dan tanyakan ayat yang memuatnya.",
+			},
+		},
 		featuresSection: "Fitur",
 		featuresSectionHint:
 			"Studio opsional tetap mati sampai Anda mengaktifkannya. Mematikan fitur hanya menyembunyikannya; data yang sudah diunduh tetap di perangkat.",

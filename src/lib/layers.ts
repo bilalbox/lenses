@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { QuizBankFile } from "./quizBank";
 import type {
 	AsbabData,
 	Manifest,
@@ -23,6 +24,7 @@ interface CorpusLayers {
 	asbab: AsbabData;
 	transitions: TransitionsFile;
 	mutashabihQuiz: MutashabihQuizFile;
+	quizBank: QuizBankFile;
 }
 
 /** One file per surah, at `/data/quran/{kind}/{nnn}.json`. */

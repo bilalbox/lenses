@@ -2,6 +2,11 @@ import { useRef } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { LOCALES, type Locale } from "../lib/i18n/types";
 import {
+	QUIZ_PREF_KEYS,
+	type QuizPrefKey,
+	type QuizPrefs,
+} from "../lib/quizPrefs";
+import {
 	FEATURE_PREF_KEYS,
 	READER_LAYER_KEYS,
 	type ReaderPrefKey,
@@ -15,8 +20,8 @@ interface Props {
 	onClose: () => void;
 	theme: string;
 	onSelectTheme: (next: "light" | "dark") => void;
-	quizHideDiacritics: boolean;
-	onToggleQuizHideDiacritics: (next: boolean) => void;
+	quizPrefs: QuizPrefs;
+	onToggleQuizPref: (key: QuizPrefKey, next: boolean) => void;
 	readerPrefs: ReaderPrefs;
 	onToggleReaderPref: (key: ReaderPrefKey, next: boolean) => void;
 	canInstall: boolean;
@@ -28,8 +33,8 @@ export function SettingsModal({
 	onClose,
 	theme,
 	onSelectTheme,
-	quizHideDiacritics,
-	onToggleQuizHideDiacritics,
+	quizPrefs,
+	onToggleQuizPref,
 	readerPrefs,
 	onToggleReaderPref,
 	canInstall,
@@ -198,24 +203,32 @@ export function SettingsModal({
 
 				<section className="settings-section">
 					<h3>{t.settings.quizSection}</h3>
-					<button
-						type="button"
-						role="switch"
-						aria-checked={quizHideDiacritics}
-						className="settings-switch-card"
-						onClick={() => onToggleQuizHideDiacritics(!quizHideDiacritics)}
-					>
-						<span className="settings-switch-content">
-							<strong>{t.settings.quizDiacriticsLabel}</strong>
-							<small>{t.settings.quizDiacriticsDescription}</small>
-						</span>
-						<span
-							className={`settings-switch${quizHideDiacritics ? " is-on" : ""}`}
-							aria-hidden="true"
-						>
-							<span className="settings-switch-thumb" />
-						</span>
-					</button>
+					<div className="settings-switch-stack">
+						{QUIZ_PREF_KEYS.map((key) => {
+							const on = quizPrefs[key];
+							return (
+								<button
+									key={key}
+									type="button"
+									role="switch"
+									aria-checked={on}
+									className="settings-switch-card"
+									onClick={() => onToggleQuizPref(key, !on)}
+								>
+									<span className="settings-switch-content">
+										<strong>{t.settings.quizPrefs[key].label}</strong>
+										<small>{t.settings.quizPrefs[key].description}</small>
+									</span>
+									<span
+										className={`settings-switch${on ? " is-on" : ""}`}
+										aria-hidden="true"
+									>
+										<span className="settings-switch-thumb" />
+									</span>
+								</button>
+							);
+						})}
+					</div>
 				</section>
 
 				<section className="settings-section">

@@ -1,5 +1,6 @@
 import { lazy, type ReactNode } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
+import type { QuizPrefs } from "../lib/quizPrefs";
 import { type ReaderPrefs, rhetoricFetchEnabled } from "../lib/readerPrefs";
 import type { ExampleQuery } from "../lib/search";
 import type { Manifest, Route } from "../lib/types";
@@ -56,7 +57,7 @@ interface Props {
 	route: Route;
 	readerPrefs: ReaderPrefs;
 	seed?: Partial<ExampleQuery>;
-	quizHideDiacritics: boolean;
+	quizPrefs: QuizPrefs;
 	openSearch: (next?: Partial<ExampleQuery>) => void;
 	openSettings: () => void;
 }
@@ -66,7 +67,7 @@ export function AppPages({
 	route,
 	readerPrefs,
 	seed,
-	quizHideDiacritics,
+	quizPrefs,
 	openSearch,
 	openSettings,
 }: Props) {
@@ -124,7 +125,8 @@ export function AppPages({
 					manifest={manifest}
 					onOpenInReader={openVersePath}
 					onOpenSearch={openSearch}
-					hideDiacritics={quizHideDiacritics}
+					hideDiacritics={quizPrefs.hideDiacritics}
+					extendedRoles={quizPrefs.extendedRoles}
 				/>
 			);
 		case "rhetoric":

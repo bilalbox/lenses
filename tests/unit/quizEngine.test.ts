@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { stripDiacritics } from "../../src/lib/arabic";
 import {
 	getCaseMeta,
 	getLensLabel,
@@ -132,7 +133,9 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 			expect(q.sura).toBe(1);
 			expect(q.targetWord).toBeDefined();
 			expect(q.headWord).toBeDefined();
-			expect(q.targetWord.n).not.toBe(q.headWord.n);
+			// Only a joined preposition governs its own word
+			if (q.governorPrefix) expect(q.headWord.n).toBe(q.targetWord.n);
+			else expect(q.targetWord.n).not.toBe(q.headWord.n);
 
 			// Must have a valid case and sign
 			expect(["NOM", "ACC", "GEN"]).toContain(q.grammaticalCase);
@@ -222,6 +225,29 @@ describe("quizEngine: iʿrāb questions from NoorBayan (real surahs)", () => {
 	it("drops a نعت whose classical iʿrāb names a different noun than the treebank", () => {
 		// 67:3 طِبَاقًا — «نعت لـ﴿سبع﴾», NoorBayan attaches it to سماوات
 		expect(irabFor(67).some((q) => q.id === "67:3:5:adj")).toBe(false);
+	});
+
+	it("asks a noun governed by a preposition joined to it (بِسْمِ)", () => {
+		const q = irabFor(1).find((x) => x.id === "1:1:1:gen");
+		expect(q).toMatchObject({
+			relation: "gen",
+			governorPrefix: "بِ",
+			grammaticalCase: "GEN",
+			sign: "kasra",
+		});
+		expect(q?.headWord.n).toBe(1);
+	});
+
+	it("skips a joined preposition's attached pronoun (عَلَيْهِمْ)", () => {
+		expect(irabFor(1).some((q) => q.id === "1:7:4:gen")).toBe(false);
+	});
+
+	it("asks the extended roles: ẓarf on its verb, mustathnā on إلا", () => {
+		const zarf = irabFor(59).find((q) => q.id === "59:7:21:adv");
+		expect(stripDiacritics(zarf?.headWord.a ?? "")).toBe("يكون");
+		const exc = irabFor(78).find((q) => q.id === "78:25:2:exc");
+		expect(stripDiacritics(exc?.headWord.a ?? "")).toBe("الا");
+		expect(exc).toMatchObject({ grammaticalCase: "ACC", sign: "fatha" });
 	});
 
 	it("keeps a نعت whose classical iʿrāb agrees with the treebank head", () => {

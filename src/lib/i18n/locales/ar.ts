@@ -96,8 +96,17 @@ export const ar: Translations = {
 		themeLight: "فاتح",
 		themeDark: "داكن",
 		quizSection: "الاختبار",
-		quizDiacriticsLabel: "إخفاء التشكيل في الاختبارات",
-		quizDiacriticsDescription: "عرض آيات القرآن بدون حركات لتحدٍّ أصعب.",
+		quizPrefs: {
+			hideDiacritics: {
+				label: "إخفاء التشكيل في الاختبارات",
+				description: "عرض آيات القرآن بدون حركات لتحدٍّ أصعب.",
+			},
+			extendedRoles: {
+				label: "مواقع إعرابية إضافية",
+				description:
+					"أضف الظرف والمستثنى والمفعول لأجله والتوكيد إلى مواقع الإعراب، واسأل عنها حيث وردت.",
+			},
+		},
 		featuresSection: "الميزات",
 		featuresSectionHint:
 			"تبقى الاستوديوهات الاختيارية معطّلة حتى تفعّلها. إيقاف الميزة يخفيها دون حذف البيانات المحمّلة.",

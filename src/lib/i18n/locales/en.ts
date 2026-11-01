@@ -95,9 +95,18 @@ export const en: Translations = {
 		themeLight: "Light",
 		themeDark: "Dark",
 		quizSection: "Quiz",
-		quizDiacriticsLabel: "Hide diacritics in quizzes",
-		quizDiacriticsDescription:
-			"Show Quran verses without harakat for a harder challenge.",
+		quizPrefs: {
+			hideDiacritics: {
+				label: "Hide diacritics in quizzes",
+				description:
+					"Show Quran verses without harakat for a harder challenge.",
+			},
+			extendedRoles: {
+				label: "Extended iʿrāb roles",
+				description:
+					"Add ẓarf, mustathnā, mafʿūl li-ajlih and tawkīd to the iʿrāb roles, and ask the ayahs that have them.",
+			},
+		},
 		featuresSection: "Features",
 		featuresSectionHint:
 			"Optional studios stay off until you enable them. Turning a feature off hides it; downloaded data stays on device.",

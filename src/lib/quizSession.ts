@@ -1,3 +1,4 @@
+import type { QuizPools } from "./quizBank";
 import {
 	type QuizCase,
 	type QuizLens,
@@ -5,7 +6,6 @@ import {
 	type QuizSign,
 	SIGNS_BY_CASE,
 } from "./quizCatalog";
-import type { QuizPools } from "./quizEngine";
 
 export interface IrabDraft {
 	relation: QuizRelation | null;
@@ -72,6 +72,8 @@ export interface QuizSessionState {
 
 export type QuizSessionEvent =
 	| { type: "seed"; random: Record<QuizLens, number> }
+	/** A lens's pool was rebuilt in a new order: pick its question afresh. */
+	| { type: "repool"; lens: QuizLens; random: number }
 	| { type: "selectLens"; lens: QuizLens }
 	| {
 			type: "answer";
@@ -281,6 +283,14 @@ export function reduceQuizSession(
 					mutashabih: pick("mutashabih"),
 				},
 			};
+		}
+		case "repool": {
+			const indices = {
+				...state.indices,
+				[event.lens]: Math.floor(event.random * pools[event.lens].length),
+			};
+			const next = { ...state, indices };
+			return event.lens === state.lens ? restart(next) : next;
 		}
 		case "selectLens":
 			if (event.lens === state.lens) return state;

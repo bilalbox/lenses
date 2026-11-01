@@ -1,3 +1,5 @@
+import type { QuizPrefKey } from "../quizPrefs";
+
 export type Locale = "en" | "ar" | "id";
 export type Direction = "ltr" | "rtl";
 
@@ -105,8 +107,7 @@ export interface Translations {
 		themeLight: string;
 		themeDark: string;
 		quizSection: string;
-		quizDiacriticsLabel: string;
-		quizDiacriticsDescription: string;
+		quizPrefs: Record<QuizPrefKey, { label: string; description: string }>;
 		featuresSection: string;
 		featuresSectionHint: string;
 		features: {

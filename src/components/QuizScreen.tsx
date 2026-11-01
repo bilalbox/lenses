@@ -16,6 +16,18 @@ import {
 	toMutashabihQuestions,
 } from "../lib/mutashabihQuiz";
 import {
+	CURATED_SURAHS,
+	EXTENDED_QUIZ_SURAHS,
+	type ExampleHuntQuestion,
+	type GrammarPools,
+	hydrateQuizPools,
+	inWordPreposition,
+	type QuizBankFile,
+	type QuizPools,
+	type QuizQuestion,
+	type SarfQuestion,
+} from "../lib/quizBank";
+import {
 	getCaseMeta,
 	getRoleMeta,
 	getSignMeta,
@@ -24,20 +36,11 @@ import {
 	type QuizLens,
 	type QuizRelation,
 	ROLE_GROUPS,
+	rolesFor,
 	SARF_CLASSES,
 	SARF_STRUCTURES,
 	signsForCase,
 } from "../lib/quizCatalog";
-import {
-	CURATED_SURAHS,
-	EXTENDED_QUIZ_SURAHS,
-	type ExampleHuntQuestion,
-	extractQuizPools,
-	type QuizPools,
-	type QuizQuestion,
-	type QuizSource,
-	type SarfQuestion,
-} from "../lib/quizEngine";
 import {
 	activeQuestion,
 	type DraftField,
@@ -50,7 +53,12 @@ import {
 	type WizardStep,
 } from "../lib/quizSession";
 import type { ExampleQuery } from "../lib/search";
-import type { Manifest, MutashabihQuizFile, Word } from "../lib/types";
+import type {
+	Manifest,
+	MutashabihQuizFile,
+	SurahFile,
+	Word,
+} from "../lib/types";
 import { MutashabihQuiz } from "./MutashabihQuiz";
 import {
 	type QuizCrumb,
@@ -60,13 +68,42 @@ import {
 	QuizStepHead,
 } from "./QuizChrome";
 
-/** A quiz surah's morphology plus its treebank; a missing treebank only costs the iʿrāb questions. */
-async function loadQuizSource(n: number): Promise<QuizSource> {
-	const [surah, syntax] = await Promise.all([
-		loadLayer("surah", n),
-		loadLayer("syntax", n).catch(() => undefined),
-	]);
-	return { surah, syntax };
+const NO_GRAMMAR: GrammarPools = { irab: [], sarf: [], examples: [] };
+
+/**
+ * Whether tapping a word in the ayah answers the step. Every word does, except
+ * the iʿrāb target, which governs itself only through a joined preposition (بِـ).
+ */
+function canPickInAyah(lens: QuizLens, target: Word, wordNum: number): boolean {
+	if (lens !== "irab" || wordNum !== target.n) return true;
+	return Boolean(inWordPreposition(target));
+}
+
+/** The picked and the correct governor as they read, for the crumbs and verdict. */
+function governorTexts(
+	question: QuizQuestion | null,
+	picked: number | null,
+): { selected?: string; answer: string } {
+	if (!question) return { answer: "" };
+	return {
+		selected: picked === null ? undefined : governorText(question, picked),
+		answer: governorText(question, question.headWord.n) ?? question.headWord.a,
+	};
+}
+
+/**
+ * How a governor reads in the ayah: the word, or for a preposition joined to the
+ * target (بِسْمِ) just that prefix, with a joiner (بِـ).
+ */
+function governorText(
+	question: QuizQuestion,
+	wordNum: number,
+): string | undefined {
+	const word = question.verse.w.find((w) => w.n === wordNum);
+	if (!word) return undefined;
+	if (wordNum !== question.targetWord.n) return word.a;
+	const prefix = inWordPreposition(word)?.a;
+	return prefix ? `${prefix}ـ` : undefined;
 }
 
 export function QuizScreen({
@@ -74,16 +111,20 @@ export function QuizScreen({
 	onOpenInReader,
 	onOpenSearch,
 	hideDiacritics = false,
+	extendedRoles = false,
 }: {
 	manifest: Manifest;
 	onOpenInReader: (sura: number, verse: number, word?: number) => void;
 	onOpenSearch?: (seed: Partial<ExampleQuery>) => void;
 	hideDiacritics?: boolean;
+	/** Also ask the extended iʿrāb roles (ẓarf, mustathnā, …). */
+	extendedRoles?: boolean;
 }) {
 	const { locale, t, formatNumber } = useI18n();
 	const quranText = (text: string) =>
 		hideDiacritics ? stripTashkeel(text) : text;
-	const [loadedFiles, setLoadedFiles] = useState<QuizSource[]>([]);
+	const [loadedFiles, setLoadedFiles] = useState<SurahFile[]>([]);
+	const [grammarBank, setGrammarBank] = useState<QuizBankFile | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [mutashabihBank, setMutashabihBank] =
 		useState<MutashabihQuizFile | null>(null);
@@ -112,29 +153,30 @@ export function QuizScreen({
 		if (!manifest) return;
 		let cancel = false;
 		Promise.all([
-			Promise.all(CURATED_SURAHS.map(loadQuizSource)),
-			// The mutashabih bank is one small file; without it only that lens is empty.
+			Promise.all(CURATED_SURAHS.map((n) => loadLayer("surah", n))),
+			// Each bank is one file; without one only its lenses are empty.
+			loadLayer("quizBank").catch(() => null),
 			loadLayer("mutashabihQuiz").catch(() => null),
 		])
-			.then(([sources, bank]) => {
+			.then(([files, bank, mutashabih]) => {
 				if (cancel) return;
-				setLoadedFiles(sources);
-				setMutashabihBank(bank);
+				setLoadedFiles(files);
+				setGrammarBank(bank);
+				setMutashabihBank(mutashabih);
 				setLoading(false);
 
 				// Wave 2: Load EXTENDED_QUIZ_SURAHS in the background for deeper variety
 				void Promise.all(
-					EXTENDED_QUIZ_SURAHS.map((n) => loadQuizSource(n).catch(() => null)),
+					EXTENDED_QUIZ_SURAHS.map((n) =>
+						loadLayer("surah", n).catch(() => null),
+					),
 				).then((more) => {
 					if (cancel) return;
-					const validMore = more.filter((f): f is QuizSource => f !== null);
+					const validMore = more.filter((f): f is SurahFile => f !== null);
 					if (validMore.length > 0) {
 						setLoadedFiles((prev) => {
-							const seen = new Set(prev.map((p) => p.surah.n));
-							return [
-								...prev,
-								...validMore.filter((f) => !seen.has(f.surah.n)),
-							];
+							const seen = new Set(prev.map((p) => p.n));
+							return [...prev, ...validMore.filter((f) => !seen.has(f.n))];
 						});
 					}
 				});
@@ -147,17 +189,32 @@ export function QuizScreen({
 		};
 	}, [manifest]);
 
-	const quizPools = useMemo<QuizPools>(
-		() => ({
-			...extractQuizPools(loadedFiles),
+	const grammarPools = useMemo(
+		() =>
+			grammarBank ? hydrateQuizPools(grammarBank, loadedFiles) : NO_GRAMMAR,
+		[grammarBank, loadedFiles],
+	);
+	const quizPools = useMemo<QuizPools>(() => {
+		const offered = new Set(rolesFor(extendedRoles).map((r) => r.code));
+		return {
+			...grammarPools,
+			irab: grammarPools.irab.filter((q) => offered.has(q.relation)),
 			mutashabih: mutashabihBank
 				? toMutashabihQuestions(mutashabihBank, manifest.units)
 				: [],
-		}),
-		[loadedFiles, mutashabihBank, manifest.units],
-	);
+		};
+	}, [grammarPools, extendedRoles, mutashabihBank, manifest.units]);
 	pools.current = quizPools;
 	const { irab: irabPool, sarf: sarfPool, examples: examplesPool } = quizPools;
+
+	// Turning the extended roles on or off reorders the iʿrāb pool, so the
+	// current index would land on another question: pick afresh.
+	const shownRoles = useRef(extendedRoles);
+	useEffect(() => {
+		if (shownRoles.current === extendedRoles) return;
+		shownRoles.current = extendedRoles;
+		dispatch({ type: "repool", lens: "irab", random: Math.random() });
+	}, [extendedRoles]);
 
 	// Always open quiz on a random verse (once curated pools are ready).
 	useEffect(() => {
@@ -288,11 +345,10 @@ export function QuizScreen({
 				? getRoleMeta(irabDraft.relation)
 				: getRoleMeta(irabQuestion.relation)
 			: QUIZ_ROLES[0]) ?? QUIZ_ROLES[0]!;
-	const selectedHeadWord =
-		lens === "irab" && irabQuestion
-			? (irabQuestion.verse.w.find((w) => w.n === irabDraft.headWordNum) ??
-				null)
-			: null;
+	const { selected: selectedHeadText, answer: answerHeadText } = governorTexts(
+		irabQuestion,
+		irabDraft.headWordNum,
+	);
 	const spottedWord =
 		lens === "examples" && exQuestion
 			? (exQuestion.verse.w.find((w) => w.n === exDraft.spottedWordNum) ?? null)
@@ -312,10 +368,10 @@ export function QuizScreen({
 					},
 					{
 						stepNum: 2,
-						label: selectedHeadWord
-							? quranText(selectedHeadWord.a)
+						label: selectedHeadText
+							? quranText(selectedHeadText)
 							: t.quiz.headBadge,
-						isAr: Boolean(selectedHeadWord),
+						isAr: Boolean(selectedHeadText),
 						filled: Boolean(irabDraft.headWordNum),
 					},
 					{
@@ -402,6 +458,8 @@ export function QuizScreen({
 						},
 					];
 
+	const canGovern = (wordNum: number) =>
+		canPickInAyah(lens, activeQ.targetWord, wordNum);
 	const isPickingWordInAyah =
 		(lens === "irab" && effectiveStep === 2) ||
 		(lens === "examples" && effectiveStep === 1);
@@ -455,7 +513,7 @@ export function QuizScreen({
 										isTarget ? "is-target" : "",
 										isHead ? "is-head" : "",
 										isCorrectHint ? "is-correct-head-hint" : "",
-										isPickingWordInAyah && !isTarget
+										isPickingWordInAyah && canGovern(w.n)
 											? "is-governor-candidate"
 											: "",
 									]
@@ -464,7 +522,7 @@ export function QuizScreen({
 									onClick={() => {
 										if (isComplete) return;
 										if (lens === "irab") {
-											if (w.n === activeQ.targetWord.n) return;
+											if (!canGovern(w.n)) return;
 											dispatch({
 												type: "answer",
 												field: "headWordNum",
@@ -547,6 +605,7 @@ export function QuizScreen({
 									/>
 
 									<RolePicker
+										extended={extendedRoles}
 										value={irabDraft.relation}
 										locale={locale}
 										onPick={(code) =>
@@ -575,8 +634,7 @@ export function QuizScreen({
 									/>
 
 									<GovernorPicker
-										words={irabQuestion.verse.w}
-										targetNum={irabQuestion.targetWord.n}
+										question={irabQuestion}
 										value={irabDraft.headWordNum}
 										format={quranText}
 										onPick={(n) =>
@@ -707,7 +765,7 @@ export function QuizScreen({
 													step={2}
 													label={fieldLabels.headWordNum}
 													value={
-														selectedHeadWord && quranText(selectedHeadWord.a)
+														selectedHeadText && quranText(selectedHeadText)
 													}
 													onEdit={goToStep}
 												/>{" "}
@@ -794,8 +852,8 @@ export function QuizScreen({
 															lang="ar"
 														>
 															{headOk
-																? `✓ ${quranText(irabQuestion.headWord.a)}`
-																: `✗ ${selectedHeadWord ? quranText(selectedHeadWord.a) : "—"} ← ✓ ${getRoleMeta(irabQuestion.relation).governorLabel.ar}: ${quranText(irabQuestion.headWord.a)}`}
+																? `✓ ${quranText(answerHeadText)}`
+																: `✗ ${selectedHeadText ? quranText(selectedHeadText) : "—"} ← ✓ ${getRoleMeta(irabQuestion.relation).governorLabel.ar}: ${quranText(answerHeadText)}`}
 														</span>
 														<span
 															className={`quiz-verdict-chip ${caseOk ? "ok" : "err"}`}
@@ -1401,12 +1459,15 @@ export function QuizScreen({
 	);
 }
 
-/** The 13 roles under learner-facing headings, so the list scans in four short groups. */
+/** The roles under learner-facing headings, so the list scans in four short groups. */
 function RolePicker({
+	extended,
 	value,
 	locale,
 	onPick,
 }: {
+	/** Offer the extended roles too. */
+	extended: boolean;
 	value: QuizRelation | null;
 	locale: Locale;
 	onPick: (code: QuizRelation) => void;
@@ -1417,23 +1478,25 @@ function RolePicker({
 				<section key={group.code} className="quiz-role-group">
 					<h3 className="quiz-role-group-title">{group.label[locale]}</h3>
 					<div className="quiz-wizard-grid-roles">
-						{QUIZ_ROLES.filter((r) => r.group === group.code).map((r) => (
-							<button
-								key={r.code}
-								type="button"
-								aria-pressed={value === r.code}
-								className={`quiz-rich-card family-${r.family}${value === r.code ? " is-selected" : ""}`}
-								onClick={() => onPick(r.code)}
-							>
-								<div className="quiz-rich-top">
-									<strong lang="ar">{r.ar}</strong>
-									<span className="quiz-rich-dot" />
-								</div>
-								<small>
-									{locale === "ar" ? r.governorLabel.ar : r[locale]}
-								</small>
-							</button>
-						))}
+						{rolesFor(extended)
+							.filter((r) => r.group === group.code)
+							.map((r) => (
+								<button
+									key={r.code}
+									type="button"
+									aria-pressed={value === r.code}
+									className={`quiz-rich-card family-${r.family}${value === r.code ? " is-selected" : ""}`}
+									onClick={() => onPick(r.code)}
+								>
+									<div className="quiz-rich-top">
+										<strong lang="ar">{r.ar}</strong>
+										<span className="quiz-rich-dot" />
+									</div>
+									<small>
+										{locale === "ar" ? r.governorLabel.ar : r[locale]}
+									</small>
+								</button>
+							))}
 					</div>
 				</section>
 			))}
@@ -1441,16 +1504,17 @@ function RolePicker({
 	);
 }
 
-/** The ayah's words as answer cards for the governor step; the ayah above takes taps too. */
+/**
+ * The ayah's words as answer cards for the governor step; the ayah above takes
+ * taps too. The target word is offered only as its joined preposition (بِـ).
+ */
 function GovernorPicker({
-	words,
-	targetNum,
+	question,
 	value,
 	format,
 	onPick,
 }: {
-	words: Word[];
-	targetNum: number;
+	question: QuizQuestion;
 	value: number | null;
 	/** How the ayah renders a word (diacritics on or off). */
 	format: (text: string) => string;
@@ -1458,9 +1522,10 @@ function GovernorPicker({
 }) {
 	return (
 		<div className="quiz-governor-grid" dir="rtl">
-			{words
-				.filter((w) => w.n !== targetNum)
-				.map((w) => (
+			{question.verse.w.map((w) => {
+				const text = governorText(question, w.n);
+				if (!text) return null;
+				return (
 					<button
 						key={w.n}
 						type="button"
@@ -1469,9 +1534,10 @@ function GovernorPicker({
 						className={`quiz-governor-card${value === w.n ? " is-selected" : ""}`}
 						onClick={() => onPick(w.n)}
 					>
-						{format(w.a)}
+						{format(text)}
 					</button>
-				))}
+				);
+			})}
 		</div>
 	);
 }

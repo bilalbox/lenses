@@ -1,5 +1,25 @@
+/**
+ * Builds the grammar quiz's questions from surah morphology and the NoorBayan
+ * treebank. Runs ahead of time (`pnpm data:quiz` writes `quizBank.json`); the
+ * quiz screen only hydrates that bank.
+ */
 import { stripDiacritics } from "./arabic";
-import type { MutashabihQuestion } from "./mutashabihQuiz";
+import {
+	type ChoiceOption,
+	classChoice,
+	EXAMPLE_FACETS,
+	type ExampleHuntQuestion,
+	type FacetCode,
+	type GrammarPools,
+	inWordPreposition,
+	type QuizQuestion,
+	rootChoice,
+	type SarfQuestion,
+	spaceRootLetters,
+	stripHarakat,
+	structureChoice,
+	waznChoice,
+} from "./quizBank";
 import {
 	type QuizCase,
 	type QuizRelation,
@@ -17,40 +37,6 @@ import type {
 	Word,
 } from "./types";
 
-export interface QuizQuestion {
-	id: string;
-	sura: number;
-	suraName: string;
-	suraPhonetic: string;
-	verse: Verse;
-	targetWord: Word;
-	headWord: Word;
-	relation: QuizRelation;
-	/** Canonical normalized role (e.g. predx -> pred for display if needed, or distinct) */
-	grammaticalCase: QuizCase;
-	sign: QuizSign;
-	signDetailAr: string;
-	classicalIrab: string;
-	clauseWords: Word[];
-}
-
-/** Fast initial surahs loaded immediately on quiz open */
-export const CURATED_SURAHS = [
-	1, 59, 67, 78, 87, 93, 94, 97, 103, 108, 109, 110, 112, 113, 114,
-];
-
-/** Additional treebank-annotated surahs loaded in the background for deeper variety */
-export const EXTENDED_QUIZ_SURAHS = [
-	62, 63, 64, 68, 71, 72, 73, 74, 75, 76, 79, 80, 81, 82, 83, 84, 85, 86, 88,
-	89, 90, 91, 92, 95, 96, 98, 99, 100, 101, 102,
-];
-
-const HARAKAT_RE = /[\u064B-\u0652\u0670\u0640\u06E1\u06E5\u06E6]/g;
-
-function stripHarakat(text: string): string {
-	return text.replace(HARAKAT_RE, "");
-}
-
 interface ExtractedIrabMeta {
 	grammaticalCase: QuizCase;
 	sign: QuizSign;
@@ -60,66 +46,69 @@ interface ExtractedIrabMeta {
 	hasElidedGovernor: boolean;
 }
 
+const mentions =
+	(...phrases: string[]) =>
+	(beforeAlama: string) =>
+		phrases.some((phrase) => beforeAlama.includes(phrase));
+
+const NASIKH_SUBJECT_RE =
+	/اسم\s+(?:الجللاله\s+|الجلالة\s+)?(?:﴿)?(?:ان|إن|أن|كان|يكون|يكاد|ليت|لعل|لا|اصبح|أصبح|اضحى|أضحى|ظل|بات|صار|ليس|ما|عسى|كاد|لكن)/;
+
+/**
+ * The role named before «وعلامة …» in a classical iʿrāb clause, first match
+ * wins; "SKIP" for roles the quiz does not ask.
+ */
+const STEM_ROLE_RULES: [
+	QuizRelation | "SKIP",
+	(beforeAlama: string, fullStemClause: string) => boolean,
+][] = [
+	[
+		"SKIP",
+		mentions("مجرور لفظا", "مفعول معه", "منادى", "نزع الخافض", "حذف الجار"),
+	],
+	[
+		"adv",
+		(before, full) =>
+			mentions("ظرف زمان", "ظرف مكان", "نائب عن ظرف", "نايب عن ظرف")(before) ||
+			full.startsWith("ظرف "),
+	],
+	[
+		"emph",
+		(before) => before.includes("توكيد") && !before.includes("حرف توكيد"),
+	],
+	["prp", mentions("مفعول لأجله", "مفعول لاجله", "مفعول له")],
+	["exc", mentions("مستثنى")],
+	["pass", mentions("نايب فاعل", "نائب فاعل")],
+	[
+		"cog",
+		mentions("مفعول مطلق", "نايب عن المفعول المطلق", "نائب عن المفعول المطلق"),
+	],
+	["obj", mentions("مفعول به")],
+	["poss", mentions("مضاف اليه", "مضاف إليه")],
+	["gen", mentions("اسم مجرور", "مجرور ب", "اسم الجلالة مجرور")],
+	["conj", mentions("معطوف")],
+	["adj", mentions("نعت", "صفة")],
+	["app", mentions("بدل", "عطف بيان")],
+	["circ", mentions("حال")],
+	["spec", mentions("تمييز")],
+	["pred", mentions("خبر")],
+	[
+		"subjx",
+		(before) =>
+			mentions("مبتدا", "مبتدأ")(before) || NASIKH_SUBJECT_RE.test(before),
+	],
+	["subj", (before) => before.replace(/اسم الفاعل/g, "").includes("فاعل")],
+];
+
 function parseStemRoleFromClause(
 	beforeAlama: string,
 	fullStemClause: string,
 ): QuizRelation | "SKIP" | null {
-	if (
-		beforeAlama.includes("مجرور لفظا") ||
-		beforeAlama.includes("ظرف زمان") ||
-		beforeAlama.includes("ظرف مكان") ||
-		beforeAlama.includes("نائب عن ظرف") ||
-		beforeAlama.includes("نايب عن ظرف") ||
-		(beforeAlama.includes("توكيد") && !beforeAlama.includes("حرف توكيد")) ||
-		beforeAlama.includes("مفعول لأجله") ||
-		beforeAlama.includes("مفعول له") ||
-		beforeAlama.includes("مفعول معه") ||
-		beforeAlama.includes("منادى") ||
-		beforeAlama.includes("مستثنى") ||
-		beforeAlama.includes("نزع الخافض") ||
-		beforeAlama.includes("حذف الجار") ||
-		fullStemClause.startsWith("ظرف ")
-	) {
-		return "SKIP";
-	}
-
-	if (beforeAlama.includes("نايب فاعل") || beforeAlama.includes("نائب فاعل"))
-		return "pass";
-	if (
-		beforeAlama.includes("مفعول مطلق") ||
-		beforeAlama.includes("نايب عن المفعول المطلق") ||
-		beforeAlama.includes("نائب عن المفعول المطلق")
-	) {
-		return "cog";
-	}
-	if (beforeAlama.includes("مفعول به")) return "obj";
-	if (beforeAlama.includes("مضاف اليه") || beforeAlama.includes("مضاف إليه"))
-		return "poss";
-	if (
-		beforeAlama.includes("اسم مجرور") ||
-		beforeAlama.includes("مجرور ب") ||
-		beforeAlama.includes("اسم الجلالة مجرور")
-	) {
-		return "gen";
-	}
-	if (beforeAlama.includes("معطوف")) return "conj";
-	if (beforeAlama.includes("نعت") || beforeAlama.includes("صفة")) return "adj";
-	if (beforeAlama.includes("بدل") || beforeAlama.includes("عطف بيان"))
-		return "app";
-	if (beforeAlama.includes("حال")) return "circ";
-	if (beforeAlama.includes("تمييز")) return "spec";
-	if (beforeAlama.includes("خبر")) return "pred";
-	if (
-		beforeAlama.includes("مبتدا") ||
-		beforeAlama.includes("مبتدأ") ||
-		/اسم\s+(?:الجللاله\s+|الجلالة\s+)?(?:﴿)?(?:ان|إن|أن|كان|يكون|يكاد|ليت|لعل|لا|اصبح|أصبح|اضحى|أضحى|ظل|بات|صار|ليس|ما|عسى|كاد|لكن)/.test(
-			beforeAlama,
-		)
-	) {
-		return "subjx";
-	}
-	if (beforeAlama.replace(/اسم الفاعل/g, "").includes("فاعل")) return "subj";
-	return null;
+	return (
+		STEM_ROLE_RULES.find(([, test]) =>
+			test(beforeAlama, fullStemClause),
+		)?.[0] ?? null
+	);
 }
 
 function extractIrabMeta(
@@ -304,6 +293,8 @@ function normalizeRelation(raw: string): QuizRelation | null {
 		"circ",
 		"cog",
 		"spec",
+		"prp",
+		"emph",
 	];
 	return valid.includes(raw as QuizRelation) ? (raw as QuizRelation) : null;
 }
@@ -319,6 +310,8 @@ interface IrabCandidate {
 	clauseWordNums: Set<number>;
 	/** For a multi-khabar adj chain: the word of the mubtada / nāsikh it ultimately predicates. */
 	predicateHead: () => number | undefined;
+	/** The governor is a preposition joined to the target word itself. */
+	inWordGovernor: boolean;
 }
 
 /**
@@ -398,6 +391,11 @@ function reconcileIrab(
 	if (!role || !headWord) return null;
 	if (classicalNamesOtherHead(targetWord.i, verse, headWord)) return null;
 
+	const governorPrefix = c.inWordGovernor
+		? inWordPreposition(targetWord)?.a
+		: undefined;
+	if (c.inWordGovernor && !governorPrefix) return null;
+
 	const clauseWords = verse.w.filter((w) => c.clauseWordNums.has(w.n));
 	return {
 		id: `${file.n}:${verse.v}:${targetWord.n}:${role.relation}`,
@@ -413,6 +411,7 @@ function reconcileIrab(
 		signDetailAr: meta.detailAr,
 		classicalIrab: targetWord.i,
 		clauseWords: clauseWords.length > 0 ? clauseWords : verse.w,
+		...(governorPrefix ? { governorPrefix } : {}),
 	};
 }
 
@@ -425,7 +424,15 @@ function normalizeNoorBayanRelation(raw: string): QuizRelation | null {
 	const rel = raw.toLowerCase().replace(/\s+/g, "");
 	if (rel.startsWith("subj<<")) return "subjx";
 	if (rel.startsWith("pred<<")) return "pred";
+	if (rel === "exp") return "exc";
 	return normalizeRelation(rel);
+}
+
+/** A NoorBayan relation as a quiz role; `link` (متعلق) on a ẓarf token is the ẓarf role. */
+function tokenRelation(tok: SyntaxToken): QuizRelation | null {
+	if (tok.rel.toLowerCase() === "link")
+		return tok.pos.startsWith("ظرف") ? "adv" : null;
+	return normalizeNoorBayanRelation(tok.rel);
 }
 
 type TokenHead = NonNullable<SyntaxToken["head"]>;
@@ -466,8 +473,14 @@ function noorBayanCandidates(
 	const candidates: IrabCandidate[] = [];
 	for (const { word, tok } of flat) {
 		const head = local(tok.head);
-		const relation = normalizeNoorBayanRelation(tok.rel);
-		if (!head || !relation || head[2] === word) continue;
+		const relation = tokenRelation(tok);
+		if (!head || !relation) continue;
+		// A dependent of its own word counts only for a joined preposition (بِسْمِ).
+		const inWordGovernor =
+			head[2] === word &&
+			relation === "gen" &&
+			tokens.get(`${head[2]}:${head[3]}`)?.pos === "حرف جر";
+		if (head[2] === word && !inWordGovernor) continue;
 		candidates.push({
 			targetWordNum: word,
 			headWordNum: head[2],
@@ -475,6 +488,7 @@ function noorBayanCandidates(
 			segIndex: tok.tok - 1,
 			clauseWordNums,
 			predicateHead: () => noorBayanPredicateHead(tokens, head, local),
+			inWordGovernor,
 		});
 	}
 	return candidates;
@@ -492,60 +506,6 @@ function extractIrabQuestions(
 			for (const c of noorBayanCandidates(sentence, file.n, verse.v))
 				pushUnique(questions, reconcileIrab(file, verse, c));
 	return questions;
-}
-
-function spaceRootLetters(text: string): string {
-	const bare = stripHarakat(text).replace(/\s+/g, "");
-	return [...bare].join(" ");
-}
-
-interface ChoiceOption {
-	code: string;
-	ar: string;
-	sub: { ar: string; en: string; id: string };
-}
-
-export interface SarfQuestion {
-	id: string;
-	sura: number;
-	suraName: string;
-	suraPhonetic: string;
-	verse: Verse;
-	targetWord: Word;
-	headAr: string;
-	kind: "verb" | "noun";
-	rootRaw: string;
-	rootSpaced: string;
-	wazn: string;
-	classCode: string;
-	structureCode: string;
-	rootOptions: ChoiceOption[];
-	waznOptions: ChoiceOption[];
-	classOptions: ChoiceOption[];
-	structureOptions: ChoiceOption[];
-	asl?: string;
-	singular?: string;
-	classicalSarf: string;
-	classicalMeaning?: string;
-	searchSeed: Partial<ExampleQuery>;
-}
-
-export interface ExampleHuntQuestion {
-	id: string;
-	sura: number;
-	suraName: string;
-	suraPhonetic: string;
-	verse: Verse;
-	targetWord: Word;
-	facetTitle: { ar: string; en: string; id: string };
-	facetHint: { ar: string; en: string; id: string };
-	facetCategory: "form" | "deriv" | "syntax" | "plural";
-	targetWazn: string;
-	targetRootSpaced: string;
-	classicalSarf: string;
-	classicalIrab?: string;
-	classicalMeaning?: string;
-	searchSeed: Partial<ExampleQuery>;
 }
 
 const BLOCK_RE = /\{([^}]*)\}:\s*([^{]*)/g;
@@ -710,24 +670,38 @@ function parseSarfFromWord(word: Word): ParsedSarfBlock | null {
 	return null;
 }
 
-function sharedLettersCount(a: string, b: string): number {
-	const setB = new Set(b.split(""));
+function sharedLettersCount(a: Set<string>, b: Set<string>): number {
 	let count = 0;
-	for (const ch of new Set(a.split(""))) {
-		if (setB.has(ch)) count++;
-	}
+	for (const ch of a) if (b.has(ch)) count++;
 	return count;
 }
 
-export interface QuizPools {
-	irab: QuizQuestion[];
-	sarf: SarfQuestion[];
-	examples: ExampleHuntQuestion[];
-	mutashabih: MutashabihQuestion[];
-}
+const sortedLetters = (root: string) => root.split("").sort().join("");
 
-/** The pools built from surah morphology and treebanks; mutashabih comes from its own bank. */
-type GrammarPools = Omit<QuizPools, "mutashabih">;
+/**
+ * Roots close to each root (same length, ≥2 shared letters), and the anagrams
+ * among them, in pool order. Many words share a root, so each is worked out once.
+ */
+function nearRootsIndex(roots: string[]) {
+	const letters = new Map(roots.map((r) => [r, new Set(r)]));
+	const cache = new Map<string, { near: string[]; anagrams: string[] }>();
+	return (root: string) => {
+		const hit = cache.get(root);
+		if (hit) return hit;
+		const own = letters.get(root) ?? new Set(root);
+		const near = roots.filter(
+			(r) =>
+				r !== root &&
+				r.length === root.length &&
+				sharedLettersCount(letters.get(r) ?? new Set(r), own) >= 2,
+		);
+		const signature = sortedLetters(root);
+		const anagrams = near.filter((r) => sortedLetters(r) === signature);
+		const entry = { near, anagrams };
+		cache.set(root, entry);
+		return entry;
+	};
+}
 
 /** One surah's morphology, with its NoorBayan treebank when loaded (needed for iʿrāb questions). */
 export interface QuizSource {
@@ -782,6 +756,7 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 	}
 
 	const rootArray = Array.from(allRoots);
+	const nearRoots = nearRootsIndex(rootArray);
 	const verbWaznArray = Array.from(verbWazns);
 	const nounWaznArray = Array.from(nounWazns);
 	const verbClassKeys = Object.keys(SARF_CLASSES).filter(
@@ -801,16 +776,7 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 		correctRaw: string,
 		seedId: string,
 	): ChoiceOption[] {
-		const near = rootArray.filter(
-			(r) =>
-				r !== correctRaw &&
-				r.length === correctRaw.length &&
-				sharedLettersCount(r, correctRaw) >= 2,
-		);
-		const anagrams = near.filter(
-			(r) =>
-				r.split("").sort().join("") === correctRaw.split("").sort().join(""),
-		);
+		const { near, anagrams } = nearRoots(correctRaw);
 		const picked: string[] = [];
 		const seen = new Set<string>([correctRaw]);
 		for (const pool of [
@@ -829,15 +795,7 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 		}
 
 		const allFour = seededShuffle([correctRaw, ...picked], `${seedId}:roots`);
-		return allFour.map((r) => ({
-			code: r,
-			ar: spaceRootLetters(r),
-			sub: {
-				ar: `مادة (${r})`,
-				en: `Root (${spaceRootLetters(r)})`,
-				id: `Akar kata (${spaceRootLetters(r)})`,
-			},
-		}));
+		return allFour.map(rootChoice);
 	}
 
 	function buildWaznOptions(
@@ -872,18 +830,7 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 			if (picked.length === 3) break;
 		}
 		return seededShuffle([correctWazn, ...picked], `${seedId}:waznOrder`).map(
-			(w) => ({
-				code: w,
-				ar: w,
-				sub: {
-					ar: kind === "verb" ? "ميزان الفعل" : "ميزان الاسم",
-					en:
-						kind === "verb"
-							? "Verbal measure (mīzān)"
-							: "Nominal measure (mīzān)",
-					id: kind === "verb" ? "Wazan fi'il" : "Wazan isim",
-				},
-			}),
+			(w) => waznChoice(w, kind),
 		);
 	}
 
@@ -928,37 +875,14 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 				`${id}:str`,
 			).slice(0, 3);
 
-			const classOptions: ChoiceOption[] = seededShuffle(
+			const classOptions = seededShuffle(
 				[classCode, ...classFoils],
 				`${id}:clsOrd`,
-			).map((k) => {
-				const cls = SARF_CLASSES[k]!;
-				return {
-					code: k,
-					ar: cls.ar,
-					sub: {
-						ar: cls.arSub,
-						en: cls.en,
-						id: cls.id,
-					},
-				};
-			});
-
-			const structureOptions: ChoiceOption[] = seededShuffle(
+			).map(classChoice);
+			const structureOptions = seededShuffle(
 				[structureCode, ...structFoils],
 				`${id}:strOrd`,
-			).map((k) => {
-				const str = SARF_STRUCTURES[k]!;
-				return {
-					code: k,
-					ar: str.ar,
-					sub: {
-						ar: str.arSub,
-						en: str.en,
-						id: str.id,
-					},
-				};
-			});
+			).map(structureChoice);
 
 			sarfQuestions.push({
 				id,
@@ -989,10 +913,7 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 
 	// Build ExampleHuntQuestion pool (Ayah Pattern Spotter)
 	interface FacetRule {
-		code: string;
-		category: "form" | "deriv" | "syntax" | "plural";
-		title: { ar: string; en: string; id: string };
-		hint: { ar: string; en: string; id: string };
+		code: FacetCode;
 		matches: (w: Word, p: ParsedSarfBlock | null) => boolean;
 		seed: (p: ParsedSarfBlock) => Partial<ExampleQuery>;
 	}
@@ -1000,98 +921,32 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 	const FACET_RULES: FacetRule[] = [
 		{
 			code: "form_VIII",
-			category: "form",
-			title: {
-				ar: "فعل مزيد على باب (افْتَعَلَ)",
-				en: "Form VIII Verb (Iftaʿala)",
-				id: "Fi'il Mazid Wazan VIII (Ifta'ala)",
-			},
-			hint: {
-				ar: "فعل خماسي مزيد بالألف والتاء (مثل: اتَّقُوا، ابتغوا، استمعوا)",
-				en: "A 5-letter verb augmented with alif and infixed tāʾ (often assimilated, like ittaqū)",
-				id: "Fi'il lima huruf dengan tambahan alif dan ta' (sering mengalami idgham seperti ittaqu)",
-			},
 			matches: (_w, p) => p?.kind === "verb" && p.bab === "افْتَعَلَ",
 			seed: () => ({ pos: "V", form: "VIII" }),
 		},
 		{
 			code: "form_IV",
-			category: "form",
-			title: {
-				ar: "فعل مزيد على باب (أَفْعَلَ)",
-				en: "Form IV Verb (Afʿala)",
-				id: "Fi'il Mazid Wazan IV (Af'ala)",
-			},
-			hint: {
-				ar: "فعل رباعي مزيد بالهمزة في أوله يفيد التعدية غالباً (مثل: آمَنُوا، أَنزَلَ، يُخْرِبُونَ)",
-				en: "A causative 4-letter verb augmented with hamza (often elided in the imperfect)",
-				id: "Fi'il empat huruf dengan tambahan hamzah (sering dibuang pada mudhari')",
-			},
 			matches: (_w, p) => p?.kind === "verb" && p.bab === "أَفْعَلَ",
 			seed: () => ({ pos: "V", form: "IV" }),
 		},
 		{
 			code: "form_X",
-			category: "form",
-			title: {
-				ar: "فعل مزيد على باب (اسْتَفْعَلَ)",
-				en: "Form X Verb (Istafʿala)",
-				id: "Fi'il Mazid Wazan X (Istaf'ala)",
-			},
-			hint: {
-				ar: "فعل سداسي مزيد بالسين والتاء يدل على الطلب أو الصيرورة (مثل: نَسْتَعِينُ، اسْتَغْفِرْ)",
-				en: "A 6-letter verb with sīn and tāʾ expressing seeking or requesting",
-				id: "Fi'il enam huruf dengan tambahan sin dan ta' yang bermakna memohon/mencari",
-			},
 			matches: (_w, p) => p?.kind === "verb" && p.bab === "اسْتَفْعَلَ",
 			seed: () => ({ pos: "V", form: "X" }),
 		},
 		{
 			code: "form_II_V",
-			category: "form",
-			title: {
-				ar: "فعل مضعف العين (فَعَّلَ / تَفَعَّلَ)",
-				en: "Geminate-Stem Verb · Form II / V (Faʿʿala / Tafaʿʿala)",
-				id: "Fi'il Bertadh'if Ain · Wazan II / V (Fa''ala / Tafa''ala)",
-			},
-			hint: {
-				ar: "فعل مزيد بتضعيف عينه للتكثير أو التدرج (مثل: قَدَّمَتْ، سَبِّحْ، يَتَفَكَّرُونَ)",
-				en: "A verb augmented by doubling its middle radical for intensity or gradation",
-				id: "Fi'il dengan penggandaan huruf tengah ('ain fi'il) untuk intensitas",
-			},
 			matches: (_w, p) =>
 				p?.kind === "verb" && (p.bab === "فَعَّلَ" || p.bab === "تَفَعَّلَ"),
 			seed: (p) => ({ pos: "V", form: p.bab === "تَفَعَّلَ" ? "V" : "II" }),
 		},
 		{
 			code: "deriv_fail",
-			category: "deriv",
-			title: {
-				ar: "اسم فاعل (مشتق يدل على من قام بالفعل)",
-				en: "Active Participle (Ism Fāʿil)",
-				id: "Isim Fa'il (Partisipel Aktif)",
-			},
-			hint: {
-				ar: "يصاغ من الثلاثي على (فَاعِل) ومن غيره بضم أوله وكسر ما قبل آخره",
-				en: "Formed on fāʿil (Form I) or with prefix mu- and kasra before the final radical",
-				id: "Dibentuk dengan pola fa'il (tsulatsi) atau awalan mu- dengan kasrah sebelum akhir",
-			},
 			matches: (_w, p) => p?.kind === "noun" && p.deriv === "اسم فاعل",
 			seed: (p) => ({ root: p.rootRaw, pos: "N,ADJ" }),
 		},
 		{
 			code: "deriv_sifa_mubalagha",
-			category: "deriv",
-			title: {
-				ar: "صفة مشبهة أو صيغة مبالغة",
-				en: "Intensive or Assimilated Adjective (Ṣifa Mushabbaha / Mubālagha)",
-				id: "Sifat Musyabbahah atau Shighah Mubalaghah",
-			},
-			hint: {
-				ar: "وصف يدل على الثبوت أو الكثرة (على أوزان مثل: فَعِيل، فَعُول، فَعَّال، فَعْلَان)",
-				en: "Describes an enduring or intensive attribute (patterns like faʿīl, faʿūl, faʿʿāl)",
-				id: "Kata sifat yang menunjukkan ketetapan atau intensitas tinggi (seperti fa'il, fa'ul, fa''al)",
-			},
 			matches: (_w, p) =>
 				p?.kind === "noun" &&
 				(p.deriv === "صفة مشبهة" || p.deriv === "صيغة مبالغة"),
@@ -1099,33 +954,11 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 		},
 		{
 			code: "deriv_tafdil",
-			category: "deriv",
-			title: {
-				ar: "أفعل التفضيل (اسم تفضيل)",
-				en: "Elative / Superlative Noun (Ism Tafḍīl)",
-				id: "Isim Tafdhil (Komparatif / Superlatif)",
-			},
-			hint: {
-				ar: "اسم مشتق على وزن (أَفْعَل) أو (فُعْلَى) أو (خَيْر / شَرّ) يدل على الزيادة في الصفة",
-				en: "Pattern afʿal / fuʿlā (or khayr / sharr) indicating superiority in a quality",
-				id: "Wazan af'al / fu'la (atau khair / syarr) yang menunjukkan makna lebih/paling",
-			},
 			matches: (_w, p) => p?.kind === "noun" && p.deriv === "أفعل التفضيل",
 			seed: (p) => ({ root: p.rootRaw }),
 		},
 		{
 			code: "plural_taksir",
-			category: "plural",
-			title: {
-				ar: "جمع تكسير (تغيرت فيه صورة المفرد)",
-				en: "Broken Plural (Jamʿ Taksīr)",
-				id: "Jamak Taksir (Jamak Tak Beraturan)",
-			},
-			hint: {
-				ar: "جمع تتغير فيه بنية المفرد على أوزان مثل: أَفْعَال، فُعُول، فِعَال، فَوَاعِل، قُرَى",
-				en: "A plural formed by shifting the internal vowel/consonant pattern rather than adding -ūna/-āt",
-				id: "Bentuk jamak dengan perubahan pola internal dari bentuk mufradnya",
-			},
 			matches: (_w, p) =>
 				p?.kind === "noun" &&
 				(p.numberClass === "جمع تكسير للقلة" ||
@@ -1134,17 +967,6 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 		},
 		{
 			code: "syntax_mansubat",
-			category: "syntax",
-			title: {
-				ar: "منصوب بياني (حال أو تمييز أو مفعول مطلق)",
-				en: "Adverbial Accusative (Ḥāl, Tamyīz, or Mafʿūl Muṭlaq)",
-				id: "Manshub Keterangan (Hal, Tamyiz, atau Maf'ul Muthlaq)",
-			},
-			hint: {
-				ar: "اسم منصوب يبين الهيئة (حال)، أو يزيل الإبهام (تمييز)، أو يؤكد الفعل بمصدره (مفعول مطلق)",
-				en: "An accusative noun describing state (ḥāl), specification (tamyīz), or cognate emphasis",
-				id: "Isim manshub yang menjelaskan keadaan (hal), rincian (tamyiz), atau penegasan (maf'ul muthlaq)",
-			},
 			matches: (w) => {
 				const cleanI = stripHarakat(w.i || "");
 				return (
@@ -1178,6 +1000,7 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 
 				const id = `ex:${file.n}:${verse.v}:${targetWord.n}:${rule.code}`;
 
+				const facet = EXAMPLE_FACETS[rule.code];
 				exampleQuestions.push({
 					id,
 					sura: file.n,
@@ -1185,9 +1008,10 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 					suraPhonetic: file.phonetic,
 					verse,
 					targetWord,
-					facetTitle: rule.title,
-					facetHint: rule.hint,
-					facetCategory: rule.category,
+					facetCode: rule.code,
+					facetTitle: facet.title,
+					facetHint: facet.hint,
+					facetCategory: facet.category,
 					targetWazn: parsed.wazn,
 					targetRootSpaced: spaceRootLetters(parsed.rootRaw),
 					classicalSarf: targetWord.sf || "",

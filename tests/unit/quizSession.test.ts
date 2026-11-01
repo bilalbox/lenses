@@ -5,7 +5,7 @@ import type {
 	QuizPools,
 	QuizQuestion,
 	SarfQuestion,
-} from "../../src/lib/quizEngine";
+} from "../../src/lib/quizBank";
 import {
 	activeQuestion,
 	initQuizSession,
@@ -100,6 +100,27 @@ describe("quizSession: seeding and questions", () => {
 				"c",
 			);
 		}
+	});
+
+	it("re-picks a rebuilt pool's question and clears its half-answered draft", () => {
+		const state = run(fullIrab[0]!, {
+			type: "repool",
+			lens: "irab",
+			random: 0.99,
+		});
+		expect(activeQuestion(state, pools)?.id).toBe("c");
+		expect(state.drafts.irab.relation).toBeNull();
+		expect(state.step).toBe(1);
+	});
+
+	it("re-picks a background lens's question without touching the current one", () => {
+		const state = run(fullIrab[0]!, {
+			type: "repool",
+			lens: "sarf",
+			random: 0,
+		});
+		expect(state.indices.sarf).toBe(0);
+		expect(state.drafts.irab.relation).toBe("subj");
 	});
 
 	it("stays put when the lens has a single question", () => {

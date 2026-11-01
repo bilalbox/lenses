@@ -19,6 +19,12 @@ import {
 	watchLibrary,
 } from "./lib/library";
 import {
+	loadQuizPrefs,
+	type QuizPrefKey,
+	type QuizPrefs,
+	saveQuizPref,
+} from "./lib/quizPrefs";
+import {
 	loadReaderPrefs,
 	type ReaderPrefKey,
 	type ReaderPrefs,
@@ -27,8 +33,6 @@ import {
 import { parseRoute } from "./lib/route";
 import { type ExampleQuery, searchVerses, type VerseHit } from "./lib/search";
 import type { Manifest } from "./lib/types";
-
-const QUIZ_HIDE_DIACRITICS_KEY = "lenses-quiz-hide-diacritics";
 
 function highlight(text: string, needle: string) {
 	if (needle.length < 2) return text;
@@ -76,9 +80,7 @@ export function App() {
 	const [theme, setTheme] = useState(
 		() => document.documentElement.dataset.theme || "light",
 	);
-	const [quizHideDiacritics, setQuizHideDiacritics] = useState(
-		() => localStorage.getItem(QUIZ_HIDE_DIACRITICS_KEY) === "1",
-	);
+	const [quizPrefs, setQuizPrefs] = useState<QuizPrefs>(loadQuizPrefs);
 	const [readerPrefs, setReaderPrefs] = useState<ReaderPrefs>(() =>
 		loadReaderPrefs(),
 	);
@@ -186,9 +188,9 @@ export function App() {
 		}
 	};
 
-	const toggleQuizHideDiacritics = (next: boolean) => {
-		setQuizHideDiacritics(next);
-		localStorage.setItem(QUIZ_HIDE_DIACRITICS_KEY, next ? "1" : "0");
+	const toggleQuizPref = (key: QuizPrefKey, next: boolean) => {
+		setQuizPrefs((prev) => ({ ...prev, [key]: next }));
+		saveQuizPref(key, next);
 	};
 
 	const toggleReaderPref = (key: ReaderPrefKey, next: boolean) => {
@@ -330,7 +332,7 @@ export function App() {
 							route={route}
 							readerPrefs={readerPrefs}
 							seed={seed}
-							quizHideDiacritics={quizHideDiacritics}
+							quizPrefs={quizPrefs}
 							openSearch={openSearch}
 							openSettings={() => setSettingsOpen(true)}
 						/>
@@ -405,8 +407,8 @@ export function App() {
 				onClose={() => setSettingsOpen(false)}
 				theme={theme}
 				onSelectTheme={selectTheme}
-				quizHideDiacritics={quizHideDiacritics}
-				onToggleQuizHideDiacritics={toggleQuizHideDiacritics}
+				quizPrefs={quizPrefs}
+				onToggleQuizPref={toggleQuizPref}
 				readerPrefs={readerPrefs}
 				onToggleReaderPref={toggleReaderPref}
 				canInstall={Boolean(install)}
