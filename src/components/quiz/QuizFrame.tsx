@@ -1,6 +1,6 @@
 /**
- * The page around every quiz lens: the lens switcher, the ayah box, the place
- * and score bar, the step crumbs, and the animated pane holding the current
+ * The page around every quiz lens: the lens switcher, the ayah box with its
+ * place, the rail of step dots, score and skip, and the animated pane holding the current
  * step. Each lens supplies its ayah, crumbs and step.
  */
 import type { Dispatch, ReactNode, RefObject } from "react";
@@ -16,8 +16,8 @@ import {
 import {
 	type QuizCrumb,
 	QuizLensSwitcher,
-	QuizMetaBar,
-	QuizProgressStrip,
+	QuizPlace,
+	QuizRail,
 } from "../QuizChrome";
 
 /** What the screen hands every lens. */
@@ -92,6 +92,9 @@ export function QuizFrame({
 					className={`quiz-wizard-ayah-box anim-soft-enter${picking ? " is-picking-governor" : ""}`}
 				>
 					{ayah}
+					{place ? (
+						<QuizPlace place={place} onOpenReader={onOpenReader} />
+					) : null}
 				</div>
 			</section>
 
@@ -102,19 +105,14 @@ export function QuizFrame({
 				aria-labelledby={`quiz-lens-tab-${lens}`}
 				aria-live="polite"
 			>
-				<QuizMetaBar
-					place={place}
-					onOpenReader={onOpenReader}
-					session={session}
-					onSkip={props.onNext}
-				/>
-
-				<QuizProgressStrip
+				<QuizRail
 					crumbs={crumbs}
 					filled={filled}
 					total={total}
 					activeStep={step}
 					onGoTo={(next) => props.dispatch({ type: "goToStep", step: next })}
+					session={session}
+					onSkip={props.onNext}
 				/>
 
 				<div

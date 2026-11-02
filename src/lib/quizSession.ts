@@ -1,5 +1,6 @@
 import type { QuizPools } from "./quizBank";
 import {
+	isPhraseRole,
 	type QuizCase,
 	type QuizLens,
 	type QuizRelation,
@@ -92,6 +93,19 @@ interface LensSpec<L extends QuizLens> {
 	answer: (question: Questions[L]) => Drafts[L];
 	/** Drops answers an edit has made impossible, so a later step is asked again. */
 	normalize?: (draft: Drafts[L]) => Drafts[L];
+	/** The fields this draft must fill before a submit; every field when absent. */
+	required?: (draft: Drafts[L]) => DraftField<L>[];
+}
+
+/** A jārr-majrūr phrase is answered by its role and mutaʿallaq alone. */
+function normalizeIrab(draft: IrabDraft): IrabDraft {
+	if (isPhraseRole(draft.relation))
+		return { ...draft, grammaticalCase: null, sign: null };
+	return draft.grammaticalCase &&
+		draft.sign &&
+		!SIGNS_BY_CASE[draft.grammaticalCase].includes(draft.sign)
+		? { ...draft, sign: null }
+		: draft;
 }
 
 const LENSES: { [L in QuizLens]: LensSpec<L> } = {
@@ -109,12 +123,11 @@ const LENSES: { [L in QuizLens]: LensSpec<L> } = {
 			grammaticalCase: q.grammaticalCase,
 			sign: q.sign,
 		}),
-		normalize: (draft) =>
-			draft.grammaticalCase &&
-			draft.sign &&
-			!SIGNS_BY_CASE[draft.grammaticalCase].includes(draft.sign)
-				? { ...draft, sign: null }
-				: draft,
+		normalize: normalizeIrab,
+		required: (draft) =>
+			isPhraseRole(draft.relation)
+				? ["relation", "headWordNum"]
+				: ["relation", "headWordNum", "grammaticalCase", "sign"],
 	},
 	sarf: {
 		fields: ["root", "wazn", "classCode", "structureCode"],
@@ -192,13 +205,21 @@ function draftOf(state: QuizSessionState): Record<string, unknown> {
 	return state.drafts[state.lens] as unknown as Record<string, unknown>;
 }
 
+/** The fields the current draft must fill, which for iʿrāb follow the role picked. */
+function requiredFields(state: QuizSessionState): string[] {
+	const spec = LENSES[state.lens] as LensSpec<QuizLens>;
+	return spec.required
+		? spec.required(state.drafts[state.lens] as never)
+		: spec.fields;
+}
+
 /** Fields answered so far, plus the always-filled first step, out of the wizard's steps. */
 export function progress(state: QuizSessionState): {
 	filled: number;
 	total: number;
 } {
 	const draft = draftOf(state);
-	const fields: string[] = LENSES[state.lens].fields;
+	const fields = requiredFields(state);
 	return {
 		filled: 1 + fields.filter((f) => draft[f] !== null).length,
 		total: fields.length + 1,
@@ -331,9 +352,9 @@ export function reduceQuizSession(
 			const question = activeQuestion(state, pools);
 			if (!question) return state;
 			const draft = draftOf(state);
-			const missing = LENSES[state.lens].fields.filter(
+			const missing = requiredFields(state).filter(
 				(f) => draft[f] === null,
-			);
+			) as DraftField[];
 			if (missing.length > 0) return { ...state, missing, verdict: null };
 			const verdict = grade(state, question);
 			return record({ ...state, missing: [], verdict }, verdict.allCorrect);

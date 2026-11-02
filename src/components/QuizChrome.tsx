@@ -1,5 +1,5 @@
-/** Quiz chrome shared by every lens: lens tabs, the meta bar, and the step strip. */
-import type { CSSProperties, ReactNode } from "react";
+/** Quiz chrome shared by every lens: lens tabs, the ayah's place, and the step rail. */
+import type { ReactNode } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { getLensLabel, type QuizLens } from "../lib/quizCatalog";
 import type { QuizSessionState, WizardStep } from "../lib/quizSession";
@@ -50,62 +50,29 @@ export function QuizLensSwitcher({
 	);
 }
 
-/** Where the ayah is (null hides it, e.g. while it is being asked), plus streak, score and skip. */
-export function QuizMetaBar({
+/** The ayah's place under the verse, doubling as the link into the reader. */
+export function QuizPlace({
 	place,
 	onOpenReader,
-	session,
-	onSkip,
 }: {
-	place: { phonetic: string; sura: number; verse: number } | null;
+	place: { phonetic: string; sura: number; verse: number };
 	onOpenReader: () => void;
-	session: Pick<QuizSessionState, "streak" | "score">;
-	onSkip: () => void;
 }) {
 	const { t, formatNumber } = useI18n();
-	const { streak, score } = session;
+	const label = t.quiz.openReader(place.sura, place.verse);
 	return (
-		<div className="quiz-wizard-meta-bar">
-			<div className="quiz-wizard-surah-tag">
-				{place ? (
-					<span className="quiz-wizard-ref">
-						{place.phonetic} {formatNumber(place.sura)}:
-						{formatNumber(place.verse)}
-					</span>
-				) : null}
-			</div>
-
-			<div className="quiz-wizard-stats">
-				<span className="quiz-wizard-stat" title={t.quiz.streakLabel}>
-					<strong>{formatNumber(streak)}</strong>
-					<small>{t.quiz.streakLabel}</small>
-				</span>
-				{score.attempts > 0 ? (
-					<span
-						className="quiz-wizard-stat quiz-wizard-stat-score"
-						title="Solved / attempts"
-					>
-						<strong>
-							{formatNumber(score.solved)}
-							<span className="quiz-stat-sep">/</span>
-							{formatNumber(score.attempts)}
-						</strong>
-					</span>
-				) : null}
-				{place ? (
-					<button
-						type="button"
-						className="quiz-wizard-skip quiz-wizard-reader"
-						onClick={onOpenReader}
-					>
-						{t.quiz.openReader(place.sura, place.verse)}
-					</button>
-				) : null}
-				<button type="button" className="quiz-wizard-skip" onClick={onSkip}>
-					{t.quiz.skipButton}
-				</button>
-			</div>
-		</div>
+		<button
+			type="button"
+			className="quiz-wizard-place"
+			onClick={onOpenReader}
+			title={label}
+			aria-label={label}
+		>
+			<span className="quiz-wizard-ref">
+				{place.phonetic} {formatNumber(place.sura)}:{formatNumber(place.verse)}
+			</span>
+			<span aria-hidden="true">↗</span>
+		</button>
 	);
 }
 
@@ -116,56 +83,107 @@ export interface QuizCrumb {
 	filled: boolean;
 }
 
-/** Progress bar and one tappable pill per step; the last pill is the check step. */
-export function QuizProgressStrip({
+/** One tappable dot per step; the active one spells out its label, the last is the check step. */
+function QuizSteps({
+	crumbs,
+	activeStep,
+	onGoTo,
+}: {
+	crumbs: QuizCrumb[];
+	activeStep: WizardStep;
+	onGoTo: (step: WizardStep) => void;
+}) {
+	const { t, formatNumber } = useI18n();
+	return (
+		<div
+			className="quiz-wizard-breadcrumbs"
+			role="tablist"
+			aria-label={t.quiz.stepsAria}
+		>
+			{crumbs.map((b, idx) => (
+				<button
+					key={b.stepNum}
+					id={`quiz-step-tab-${b.stepNum}`}
+					type="button"
+					role="tab"
+					aria-selected={activeStep === b.stepNum}
+					aria-controls="quiz-step-panel"
+					title={b.label}
+					className={`quiz-crumb ${activeStep === b.stepNum ? "is-active" : ""} ${b.filled ? "is-filled" : ""}`}
+					onClick={() => onGoTo(b.stepNum)}
+				>
+					<span className="quiz-crumb-num">
+						{idx === crumbs.length - 1 ? "✓" : formatNumber(idx + 1)}
+					</span>
+					<span className="quiz-crumb-text" lang={b.isAr ? "ar" : undefined}>
+						{b.label}
+					</span>
+				</button>
+			))}
+		</div>
+	);
+}
+
+/** Streak, and solved / attempts once there is an attempt. */
+function QuizScore({
+	session,
+}: {
+	session: Pick<QuizSessionState, "streak" | "score">;
+}) {
+	const { t, formatNumber } = useI18n();
+	const { streak, score } = session;
+	return (
+		<span className="quiz-wizard-score">
+			<span className="quiz-wizard-stat" title={t.quiz.streakLabel}>
+				<strong>{formatNumber(streak)}</strong>
+				<small>{t.quiz.streakLabel}</small>
+			</span>
+			{score.attempts > 0 ? (
+				<span className="quiz-wizard-stat" title={t.quiz.scoreLabel}>
+					<strong>
+						{formatNumber(score.solved)}
+						<span className="quiz-stat-sep">/</span>
+						{formatNumber(score.attempts)}
+					</strong>
+				</span>
+			) : null}
+		</span>
+	);
+}
+
+/** The single control row above each step: step dots, score and skip, with progress ruled under it. */
+export function QuizRail({
 	crumbs,
 	filled,
 	total,
 	activeStep,
 	onGoTo,
+	session,
+	onSkip,
 }: {
 	crumbs: QuizCrumb[];
 	filled: number;
 	total: number;
 	activeStep: WizardStep;
 	onGoTo: (step: WizardStep) => void;
+	session: Pick<QuizSessionState, "streak" | "score">;
+	onSkip: () => void;
 }) {
-	const { t, formatNumber } = useI18n();
-	const steps = { "--quiz-steps": crumbs.length } as CSSProperties;
+	const { t } = useI18n();
 	return (
-		<div className="quiz-wizard-progress-strip">
+		<div className="quiz-wizard-rail">
+			<QuizSteps crumbs={crumbs} activeStep={activeStep} onGoTo={onGoTo} />
+			<div className="quiz-wizard-stats">
+				<QuizScore session={session} />
+				<button type="button" className="quiz-wizard-skip" onClick={onSkip}>
+					{t.quiz.skipButton}
+				</button>
+			</div>
 			<div className="quiz-progress-track" aria-hidden="true">
 				<div
 					className="quiz-progress-fill"
 					style={{ width: `${Math.round((filled / total) * 100)}%` }}
 				/>
-			</div>
-			<div
-				className="quiz-wizard-breadcrumbs"
-				style={steps}
-				role="tablist"
-				aria-label={t.quiz.stepsAria}
-			>
-				{crumbs.map((b, idx) => (
-					<button
-						key={b.stepNum}
-						id={`quiz-step-tab-${b.stepNum}`}
-						type="button"
-						role="tab"
-						aria-selected={activeStep === b.stepNum}
-						aria-controls="quiz-step-panel"
-						title={b.label}
-						className={`quiz-crumb ${activeStep === b.stepNum ? "is-active" : ""} ${b.filled ? "is-filled" : ""}`}
-						onClick={() => onGoTo(b.stepNum)}
-					>
-						<span className="quiz-crumb-num">
-							{idx === crumbs.length - 1 ? "✓" : formatNumber(idx + 1)}
-						</span>
-						<span className="quiz-crumb-text" lang={b.isAr ? "ar" : undefined}>
-							{b.label}
-						</span>
-					</button>
-				))}
 			</div>
 		</div>
 	);

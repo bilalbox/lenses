@@ -12,7 +12,7 @@ import {
 	SARF_STRUCTURES,
 } from "./quizCatalog";
 import type { ExampleQuery } from "./search";
-import type { Segment, SurahFile, Verse, Word } from "./types";
+import type { SurahFile, Verse, Word } from "./types";
 
 /** Fast initial surahs loaded immediately on quiz open */
 export const CURATED_SURAHS = [
@@ -34,16 +34,12 @@ export interface QuizQuestion {
 	targetWord: Word;
 	headWord: Word;
 	relation: QuizRelation;
-	grammaticalCase: QuizCase;
-	sign: QuizSign;
+	/** Null for a jārr-majrūr phrase (`pp`), which takes no case of its own. */
+	grammaticalCase: QuizCase | null;
+	sign: QuizSign | null;
 	signDetailAr: string;
 	classicalIrab: string;
 	clauseWords: Word[];
-	/**
-	 * The governor is a preposition joined to the target word (بِـ in بِسْمِ):
-	 * its text. `headWord` is then the target word itself.
-	 */
-	governorPrefix?: string;
 }
 
 export interface ChoiceOption {
@@ -107,11 +103,6 @@ export interface QuizPools {
 
 /** The pools built from surah morphology and treebanks; mutashabih comes from its own bank. */
 export type GrammarPools = Omit<QuizPools, "mutashabih">;
-
-/** The preposition prefix of a word (بِـ، لِـ، كَـ), which governs the noun it is joined to. */
-export function inWordPreposition(word: Word): Segment | undefined {
-	return word.s.find((seg) => seg.k === "p" && seg.p === "P");
-}
 
 const HARAKAT_RE = /[ً-ْٰـۡۥۦ]/g;
 
@@ -307,14 +298,14 @@ type WordRef = [number, number, number];
 
 interface IrabEntry {
 	at: WordRef;
-	/** Governor's word number; the target's own when `prefix` is set. */
+	/** Governor's word number: another word of the ayah. */
 	head: number;
 	rel: QuizRelation;
-	case: QuizCase;
-	sign: QuizSign;
+	/** Absent for a jārr-majrūr phrase. */
+	case?: QuizCase;
+	sign?: QuizSign;
 	detail: string;
 	clause: number[];
-	prefix?: string;
 }
 
 interface SarfEntry {
@@ -372,11 +363,10 @@ export function toQuizBank(
 			at: refOf(q),
 			head: q.headWord.n,
 			rel: q.relation,
-			case: q.grammaticalCase,
-			sign: q.sign,
+			...(q.grammaticalCase ? { case: q.grammaticalCase } : {}),
+			...(q.sign ? { sign: q.sign } : {}),
 			detail: q.signDetailAr,
 			clause: q.clauseWords.map((w) => w.n),
-			...(q.governorPrefix ? { prefix: q.governorPrefix } : {}),
 		})),
 		sarf: pools.sarf.map((q) => ({
 			at: refOf(q),
@@ -437,7 +427,9 @@ function place({ file, verse, word }: Located) {
 }
 
 function hydrateIrab(e: IrabEntry, at: Located): QuizQuestion | null {
-	const headWord = at.verse.w.find((w) => w.n === e.head);
+	// A word never governs itself; older banks asked a joined preposition that way.
+	const headWord =
+		e.head === at.word.n ? null : at.verse.w.find((w) => w.n === e.head);
 	if (!headWord) return null;
 	const clause = new Set(e.clause);
 	return {
@@ -445,12 +437,11 @@ function hydrateIrab(e: IrabEntry, at: Located): QuizQuestion | null {
 		...place(at),
 		headWord,
 		relation: e.rel,
-		grammaticalCase: e.case,
-		sign: e.sign,
+		grammaticalCase: e.case ?? null,
+		sign: e.sign ?? null,
 		signDetailAr: e.detail,
 		classicalIrab: at.word.i ?? "",
 		clauseWords: at.verse.w.filter((w) => clause.has(w.n)),
-		...(e.prefix ? { governorPrefix: e.prefix } : {}),
 	};
 }
 

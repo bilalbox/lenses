@@ -133,14 +133,18 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 			expect(q.sura).toBe(1);
 			expect(q.targetWord).toBeDefined();
 			expect(q.headWord).toBeDefined();
-			// Only a joined preposition governs its own word
-			if (q.governorPrefix) expect(q.headWord.n).toBe(q.targetWord.n);
-			else expect(q.targetWord.n).not.toBe(q.headWord.n);
+			// A word never governs itself
+			expect(q.targetWord.n).not.toBe(q.headWord.n);
 
-			// Must have a valid case and sign
-			expect(["NOM", "ACC", "GEN"]).toContain(q.grammaticalCase);
-			expect(q.sign).toBeDefined();
-			expect(q.signDetailAr).toBeTruthy();
+			// A jārr-majrūr phrase has no case or sign; every other role has both
+			if (q.relation === "pp") {
+				expect(q.grammaticalCase).toBeNull();
+				expect(q.sign).toBeNull();
+			} else {
+				expect(["NOM", "ACC", "GEN"]).toContain(q.grammaticalCase);
+				expect(q.sign).toBeTruthy();
+				expect(q.signDetailAr).toBeTruthy();
+			}
 
 			// Clause words must include both target and head
 			const clauseWordNums = q.clauseWords.map((w) => w.n);
@@ -227,19 +231,31 @@ describe("quizEngine: iʿrāb questions from NoorBayan (real surahs)", () => {
 		expect(irabFor(67).some((q) => q.id === "67:3:5:adj")).toBe(false);
 	});
 
-	it("asks a noun governed by a preposition joined to it (بِسْمِ)", () => {
-		const q = irabFor(1).find((x) => x.id === "1:1:1:gen");
+	it("asks a joined jārr-majrūr as one phrase on its mutaʿallaq (لِلَّهِ ← سَبَّحَ)", () => {
+		const q = irabFor(59).find((x) => x.id === "59:1:2:pp");
 		expect(q).toMatchObject({
-			relation: "gen",
-			governorPrefix: "بِ",
-			grammaticalCase: "GEN",
-			sign: "kasra",
+			relation: "pp",
+			grammaticalCase: null,
+			sign: null,
 		});
-		expect(q?.headWord.n).toBe(1);
+		expect(stripDiacritics(q?.headWord.a ?? "")).toBe("سبح");
 	});
 
-	it("skips a joined preposition's attached pronoun (عَلَيْهِمْ)", () => {
-		expect(irabFor(1).some((q) => q.id === "1:7:4:gen")).toBe(false);
+	it("asks a preposition joined to a pronoun as a phrase too (عَلَيْهِمْ ← أَنْعَمْتَ)", () => {
+		const q = irabFor(1).find((x) => x.id === "1:7:4:pp");
+		expect(stripDiacritics(q?.headWord.a ?? "")).toBe("انعمت");
+	});
+
+	it("drops a phrase whose classical iʿrāb names another mutaʿallaq", () => {
+		// 67:27 بِهِۦ — NoorBayan attaches it to كُنتُم, the classical iʿrāb to ﴿تَدَّعُونَ﴾
+		expect(irabFor(67).some((q) => q.id === "67:27:12:pp")).toBe(false);
+	});
+
+	it("never asks the noun inside a joined jārr-majrūr on its own (بِسْمِ)", () => {
+		const ids = irabFor(1).map((q) => q.id);
+		expect(ids).not.toContain("1:1:1:gen");
+		// Its mutaʿallaq is elided (مَحْذُوف), so the phrase is not asked either
+		expect(ids).not.toContain("1:1:1:pp");
 	});
 
 	it("asks the extended roles: ẓarf on its verb, mustathnā on إلا", () => {

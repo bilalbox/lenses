@@ -228,6 +228,73 @@ describe("quizSession: case and sign stay compatible", () => {
 	});
 });
 
+describe("quizSession: a jārr-majrūr phrase asks role and mutaʿallaq only", () => {
+	const phrase = {
+		...irab("pp", 59, 1),
+		relation: "pp",
+		grammaticalCase: null,
+		sign: null,
+	} as QuizQuestion;
+	const phrasePools: QuizPools = { ...pools, irab: [phrase] };
+	const runPhrase = (...events: QuizSessionEvent[]) =>
+		events.reduce(
+			(state, event) => reduceQuizSession(state, event, phrasePools),
+			initQuizSession(),
+		);
+	const pickPhrase: QuizSessionEvent = {
+		type: "answer",
+		field: "relation",
+		value: "pp",
+	};
+
+	it("clears a drafted case and sign once the phrase role is picked", () => {
+		const state = runPhrase(
+			{ type: "answer", field: "relation", value: "gen" },
+			{ type: "answer", field: "grammaticalCase", value: "GEN" },
+			{ type: "answer", field: "sign", value: "kasra" },
+			pickPhrase,
+		);
+		expect(state.drafts.irab).toMatchObject({
+			relation: "pp",
+			grammaticalCase: null,
+			sign: null,
+		});
+	});
+
+	it("submits with role and mutaʿallaq, and grades it correct", () => {
+		const state = runPhrase(
+			pickPhrase,
+			{ type: "answer", field: "headWordNum", value: 1 },
+			{ type: "submit" },
+		);
+		expect(state.missing).toEqual([]);
+		expect(state.verdict?.allCorrect).toBe(true);
+		expect(progress(state)).toEqual({ filled: 3, total: 3 });
+	});
+
+	it("requires case and sign again when the role goes back to a single word", () => {
+		const state = runPhrase(
+			pickPhrase,
+			{ type: "answer", field: "relation", value: "gen" },
+			{ type: "answer", field: "headWordNum", value: 1 },
+			{ type: "submit" },
+		);
+		expect(state.missing).toEqual(["grammaticalCase", "sign"]);
+	});
+
+	it("marks a single-word analysis of a phrase wrong", () => {
+		const state = runPhrase(
+			{ type: "answer", field: "relation", value: "gen" },
+			{ type: "answer", field: "headWordNum", value: 1 },
+			{ type: "answer", field: "grammaticalCase", value: "GEN" },
+			{ type: "answer", field: "sign", value: "kasra" },
+			{ type: "submit" },
+		);
+		expect(state.verdict?.allCorrect).toBe(false);
+		expect(state.verdict?.fields.relation).toBe(false);
+	});
+});
+
 describe("quizSession: wizard navigation and lenses", () => {
 	it("advances on answer and steps back to edit after a verdict", () => {
 		const answered = run({

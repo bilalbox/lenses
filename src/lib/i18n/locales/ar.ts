@@ -35,6 +35,7 @@ export const ar: Translations = {
 		lensesAria: "عدسات الاختبار",
 		stepsAria: "خطوات الاختبار",
 		streakLabel: "تتابع",
+		scoreLabel: "الصحيح / المحاولات",
 		skipButton: "↻ تخطي",
 		openReader: (sura: number, verse: number) =>
 			`القارئ ${formatNum(sura, "ar")}:${formatNum(verse, "ar")} ↗`,

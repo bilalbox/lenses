@@ -2254,9 +2254,9 @@ main {
 }
 
 .quiz-progress-track {
-	height: 7px;
+	height: 2px;
 	border-radius: 99px;
-	background: color-mix(in srgb, var(--ink) 12%, transparent);
+	background: var(--line);
 	overflow: hidden;
 }
 
@@ -2589,28 +2589,45 @@ main {
 	overflow: clip;
 }
 
-.quiz-wizard-meta-bar {
+/* One row of chrome above each step: step dots at the start, score and skip at
+   the end, progress ruled underneath. Kept quiet so the question leads. */
+.quiz-wizard-rail {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
-	gap: 0.5rem;
+	gap: 0 0.5rem;
 	flex-shrink: 0;
-	min-height: 32px;
-	margin-bottom: 0.35rem;
 }
 
-.quiz-wizard-surah-tag {
-	display: flex;
+.quiz-wizard-rail .quiz-progress-track {
+	flex-basis: 100%;
+	margin-top: 0.15rem;
+}
+
+.quiz-wizard-place {
+	align-self: flex-end;
+	display: inline-flex;
 	align-items: center;
-	gap: 0.4rem;
-	min-width: 0;
+	gap: 0.35rem;
+	margin-top: auto;
+	border: 0;
+	background: transparent;
+	border-radius: 8px;
+	padding: 0.3rem 0.5rem;
+	min-height: 36px;
+	color: var(--gold-ink);
+	font-size: 0.8rem;
+	font-weight: 600;
+	transition: background-color var(--duration-fast) ease;
+}
+
+.quiz-wizard-place:hover {
+	background: color-mix(in srgb, var(--gold-ink) 10%, transparent);
 }
 
 .quiz-wizard-ref {
 	white-space: nowrap;
-	color: var(--gold-ink);
-	font-size: 0.8rem;
-	font-weight: 700;
 	letter-spacing: 0.04em;
 	font-variant-numeric: tabular-nums;
 }
@@ -2618,33 +2635,34 @@ main {
 .quiz-wizard-stats {
 	display: flex;
 	align-items: center;
-	gap: 0.35rem;
-	flex-wrap: wrap;
+	gap: 0.25rem;
 	margin-inline-start: auto;
+}
+
+.quiz-wizard-score {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding-inline: 0.4rem;
 }
 
 .quiz-wizard-stat {
 	display: inline-flex;
-	align-items: center;
+	align-items: baseline;
 	gap: 0.25rem;
-	font-size: 0.78rem;
-	padding: 0.15rem 0.5rem;
-	border-radius: 8px;
-	background: var(--bg-2);
 	font-variant-numeric: tabular-nums;
-	min-height: 32px;
 }
 
 .quiz-wizard-stat strong {
 	color: var(--teal);
-	font-size: 0.95rem;
+	font-size: 0.9rem;
 	font-weight: 700;
 	line-height: 1;
 }
 
 .quiz-wizard-stat small {
 	color: var(--muted);
-	font-size: 0.78rem;
+	font-size: 0.75rem;
 }
 
 .quiz-stat-sep {
@@ -2654,96 +2672,106 @@ main {
 }
 
 .quiz-wizard-skip {
-	border: 1px solid var(--line);
-	background: var(--paper);
+	border: 0;
+	background: transparent;
+	color: var(--muted);
 	border-radius: 8px;
-	padding: 0.35rem 0.75rem;
-	font-size: 0.78rem;
+	padding: 0.3rem 0.6rem;
+	font-size: 0.8rem;
 	font-weight: 600;
 	min-height: 44px;
 	line-height: 1;
+	white-space: nowrap;
 	display: inline-flex;
 	align-items: center;
 	transition:
 		background-color var(--duration-fast) ease,
-		border-color var(--duration-fast) ease;
+		color var(--duration-fast) ease;
 }
 
 .quiz-wizard-skip:hover {
-	border-color: var(--teal);
 	background: var(--teal-soft);
+	color: var(--teal);
 }
 
-@media (max-width: 560px) {
-	.quiz-wizard-reader {
-		display: none;
-	}
-}
-
-.quiz-wizard-progress-strip {
-	display: grid;
-	gap: 0.35rem;
-	flex-shrink: 0;
-}
-
+/* Step dots joined by a short connector; filled steps ink the connector teal. */
 .quiz-wizard-breadcrumbs {
-	display: grid;
-	grid-template-columns: repeat(var(--quiz-steps, 5), minmax(0, 1fr));
-	gap: 0.35rem;
+	display: flex;
+	align-items: center;
+	min-width: 0;
 }
 
 .quiz-crumb {
-	display: flex;
+	position: relative;
+	display: inline-flex;
 	align-items: center;
-	justify-content: center;
-	gap: 0.3rem;
-	min-height: 48px;
-	padding: 0.3rem 0.45rem;
-	border-radius: 10px;
-	border: 1px solid var(--line);
-	background: var(--bg-2);
-	font-size: 0.78rem;
-	color: color-mix(in srgb, var(--ink) 70%, var(--muted));
-	overflow: hidden;
+	gap: 0.35rem;
+	min-height: 44px;
+	padding: 0 0.2rem;
+	border: 0;
+	background: transparent;
+	font-size: 0.8rem;
+	color: var(--muted);
 	white-space: nowrap;
+	transition: color var(--duration-fast) ease;
+}
+
+.quiz-crumb + .quiz-crumb {
+	margin-inline-start: 0.85rem;
+}
+
+.quiz-crumb + .quiz-crumb::before {
+	content: "";
+	position: absolute;
+	inset-inline-start: -0.8rem;
+	top: 50%;
+	width: 0.75rem;
+	height: 2px;
+	border-radius: 2px;
+	background: var(--line);
+}
+
+.quiz-crumb.is-filled + .quiz-crumb::before {
+	background: color-mix(in srgb, var(--teal) 55%, var(--line));
+}
+
+.quiz-crumb-num {
+	width: 26px;
+	height: 26px;
+	border-radius: 99px;
+	border: 1.5px solid var(--line);
+	background: var(--paper);
+	color: var(--muted);
+	display: inline-grid;
+	place-items: center;
+	font-size: 0.75rem;
+	font-weight: 700;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 	transition:
 		background-color var(--duration-fast) ease,
 		border-color var(--duration-fast) ease,
 		color var(--duration-fast) ease;
 }
 
-.quiz-crumb.is-filled {
-	background: var(--paper);
-	color: var(--ink);
-	border-color: color-mix(in srgb, var(--teal) 45%, var(--line));
+.quiz-crumb:hover .quiz-crumb-num {
+	border-color: var(--teal);
+	color: var(--teal);
+}
+
+.quiz-crumb.is-filled .quiz-crumb-num {
+	border-color: color-mix(in srgb, var(--teal) 55%, var(--line));
+	background: var(--teal-soft);
+	color: var(--teal);
 }
 
 .quiz-crumb.is-active {
-	background: var(--teal-soft);
-	border-color: var(--teal);
 	color: var(--teal);
 	font-weight: 700;
 }
 
-.quiz-crumb-num {
-	width: 20px;
-	height: 20px;
-	border-radius: 99px;
-	background: color-mix(in srgb, var(--ink) 10%, var(--paper));
-	color: var(--ink);
-	display: inline-grid;
-	place-items: center;
-	font-size: 0.78rem;
-	font-weight: 700;
-	flex-shrink: 0;
-	font-variant-numeric: tabular-nums;
-}
-
-:root[data-theme="dark"] .quiz-crumb-num {
-	background: rgba(255, 255, 255, 0.1);
-}
-
 .quiz-crumb.is-active .quiz-crumb-num {
+	border-color: var(--teal);
 	background: var(--teal);
 	color: #fffdf8;
 }
@@ -2752,19 +2780,41 @@ main {
 	color: var(--on-accent);
 }
 
+/* Only the active step spells out its label; the rest stay as numbered dots. */
 .quiz-crumb-text {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	min-width: 0;
+	max-width: 9rem;
 }
 
+.quiz-crumb:not(.is-active) .quiz-crumb-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	clip-path: inset(50%);
+}
+
+/* On phones the question already names the step, so every dot stays a dot and the rail keeps to one row. */
 @media (max-width: 640px) {
-	.quiz-crumb:not(.is-active) .quiz-crumb-text {
-		display: none;
+	.quiz-crumb.is-active .quiz-crumb-text {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		clip-path: inset(50%);
 	}
 
-	.quiz-crumb.is-active .quiz-crumb-text {
-		max-width: 5.5rem;
+	.quiz-crumb + .quiz-crumb {
+		margin-inline-start: 0.6rem;
+	}
+
+	.quiz-crumb + .quiz-crumb::before {
+		inset-inline-start: -0.55rem;
+		width: 0.5rem;
+	}
+
+	.quiz-wizard-stat small {
+		display: none;
 	}
 }
 
@@ -2890,7 +2940,7 @@ main {
 	align-items: start;
 	gap: 0.3rem 0.75rem;
 	flex-shrink: 0;
-	padding-block: 0.35rem 0.75rem;
+	padding-block: 1.1rem 0.9rem;
 	border-bottom: 1px solid var(--line);
 	margin-bottom: 0.15rem;
 }
@@ -2900,9 +2950,9 @@ main {
 	margin: 0;
 	max-width: 40ch;
 	font-family: var(--serif);
-	font-size: clamp(1.3rem, 3vw, 1.7rem);
+	font-size: clamp(1.45rem, 3.6vw, 1.95rem);
 	font-weight: 700;
-	line-height: 1.45;
+	line-height: 1.4;
 	color: var(--ink);
 	text-wrap: balance;
 }
@@ -3327,10 +3377,6 @@ main {
 		min-height: 40px;
 	}
 
-	.quiz-crumb {
-		min-height: 44px;
-	}
-
 	.quiz-wizard-verse-line .quiz-word-token {
 		min-height: 44px;
 		min-width: 44px;
@@ -3341,15 +3387,6 @@ main {
 		/* Slightly denser so a mid-length ayah and the question can share a phone screen */
 		font-size: clamp(1.3rem, 4.4vw, 1.7rem);
 		line-height: 1.45;
-	}
-
-	.quiz-wizard-meta-bar {
-		gap: 0.35rem;
-		margin-bottom: 0.25rem;
-	}
-
-	.quiz-wizard-progress-strip {
-		gap: 0.25rem;
 	}
 
 	.quiz-wizard-actions.sticky-actions {

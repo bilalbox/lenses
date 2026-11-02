@@ -11,7 +11,6 @@ import {
 	type ExampleHuntQuestion,
 	type FacetCode,
 	type GrammarPools,
-	inWordPreposition,
 	type QuizQuestion,
 	rootChoice,
 	type SarfQuestion,
@@ -33,6 +32,7 @@ import type {
 	SurahSyntaxFile,
 	SyntaxSentence,
 	SyntaxToken,
+	SyntaxWord,
 	Verse,
 	Word,
 } from "./types";
@@ -310,8 +310,6 @@ interface IrabCandidate {
 	clauseWordNums: Set<number>;
 	/** For a multi-khabar adj chain: the word of the mubtada / nāsikh it ultimately predicates. */
 	predicateHead: () => number | undefined;
-	/** The governor is a preposition joined to the target word itself. */
-	inWordGovernor: boolean;
 }
 
 /**
@@ -391,11 +389,6 @@ function reconcileIrab(
 	if (!role || !headWord) return null;
 	if (classicalNamesOtherHead(targetWord.i, verse, headWord)) return null;
 
-	const governorPrefix = c.inWordGovernor
-		? inWordPreposition(targetWord)?.a
-		: undefined;
-	if (c.inWordGovernor && !governorPrefix) return null;
-
 	const clauseWords = verse.w.filter((w) => c.clauseWordNums.has(w.n));
 	return {
 		id: `${file.n}:${verse.v}:${targetWord.n}:${role.relation}`,
@@ -411,7 +404,6 @@ function reconcileIrab(
 		signDetailAr: meta.detailAr,
 		classicalIrab: targetWord.i,
 		clauseWords: clauseWords.length > 0 ? clauseWords : verse.w,
-		...(governorPrefix ? { governorPrefix } : {}),
 	};
 }
 
@@ -475,12 +467,9 @@ function noorBayanCandidates(
 		const head = local(tok.head);
 		const relation = tokenRelation(tok);
 		if (!head || !relation) continue;
-		// A dependent of its own word counts only for a joined preposition (بِسْمِ).
-		const inWordGovernor =
-			head[2] === word &&
-			relation === "gen" &&
-			tokens.get(`${head[2]}:${head[3]}`)?.pos === "حرف جر";
-		if (head[2] === word && !inWordGovernor) continue;
+		// A noun inside its own word (الإيمان in بالإيمان) is asked as the
+		// whole jārr-majrūr phrase instead; see phraseQuestion.
+		if (head[2] === word) continue;
 		candidates.push({
 			targetWordNum: word,
 			headWordNum: head[2],
@@ -488,10 +477,87 @@ function noorBayanCandidates(
 			segIndex: tok.tok - 1,
 			clauseWordNums,
 			predicateHead: () => noorBayanPredicateHead(tokens, head, local),
-			inWordGovernor,
 		});
 	}
 	return candidates;
+}
+
+/** Derivations of a noun that a jārr-majrūr can attach to: the participles and the maṣdar. */
+const VERB_LIKE_DERIV = new Set(["ACT-PCPL", "PASS-PCPL", "VN"]);
+
+/** A verb, adjective or verb-like noun: the words a jārr-majrūr is taught to attach to. */
+function canBearPhrase(word: Word): boolean {
+	const main = word.s.find((seg) => seg.k === "m");
+	if (!main) return false;
+	return (
+		main.p === "V" ||
+		main.p === "ADJ" ||
+		VERB_LIKE_DERIV.has(main.f?.deriv ?? "")
+	);
+}
+
+/**
+ * The mutaʿallaq of a word that opens with a joined preposition governing the
+ * rest of it (بِالْإِيمَانِ، عَلَيْهِمْ), when the treebank attaches it (`link`)
+ * to another word of the same ayah. Elided (مَحْذُوف) attachments have no head.
+ */
+function phraseHead(sura: number, verse: number, word: SyntaxWord) {
+	const [prep, ...rest] = word.tokens;
+	const head = prep?.head;
+	if (prep?.pos !== "حرف جر" || prep.rel.toLowerCase() !== "link") return null;
+	if (!head || head[0] !== sura || head[1] !== verse || head[2] === word.w)
+		return null;
+	const governsRest = rest.some(
+		(t) => t.rel === "gen" && t.head?.[2] === word.w && t.head[3] === prep.tok,
+	);
+	return governsRest ? head[2] : null;
+}
+
+/**
+ * Whether a phrase's classical iʿrāb agrees on its mutaʿallaq. Most leave it
+ * unnamed; one that names another word (or an attachment to no word, بمعنى
+ * النفي) contradicts the treebank.
+ */
+function classicalAgreesOnAttachment(irab: string, head: Word): boolean {
+	const bare = stripDiacritics(irab);
+	if (!bare.includes("متعلق")) return true;
+	const named = bare.match(/متعلق\S* ب\S*?﴿([^﴾]+)﴾/)?.[1];
+	return Boolean(named && stripDiacritics(head.a).includes(named.trim()));
+}
+
+/**
+ * A joined jārr-majrūr asked as one phrase: its role is the phrase itself and
+ * its governor the word it attaches to. It takes no case or sign of its own.
+ */
+function phraseQuestion(
+	file: SurahFile,
+	verse: Verse,
+	sentence: SyntaxSentence,
+	word: SyntaxWord,
+): QuizQuestion | null {
+	const headNum = phraseHead(file.n, verse.v, word);
+	const targetWord = verse.w.find((w) => w.n === word.w);
+	const headWord = verse.w.find((w) => w.n === headNum);
+	const classical = stripDiacritics(targetWord?.i ?? "");
+	if (!targetWord?.i || !classical.includes("حرف جر") || !headWord) return null;
+	if (!canBearPhrase(headWord)) return null;
+	if (!classicalAgreesOnAttachment(targetWord.i, headWord)) return null;
+	const clause = new Set(sentence.words.map((w) => w.w));
+	return {
+		id: `${file.n}:${verse.v}:${targetWord.n}:pp`,
+		sura: file.n,
+		suraName: file.name,
+		suraPhonetic: file.phonetic,
+		verse,
+		targetWord,
+		headWord,
+		relation: "pp",
+		grammaticalCase: null,
+		sign: null,
+		signDetailAr: "",
+		classicalIrab: targetWord.i,
+		clauseWords: verse.w.filter((w) => clause.has(w.n)),
+	};
 }
 
 /** iʿrāb questions from the NoorBayan treebank, reconciled with each word's classical iʿrāb. */
@@ -502,9 +568,12 @@ function extractIrabQuestions(
 	const questions: QuizQuestion[] = [];
 	const byVerse = new Map(syntax.verses.map((v) => [v.v, v]));
 	for (const verse of file.verses)
-		for (const sentence of byVerse.get(verse.v)?.sentences ?? [])
+		for (const sentence of byVerse.get(verse.v)?.sentences ?? []) {
 			for (const c of noorBayanCandidates(sentence, file.n, verse.v))
 				pushUnique(questions, reconcileIrab(file, verse, c));
+			for (const word of sentence.words)
+				pushUnique(questions, phraseQuestion(file, verse, sentence, word));
+		}
 	return questions;
 }
 

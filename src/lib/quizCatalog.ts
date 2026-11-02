@@ -9,6 +9,7 @@ export type QuizRelation =
 	| "pred"
 	| "predx"
 	| "gen"
+	| "pp"
 	| "poss"
 	| "adj"
 	| "app"
@@ -188,6 +189,24 @@ export const QUIZ_ROLES: RoleMeta[] = [
 			id: "Pilih huruf jar yang memajrurkan isim ini",
 		},
 		defaultCase: "GEN",
+	},
+	{
+		code: "pp",
+		ar: "جار ومجرور (شبه جملة)",
+		en: "Prepositional Phrase (Jārr wa-Majrūr)",
+		id: "Jar Majrur (Syibhul Jumlah)",
+		family: "clause",
+		group: "genitives",
+		governorLabel: {
+			ar: "المتعلَّق به",
+			en: "Attached Governor (Mutaʿallaq bihi)",
+			id: "Muta'allaq Bih",
+		},
+		governorPrompt: {
+			ar: "اختر الفعل أو ما يشبهه الذي يتعلق به الجار والمجرور",
+			en: "Select the verb (or verb-like word) this prepositional phrase attaches to",
+			id: "Pilih fi'il (atau yang serupa) tempat jar majrur ini bergantung",
+		},
 	},
 	{
 		code: "adj",
@@ -551,6 +570,14 @@ export function signsForCase(grammaticalCase: QuizCase | null): SignMeta[] {
 	if (!grammaticalCase) return QUIZ_SIGNS;
 	const allowed = SIGNS_BY_CASE[grammaticalCase];
 	return QUIZ_SIGNS.filter((s) => allowed.includes(s.code));
+}
+
+/**
+ * Whether a role is the jārr-majrūr phrase (بِالْإِيمَانِ), which has a
+ * mutaʿallaq but no case or sign of its own.
+ */
+export function isPhraseRole(relation: QuizRelation | null): boolean {
+	return relation === "pp";
 }
 
 /** Roles the picker offers: the core set, plus the extended ones when turned on. */

@@ -24,7 +24,12 @@ describe("integration: quiz sign picker", () => {
 		const { irab } = extractQuizPools(sources);
 		expect(irab.length).toBeGreaterThan(0);
 		const outside = irab
-			.filter((q) => !SIGNS_BY_CASE[q.grammaticalCase].includes(q.sign))
+			.filter(
+				(q) =>
+					q.grammaticalCase !== null &&
+					(q.sign === null ||
+						!SIGNS_BY_CASE[q.grammaticalCase].includes(q.sign)),
+			)
 			.map((q) => `${q.id} ${q.grammaticalCase} ${q.sign}`);
 		expect(outside).toEqual([]);
 	}, 120_000);

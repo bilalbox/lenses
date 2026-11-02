@@ -29,6 +29,7 @@ export const id: Translations = {
 		lensesAria: "Lensa kuis",
 		stepsAria: "Langkah kuis",
 		streakLabel: "beruntun",
+		scoreLabel: "benar / percobaan",
 		skipButton: "↻ Lewati",
 		openReader: (sura: number, verse: number) =>
 			`Pembaca ${formatNum(sura, "id")}:${formatNum(verse, "id")} ↗`,

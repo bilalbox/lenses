@@ -49,6 +49,7 @@ export interface Translations {
 		lensesAria: string;
 		stepsAria: string;
 		streakLabel: string;
+		scoreLabel: string;
 		skipButton: string;
 		openReader: (sura: number, verse: number) => string;
 		stepRoleCrumb: string;

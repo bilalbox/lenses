@@ -1,12 +1,18 @@
-/** The iʿrāb lens: name the target word's role, governor, case and sign. */
+/**
+ * The iʿrāb lens: name the target word's role, governor, case and sign. A
+ * joined jārr-majrūr (بِالْإِيمَانِ) is named by its role and mutaʿallaq alone.
+ */
+import type { ReactNode } from "react";
+import { stripDiacritics } from "../../lib/arabic";
 import { formatWordIrabText } from "../../lib/formatIrab";
 import { useI18n } from "../../lib/i18n/I18nContext";
 import type { Locale } from "../../lib/i18n/types";
-import { inWordPreposition, type QuizQuestion } from "../../lib/quizBank";
+import type { QuizQuestion } from "../../lib/quizBank";
 import {
 	getCaseMeta,
 	getRoleMeta,
 	getSignMeta,
+	isPhraseRole,
 	QUIZ_CASES,
 	type QuizRelation,
 	ROLE_GROUPS,
@@ -39,27 +45,23 @@ import {
 
 type IrabField = DraftField<"irab">;
 
-/**
- * How a governor reads in the ayah: the word, or for a preposition joined to the
- * target (بِسْمِ) just that prefix, with a joiner (بِـ).
- */
+/** How a governor reads in the ayah; the target never governs itself. */
 function governorText(
 	question: QuizQuestion,
 	wordNum: number,
 ): string | undefined {
-	const word = question.verse.w.find((w) => w.n === wordNum);
-	if (!word) return undefined;
-	if (wordNum !== question.targetWord.n) return word.a;
-	const prefix = inWordPreposition(word)?.a;
-	return prefix ? `${prefix}ـ` : undefined;
+	if (wordNum === question.targetWord.n) return undefined;
+	return question.verse.w.find((w) => w.n === wordNum)?.a;
 }
 
-/** Whether a word can govern the target: any other word, or the target through a joined preposition (بِـ). */
+/** Whether a word can govern the target: any word of the ayah but the target. */
 function canGovern(question: QuizQuestion, wordNum: number): boolean {
-	return (
-		wordNum !== question.targetWord.n ||
-		Boolean(inWordPreposition(question.targetWord))
-	);
+	return wordNum !== question.targetWord.n;
+}
+
+/** The step after the governor: case, or the check step once a phrase role is picked. */
+function afterGovernor(draft: IrabDraft): WizardStep {
+	return isPhraseRole(draft.relation) ? 5 : 3;
 }
 
 interface Heads {
@@ -86,7 +88,8 @@ function crumbsOf(
 	t: ReturnType<typeof useI18n>["t"],
 ): QuizCrumb[] {
 	const d = session.drafts.irab;
-	return [
+	const { filled, total } = progress(session);
+	const crumbs: QuizCrumb[] = [
 		{
 			stepNum: 1,
 			label: d.relation ? getRoleMeta(d.relation).ar : t.quiz.stepRoleCrumb,
@@ -116,9 +119,13 @@ function crumbsOf(
 		{
 			stepNum: 5,
 			label: t.quiz.stepCheckCrumb,
-			filled: progress(session).filled === 5,
+			filled: filled === total,
 		},
 	];
+	// A phrase has no case or sign: its wizard is role, mutaʿallaq, check.
+	return isPhraseRole(d.relation)
+		? crumbs.filter((c) => c.stepNum !== 3 && c.stepNum !== 4)
+		: crumbs;
 }
 
 function caseChoices(locale: Locale): Choice[] {
@@ -167,7 +174,11 @@ export function IrabLens({
 	});
 	const onTapWord = (wordNum: number) => {
 		if (canGovern(q, wordNum))
-			answer("headWordNum", wordNum, step === 2 ? 3 : undefined);
+			answer(
+				"headWordNum",
+				wordNum,
+				step === 2 ? afterGovernor(draft) : undefined,
+			);
 	};
 	const governorLabel = getRoleMeta(draft.relation ?? q.relation).governorLabel;
 
@@ -208,7 +219,7 @@ export function IrabLens({
 						question={q}
 						value={draft.headWordNum}
 						format={show}
-						onPick={(n) => answer("headWordNum", n, 3)}
+						onPick={(n) => answer("headWordNum", n, afterGovernor(draft))}
 					/>
 				</StepBody>
 			)}
@@ -286,13 +297,22 @@ function IrabCheck({
 	const d = session.drafts.irab;
 	const labels = fieldLabels(q, locale, t);
 	const targetAr = show(q.targetWord.a);
+	const phrase = isPhraseRole(d.relation);
+	const head = (
+		<FormulaPart
+			step={2}
+			label={labels.headWordNum}
+			value={heads.picked && show(heads.picked)}
+			onEdit={onEdit}
+		/>
+	);
 	return (
 		<>
 			<QuizStepHead
 				title={t.quiz.step5Title(targetAr)}
 				focus={targetAr}
 				backLabel={t.quiz.editButton}
-				onBack={() => onEdit(4)}
+				onBack={() => onEdit(phrase ? 2 : 4)}
 			/>
 
 			<FormulaPreview>
@@ -303,26 +323,13 @@ function IrabCheck({
 					value={d.relation && getRoleMeta(d.relation).ar}
 					onEdit={onEdit}
 				/>{" "}
-				<span>لـ</span>{" "}
-				<FormulaPart
-					step={2}
-					label={labels.headWordNum}
-					value={heads.picked && show(heads.picked)}
-					onEdit={onEdit}
-				/>{" "}
-				<FormulaPart
-					step={3}
-					label={labels.grammaticalCase}
-					value={d.grammaticalCase && getCaseMeta(d.grammaticalCase).ar}
-					onEdit={onEdit}
-				/>{" "}
-				<span>وعلامة إعرابه</span>{" "}
-				<FormulaPart
-					step={4}
-					label={labels.sign}
-					value={d.sign && getSignMeta(d.sign).ar}
-					onEdit={onEdit}
-				/>
+				{phrase ? (
+					<>
+						<span>متعلقان بـ</span> {head}
+					</>
+				) : (
+					<CaseAndSign draft={d} labels={labels} head={head} onEdit={onEdit} />
+				)}
 				.
 			</FormulaPreview>
 			<p className="quiz-wizard-subprompt">{t.quiz.formulaEditHint}</p>
@@ -333,6 +340,75 @@ function IrabCheck({
 				onSubmit={onSubmit}
 			/>
 		</>
+	);
+}
+
+/** The rest of a word's formula: لـ governor, case, and وعلامة إعرابه sign. */
+function CaseAndSign({
+	draft,
+	labels,
+	head,
+	onEdit,
+}: {
+	draft: IrabDraft;
+	labels: Record<IrabField, string>;
+	head: ReactNode;
+	onEdit: (step: WizardStep) => void;
+}) {
+	return (
+		<>
+			<span>لـ</span> {head}{" "}
+			<FormulaPart
+				step={3}
+				label={labels.grammaticalCase}
+				value={draft.grammaticalCase && getCaseMeta(draft.grammaticalCase).ar}
+				onEdit={onEdit}
+			/>{" "}
+			<span>وعلامة إعرابه</span>{" "}
+			<FormulaPart
+				step={4}
+				label={labels.sign}
+				value={draft.sign && getSignMeta(draft.sign).ar}
+				onEdit={onEdit}
+			/>
+		</>
+	);
+}
+
+/** Case and sign verdicts; a phrase question asks neither, so it shows none. */
+function CaseAndSignChips({
+	question: q,
+	draft,
+	ok,
+}: {
+	question: QuizQuestion;
+	draft: IrabDraft;
+	ok: (field: IrabField) => boolean;
+}) {
+	if (!q.grammaticalCase || !q.sign) return null;
+	return (
+		<>
+			<VerdictChip
+				ok={ok("grammaticalCase")}
+				picked={draft.grammaticalCase && getCaseMeta(draft.grammaticalCase).ar}
+				answer={getCaseMeta(q.grammaticalCase).ar}
+			/>
+			<VerdictChip
+				ok={ok("sign")}
+				picked={draft.sign && getSignMeta(draft.sign).ar}
+				answer={q.signDetailAr}
+			/>
+		</>
+	);
+}
+
+/** The classical iʿrāb, with a phrase's mutaʿallaq added when the word's own iʿrāb leaves it out. */
+function revealProse(q: QuizQuestion, headAnswer: string): ReactNode {
+	const named = stripDiacritics(q.classicalIrab).includes("متعلق");
+	if (!isPhraseRole(q.relation) || named)
+		return formatWordIrabText(q.classicalIrab);
+	return formatWordIrabText(
+		`${q.classicalIrab} وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ﴿${headAnswer}﴾.`,
 	);
 }
 
@@ -347,7 +423,6 @@ function IrabReveal({
 	const d = session.drafts.irab;
 	const ok = (field: IrabField) => session.verdict?.fields[field] ?? false;
 	const role = getRoleMeta(q.relation);
-	const caseAr = getCaseMeta(q.grammaticalCase).ar;
 	const headAnswer = show(heads.answer);
 	return (
 		<RevealCard
@@ -366,19 +441,10 @@ function IrabReveal({
 						answer={headAnswer}
 						wrongAnswer={`${role.governorLabel.ar}: ${headAnswer}`}
 					/>
-					<VerdictChip
-						ok={ok("grammaticalCase")}
-						picked={d.grammaticalCase && getCaseMeta(d.grammaticalCase).ar}
-						answer={caseAr}
-					/>
-					<VerdictChip
-						ok={ok("sign")}
-						picked={d.sign && getSignMeta(d.sign).ar}
-						answer={q.signDetailAr}
-					/>
+					<CaseAndSignChips question={q} draft={d} ok={ok} />
 				</>
 			}
-			prose={formatWordIrabText(q.classicalIrab)}
+			prose={revealProse(q, headAnswer)}
 			onNext={onNext}
 		/>
 	);

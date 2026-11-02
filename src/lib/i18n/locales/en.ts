@@ -30,6 +30,7 @@ export const en: Translations = {
 		lensesAria: "Quiz lenses",
 		stepsAria: "Quiz steps",
 		streakLabel: "streak",
+		scoreLabel: "solved / attempts",
 		skipButton: "↻ Skip",
 		openReader: (sura: number, verse: number) =>
 			`Reader ${formatNum(sura, "en")}:${formatNum(verse, "en")} ↗`,

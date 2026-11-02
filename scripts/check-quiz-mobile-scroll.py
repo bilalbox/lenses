@@ -42,7 +42,7 @@ def measure(page):
             ayahTop: Math.round(ar.top),
             ayahInView: ar.top < window.innerHeight && ar.bottom > 60 && ar.height > 40,
             stepOnScreen: step ? step.getBoundingClientRect().top < window.innerHeight : false,
-            metaInBottom: !!bottom.querySelector('.quiz-wizard-meta-bar'),
+            metaInBottom: !!bottom.querySelector('.quiz-wizard-rail'),
           };
         }"""
     )
@@ -79,7 +79,7 @@ def main() -> None:
     print("desktop", desk)
 
     assert metrics.get("ok"), metrics
-    assert metrics["metaInBottom"], "meta/progress should live in bottom pane"
+    assert metrics["metaInBottom"], "step rail should live in bottom pane"
     assert metrics["ayahInView"], f"ayah not in view: {metrics}"
     assert metrics["wordsOnScreen"] >= 4, f"verse not readable on first screen: {metrics}"
     assert metrics["gap"] < 40, f"black-void style grid gap: {metrics}"
