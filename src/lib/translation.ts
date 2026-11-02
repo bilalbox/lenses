@@ -8,7 +8,7 @@ export function loadVerseTranslation(
 ): Promise<string> {
 	const cacheKey = `${key}:${sura}:${aya}`;
 	const cached = translationCache.get(cacheKey);
-	if (cached) return cached;
+	if (cached !== undefined) return cached;
 
 	// Check persistent storage first (instant & offline-capable)
 	try {

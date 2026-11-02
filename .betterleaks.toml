@@ -1,0 +1,21 @@
+# Quality-kit Betterleaks v1 config (pin binary to 1.x until v2 is stable).
+# Extends built-in rules. Pass -c explicitly — auto-load requires --unsafe-auto-load-config.
+#
+# tools/quality/run-secret-scan.sh appends every .betterleaks.d/*.toml to this
+# file before scanning, so Pack (and Target) allowlists add to these entries.
+# Use [[allowlists]] everywhere: Betterleaks refuses [allowlist] alongside it.
+
+title = "quality-kit secret detection"
+betterleaksMinVersion = "v1.9.0"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Fixtures and the kit lock file (every Host)"
+paths = [
+  # apply's lock file: content hashes keyed by path (e.g. run-secret-scan.sh).
+  '''(?:^|/)\.quality-kit\.lock\.json$''',
+  # Intentional fixture leaks only — test source dirs are scanned.
+  '''(?i)fixtures\/.*''',
+]

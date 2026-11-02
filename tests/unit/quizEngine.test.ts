@@ -211,7 +211,7 @@ describe("quizEngine: iʿrāb questions from NoorBayan (real surahs)", () => {
 				),
 				"utf-8",
 			),
-		);
+		) as T;
 	const irabFor = (n: number) =>
 		extractQuizPools([
 			{

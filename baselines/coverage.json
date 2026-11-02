@@ -1,0 +1,12 @@
+{
+	"version": 1,
+	"findings": [
+		{
+			"id": ".",
+			"score": 76.76,
+			"note": "Adoption baseline"
+		}
+	],
+	"worseWhen": "lower",
+	"floor": 0
+}

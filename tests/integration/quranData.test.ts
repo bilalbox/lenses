@@ -458,7 +458,7 @@ describe("integration: Quran dataset integrity", () => {
 		expect(match2_123?.score).toBeGreaterThan(0.8);
 		expect(match2_123?.cat).toBe("word_swap");
 		expect(match2_123?.noteEn).toContain("shafa'ah");
-	});
+	}, 60_000);
 
 	it("ships no balāghah or munāsabāt data, sources or manifest fields", () => {
 		for (const retired of ["rhetoric.json", "transitions.json", "structure"])

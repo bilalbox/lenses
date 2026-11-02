@@ -63,7 +63,8 @@ function useVerseTranslation(
 		}
 		const key = locale === "id" ? "indonesian_sabiq" : "english_saheeh";
 		let cancelled = false;
-		loadVerseTranslation(key, sura, verse).then((text) => {
+		// loadVerseTranslation resolves to "" on failure, so it never rejects.
+		void loadVerseTranslation(key, sura, verse).then((text) => {
 			if (!cancelled) setTranslation(text);
 		});
 		return () => {
