@@ -1,0 +1,30 @@
+# Dependency vulnerability ignores for osv-scanner (shared-layer seed).
+# The Target owns this file after apply: add entries deliberately.
+#
+# Every [[IgnoredVulns]] MUST have both:
+#   id     = "GHSA-…" or "CVE-…" (or another OSV id)
+#   reason = "why this finding is accepted"   (non-empty; enforced by run-vuln-scan.sh)
+#
+# Example:
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# reason = "dev-only; tracked in ISSUE-123"
+
+# Adopted 2026-11-02. All three are transitive, dev/build-time only, and see no
+# attacker-controlled input. The fixed releases are major bumps their parents
+# do not accept yet; ignoreUntil forces a revisit.
+
+[[IgnoredVulns]]
+id = "GHSA-gcqx-w48m-w2h4"
+ignoreUntil = 2027-02-01T00:00:00Z
+reason = "deepmerge 4.3.1 via vite-plugin-pwa > workbox-build > @rollup/plugin-node-resolve; build-time merge of our own config, no fixed release"
+
+[[IgnoredVulns]]
+id = "GHSA-3g3m-2fjr-6pw4"
+ignoreUntil = 2027-02-01T00:00:00Z
+reason = "glob 10/11 via c8 > test-exclude and workbox-build; dev/build-time walks of the repo, no AbortSignal timeouts; fix needs glob 14 (major)"
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2027-02-01T00:00:00Z
+reason = "minimatch 5/9/10 via ejs > jake > filelist, c8 > test-exclude, workbox-build; patterns come from our own config, not untrusted input; fix needs minimatch 11 (major)"

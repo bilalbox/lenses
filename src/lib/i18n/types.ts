@@ -1,4 +1,5 @@
 import type { QuizPrefKey } from "../quizPrefs";
+import type { Manifest } from "../types";
 
 export type Locale = "en" | "ar" | "id";
 export type Direction = "ltr" | "rtl";
@@ -232,14 +233,7 @@ export interface Translations {
 		pageTitle: string;
 		intro: string;
 		coverageHeading: string;
-		coverageBody: (
-			words: number,
-			syntaxVerses: number,
-			partialText: string,
-			chStart: number,
-			chEnd: number,
-		) => string;
-		partialSnippet: (syntax: number, total: number, surah: number) => string;
+		coverageBody: (stats: Manifest["stats"]) => string;
 		licenseLabel: string;
 		kinds: Record<string, string>;
 		items: Record<string, SourceItemTranslation>;

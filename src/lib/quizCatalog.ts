@@ -197,6 +197,7 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		id: "Jar Majrur (Syibhul Jumlah)",
 		family: "clause",
 		group: "genitives",
+		extended: true,
 		governorLabel: {
 			ar: "المتعلَّق به",
 			en: "Attached Governor (Mutaʿallaq bihi)",

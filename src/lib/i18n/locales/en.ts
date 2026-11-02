@@ -131,7 +131,7 @@ export const en: Translations = {
 			extendedRoles: {
 				label: "Extended iʿrāb roles",
 				description:
-					"Add ẓarf, mustathnā, mafʿūl li-ajlih and tawkīd to the iʿrāb roles, and ask the ayahs that have them.",
+					"Add jārr wa-majrūr (prepositional phrases), ẓarf, mustathnā, mafʿūl li-ajlih and tawkīd to the iʿrāb roles, and ask the ayahs that have them.",
 			},
 		},
 		readerSection: "Reader layers",
@@ -248,19 +248,9 @@ export const en: Translations = {
 		pageTitle: "What this edition is built from",
 		intro:
 			"Lenses is a reader for analyses other people published. The Arabic Quranic text is stored verbatim. Grammatical layers stay attributed to their sources, and a verse can show more than one of them at once.",
-		coverageHeading: "Syntactic Coverage",
-		coverageBody: (
-			words: number,
-			syntaxVerses: number,
-			partialText: string,
-			chStart: number,
-			chEnd: number,
-		) =>
-			chStart && chEnd
-				? `Morphology covers all ${formatNum(words, "en")} words. The dependency treebank covers ${formatNum(syntaxVerses, "en")} verses${partialText}. Chapters ${formatNum(chStart, "en")}–${formatNum(chEnd, "en")} have no corpus syntax in this export. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`
-				: `Morphology covers all ${formatNum(words, "en")} words. The NoorBayan dependency treebank covers all 114 surahs (${formatNum(syntaxVerses, "en")} verses) with full dependency and constituent tree analysis. Classical iʿrāb and ṣarf from the Tafsir Center are included for every word.`,
-		partialSnippet: (syntax: number, total: number, surah: number) =>
-			`, including ${formatNum(syntax, "en")} of ${formatNum(total, "en")} verses in surah ${formatNum(surah, "en")}`,
+		coverageHeading: "Corpus & Layer Coverage",
+		coverageBody: (stats) =>
+			`Morphology and Tafsir Center classical iʿrāb, ṣarf, and word meanings cover all ${formatNum(stats.words, "en")} words across all 114 surahs (${formatNum(stats.syntaxVerses, "en")} verses), alongside surah maqāṣid and verse commentary in Arabic, English, and Indonesian. The NoorBayan treebank spans all ${formatNum(stats.syntaxVerses, "en")} verses (${formatNum(stats.syntaxGraphs, "en")} clause trees). Canonical qirāʾāt cover ${formatNum(stats.qiraatWords ?? 0, "en")} words in ${formatNum(stats.qiraatVerses ?? 0, "en")} verses, verbal similarities link ${formatNum(stats.mutashabihPairs ?? 0, "en")} verse pairs across ${formatNum(stats.mutashabihVerses ?? 0, "en")} verses, and authenticated asbāb al-nuzūl cover ${formatNum(stats.asbabVerses ?? 0, "en")} verses.`,
 		licenseLabel: "License:",
 		kinds: {
 			morphology: "Morphology",
@@ -269,6 +259,9 @@ export const en: Translations = {
 			"classical-irab": "Classical Iʿrāb",
 			tafsir: "Commentary (Tafsir)",
 			translation: "Translation",
+			asbab: "Causes of Revelation",
+			qiraat: "Ten Readings (Qirāʾāt)",
+			mutashabih: "Verbal Similarities",
 		},
 		items: {},
 	},

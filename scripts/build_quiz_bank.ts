@@ -22,14 +22,17 @@ const DATA = path.resolve("public/data/quran");
 export const QUIZ_BANK_PATH = path.join(DATA, "quizBank.json");
 
 function readSource(n: number): QuizSource {
-	const read = (kind: string) =>
+	const read = <T>(kind: string): T =>
 		JSON.parse(
 			readFileSync(
 				path.join(DATA, kind, `${String(n).padStart(3, "0")}.json`),
 				"utf-8",
 			),
-		);
-	return { surah: read("surah"), syntax: read("syntax") };
+		) as T;
+	return {
+		surah: read<QuizSource["surah"]>("surah"),
+		syntax: read<QuizSource["syntax"]>("syntax"),
+	};
 }
 
 /** The bank for the quiz surahs, curated first so the screen's first wave is a prefix. */

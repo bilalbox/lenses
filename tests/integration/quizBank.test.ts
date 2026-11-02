@@ -13,17 +13,17 @@ import { extractQuizPools, type QuizSource } from "../../src/lib/quizEngine";
 import type { SurahFile } from "../../src/lib/types";
 
 const dataDir = path.resolve("public/data/quran");
-const read = (kind: string, n: number) =>
+const read = <T>(kind: string, n: number): T =>
 	JSON.parse(
 		fs.readFileSync(
 			path.join(dataDir, kind, `${String(n).padStart(3, "0")}.json`),
 			"utf-8",
 		),
-	);
+	) as T;
 const committed: QuizBankFile = JSON.parse(
 	fs.readFileSync(QUIZ_BANK_PATH, "utf-8"),
 );
-const surahs: SurahFile[] = committed.surahs.map((n) => read("surah", n));
+const surahs = committed.surahs.map((n) => read<SurahFile>("surah", n));
 
 describe("integration: precomputed quiz bank", () => {
 	it("matches a fresh build (run `pnpm data:quiz` after changing extraction or data)", () => {
@@ -32,8 +32,8 @@ describe("integration: precomputed quiz bank", () => {
 
 	it("hydrates back to exactly the extracted questions", () => {
 		const sources: QuizSource[] = [1, 59, 78].map((n) => ({
-			surah: read("surah", n),
-			syntax: read("syntax", n),
+			surah: read<QuizSource["surah"]>("surah", n),
+			syntax: read<QuizSource["syntax"]>("syntax", n),
 		}));
 		const pools = extractQuizPools(sources);
 		const bank = toQuizBank(pools, [1, 59, 78]);
@@ -58,7 +58,10 @@ describe("integration: precomputed quiz bank", () => {
 		const codes = new Set(QUIZ_ROLES.map((r) => r.code));
 		const relations = new Set(committed.irab.map((q) => q.rel));
 		for (const rel of relations) expect(codes.has(rel)).toBe(true);
-		expect(getRoleMeta("adv").extended).toBe(true);
+		const extendedCodes = QUIZ_ROLES.filter((r) => r.extended).map(
+			(r) => r.code,
+		);
+		expect(extendedCodes).toEqual(["pp", "adv", "prp", "exc", "emph"]);
 		expect(getRoleMeta("subj").extended).toBeUndefined();
 	});
 });

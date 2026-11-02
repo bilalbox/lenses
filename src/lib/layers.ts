@@ -62,7 +62,7 @@ async function getJson<T>(url: string): Promise<T> {
 
 function request<T>(url: string): Promise<T> {
 	const cached = requests.get(url);
-	if (cached) return cached as Promise<T>;
+	if (cached !== undefined) return cached as Promise<T>;
 	const pending = getJson<T>(url).then(
 		(file) => {
 			settled.set(url, file);

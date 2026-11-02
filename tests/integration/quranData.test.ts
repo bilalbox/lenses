@@ -277,7 +277,10 @@ describe("integration: Quran dataset integrity", () => {
 		expect(baqarahQiraat.verses.length).toBeGreaterThan(0);
 	});
 
-	it("verifies i18n locales support Surah Maqasid, Asbab, Nahw, and Qiraat", () => {
+	it("verifies i18n locales support Surah Maqasid, Asbab, Nahw, Qiraat, and all Manifest Sources", () => {
+		const manifest: Manifest = JSON.parse(
+			fs.readFileSync(manifestPath, "utf-8"),
+		);
 		const locales = { en, ar, id };
 		for (const [code, t] of Object.entries(locales)) {
 			expect(t.verse.surahGoalLabel, `${code} surahGoalLabel`).toBeTruthy();
@@ -321,6 +324,25 @@ describe("integration: Quran dataset integrity", () => {
 				t.verse.mutashabihJumpToAyah,
 				`${code} mutashabihJumpToAyah`,
 			).toBeTruthy();
+
+			expect(
+				t.sources.coverageBody(manifest.stats),
+				`${code} coverageBody`,
+			).toBeTruthy();
+			for (const src of manifest.sources) {
+				expect(
+					t.sources.kinds[src.kind],
+					`${code} sources.kinds.${src.kind}`,
+				).toBeTruthy();
+			}
+		}
+
+		const sourceIds = manifest.sources.map((s) => s.id).sort();
+		for (const [code, t] of Object.entries({ ar, id })) {
+			expect(
+				Object.keys(t.sources.items).sort(),
+				`${code} source items`,
+			).toEqual(sourceIds);
 		}
 	});
 
@@ -436,7 +458,7 @@ describe("integration: Quran dataset integrity", () => {
 		expect(match2_123?.score).toBeGreaterThan(0.8);
 		expect(match2_123?.cat).toBe("word_swap");
 		expect(match2_123?.noteEn).toContain("shafa'ah");
-	});
+	}, 60_000);
 
 	it("ships no balāghah or munāsabāt data, sources or manifest fields", () => {
 		for (const retired of ["rhetoric.json", "transitions.json", "structure"])

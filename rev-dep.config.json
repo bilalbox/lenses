@@ -8,7 +8,7 @@
 		"**/.git/**",
 		"**/.wrangler/**",
 		"**/baselines/**",
-		"**/tests/ratchets/fixtures/**",
+		"**/tools/quality/ratchets/fixtures/**",
 		"**/data/**",
 		"**/public/data/**"
 	],
@@ -23,7 +23,8 @@
 			"devEntryPoints": [
 				"vite.config.ts",
 				"scripts/**/*.{ts,tsx,js,mjs,cjs}",
-				"tests/**/*.{ts,tsx,js,mjs,cjs,sh}"
+				"tests/**/*.{ts,tsx,js,mjs,cjs,sh}",
+				"tools/**/*.{ts,tsx,js,mjs,cjs,sh}"
 			],
 			"circularImportsDetection": {
 				"enabled": true,
@@ -32,12 +33,12 @@
 			"orphanFilesDetection": {
 				"enabled": true,
 				"ignoreTypeImports": true,
-				"graphExclude": ["scripts/**", "tests/**", "baselines/**"]
+				"graphExclude": ["scripts/**", "tests/**", "tools/**", "baselines/**"]
 			},
 			"unusedExportsDetection": {
 				"enabled": true,
 				"ignoreTypeExports": true,
-				"ignoreFiles": ["scripts/**", "tests/**"]
+				"ignoreFiles": ["scripts/**", "tests/**", "tools/**"]
 			},
 			"unusedNodeModulesDetection": {
 				"enabled": true,
@@ -45,6 +46,7 @@
 				"pkgJsonFieldsWithBinaries": ["scripts", "bin"],
 				"filesWithBinaries": [
 					"scripts/run-rev-dep.ts",
+					"tools/quality/js-ts/collect-coverage.sh",
 					".husky/pre-commit",
 					".husky/pre-push"
 				],
@@ -53,7 +55,8 @@
 					"biome.json",
 					"biome.complexity.json",
 					"vitest.config.*",
-					"vite.config.*"
+					"vite.config.*",
+					"tools/quality/js-ts/collect-coverage.sh"
 				]
 			},
 			"missingNodeModulesDetection": {
@@ -71,7 +74,12 @@
 				"enabled": true,
 				"minTokens": 50,
 				"snapshotPath": ".rev-dep.duplicates.json",
-				"ignoreFiles": ["scripts/**", "tests/**", "**/node_modules/**"]
+				"ignoreFiles": [
+					"scripts/**",
+					"tests/**",
+					"tools/**",
+					"**/node_modules/**"
+				]
 			}
 		}
 	]

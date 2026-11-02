@@ -11,9 +11,10 @@
 			"!!**/dist",
 			"!!**/node_modules",
 			"!!**/.wrangler",
+			"!!**/pnpm-lock.yaml",
 			"!!.rev-dep.baseline.json",
 			"!!.rev-dep.duplicates.json",
-			"!!pnpm-lock.yaml",
+			"!!**/tools/quality/ratchets",
 			"!!public/data",
 			"!!data"
 		]
@@ -35,9 +36,19 @@
 			"complexity": {
 				"noImportantStyles": "off"
 			},
+			"correctness": {
+				"noUnusedImports": { "level": "on", "fix": "safe" }
+			},
+			"nursery": {
+				"noFloatingPromises": "error",
+				"noMisusedPromises": "error",
+				"noUnsafeReturn": "error",
+				"useExhaustiveSwitchCases": "error"
+			},
 			"style": {
 				"noDescendingSpecificity": "off",
-				"noNonNullAssertion": "off"
+				"noNonNullAssertion": "off",
+				"useTemplate": { "level": "on", "fix": "safe" }
 			},
 			"suspicious": {
 				"noConsole": "error",
