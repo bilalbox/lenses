@@ -20,10 +20,10 @@ import {
 } from "../lib/quizSession";
 import type { ExampleQuery } from "../lib/search";
 import type { Manifest } from "../lib/types";
-import { MutashabihQuiz } from "./MutashabihQuiz";
 import { ExamplesLens } from "./quiz/ExamplesLens";
-import type { LensProps } from "./quiz/GrammarFrame";
 import { IrabLens } from "./quiz/IrabLens";
+import { MutashabihLens } from "./quiz/MutashabihLens";
+import type { LensProps } from "./quiz/QuizFrame";
 import { SarfLens } from "./quiz/SarfLens";
 import { useQuizPools } from "./quiz/useQuizPools";
 
@@ -140,19 +140,6 @@ export function QuizScreen({
 		);
 	}
 
-	if (lens === "mutashabih")
-		return (
-			<MutashabihQuiz
-				question={question as MutashabihQuestion}
-				session={session}
-				dispatch={dispatch}
-				hideDiacritics={hideDiacritics}
-				onOpenInReader={onOpenInReader}
-				onSelectLens={handleSelectLens}
-				onNext={handleNextRandom}
-			/>
-		);
-
 	const shared: Omit<LensProps<never>, "question"> = {
 		session,
 		dispatch,
@@ -164,6 +151,10 @@ export function QuizScreen({
 		targetBtnRef,
 		ayahBoxRef,
 	};
+	if (lens === "mutashabih")
+		return (
+			<MutashabihLens {...shared} question={question as MutashabihQuestion} />
+		);
 	if (lens === "irab")
 		return (
 			<IrabLens

@@ -23,13 +23,8 @@ import {
 import type { Word } from "../../lib/types";
 import type { QuizCrumb } from "../QuizChrome";
 import { QuizStepHead } from "../QuizChrome";
-import {
-	currentStep,
-	GrammarFrame,
-	type LensProps,
-	missingLabels,
-	type TokenMarks,
-} from "./GrammarFrame";
+import { GrammarFrame, type TokenMarks } from "./GrammarFrame";
+import { currentStep, type LensProps, missingLabels } from "./QuizFrame";
 import {
 	type Choice,
 	ChoiceGrid,

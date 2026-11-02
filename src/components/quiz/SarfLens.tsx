@@ -13,13 +13,8 @@ import {
 import type { ExampleQuery } from "../../lib/search";
 import type { QuizCrumb } from "../QuizChrome";
 import { QuizStepHead } from "../QuizChrome";
-import {
-	currentStep,
-	GrammarFrame,
-	type LensProps,
-	missingLabels,
-	type TokenMarks,
-} from "./GrammarFrame";
+import { GrammarFrame, type TokenMarks } from "./GrammarFrame";
+import { currentStep, type LensProps, missingLabels } from "./QuizFrame";
 import {
 	type Choice,
 	ChoiceGrid,

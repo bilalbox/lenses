@@ -7,7 +7,7 @@ export interface Choice {
 	code: string;
 	ar: string;
 	/** The line under the Arabic label. */
-	sub: string;
+	sub?: string;
 	/** A gloss beside the Arabic label (case cards only). */
 	gloss?: string;
 }
@@ -17,10 +17,13 @@ export function ChoiceGrid({
 	choices,
 	value,
 	onPick,
+	pressed = false,
 }: {
 	choices: Choice[];
 	value: string | null;
 	onPick: (code: string) => void;
+	/** Mark the picked card with `aria-pressed`. */
+	pressed?: boolean;
 }) {
 	return (
 		<div className="quiz-wizard-sign-grid">
@@ -28,12 +31,13 @@ export function ChoiceGrid({
 				<button
 					key={c.code}
 					type="button"
+					aria-pressed={pressed ? value === c.code : undefined}
 					className={`quiz-sign-card quiz-wizard-sign-card${value === c.code ? " is-selected" : ""}`}
 					onClick={() => onPick(c.code)}
 				>
 					<div>
 						<strong lang="ar">{c.ar}</strong>
-						<small>{c.sub}</small>
+						{c.sub !== undefined ? <small>{c.sub}</small> : null}
 					</div>
 				</button>
 			))}
@@ -175,14 +179,18 @@ export function RevealCard({
 	chips,
 	prose,
 	meaning,
+	children,
 	onNext,
 	secondary,
 }: {
 	correct: boolean;
 	title: string;
 	chips: ReactNode;
-	prose: ReactNode;
+	/** The classical analysis, as Arabic prose. */
+	prose?: ReactNode;
 	meaning?: string;
+	/** Anything else shown before the actions. */
+	children?: ReactNode;
 	onNext: () => void;
 	/** An extra action beside "next" (e.g. open the pattern in example search). */
 	secondary?: { label: string; onClick: () => void };
@@ -202,13 +210,15 @@ export function RevealCard({
 
 			<div className="quiz-wizard-verdict-strip">{chips}</div>
 
-			<p
-				className="prose irab-prose quiz-wizard-irab-prose"
-				dir="rtl"
-				lang="ar"
-			>
-				{prose}
-			</p>
+			{prose !== undefined ? (
+				<p
+					className="prose irab-prose quiz-wizard-irab-prose"
+					dir="rtl"
+					lang="ar"
+				>
+					{prose}
+				</p>
+			) : null}
 
 			{meaning ? (
 				<p className="prose quiz-meaning-note" dir="rtl" lang="ar">
@@ -216,6 +226,8 @@ export function RevealCard({
 					{meaning}
 				</p>
 			) : null}
+
+			{children}
 
 			<div className="quiz-wizard-actions sticky-actions">
 				<button type="button" className="quiz-next-cta" onClick={onNext}>
