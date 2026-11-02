@@ -84,4 +84,9 @@ describe("readerPrefs", () => {
 			Object.keys(DEFAULT_READER_PREFS).sort(),
 		);
 	});
+
+	it("returns default prefs if stored JSON is corrupt", () => {
+		store.set("lenses-reader-prefs", "not-json");
+		expect(loadReaderPrefs()).toEqual(DEFAULT_READER_PREFS);
+	});
 });

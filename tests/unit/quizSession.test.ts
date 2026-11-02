@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MutashabihQuestion } from "../../src/lib/mutashabihQuiz";
 import type {
-	ExampleHuntQuestion,
 	QuizPools,
 	QuizQuestion,
 	SarfQuestion,
@@ -42,13 +41,6 @@ const sarf = {
 	structureCode: "st",
 } as SarfQuestion;
 
-const example = {
-	id: "e1",
-	sura: 1,
-	verse: verse(1),
-	targetWord: word(4),
-} as ExampleHuntQuestion;
-
 const mutashabih = {
 	id: "m1",
 	sura: 2,
@@ -59,7 +51,6 @@ const mutashabih = {
 const pools: QuizPools = {
 	irab: [irab("a", 1, 1), irab("b", 1, 1), irab("c", 2, 5)],
 	sarf: [sarf],
-	examples: [example],
 	mutashabih: [mutashabih],
 };
 
@@ -81,13 +72,12 @@ describe("quizSession: seeding and questions", () => {
 	it("seeds one random question per lens", () => {
 		const state = run({
 			type: "seed",
-			random: { irab: 0.99, sarf: 0, examples: 0.5, mutashabih: 0.5 },
+			random: { irab: 0.99, sarf: 0, mutashabih: 0.5 },
 		});
 		expect(state.seeded).toBe(true);
 		expect(state.indices).toEqual({
 			irab: 2,
 			sarf: 0,
-			examples: 0,
 			mutashabih: 0,
 		});
 		expect(activeQuestion(state, pools)?.id).toBe("c");
@@ -201,10 +191,6 @@ describe("quizSession: answering and submitting", () => {
 			filled: 3,
 			total: 5,
 		});
-		expect(progress(run({ type: "selectLens", lens: "examples" }))).toEqual({
-			filled: 1,
-			total: 2,
-		});
 	});
 });
 
@@ -317,25 +303,25 @@ describe("quizSession: wizard navigation and lenses", () => {
 		const state = run(
 			...fullIrab,
 			{ type: "submit" },
-			{ type: "selectLens", lens: "examples" },
+			{ type: "selectLens", lens: "mutashabih" },
 		);
-		expect(state.lens).toBe("examples");
+		expect(state.lens).toBe("mutashabih");
 		expect(state.drafts.irab.relation).toBeNull();
 		expect(state).toMatchObject({ step: 1, verdict: null, recorded: false });
 		expect(state.score.solved).toBe(1);
-		expect(activeQuestion(state, pools)?.id).toBe("e1");
+		expect(activeQuestion(state, pools)?.id).toBe("m1");
 	});
 
-	it("grades the examples lens on the spotted word", () => {
-		const state = run(
-			{ type: "selectLens", lens: "examples" },
-			{ type: "answer", field: "spottedWordNum", value: 4 },
+	it("reopens step when going back to an earlier step after submit", () => {
+		const submitted = run(...fullIrab, { type: "submit" });
+		expect(submitted.verdict).not.toBeNull();
+		const back = run(
+			...fullIrab,
 			{ type: "submit" },
+			{ type: "goToStep", step: 1 },
 		);
-		expect(state.verdict).toMatchObject({
-			fields: { spottedWordNum: true },
-			allCorrect: true,
-		});
+		expect(back.step).toBe(1);
+		expect(back.verdict).toBeNull();
 	});
 
 	it("grades the mutashabih lens on wording and surah in three steps", () => {

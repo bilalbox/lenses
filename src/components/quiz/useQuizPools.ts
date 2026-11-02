@@ -17,7 +17,7 @@ import {
 import { rolesFor } from "../../lib/quizCatalog";
 import type { Manifest, MutashabihQuizFile, SurahFile } from "../../lib/types";
 
-const NO_GRAMMAR: GrammarPools = { irab: [], sarf: [], examples: [] };
+const NO_GRAMMAR: GrammarPools = { irab: [], sarf: [] };
 
 export function useQuizPools(
 	manifest: Manifest,

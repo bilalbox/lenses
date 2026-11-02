@@ -48,7 +48,7 @@ describe("integration: precomputed quiz bank", () => {
 			surahs.filter((s) => curated.has(s.n)),
 		);
 		const all = hydrateQuizPools(committed, surahs);
-		for (const lens of ["irab", "sarf", "examples"] as const) {
+		for (const lens of ["irab", "sarf"] as const) {
 			expect(first[lens].length).toBeGreaterThan(0);
 			expect(all[lens].slice(0, first[lens].length)).toEqual(first[lens]);
 		}

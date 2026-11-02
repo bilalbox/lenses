@@ -1,20 +1,16 @@
 /**
- * The page around a grammar lens (iʿrāb, ṣarf, pattern hunt): the quiz frame
+ * The page around a grammar lens (iʿrāb, ṣarf): the quiz frame
  * with the ayah as tappable words, each marked for the current step.
  */
 import type { ReactNode, RefObject } from "react";
 import { useI18n } from "../../lib/i18n/I18nContext";
-import type {
-	ExampleHuntQuestion,
-	QuizQuestion,
-	SarfQuestion,
-} from "../../lib/quizBank";
+import type { QuizQuestion, SarfQuestion } from "../../lib/quizBank";
 import type { Word } from "../../lib/types";
 import type { QuizCrumb } from "../QuizChrome";
 import { type LensProps, QuizFrame } from "./QuizFrame";
 
-export type GrammarLens = "irab" | "sarf" | "examples";
-type GrammarQuestion = QuizQuestion | SarfQuestion | ExampleHuntQuestion;
+export type GrammarLens = "irab" | "sarf";
+type GrammarQuestion = QuizQuestion | SarfQuestion;
 
 /** How one ayah word shows in the current step. */
 export interface TokenMarks {

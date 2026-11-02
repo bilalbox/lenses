@@ -5,11 +5,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { stripTashkeel } from "../lib/arabic";
 import type { MutashabihQuestion } from "../lib/mutashabihQuiz";
-import type {
-	ExampleHuntQuestion,
-	QuizQuestion,
-	SarfQuestion,
-} from "../lib/quizBank";
+import type { QuizQuestion, SarfQuestion } from "../lib/quizBank";
 import type { QuizLens } from "../lib/quizCatalog";
 import {
 	activeQuestion,
@@ -20,7 +16,6 @@ import {
 } from "../lib/quizSession";
 import type { ExampleQuery } from "../lib/search";
 import type { Manifest } from "../lib/types";
-import { ExamplesLens } from "./quiz/ExamplesLens";
 import { IrabLens } from "./quiz/IrabLens";
 import { MutashabihLens } from "./quiz/MutashabihLens";
 import type { LensProps } from "./quiz/QuizFrame";
@@ -54,7 +49,7 @@ export function QuizScreen({
 	const { lens } = session;
 	const targetBtnRef = useRef<HTMLButtonElement | null>(null);
 	const ayahBoxRef = useRef<HTMLDivElement | null>(null);
-	const { irab: irabPool, sarf: sarfPool, examples: examplesPool } = quizPools;
+	const { irab: irabPool, sarf: sarfPool } = quizPools;
 
 	// Turning the extended roles on or off reorders the iʿrāb pool, so the
 	// current index would land on another question: pick afresh.
@@ -68,31 +63,19 @@ export function QuizScreen({
 	// Always open quiz on a random verse (once curated pools are ready).
 	useEffect(() => {
 		if (session.seeded || loading) return;
-		if (
-			irabPool.length === 0 &&
-			sarfPool.length === 0 &&
-			examplesPool.length === 0
-		)
-			return;
+		if (irabPool.length === 0 && sarfPool.length === 0) return;
 		const raf = requestAnimationFrame(() => {
 			dispatch({
 				type: "seed",
 				random: {
 					irab: Math.random(),
 					sarf: Math.random(),
-					examples: Math.random(),
 					mutashabih: Math.random(),
 				},
 			});
 		});
 		return () => cancelAnimationFrame(raf);
-	}, [
-		examplesPool.length,
-		irabPool.length,
-		loading,
-		session.seeded,
-		sarfPool.length,
-	]);
+	}, [irabPool.length, loading, session.seeded, sarfPool.length]);
 
 	const question = activeQuestion(session, pools.current);
 	const questionId = question?.id;
@@ -163,18 +146,10 @@ export function QuizScreen({
 				extendedRoles={extendedRoles}
 			/>
 		);
-	if (lens === "sarf")
-		return (
-			<SarfLens
-				{...shared}
-				question={question as SarfQuestion}
-				onOpenSearch={onOpenSearch}
-			/>
-		);
 	return (
-		<ExamplesLens
+		<SarfLens
 			{...shared}
-			question={question as ExampleHuntQuestion}
+			question={question as SarfQuestion}
 			onOpenSearch={onOpenSearch}
 		/>
 	);

@@ -1,6 +1,6 @@
 /**
  * Builds public/data/quran/quizBank.json, the grammar quiz's precomputed
- * questions (iʿrāb, ṣarf, pattern hunt) for the quiz surahs.
+ * questions (iʿrāb, ṣarf) for the quiz surahs.
  *
  * Reads public/data/quran/{surah,syntax}/*.json (run `pnpm data` and
  * `pnpm data:syntax` first). The quiz screen only hydrates this file, so the
@@ -45,7 +45,7 @@ function main(): void {
 	const bank = buildQuizBank();
 	writeFileSync(QUIZ_BANK_PATH, JSON.stringify(bank));
 	console.log(
-		`quizBank.json: ${bank.irab.length} iʿrāb, ${bank.sarf.length} ṣarf, ${bank.examples.length} pattern-hunt questions`,
+		`quizBank.json: ${bank.irab.length} iʿrāb, ${bank.sarf.length} ṣarf questions`,
 	);
 }
 

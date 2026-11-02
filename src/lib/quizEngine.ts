@@ -7,9 +7,6 @@ import { stripDiacritics } from "./arabic";
 import {
 	type ChoiceOption,
 	classChoice,
-	EXAMPLE_FACETS,
-	type ExampleHuntQuestion,
-	type FacetCode,
 	type GrammarPools,
 	type QuizQuestion,
 	rootChoice,
@@ -785,7 +782,7 @@ function irabPool(sources: QuizSource[]): QuizQuestion[] {
 	return questions;
 }
 
-/** Every quiz pool for the loaded surahs: iʿrāb from NoorBayan, ṣarf and examples from morphology. */
+/** Every quiz pool for the loaded surahs: iʿrāb from NoorBayan, ṣarf from morphology. */
 export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 	const files = sources.map((source) => source.surah);
 	interface RawEntry {
@@ -980,121 +977,8 @@ export function extractQuizPools(sources: QuizSource[]): GrammarPools {
 		}
 	}
 
-	// Build ExampleHuntQuestion pool (Ayah Pattern Spotter)
-	interface FacetRule {
-		code: FacetCode;
-		matches: (w: Word, p: ParsedSarfBlock | null) => boolean;
-		seed: (p: ParsedSarfBlock) => Partial<ExampleQuery>;
-	}
-
-	const FACET_RULES: FacetRule[] = [
-		{
-			code: "form_VIII",
-			matches: (_w, p) => p?.kind === "verb" && p.bab === "افْتَعَلَ",
-			seed: () => ({ pos: "V", form: "VIII" }),
-		},
-		{
-			code: "form_IV",
-			matches: (_w, p) => p?.kind === "verb" && p.bab === "أَفْعَلَ",
-			seed: () => ({ pos: "V", form: "IV" }),
-		},
-		{
-			code: "form_X",
-			matches: (_w, p) => p?.kind === "verb" && p.bab === "اسْتَفْعَلَ",
-			seed: () => ({ pos: "V", form: "X" }),
-		},
-		{
-			code: "form_II_V",
-			matches: (_w, p) =>
-				p?.kind === "verb" && (p.bab === "فَعَّلَ" || p.bab === "تَفَعَّلَ"),
-			seed: (p) => ({ pos: "V", form: p.bab === "تَفَعَّلَ" ? "V" : "II" }),
-		},
-		{
-			code: "deriv_fail",
-			matches: (_w, p) => p?.kind === "noun" && p.deriv === "اسم فاعل",
-			seed: (p) => ({ root: p.rootRaw, pos: "N,ADJ" }),
-		},
-		{
-			code: "deriv_sifa_mubalagha",
-			matches: (_w, p) =>
-				p?.kind === "noun" &&
-				(p.deriv === "صفة مشبهة" || p.deriv === "صيغة مبالغة"),
-			seed: (p) => ({ root: p.rootRaw }),
-		},
-		{
-			code: "deriv_tafdil",
-			matches: (_w, p) => p?.kind === "noun" && p.deriv === "أفعل التفضيل",
-			seed: (p) => ({ root: p.rootRaw }),
-		},
-		{
-			code: "plural_taksir",
-			matches: (_w, p) =>
-				p?.kind === "noun" &&
-				(p.numberClass === "جمع تكسير للقلة" ||
-					p.numberClass === "جمع تكسير للكثرة"),
-			seed: (p) => ({ root: p.rootRaw, pos: "N" }),
-		},
-		{
-			code: "syntax_mansubat",
-			matches: (w) => {
-				const cleanI = stripHarakat(w.i || "");
-				return (
-					cleanI.includes("حال منصوب") ||
-					cleanI.includes("تمييز منصوب") ||
-					cleanI.includes("مفعول مطلق")
-				);
-			},
-			seed: (p) => ({ root: p.rootRaw, relation: "circ,spec,cog" }),
-		},
-	];
-
-	const exampleQuestions: ExampleHuntQuestion[] = [];
-	for (const file of files) {
-		for (const verse of file.verses) {
-			if (verse.w.length < 3 || verse.w.length > 26) continue;
-			const parsedMap = new Map<number, ParsedSarfBlock | null>();
-			for (const w of verse.w) {
-				parsedMap.set(w.n, parseSarfFromWord(w));
-			}
-
-			for (const rule of FACET_RULES) {
-				const matchingWords = verse.w.filter((w) =>
-					rule.matches(w, parsedMap.get(w.n) ?? null),
-				);
-				if (matchingWords.length !== 1) continue;
-				const targetWord = matchingWords[0];
-				if (!targetWord) continue;
-				const parsed = parsedMap.get(targetWord.n);
-				if (!parsed) continue;
-
-				const id = `ex:${file.n}:${verse.v}:${targetWord.n}:${rule.code}`;
-
-				const facet = EXAMPLE_FACETS[rule.code];
-				exampleQuestions.push({
-					id,
-					sura: file.n,
-					suraName: file.name,
-					suraPhonetic: file.phonetic,
-					verse,
-					targetWord,
-					facetCode: rule.code,
-					facetTitle: facet.title,
-					facetHint: facet.hint,
-					facetCategory: facet.category,
-					targetWazn: parsed.wazn,
-					targetRootSpaced: spaceRootLetters(parsed.rootRaw),
-					classicalSarf: targetWord.sf || "",
-					classicalIrab: targetWord.i,
-					classicalMeaning: targetWord.m,
-					searchSeed: rule.seed(parsed),
-				});
-			}
-		}
-	}
-
 	return {
 		irab: irabPool(sources),
 		sarf: sarfQuestions,
-		examples: exampleQuestions,
 	};
 }

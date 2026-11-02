@@ -41,7 +41,6 @@ export const id: Translations = {
 		fieldWazn: "Wazan",
 		fieldClass: "Bab/Musytaq",
 		fieldStructure: "Struktur",
-		fieldSpotted: "Kata dalam ayat",
 		targetBadge: "Target",
 		headBadge: "Pengampu",
 		legendTarget: (wordAr: string) => `Target · ${wordAr}`,
@@ -70,7 +69,7 @@ export const id: Translations = {
 		submitButton: "Periksa & Tampilkan I'rab Klasik",
 		nextButton: "Soal Berikutnya →",
 		exactMatchEyebrow: "TEPAT SEKALI · أحسنت",
-		reviewEyebrow: "TINJAUAN I'RAB · التصويب",
+		reviewEyebrow: "TINJAUAN · تصويب",
 		classicalHeading: (wordAr: string) => `I'rab Klasik untuk ${wordAr}`,
 		formulaEditHint: "Ketuk bagian mana pun untuk mengubahnya.",
 		incompleteAlert: "Ketuk langkah yang belum lengkap di atas:",
@@ -104,16 +103,6 @@ export const id: Translations = {
 			submitButton: "Periksa & Tampilkan Sharaf Klasik",
 			revealHeading: (wordAr: string) => `Sharaf Klasik untuk ${wordAr}`,
 			rootInExamples: (root: string) => `Akar kata (${root}) di Contoh ↗`,
-		},
-		examples: {
-			spotQuestion: (pattern: string) =>
-				`Kata mana pada ayat yang merupakan: "${pattern}"?`,
-			spotCrumb: "Pilih Kata",
-			reviewTitle: (pattern: string) =>
-				`Periksa pilihan Anda untuk "${pattern}"`,
-			submitButton: "Periksa & Tampilkan Analisis",
-			revealHeading: (wordAr: string) => `Contoh dalam ayat: ${wordAr}`,
-			explorePattern: "Jelajahi Pola Ini di Contoh ↗",
 		},
 	},
 	settings: {

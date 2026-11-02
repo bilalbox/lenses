@@ -73,31 +73,9 @@ export interface SarfQuestion {
 	searchSeed: Partial<ExampleQuery>;
 }
 
-export type FacetCategory = "form" | "deriv" | "syntax" | "plural";
-
-export interface ExampleHuntQuestion {
-	id: string;
-	sura: number;
-	suraName: string;
-	suraPhonetic: string;
-	verse: Verse;
-	targetWord: Word;
-	facetCode: FacetCode;
-	facetTitle: { ar: string; en: string; id: string };
-	facetHint: { ar: string; en: string; id: string };
-	facetCategory: FacetCategory;
-	targetWazn: string;
-	targetRootSpaced: string;
-	classicalSarf: string;
-	classicalIrab?: string;
-	classicalMeaning?: string;
-	searchSeed: Partial<ExampleQuery>;
-}
-
 export interface QuizPools {
 	irab: QuizQuestion[];
 	sarf: SarfQuestion[];
-	examples: ExampleHuntQuestion[];
 	mutashabih: MutashabihQuestion[];
 }
 
@@ -160,135 +138,6 @@ export function structureChoice(code: string): ChoiceOption {
 	return catalogChoice(code, SARF_STRUCTURES[code]!);
 }
 
-interface FacetMeta {
-	category: FacetCategory;
-	title: { ar: string; en: string; id: string };
-	hint: { ar: string; en: string; id: string };
-}
-
-/** What the Pattern Hunt asks the reader to spot; the matching rules live with extraction. */
-export const EXAMPLE_FACETS = {
-	form_VIII: {
-		category: "form",
-		title: {
-			ar: "فعل مزيد على باب (افْتَعَلَ)",
-			en: "Form VIII Verb (Iftaʿala)",
-			id: "Fi'il Mazid Wazan VIII (Ifta'ala)",
-		},
-		hint: {
-			ar: "فعل خماسي مزيد بالألف والتاء (مثل: اتَّقُوا، ابتغوا، استمعوا)",
-			en: "A 5-letter verb augmented with alif and infixed tāʾ (often assimilated, like ittaqū)",
-			id: "Fi'il lima huruf dengan tambahan alif dan ta' (sering mengalami idgham seperti ittaqu)",
-		},
-	},
-	form_IV: {
-		category: "form",
-		title: {
-			ar: "فعل مزيد على باب (أَفْعَلَ)",
-			en: "Form IV Verb (Afʿala)",
-			id: "Fi'il Mazid Wazan IV (Af'ala)",
-		},
-		hint: {
-			ar: "فعل رباعي مزيد بالهمزة في أوله يفيد التعدية غالباً (مثل: آمَنُوا، أَنزَلَ، يُخْرِبُونَ)",
-			en: "A causative 4-letter verb augmented with hamza (often elided in the imperfect)",
-			id: "Fi'il empat huruf dengan tambahan hamzah (sering dibuang pada mudhari')",
-		},
-	},
-	form_X: {
-		category: "form",
-		title: {
-			ar: "فعل مزيد على باب (اسْتَفْعَلَ)",
-			en: "Form X Verb (Istafʿala)",
-			id: "Fi'il Mazid Wazan X (Istaf'ala)",
-		},
-		hint: {
-			ar: "فعل سداسي مزيد بالسين والتاء يدل على الطلب أو الصيرورة (مثل: نَسْتَعِينُ، اسْتَغْفِرْ)",
-			en: "A 6-letter verb with sīn and tāʾ expressing seeking or requesting",
-			id: "Fi'il enam huruf dengan tambahan sin dan ta' yang bermakna memohon/mencari",
-		},
-	},
-	form_II_V: {
-		category: "form",
-		title: {
-			ar: "فعل مضعف العين (فَعَّلَ / تَفَعَّلَ)",
-			en: "Geminate-Stem Verb · Form II / V (Faʿʿala / Tafaʿʿala)",
-			id: "Fi'il Bertadh'if Ain · Wazan II / V (Fa''ala / Tafa''ala)",
-		},
-		hint: {
-			ar: "فعل مزيد بتضعيف عينه للتكثير أو التدرج (مثل: قَدَّمَتْ، سَبِّحْ، يَتَفَكَّرُونَ)",
-			en: "A verb augmented by doubling its middle radical for intensity or gradation",
-			id: "Fi'il dengan penggandaan huruf tengah ('ain fi'il) untuk intensitas",
-		},
-	},
-	deriv_fail: {
-		category: "deriv",
-		title: {
-			ar: "اسم فاعل (مشتق يدل على من قام بالفعل)",
-			en: "Active Participle (Ism Fāʿil)",
-			id: "Isim Fa'il (Partisipel Aktif)",
-		},
-		hint: {
-			ar: "يصاغ من الثلاثي على (فَاعِل) ومن غيره بضم أوله وكسر ما قبل آخره",
-			en: "Formed on fāʿil (Form I) or with prefix mu- and kasra before the final radical",
-			id: "Dibentuk dengan pola fa'il (tsulatsi) atau awalan mu- dengan kasrah sebelum akhir",
-		},
-	},
-	deriv_sifa_mubalagha: {
-		category: "deriv",
-		title: {
-			ar: "صفة مشبهة أو صيغة مبالغة",
-			en: "Intensive or Assimilated Adjective (Ṣifa Mushabbaha / Mubālagha)",
-			id: "Sifat Musyabbahah atau Shighah Mubalaghah",
-		},
-		hint: {
-			ar: "وصف يدل على الثبوت أو الكثرة (على أوزان مثل: فَعِيل، فَعُول، فَعَّال، فَعْلَان)",
-			en: "Describes an enduring or intensive attribute (patterns like faʿīl, faʿūl, faʿʿāl)",
-			id: "Kata sifat yang menunjukkan ketetapan atau intensitas tinggi (seperti fa'il, fa'ul, fa''al)",
-		},
-	},
-	deriv_tafdil: {
-		category: "deriv",
-		title: {
-			ar: "أفعل التفضيل (اسم تفضيل)",
-			en: "Elative / Superlative Noun (Ism Tafḍīl)",
-			id: "Isim Tafdhil (Komparatif / Superlatif)",
-		},
-		hint: {
-			ar: "اسم مشتق على وزن (أَفْعَل) أو (فُعْلَى) أو (خَيْر / شَرّ) يدل على الزيادة في الصفة",
-			en: "Pattern afʿal / fuʿlā (or khayr / sharr) indicating superiority in a quality",
-			id: "Wazan af'al / fu'la (atau khair / syarr) yang menunjukkan makna lebih/paling",
-		},
-	},
-	plural_taksir: {
-		category: "plural",
-		title: {
-			ar: "جمع تكسير (تغيرت فيه صورة المفرد)",
-			en: "Broken Plural (Jamʿ Taksīr)",
-			id: "Jamak Taksir (Jamak Tak Beraturan)",
-		},
-		hint: {
-			ar: "جمع تتغير فيه بنية المفرد على أوزان مثل: أَفْعَال، فُعُول، فِعَال، فَوَاعِل، قُرَى",
-			en: "A plural formed by shifting the internal vowel/consonant pattern rather than adding -ūna/-āt",
-			id: "Bentuk jamak dengan perubahan pola internal dari bentuk mufradnya",
-		},
-	},
-	syntax_mansubat: {
-		category: "syntax",
-		title: {
-			ar: "منصوب بياني (حال أو تمييز أو مفعول مطلق)",
-			en: "Adverbial Accusative (Ḥāl, Tamyīz, or Mafʿūl Muṭlaq)",
-			id: "Manshub Keterangan (Hal, Tamyiz, atau Maf'ul Muthlaq)",
-		},
-		hint: {
-			ar: "اسم منصوب يبين الهيئة (حال)، أو يزيل الإبهام (تمييز)، أو يؤكد الفعل بمصدره (مفعول مطلق)",
-			en: "An accusative noun describing state (ḥāl), specification (tamyīz), or cognate emphasis",
-			id: "Isim manshub yang menjelaskan keadaan (hal), rincian (tamyiz), atau penegasan (maf'ul muthlaq)",
-		},
-	},
-} satisfies Record<string, FacetMeta>;
-
-export type FacetCode = keyof typeof EXAMPLE_FACETS;
-
 // ---------------------------------------------------------------------------
 // The bank file
 // ---------------------------------------------------------------------------
@@ -326,21 +175,12 @@ interface SarfEntry {
 	seed: Partial<ExampleQuery>;
 }
 
-interface ExampleEntry {
-	at: WordRef;
-	facet: FacetCode;
-	wazn: string;
-	root: string;
-	seed: Partial<ExampleQuery>;
-}
-
 export interface QuizBankFile {
 	version: 1;
 	/** Surahs the bank was built from, in the order their questions appear. */
 	surahs: number[];
 	irab: IrabEntry[];
 	sarf: SarfEntry[];
-	examples: ExampleEntry[];
 }
 
 const refOf = (q: {
@@ -382,13 +222,6 @@ export function toQuizBank(
 			structures: codes(q.structureOptions),
 			...(q.asl !== undefined ? { asl: q.asl } : {}),
 			...(q.singular !== undefined ? { singular: q.singular } : {}),
-			seed: q.searchSeed,
-		})),
-		examples: pools.examples.map((q) => ({
-			at: refOf(q),
-			facet: q.facetCode,
-			wazn: q.targetWazn,
-			root: q.targetRootSpaced.replace(/ /g, ""),
 			seed: q.searchSeed,
 		})),
 	};
@@ -468,24 +301,6 @@ function hydrateSarf(e: SarfEntry, at: Located): SarfQuestion {
 	};
 }
 
-function hydrateExample(e: ExampleEntry, at: Located): ExampleHuntQuestion {
-	const facet: FacetMeta = EXAMPLE_FACETS[e.facet];
-	return {
-		id: `ex:${e.at.join(":")}:${e.facet}`,
-		...place(at),
-		facetCode: e.facet,
-		facetTitle: facet.title,
-		facetHint: facet.hint,
-		facetCategory: facet.category,
-		targetWazn: e.wazn,
-		targetRootSpaced: spaceRootLetters(e.root),
-		classicalSarf: at.word.sf || "",
-		classicalIrab: at.word.i,
-		classicalMeaning: at.word.m,
-		searchSeed: e.seed,
-	};
-}
-
 function hydrateAll<E extends { at: WordRef }, Q>(
 	entries: E[],
 	find: (ref: WordRef) => Located | null,
@@ -512,6 +327,5 @@ export function hydrateQuizPools(
 	return {
 		irab: hydrateAll(bank.irab, find, hydrateIrab),
 		sarf: hydrateAll(bank.sarf, find, hydrateSarf),
-		examples: hydrateAll(bank.examples, find, hydrateExample),
 	};
 }

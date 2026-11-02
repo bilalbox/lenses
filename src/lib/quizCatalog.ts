@@ -598,7 +598,7 @@ export function getSignMeta(code: QuizSign): SignMeta {
 	return QUIZ_SIGNS.find((s) => s.code === code) ?? QUIZ_SIGNS[0]!;
 }
 
-export type QuizLens = "irab" | "sarf" | "examples" | "mutashabih";
+export type QuizLens = "irab" | "sarf" | "mutashabih";
 
 export const SARF_CLASSES: Record<
 	string,
@@ -874,11 +874,6 @@ export function getLensLabel(
 			en: { title: "Ṣarf & Mīzān", badge: "صرف" },
 			ar: { title: "الميزان الصرفي", badge: "صرف" },
 			id: { title: "Sharaf & Wazan", badge: "صرف" },
-		},
-		examples: {
-			en: { title: "Pattern Hunt", badge: "شواهد" },
-			ar: { title: "شواهد وأنماط", badge: "شواهد" },
-			id: { title: "Lacak Pola", badge: "شواهد" },
 		},
 		mutashabih: {
 			en: { title: "Similar Verses", badge: "متشابه" },

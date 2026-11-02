@@ -22,10 +22,6 @@ export interface SarfDraft {
 	structureCode: string | null;
 }
 
-export interface ExamplesDraft {
-	spottedWordNum: number | null;
-}
-
 export interface MutashabihDraft {
 	/** Index of the picked wording. */
 	wording: number | null;
@@ -36,7 +32,6 @@ export interface MutashabihDraft {
 export interface Drafts {
 	irab: IrabDraft;
 	sarf: SarfDraft;
-	examples: ExamplesDraft;
 	mutashabih: MutashabihDraft;
 }
 
@@ -144,11 +139,6 @@ const LENSES: { [L in QuizLens]: LensSpec<L> } = {
 			structureCode: q.structureCode,
 		}),
 	},
-	examples: {
-		fields: ["spottedWordNum"],
-		empty: () => ({ spottedWordNum: null }),
-		answer: (q) => ({ spottedWordNum: q.targetWord.n }),
-	},
 	mutashabih: {
 		fields: ["wording", "surah"],
 		empty: () => ({ wording: null, surah: null }),
@@ -160,7 +150,6 @@ function emptyDrafts(): Drafts {
 	return {
 		irab: LENSES.irab.empty(),
 		sarf: LENSES.sarf.empty(),
-		examples: LENSES.examples.empty(),
 		mutashabih: LENSES.mutashabih.empty(),
 	};
 }
@@ -168,7 +157,6 @@ function emptyDrafts(): Drafts {
 const MAX_STEP: Record<QuizLens, WizardStep> = {
 	irab: 5,
 	sarf: 5,
-	examples: 2,
 	mutashabih: 3,
 };
 
@@ -180,7 +168,7 @@ export function maxStep(lens: QuizLens): WizardStep {
 export function initQuizSession(): QuizSessionState {
 	return {
 		lens: "irab",
-		indices: { irab: 0, sarf: 0, examples: 0, mutashabih: 0 },
+		indices: { irab: 0, sarf: 0, mutashabih: 0 },
 		seeded: false,
 		drafts: emptyDrafts(),
 		step: 1,
@@ -300,7 +288,6 @@ export function reduceQuizSession(
 				indices: {
 					irab: pick("irab"),
 					sarf: pick("sarf"),
-					examples: pick("examples"),
 					mutashabih: pick("mutashabih"),
 				},
 			};

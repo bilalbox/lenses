@@ -42,7 +42,6 @@ export const en: Translations = {
 		fieldWazn: "Wazn",
 		fieldClass: "Class",
 		fieldStructure: "Structure",
-		fieldSpotted: "Word in Ayah",
 		targetBadge: "Target",
 		headBadge: "Governor",
 		legendTarget: (wordAr: string) => `Target · ${wordAr}`,
@@ -69,7 +68,7 @@ export const en: Translations = {
 		submitButton: "Submit & Reveal Classical Iʿrāb",
 		nextButton: "Next Challenge →",
 		exactMatchEyebrow: "EXACT MATCH · أحسنت",
-		reviewEyebrow: "GRAMMATICAL REVIEW · التصويب",
+		reviewEyebrow: "REVIEW · تصويب",
 		classicalHeading: (wordAr: string) => `Classical Iʿrāb for ${wordAr}`,
 		formulaEditHint: "Tap any part to change it.",
 		incompleteAlert: "Tap a missing step above to complete:",
@@ -103,15 +102,6 @@ export const en: Translations = {
 			submitButton: "Submit & Reveal Classical Ṣarf",
 			revealHeading: (wordAr: string) => `Classical Ṣarf for ${wordAr}`,
 			rootInExamples: (root: string) => `Root (${root}) in Examples ↗`,
-		},
-		examples: {
-			spotQuestion: (pattern: string) =>
-				`Which word in the ayah is an example of: "${pattern}"?`,
-			spotCrumb: "Spot Word",
-			reviewTitle: (pattern: string) => `Confirm your choice for "${pattern}"`,
-			submitButton: "Submit & Reveal Analysis",
-			revealHeading: (wordAr: string) => `Spotted Example: ${wordAr}`,
-			explorePattern: "Explore Pattern in Examples ↗",
 		},
 	},
 	settings: {

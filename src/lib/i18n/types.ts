@@ -61,7 +61,6 @@ export interface Translations {
 		fieldWazn: string;
 		fieldClass: string;
 		fieldStructure: string;
-		fieldSpotted: string;
 		targetBadge: string;
 		headBadge: string;
 		legendTarget: (wordAr: string) => string;
@@ -109,15 +108,6 @@ export interface Translations {
 			submitButton: string;
 			revealHeading: (wordAr: string) => string;
 			rootInExamples: (root: string) => string;
-		};
-		examples: {
-			/** `pattern` is the facet title in the interface language. */
-			spotQuestion: (pattern: string) => string;
-			spotCrumb: string;
-			reviewTitle: (pattern: string) => string;
-			submitButton: string;
-			revealHeading: (wordAr: string) => string;
-			explorePattern: string;
 		};
 	};
 	settings: {

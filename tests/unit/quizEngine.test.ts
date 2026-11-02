@@ -7,9 +7,12 @@ import {
 	getLensLabel,
 	getRoleMeta,
 	getSignMeta,
+	isPhraseRole,
 	type QuizCase,
 	type QuizRelation,
 	type QuizSign,
+	rolesFor,
+	signsForCase,
 } from "../../src/lib/quizCatalog";
 import { extractQuizPools } from "../../src/lib/quizEngine";
 import type { SurahFile, SurahSyntaxFile } from "../../src/lib/types";
@@ -104,15 +107,14 @@ describe("quizEngine: metadata lookup", () => {
 			title: "الميزان الصرفي",
 			badge: "صرف",
 		});
+	});
 
-		expect(getLensLabel("examples", "en")).toEqual({
-			title: "Pattern Hunt",
-			badge: "شواهد",
-		});
-		expect(getLensLabel("examples", "ar")).toEqual({
-			title: "شواهد وأنماط",
-			badge: "شواهد",
-		});
+	it("filters signs and roles properly", () => {
+		expect(signsForCase(null)).toHaveLength(8);
+		expect(signsForCase("NOM")).toHaveLength(4);
+		expect(isPhraseRole("pp")).toBe(true);
+		expect(isPhraseRole("subj")).toBe(false);
+		expect(rolesFor(true).length).toBeGreaterThan(rolesFor(false).length);
 	});
 });
 
@@ -182,22 +184,6 @@ describe("quizEngine: extraction from Surah data (Al-Fātiḥah fixture)", () =>
 			const structCodes = sq.structureOptions.map((o) => o.code);
 			expect(new Set(structCodes).size).toBe(4);
 			expect(structCodes).toContain(sq.structureCode);
-		}
-	});
-
-	it("extracts example hunt questions with valid clues and answer words", () => {
-		const pools = extractQuizPools([{ surah: fatihah }]);
-		expect(pools.examples.length).toBeGreaterThan(0);
-
-		for (const eq of pools.examples) {
-			expect(eq.id).toBeDefined();
-			expect(eq.targetWord.n).toBeGreaterThan(0);
-			expect(eq.targetWord.a).toBeTruthy();
-			expect(eq.facetTitle.ar).toBeTruthy();
-			expect(eq.facetTitle.en).toBeTruthy();
-			expect(eq.facetHint.ar).toBeTruthy();
-			expect(eq.targetWazn).toBeTruthy();
-			expect(eq.searchSeed).toBeDefined();
 		}
 	});
 });
