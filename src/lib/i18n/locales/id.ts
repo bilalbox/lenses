@@ -133,7 +133,7 @@ export const id: Translations = {
 			extendedRoles: {
 				label: "Kedudukan i'rab tambahan",
 				description:
-					"Tambahkan zharaf, mustatsna, maf'ul li ajlih, dan taukid ke pilihan i'rab, dan tanyakan ayat yang memuatnya.",
+					"Tambahkan jar majrur (syibhul jumlah), zharaf, mustatsna, maf'ul li ajlih, dan taukid ke pilihan i'rab, dan tanyakan ayat yang memuatnya.",
 			},
 		},
 		readerSection: "Lapisan pembaca",
@@ -249,29 +249,20 @@ export const id: Translations = {
 		pageTitle: "Sumber edisi ini dibangun",
 		intro:
 			"Lenses adalah pembaca untuk analisis yang dipublikasikan secara terbuka. Teks Al-Qur'an bahasa Arab disimpan tanpa perubahan. Lapisan tata bahasa diatribusikan ke sumber aslinya.",
-		coverageHeading: "Cakupan Sintaksis",
-		coverageBody: (
-			words: number,
-			syntaxVerses: number,
-			partialText: string,
-			chStart: number,
-			chEnd: number,
-		) =>
-			chStart && chEnd
-				? `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis mencakup ${formatNum(syntaxVerses, "id")} ayat${partialText}. Surah ${formatNum(chStart, "id")}–${formatNum(chEnd, "id")} belum memiliki sintaksis korpus. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`
-				: `Morfologi mencakup seluruh ${formatNum(words, "id")} kata. Pohon sintaksis lengkap NoorBayan mencakup seluruh 114 surah (${formatNum(syntaxVerses, "id")} ayat) dengan analisis relasi dependensi dan frasa konstituen lengkap. I'rab dan sharaf klasik dari Markaz Tafsir disertakan untuk setiap kata.`,
-		partialSnippet: (syntax: number, total: number, surah: number) =>
-			`, termasuk ${formatNum(syntax, "id")} dari ${formatNum(total, "id")} ayat di surah ${formatNum(surah, "id")}`,
+		coverageHeading: "Cakupan Korpus & Lapisan Analisis",
+		coverageBody: (stats) =>
+			`Morfologi serta i'rab klasik, sharaf, dan makna kata dari Markaz Tafsir mencakup seluruh ${formatNum(stats.words, "id")} kata di 114 surah (${formatNum(stats.syntaxVerses, "id")} ayat), bersama maqashid surah dan tafsir Al-Mukhtashar dalam bahasa Arab, Inggris, dan Indonesia. Pohon sintaksis NoorBayan mencakup seluruh ${formatNum(stats.syntaxVerses, "id")} ayat (${formatNum(stats.syntaxGraphs, "id")} pohon klausa), Qira'at Asyrah mencakup ${formatNum(stats.qiraatWords ?? 0, "id")} kata pada ${formatNum(stats.qiraatVerses ?? 0, "id")} ayat, mutasyabih lafzhi menghubungkan ${formatNum(stats.mutashabihPairs ?? 0, "id")} pasangan pada ${formatNum(stats.mutashabihVerses ?? 0, "id")} ayat, dan asbabun nuzul terverifikasi mencakup ${formatNum(stats.asbabVerses ?? 0, "id")} ayat.`,
 		licenseLabel: "Lisensi:",
 		kinds: {
 			morphology: "Morfologi",
 			syntax: "Pohon Sintaksis",
 			text: "Teks Al-Qur'an",
-			"classical-irab": "I'rab Klasik",
+			"classical-irab": "I'rab & Sharaf Klasik",
 			tafsir: "Tafsir",
 			translation: "Terjemahan",
 			asbab: "Asbabun Nuzul",
 			qiraat: "Qira'at Asyrah",
+			mutashabih: "Kesamaan Verbal",
 		},
 		items: {
 			"qac-morphology": {
@@ -282,21 +273,12 @@ export const id: Translations = {
 				license:
 					"GPL, dengan izin penggunaan dalam aplikasi selama korpus diatribusikan.",
 			},
-			"qac-syntax": {
-				title: "Graf Dependensi Sintaksis Quranic Arabic Corpus",
-				attribution:
-					"Kais Dukes, Quranic Arabic Corpus (kaisdukes/quranic-corpus-api)",
-				description:
-					"Graf dependensi sintaksis dari Quranic Arabic Dependency Treebank.",
-				license:
-					"Didistribusikan sesuai ketentuan korpus: mencantumkan atribusi ke corpus.quran.com.",
-			},
 			"noorbayan-syntax": {
 				title: "Pohon Sintaksis Quran Lengkap (NoorBayan)",
 				attribution:
 					"NoorBayan, berbasis Quranic Arabic Corpus Dr. Kais Dukes (rahimahullah), diverifikasi oleh Quranpedia",
 				description:
-					"Pohon ketergantungan sintaksis dan frasa konstituen lengkap untuk seluruh 6.236 ayat Al-Qur'an dalam 114 surah.",
+					"Pohon ketergantungan sintaksis dan frasa konstituen lengkap untuk seluruh 6.236 ayat Al-Qur'an dalam 114 surah, yang juga menjadi dasar pencarian relasi dan kuis i'rab.",
 				license: "Lisensi MIT.",
 			},
 			"asbab-muharrar": {
@@ -334,7 +316,7 @@ export const id: Translations = {
 				title: "Analisis Linguistik Markaz Tafsir (I'rab & Sharaf)",
 				attribution: "Pusat Studi Al-Qur'an Tafsir Center (Markaz Tafsir)",
 				description:
-					"Deskripsi morfologi klasik (sharaf) dari basis data Markaz Tafsir, beserta i'rab kata per kata dan sintaksis kalimat ayat.",
+					"Deskripsi morfologi klasik (sharaf), i'rab kata per kata, dan makna kata dari basis data Markaz Tafsir, beserta sintaksis kalimat ayat dan maqashid surah.",
 				license: "Creative Commons Attribution 4.0 International (CC BY 4.0).",
 			},
 			"indonesian-mokhtasar": {
@@ -357,9 +339,9 @@ export const id: Translations = {
 			"saheeh-international": {
 				title: "Terjemahan Bahasa Inggris Saheeh International",
 				attribution:
-					"Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net dan QuranEnc.com",
+					"Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via QuranEnc.com",
 				description:
-					"Terjemahan harfiah bahasa Inggris yang selaras dengan sintaksis Arab untuk analisis struktural dan retorika.",
+					"Terjemahan harfiah bahasa Inggris yang selaras dengan sintaksis Arab, ditampilkan pada lapisan makna ayat di samping teks Arab.",
 				license:
 					"Domain publik / Distribusi pendidikan terbuka dengan atribusi kepada Saheeh International.",
 			},
@@ -370,6 +352,21 @@ export const id: Translations = {
 				description:
 					"Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
 				license: "Distribusi terbuka / Ketentuan publikasi ulang QuranEnc.",
+			},
+			"waqar-mutashabihat": {
+				title: "Dataset Mutasyabihat Al-Qur'an (Pasangan Ayat Huffazh)",
+				attribution: "Waqar144 (Quran_Mutashabihat_Data)",
+				description:
+					"Pasangan ayat dengan kemiripan redaksi terkurasi di seluruh 30 juz untuk menjaga ketepatan hafalan Al-Qur'an.",
+				license: "CC0 1.0 Universal (Domain Publik).",
+			},
+			"quranpedia-mutashabihat": {
+				title: "Kesamaan Verbal & Kaidah Hafalan Quranpedia",
+				attribution: "Quranpedia.net (الموسوعة القرآنية)",
+				description:
+					"Kaidah hafalan klasik (dhabt) dan penjelasan perbedaan redaksi serta balaghah (tawjih) antarayat yang mirip.",
+				license:
+					"Bebas digunakan dalam aplikasi dan perangkat riset dengan mencantumkan atribusi.",
 			},
 		},
 	},

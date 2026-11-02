@@ -58,7 +58,10 @@ describe("integration: precomputed quiz bank", () => {
 		const codes = new Set(QUIZ_ROLES.map((r) => r.code));
 		const relations = new Set(committed.irab.map((q) => q.rel));
 		for (const rel of relations) expect(codes.has(rel)).toBe(true);
-		expect(getRoleMeta("adv").extended).toBe(true);
+		const extendedCodes = QUIZ_ROLES.filter((r) => r.extended).map(
+			(r) => r.code,
+		);
+		expect(extendedCodes).toEqual(["pp", "adv", "prp", "exc", "emph"]);
 		expect(getRoleMeta("subj").extended).toBeUndefined();
 	});
 });

@@ -4,11 +4,6 @@ import type { Manifest } from "../lib/types";
 export function SourcesPage({ manifest }: { manifest: Manifest }) {
 	const { t } = useI18n();
 
-	const partial = manifest.stats.partialChapters[0];
-	const partialText = partial
-		? t.sources.partialSnippet(partial.syntax, partial.verses, partial.n)
-		: "";
-
 	return (
 		<article className="sources-page anim-soft-enter">
 			<header className="page-intro">
@@ -18,17 +13,7 @@ export function SourcesPage({ manifest }: { manifest: Manifest }) {
 
 			<section>
 				<h2>{t.sources.coverageHeading}</h2>
-				<p>
-					{t.sources.coverageBody(
-						manifest.stats.words,
-						manifest.stats.syntaxVerses,
-						partialText,
-						manifest.stats.chaptersWithoutSyntax[0] ?? 0,
-						manifest.stats.chaptersWithoutSyntax[
-							manifest.stats.chaptersWithoutSyntax.length - 1
-						] ?? 0,
-					)}
-				</p>
+				<p>{t.sources.coverageBody(manifest.stats)}</p>
 			</section>
 
 			<ul className="source-cards">

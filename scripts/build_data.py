@@ -569,7 +569,7 @@ def build_sources() -> list[dict[str, Any]]:
                 "NoorBayan, building on the Quranic Arabic Corpus of Dr. Kais Dukes "
                 "(may Allah have mercy on him), verified by Quranpedia"
             ),
-            "description": "Full-Quran dependency and constituency treebank covering all 6,236 verses across 114 surahs.",
+            "description": "Full-Quran dependency and constituency treebank covering all 6,236 verses across 114 surahs, powering syntax graphs, relation search, and the iʿrāb quiz.",
             "license": "MIT",
             "url": "https://github.com/NoorBayan/Quranic",
         },
@@ -596,7 +596,7 @@ def build_sources() -> list[dict[str, Any]]:
             "title": "Tafsir Center linguistic analysis",
             "kind": "classical-irab",
             "attribution": "Tafsir Center for Quranic Studies",
-            "description": "Traditional morphological description (ṣarf) from the Tafsir Center database, alongside word-level classical iʿrāb and verse-level sentence syntax. A second analysis beside the corpus tree.",
+            "description": "Word-level classical iʿrāb, morphological description (ṣarf), concise word meanings, verse-level sentence syntax, and surah maqāṣid & classification from the Tafsir Center database.",
             "license": "CC BY 4.0",
             "url": "https://tafsir.net/",
         },
@@ -622,7 +622,7 @@ def build_sources() -> list[dict[str, Any]]:
             "id": "saheeh-international",
             "title": "Saheeh International English Translation",
             "kind": "translation",
-            "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net and QuranEnc.com (english_saheeh)",
+            "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via QuranEnc.com (english_saheeh)",
             "description": "Literal and syntax-aligned English translation of the Quran, shown in the reader's meaning layer beside the Arabic text.",
             "license": "Public domain / Open educational distribution with attribution to Saheeh International.",
             "url": "https://quranenc.com/en/browse/english_saheeh",
@@ -658,8 +658,8 @@ NOTICE_SECTIONS: list[list[str]] = [
         "https://creativecommons.org/licenses/by/4.0/",
         "Credit: Tafsir Center for Quranic Studies (https://tafsir.net)",
         "This app uses word-level iʿrāb (irabMushakkal), ṣarf, word meanings,",
-        "and verse-level iʿrāb (irabAyah1). It does not redistribute the tafsir",
-        "book texts stored in the same database.",
+        "verse-level iʿrāb (irabAyah1), and surah maqāṣid & classification.",
+        "It does not redistribute the tafsir book texts stored in the same database.",
         "Dataset: https://huggingface.co/datasets/tafsircenter/tafsir-mcp-data",
     ],
     [
@@ -691,7 +691,7 @@ NOTICE_SECTIONS: list[list[str]] = [
         "Saheeh International English Translation",
         "Title: The Qur'an: English Meanings",
         "Translators: Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley)",
-        "Source: Tanzil.net and QuranEnc.com, key english_saheeh",
+        "Source: QuranEnc.com, key english_saheeh",
         "https://quranenc.com/en/browse/english_saheeh",
         "License / Terms: Verbatim text retained with clear attribution to Saheeh International.",
         "Used in Lenses as the literal syntax-aligned translation in the reader's meaning layer.",
@@ -727,7 +727,7 @@ def write_notices(morph_header: str, uthmani_header: str) -> None:
                 "URL: https://github.com/NoorBayan/Quranic",
                 "Verification & Clean Export: Quranpedia.net (https://quranpedia.net/dumps/syntax.json.gz)",
                 "License: MIT License",
-                "Used in Lenses for full-Quran dependency tree graphs, constituent phrase analysis, and word relations in search.",
+                "Used in Lenses for full-Quran dependency tree graphs, constituent phrase analysis, word relations in search, and the iʿrāb quiz.",
             ]
         ),
     )

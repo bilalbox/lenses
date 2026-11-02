@@ -1514,7 +1514,7 @@
       "title": "The Quranic Treebank (NoorBayan)",
       "kind": "syntax",
       "attribution": "NoorBayan, building on the Quranic Arabic Corpus of Dr. Kais Dukes (may Allah have mercy on him), verified by Quranpedia",
-      "description": "Full-Quran dependency and constituency treebank covering all 6,236 verses across 114 surahs.",
+      "description": "Full-Quran dependency and constituency treebank covering all 6,236 verses across 114 surahs, powering syntax graphs, relation search, and the iʿrāb quiz.",
       "license": "MIT",
       "url": "https://github.com/NoorBayan/Quranic"
     },
@@ -1541,7 +1541,7 @@
       "title": "Tafsir Center linguistic analysis",
       "kind": "classical-irab",
       "attribution": "Tafsir Center for Quranic Studies",
-      "description": "Traditional morphological description (ṣarf) from the Tafsir Center database, alongside word-level classical iʿrāb and verse-level sentence syntax. A second analysis beside the corpus tree.",
+      "description": "Word-level classical iʿrāb, morphological description (ṣarf), concise word meanings, verse-level sentence syntax, and surah maqāṣid & classification from the Tafsir Center database.",
       "license": "CC BY 4.0",
       "url": "https://tafsir.net/"
     },
@@ -1567,7 +1567,7 @@
       "id": "saheeh-international",
       "title": "Saheeh International English Translation",
       "kind": "translation",
-      "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via Tanzil.net and QuranEnc.com (english_saheeh)",
+      "attribution": "Saheeh International (Emily Assami, Mary Kennedy, Amatullah Bantley), via QuranEnc.com (english_saheeh)",
       "description": "Literal and syntax-aligned English translation of the Quran, shown in the reader's meaning layer beside the Arabic text.",
       "license": "Public domain / Open educational distribution with attribution to Saheeh International.",
       "url": "https://quranenc.com/en/browse/english_saheeh"
