@@ -84,6 +84,34 @@ export const en: Translations = {
 			placesHeading: "Where each wording occurs",
 			thisAyah: "this ayah",
 		},
+		sarf: {
+			rootQuestion: (wordAr: string) =>
+				`What is the lexical root (māddah) of ${wordAr}?`,
+			waznQuestion: (wordAr: string) =>
+				`What is the morphological pattern (wazn) of ${wordAr}?`,
+			verbClassQuestion: (wordAr: string) =>
+				`Which verbal bāb / form does ${wordAr} belong to?`,
+			nounClassQuestion: (wordAr: string) =>
+				`What derivational class is the noun ${wordAr}?`,
+			verbStructureQuestion: (wordAr: string) =>
+				`How is ${wordAr} classified by root soundness?`,
+			nounStructureQuestion: (wordAr: string) =>
+				`What is the number / plural structure of ${wordAr}?`,
+			reviewTitle: (wordAr: string) =>
+				`Review your morphological profile for ${wordAr}`,
+			submitButton: "Submit & Reveal Classical Ṣarf",
+			revealHeading: (wordAr: string) => `Classical Ṣarf for ${wordAr}`,
+			rootInExamples: (root: string) => `Root (${root}) in Examples ↗`,
+		},
+		examples: {
+			spotQuestion: (pattern: string) =>
+				`Which word in the ayah is an example of: "${pattern}"?`,
+			spotCrumb: "Spot Word",
+			reviewTitle: (pattern: string) => `Confirm your choice for "${pattern}"`,
+			submitButton: "Submit & Reveal Analysis",
+			revealHeading: (wordAr: string) => `Spotted Example: ${wordAr}`,
+			explorePattern: "Explore Pattern in Examples ↗",
+		},
 	},
 	settings: {
 		title: "Settings",

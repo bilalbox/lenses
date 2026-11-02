@@ -85,6 +85,31 @@ export const ar: Translations = {
 			placesHeading: "مواضع كل لفظ",
 			thisAyah: "هذه الآية",
 		},
+		sarf: {
+			rootQuestion: (wordAr: string) =>
+				`ما المادة المعجمية (الجذر) لكلمة ﴿${wordAr}﴾؟`,
+			waznQuestion: (wordAr: string) => `ما الوزن الصرفي لـ ﴿${wordAr}﴾؟`,
+			verbClassQuestion: (wordAr: string) =>
+				`من أي باب صرفي جاء الفعل ﴿${wordAr}﴾؟`,
+			nounClassQuestion: (wordAr: string) =>
+				`ما نوع الاسم ﴿${wordAr}﴾ من حيث الاشتقاق؟`,
+			verbStructureQuestion: (wordAr: string) =>
+				`ما نوع الفعل ﴿${wordAr}﴾ من حيث الصحة والاعتلال؟`,
+			nounStructureQuestion: (wordAr: string) =>
+				`ما بنية الاسم ﴿${wordAr}﴾ من حيث الإفراد والجمع؟`,
+			reviewTitle: (wordAr: string) => `راجع التحليل الصرفي لـ ﴿${wordAr}﴾`,
+			submitButton: "تحقق واكشف التحليل الصرفي",
+			revealHeading: (wordAr: string) => `التحليل الصرفي الكامل لـ ﴿${wordAr}﴾`,
+			rootInExamples: (root: string) => `شواهد الجذر (${root}) ↗`,
+		},
+		examples: {
+			spotQuestion: (pattern: string) => `أي كلمة في الآية تمثل: «${pattern}»؟`,
+			spotCrumb: "الشاهد",
+			reviewTitle: (pattern: string) => `تحقق من اختيارك لـ «${pattern}»`,
+			submitButton: "تحقق واكشف التحليل",
+			revealHeading: (wordAr: string) => `الشاهد في الآية: ﴿${wordAr}﴾`,
+			explorePattern: "استكشف هذا النمط في الشواهد ↗",
+		},
 	},
 	settings: {
 		title: "الإعدادات",

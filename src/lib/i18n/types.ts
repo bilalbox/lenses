@@ -96,6 +96,27 @@ export interface Translations {
 			placesHeading: string;
 			thisAyah: string;
 		};
+		sarf: {
+			rootQuestion: (wordAr: string) => string;
+			waznQuestion: (wordAr: string) => string;
+			verbClassQuestion: (wordAr: string) => string;
+			nounClassQuestion: (wordAr: string) => string;
+			verbStructureQuestion: (wordAr: string) => string;
+			nounStructureQuestion: (wordAr: string) => string;
+			reviewTitle: (wordAr: string) => string;
+			submitButton: string;
+			revealHeading: (wordAr: string) => string;
+			rootInExamples: (root: string) => string;
+		};
+		examples: {
+			/** `pattern` is the facet title in the interface language. */
+			spotQuestion: (pattern: string) => string;
+			spotCrumb: string;
+			reviewTitle: (pattern: string) => string;
+			submitButton: string;
+			revealHeading: (wordAr: string) => string;
+			explorePattern: string;
+		};
 	};
 	settings: {
 		title: string;

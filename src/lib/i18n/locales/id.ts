@@ -86,6 +86,34 @@ export const id: Translations = {
 			placesHeading: "Letak setiap lafaz",
 			thisAyah: "ayat ini",
 		},
+		sarf: {
+			rootQuestion: (wordAr: string) =>
+				`Apa akar kata (maddah) dari ${wordAr}?`,
+			waznQuestion: (wordAr: string) => `Apa wazan sharaf dari ${wordAr}?`,
+			verbClassQuestion: (wordAr: string) =>
+				`Termasuk bab / wazan fi'il apa ${wordAr}?`,
+			nounClassQuestion: (wordAr: string) =>
+				`Termasuk jenis isim apa ${wordAr} dari segi derivasinya (isytiqaq)?`,
+			verbStructureQuestion: (wordAr: string) =>
+				`Bagaimana ${wordAr} digolongkan menurut shahih dan mu'tal akar katanya?`,
+			nounStructureQuestion: (wordAr: string) =>
+				`Apa struktur bilangan (mufrad, mutsanna, jamak) dari ${wordAr}?`,
+			reviewTitle: (wordAr: string) =>
+				`Tinjau analisis sharaf Anda untuk ${wordAr}`,
+			submitButton: "Periksa & Tampilkan Sharaf Klasik",
+			revealHeading: (wordAr: string) => `Sharaf Klasik untuk ${wordAr}`,
+			rootInExamples: (root: string) => `Akar kata (${root}) di Contoh ↗`,
+		},
+		examples: {
+			spotQuestion: (pattern: string) =>
+				`Kata mana pada ayat yang merupakan: "${pattern}"?`,
+			spotCrumb: "Pilih Kata",
+			reviewTitle: (pattern: string) =>
+				`Periksa pilihan Anda untuk "${pattern}"`,
+			submitButton: "Periksa & Tampilkan Analisis",
+			revealHeading: (wordAr: string) => `Contoh dalam ayat: ${wordAr}`,
+			explorePattern: "Jelajahi Pola Ini di Contoh ↗",
+		},
 	},
 	settings: {
 		title: "Pengaturan",

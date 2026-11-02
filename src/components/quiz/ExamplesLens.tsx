@@ -20,13 +20,6 @@ import {
 	VerdictChip,
 } from "./QuizParts";
 
-function spotQuestion(q: ExampleHuntQuestion, locale: Locale): string {
-	if (locale === "ar") return `أي كلمة في الآية تمثل: «${q.facetTitle.ar}»؟`;
-	if (locale === "id")
-		return `Kata mana pada ayat yang merupakan: "${q.facetTitle.id}"?`;
-	return `Which word in the ayah is an example of: "${q.facetTitle.en}"?`;
-}
-
 function spottedWord(q: ExampleHuntQuestion, session: QuizSessionState) {
 	const n = session.drafts.examples.spottedWordNum;
 	return q.verse.w.find((w) => w.n === n) ?? null;
@@ -37,22 +30,19 @@ function crumbsOf(
 	spotted: Word | null,
 	show: (text: string) => string,
 	locale: Locale,
-	checkLabel: string,
+	t: ReturnType<typeof useI18n>["t"],
 ): QuizCrumb[] {
+	const spotCrumb = t.quiz.examples.spotCrumb;
 	return [
 		{
 			stepNum: 1,
-			label: spotted
-				? show(spotted.a)
-				: locale === "ar"
-					? "الشاهد"
-					: "Spot Word",
+			label: spotted ? show(spotted.a) : spotCrumb,
 			isAr: Boolean(spotted || locale === "ar"),
 			filled: Boolean(session.drafts.examples.spottedWordNum),
 		},
 		{
 			stepNum: 2,
-			label: checkLabel,
+			label: t.quiz.stepCheckCrumb,
 			filled: progress(session).filled === 2,
 		},
 	];
@@ -82,7 +72,7 @@ export function ExamplesLens({
 		<GrammarFrame
 			lens="examples"
 			props={props}
-			crumbs={crumbsOf(session, spotted, show, locale, t.quiz.stepCheckCrumb)}
+			crumbs={crumbsOf(session, spotted, show, locale, t)}
 			marks={marks}
 			picking={step === 1}
 			onTapWord={(n) =>
@@ -97,7 +87,7 @@ export function ExamplesLens({
 			{step === 1 && (
 				<StepBody>
 					<QuizStepHead
-						title={spotQuestion(q, locale)}
+						title={t.quiz.examples.spotQuestion(q.facetTitle[locale])}
 						hint={q.facetHint[locale]}
 					/>
 				</StepBody>
@@ -134,11 +124,7 @@ function ExamplesCheck({
 	return (
 		<>
 			<QuizStepHead
-				title={
-					locale === "ar"
-						? `تحقق من اختيارك لـ «${q.facetTitle.ar}»`
-						: `Confirm your choice for "${q.facetTitle.en}"`
-				}
+				title={t.quiz.examples.reviewTitle(q.facetTitle[locale])}
 				backLabel={t.quiz.editButton}
 				onBack={goTo}
 			/>
@@ -155,9 +141,7 @@ function ExamplesCheck({
 
 			<SubmitBar
 				missing={missingLabels(session, labels)}
-				label={
-					locale === "ar" ? "تحقق واكشف التحليل" : "Submit & Reveal Analysis"
-				}
+				label={t.quiz.examples.submitButton}
 				onSubmit={onSubmit}
 			/>
 		</>
@@ -175,7 +159,7 @@ function ExamplesReveal({
 	spotted: Word | null;
 	onOpenSearch?: (seed: Partial<ExampleQuery>) => void;
 }) {
-	const { locale } = useI18n();
+	const { t } = useI18n();
 	const correct = session.verdict?.allCorrect ?? false;
 	const word = show(q.targetWord.a);
 	const prose =
@@ -185,11 +169,7 @@ function ExamplesReveal({
 	return (
 		<RevealCard
 			correct={correct}
-			title={
-				locale === "ar"
-					? `الشاهد في الآية: ﴿${word}﴾`
-					: `Spotted Example: ${word}`
-			}
+			title={t.quiz.examples.revealHeading(word)}
 			chips={
 				<>
 					<VerdictChip
@@ -207,10 +187,7 @@ function ExamplesReveal({
 			secondary={
 				onOpenSearch
 					? {
-							label:
-								locale === "ar"
-									? "استكشف هذا النمط في الشواهد ↗"
-									: "Explore Pattern in Examples ↗",
+							label: t.quiz.examples.explorePattern,
 							onClick: () => onOpenSearch(q.searchSeed),
 						}
 					: undefined

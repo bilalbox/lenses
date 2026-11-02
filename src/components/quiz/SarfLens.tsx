@@ -35,54 +35,33 @@ const spaced = (root: string) => root.split("").join(" ");
 const classAr = (code: string) => SARF_CLASSES[code]?.ar;
 const structureAr = (code: string) => SARF_STRUCTURES[code]?.ar;
 
+type T = ReturnType<typeof useI18n>["t"];
+
 /** Step headings, by step; the verb and noun steps 3–4 ask different things. */
 const TITLES: Record<
 	1 | 2 | 3 | 4,
-	(q: SarfQuestion, locale: Locale, show: Show) => string
+	(q: SarfQuestion, t: T, show: Show) => string
 > = {
-	1: (q, locale, show) => {
-		const w = show(q.targetWord.a);
-		if (locale === "ar") return `ما المادة المعجمية (الجذر) لكلمة ﴿${w}﴾؟`;
-		if (locale === "id") return `Apa akar kata (maddah) dari ${w}?`;
-		return `What is the lexical root (māddah) of ${w}?`;
-	},
-	2: (q, locale, show) => {
-		const w = show(q.headAr);
-		if (locale === "ar") return `ما الوزن الصرفي لـ ﴿${w}﴾؟`;
-		if (locale === "id") return `Apa wazan sharaf dari ${w}?`;
-		return `What is the morphological pattern (wazn) of ${w}?`;
-	},
-	3: (q, locale, show) => {
-		const w = show(q.headAr);
-		if (q.kind === "verb")
-			return locale === "ar"
-				? `من أي باب صرفي جاء الفعل ﴿${w}﴾؟`
-				: `Which verbal bāb / form does ${w} belong to?`;
-		return locale === "ar"
-			? `ما نوع الاسم ﴿${w}﴾ من حيث الاشتقاق؟`
-			: `What derivational class is the noun ${w}?`;
-	},
-	4: (q, locale, show) => {
-		const w = show(q.headAr);
-		if (q.kind === "verb")
-			return locale === "ar"
-				? `ما نوع الفعل ﴿${w}﴾ من حيث الصحة والاعتلال؟`
-				: `How is ${w} classified by root soundness?`;
-		return locale === "ar"
-			? `ما بنية الاسم ﴿${w}﴾ من حيث الإفراد والجمع؟`
-			: `What is the number / plural structure of ${w}?`;
-	},
+	1: (q, t, show) => t.quiz.sarf.rootQuestion(show(q.targetWord.a)),
+	2: (q, t, show) => t.quiz.sarf.waznQuestion(show(q.headAr)),
+	3: (q, t, show) =>
+		(q.kind === "verb"
+			? t.quiz.sarf.verbClassQuestion
+			: t.quiz.sarf.nounClassQuestion)(show(q.headAr)),
+	4: (q, t, show) =>
+		(q.kind === "verb"
+			? t.quiz.sarf.verbStructureQuestion
+			: t.quiz.sarf.nounStructureQuestion)(show(q.headAr)),
 };
 
 /** A crumb's label: the answer once picked, else the field name. */
 function crumbLabel(
 	value: string | null | undefined,
 	locale: Locale,
-	ar: string,
-	en: string,
+	field: string,
 ): { label: string; isAr: boolean } {
 	return {
-		label: value || (locale === "ar" ? ar : en),
+		label: value || field,
 		isAr: Boolean(value || locale === "ar"),
 	};
 }
@@ -90,7 +69,7 @@ function crumbLabel(
 function crumbsOf(
 	session: QuizSessionState,
 	locale: Locale,
-	checkLabel: string,
+	t: T,
 ): QuizCrumb[] {
 	const d = session.drafts.sarf;
 	const cls = d.classCode && (classAr(d.classCode) || d.classCode);
@@ -99,27 +78,27 @@ function crumbsOf(
 	return [
 		{
 			stepNum: 1,
-			...crumbLabel(d.root && spaced(d.root), locale, "المادة", "Root"),
+			...crumbLabel(d.root && spaced(d.root), locale, t.quiz.fieldRoot),
 			filled: Boolean(d.root),
 		},
 		{
 			stepNum: 2,
-			...crumbLabel(d.wazn, locale, "الوزن", "Wazn"),
+			...crumbLabel(d.wazn, locale, t.quiz.fieldWazn),
 			filled: Boolean(d.wazn),
 		},
 		{
 			stepNum: 3,
-			...crumbLabel(cls, locale, "الباب/المشتق", "Class"),
+			...crumbLabel(cls, locale, t.quiz.fieldClass),
 			filled: Boolean(d.classCode),
 		},
 		{
 			stepNum: 4,
-			...crumbLabel(str, locale, "البنية", "Structure"),
+			...crumbLabel(str, locale, t.quiz.fieldStructure),
 			filled: Boolean(d.structureCode),
 		},
 		{
 			stepNum: 5,
-			label: checkLabel,
+			label: t.quiz.stepCheckCrumb,
 			filled: progress(session).filled === 5,
 		},
 	];
@@ -165,7 +144,7 @@ export function SarfLens({
 		<GrammarFrame
 			lens="sarf"
 			props={props}
-			crumbs={crumbsOf(session, locale, t.quiz.stepCheckCrumb)}
+			crumbs={crumbsOf(session, locale, t)}
 			marks={noMarks}
 			picking={false}
 		>
@@ -202,7 +181,7 @@ function SarfChoiceStep({
 	return (
 		<StepBody>
 			<QuizStepHead
-				title={TITLES[step](q, locale, show)}
+				title={TITLES[step](q, t, show)}
 				focus={focus}
 				{...(back
 					? { backLabel: t.quiz.backButton, onBack: () => onEdit(back) }
@@ -231,7 +210,7 @@ function SarfCheck({
 	onSubmit,
 	onEdit,
 }: LensProps<SarfQuestion> & { onEdit: (step: WizardStep) => void }) {
-	const { locale, t } = useI18n();
+	const { t } = useI18n();
 	const d = session.drafts.sarf;
 	const labels: Record<SarfField, string> = {
 		root: t.quiz.fieldRoot,
@@ -243,11 +222,7 @@ function SarfCheck({
 	return (
 		<>
 			<QuizStepHead
-				title={
-					locale === "ar"
-						? `راجع التحليل الصرفي لـ ﴿${word}﴾`
-						: `Review your morphological profile for ${word}`
-				}
+				title={t.quiz.sarf.reviewTitle(word)}
 				focus={word}
 				backLabel={t.quiz.editButton}
 				onBack={() => onEdit(4)}
@@ -291,11 +266,7 @@ function SarfCheck({
 
 			<SubmitBar
 				missing={missingLabels(session, labels)}
-				label={
-					locale === "ar"
-						? "تحقق واكشف التحليل الصرفي"
-						: "Submit & Reveal Classical Ṣarf"
-				}
+				label={t.quiz.sarf.submitButton}
 				onSubmit={onSubmit}
 			/>
 		</>
@@ -311,18 +282,14 @@ function SarfReveal({
 }: LensProps<SarfQuestion> & {
 	onOpenSearch?: (seed: Partial<ExampleQuery>) => void;
 }) {
-	const { locale } = useI18n();
+	const { t } = useI18n();
 	const d = session.drafts.sarf;
 	const ok = (field: SarfField) => session.verdict?.fields[field] ?? false;
 	const word = show(q.targetWord.a);
 	return (
 		<RevealCard
 			correct={session.verdict?.allCorrect ?? false}
-			title={
-				locale === "ar"
-					? `التحليل الصرفي الكامل لـ ﴿${word}﴾`
-					: `Classical Ṣarf for ${word}`
-			}
+			title={t.quiz.sarf.revealHeading(word)}
 			chips={
 				<>
 					<VerdictChip
@@ -358,10 +325,7 @@ function SarfReveal({
 			secondary={
 				onOpenSearch
 					? {
-							label:
-								locale === "ar"
-									? `شواهد الجذر (${q.rootSpaced}) ↗`
-									: `Root (${q.rootSpaced}) in Examples ↗`,
+							label: t.quiz.sarf.rootInExamples(q.rootSpaced),
 							onClick: () => onOpenSearch(q.searchSeed),
 						}
 					: undefined
