@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { stripTashkeel } from "../lib/arabic";
 import type { MutashabihQuestion } from "../lib/mutashabihQuiz";
-import type { QuizQuestion, SarfQuestion } from "../lib/quizBank";
+import type { QuizQuestion, SarfQuestion, UsulQuestion } from "../lib/quizBank";
 import type { QuizLens } from "../lib/quizCatalog";
 import {
 	activeQuestion,
@@ -20,16 +20,19 @@ import { IrabLens } from "./quiz/IrabLens";
 import { MutashabihLens } from "./quiz/MutashabihLens";
 import type { LensProps } from "./quiz/QuizFrame";
 import { SarfLens } from "./quiz/SarfLens";
+import { UsulLens } from "./quiz/UsulLens";
 import { useQuizPools } from "./quiz/useQuizPools";
 
 export function QuizScreen({
 	manifest,
+	initialLens,
 	onOpenInReader,
 	onOpenSearch,
 	hideDiacritics = false,
 	extendedRoles = false,
 }: {
 	manifest: Manifest;
+	initialLens?: QuizLens;
 	onOpenInReader: (sura: number, verse: number, word?: number) => void;
 	onOpenSearch?: (seed: Partial<ExampleQuery>) => void;
 	hideDiacritics?: boolean;
@@ -43,10 +46,16 @@ export function QuizScreen({
 	const [session, dispatch] = useReducer(
 		(state: QuizSessionState, event: QuizSessionEvent) =>
 			reduceQuizSession(state, event, pools.current),
-		undefined,
-		initQuizSession,
+		initialLens,
+		(initLens) => initQuizSession(initLens),
 	);
 	const { lens } = session;
+
+	useEffect(() => {
+		if (initialLens && initialLens !== session.lens) {
+			dispatch({ type: "selectLens", lens: initialLens });
+		}
+	}, [initialLens, session.lens]);
 	const targetBtnRef = useRef<HTMLButtonElement | null>(null);
 	const ayahBoxRef = useRef<HTMLDivElement | null>(null);
 	const { irab: irabPool, sarf: sarfPool } = quizPools;
@@ -71,6 +80,7 @@ export function QuizScreen({
 					irab: Math.random(),
 					sarf: Math.random(),
 					mutashabih: Math.random(),
+					usul: Math.random(),
 				},
 			});
 		});
@@ -134,6 +144,8 @@ export function QuizScreen({
 		targetBtnRef,
 		ayahBoxRef,
 	};
+	if (lens === "usul")
+		return <UsulLens {...shared} question={question as UsulQuestion} />;
 	if (lens === "mutashabih")
 		return (
 			<MutashabihLens {...shared} question={question as MutashabihQuestion} />

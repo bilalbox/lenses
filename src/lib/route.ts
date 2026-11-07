@@ -6,10 +6,10 @@ const SIMPLE_PAGES = new Set(["quiz", "search", "surahs", "sources"] as const);
 type SimplePage = "quiz" | "search" | "surahs" | "sources";
 
 function parseTab(params: URLSearchParams): string | undefined {
-	const explicit = params.get("tab");
+	const explicit = params.get("tab") ?? params.get("lens");
 	if (explicit) return explicit;
 	// Legacy flag params (`?asbab=1`) predate `tab=`.
-	for (const legacy of ["mutashabih", "asbab"]) {
+	for (const legacy of ["mutashabih", "asbab", "usul"]) {
 		if (params.has(legacy)) return legacy;
 	}
 	return undefined;

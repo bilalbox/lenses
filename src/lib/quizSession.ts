@@ -1,4 +1,4 @@
-import type { QuizPools } from "./quizBank";
+import type { QuizPools, UsulQuestion } from "./quizBank";
 import {
 	isPhraseRole,
 	type QuizCase,
@@ -29,13 +29,19 @@ export interface MutashabihDraft {
 	surah: number | null;
 }
 
+export interface UsulDraft {
+	option: string | null;
+	pickedWord: number | null;
+}
+
 export interface Drafts {
 	irab: IrabDraft;
 	sarf: SarfDraft;
 	mutashabih: MutashabihDraft;
+	usul: UsulDraft;
 }
 
-type Questions = { [L in QuizLens]: QuizPools[L][number] };
+type Questions = { [L in QuizLens]: NonNullable<QuizPools[L]>[number] };
 
 /** A field of one lens's draft; every field is required and graded. */
 export type DraftField<L extends QuizLens = QuizLens> = L extends QuizLens
@@ -144,6 +150,14 @@ const LENSES: { [L in QuizLens]: LensSpec<L> } = {
 		empty: () => ({ wording: null, surah: null }),
 		answer: (q) => ({ wording: q.answer, surah: q.sura }),
 	},
+	usul: {
+		fields: ["option"],
+		empty: () => ({ option: null, pickedWord: null }),
+		answer: (q) => ({
+			option: (q as UsulQuestion).shahid.taxonomyId,
+			pickedWord: (q as UsulQuestion).shahid.wordStart,
+		}),
+	},
 };
 
 function emptyDrafts(): Drafts {
@@ -151,6 +165,7 @@ function emptyDrafts(): Drafts {
 		irab: LENSES.irab.empty(),
 		sarf: LENSES.sarf.empty(),
 		mutashabih: LENSES.mutashabih.empty(),
+		usul: LENSES.usul.empty(),
 	};
 }
 
@@ -158,6 +173,7 @@ const MAX_STEP: Record<QuizLens, WizardStep> = {
 	irab: 5,
 	sarf: 5,
 	mutashabih: 3,
+	usul: 2,
 };
 
 /** Last wizard step: the check step. */
@@ -165,10 +181,12 @@ export function maxStep(lens: QuizLens): WizardStep {
 	return MAX_STEP[lens];
 }
 
-export function initQuizSession(): QuizSessionState {
+export function initQuizSession(
+	initialLens: QuizLens = "irab",
+): QuizSessionState {
 	return {
-		lens: "irab",
-		indices: { irab: 0, sarf: 0, mutashabih: 0 },
+		lens: initialLens,
+		indices: { irab: 0, sarf: 0, mutashabih: 0, usul: 0 },
 		seeded: false,
 		drafts: emptyDrafts(),
 		step: 1,
@@ -185,8 +203,10 @@ export function activeQuestion(
 	state: QuizSessionState,
 	pools: QuizPools,
 ): Questions[QuizLens] | null {
-	const pool: Questions[QuizLens][] = pools[state.lens];
-	return pool[state.indices[state.lens] % Math.max(pool.length, 1)] ?? null;
+	const pool: Questions[QuizLens][] = (pools[state.lens] ??
+		[]) as Questions[QuizLens][];
+	if (pool.length === 0) return null;
+	return pool[state.indices[state.lens] % pool.length] ?? null;
 }
 
 function draftOf(state: QuizSessionState): Record<string, unknown> {
@@ -262,7 +282,8 @@ function nextIndex(
 	pools: QuizPools,
 	random: number,
 ): number | null {
-	const pool: Questions[QuizLens][] = pools[state.lens];
+	const pool: Questions[QuizLens][] = (pools[state.lens] ??
+		[]) as Questions[QuizLens][];
 	const current = activeQuestion(state, pools);
 	if (pool.length <= 1 || !current) return null;
 	const elsewhere = pool.filter(
@@ -273,6 +294,27 @@ function nextIndex(
 	return Math.max(picked ? pool.indexOf(picked) : 0, 0);
 }
 
+function pickSeedIndex(
+	pools: QuizPools,
+	lens: QuizLens,
+	randomVal?: number,
+): number {
+	const len = pools[lens]?.length ?? 0;
+	if (len === 0 || typeof randomVal !== "number" || Number.isNaN(randomVal)) {
+		return 0;
+	}
+	return Math.floor(randomVal * len);
+}
+
+function repoolIndex(
+	pools: QuizPools,
+	lens: QuizLens,
+	randomVal: number,
+): number {
+	const len = pools[lens]?.length ?? 0;
+	return len > 0 ? Math.floor(randomVal * len) : 0;
+}
+
 export function reduceQuizSession(
 	state: QuizSessionState,
 	event: QuizSessionEvent,
@@ -280,22 +322,25 @@ export function reduceQuizSession(
 ): QuizSessionState {
 	switch (event.type) {
 		case "seed": {
-			const pick = (lens: QuizLens) =>
-				Math.floor(event.random[lens] * pools[lens].length);
 			return {
 				...state,
 				seeded: true,
 				indices: {
-					irab: pick("irab"),
-					sarf: pick("sarf"),
-					mutashabih: pick("mutashabih"),
+					irab: pickSeedIndex(pools, "irab", event.random.irab),
+					sarf: pickSeedIndex(pools, "sarf", event.random.sarf),
+					mutashabih: pickSeedIndex(
+						pools,
+						"mutashabih",
+						event.random.mutashabih,
+					),
+					usul: pickSeedIndex(pools, "usul", event.random.usul),
 				},
 			};
 		}
 		case "repool": {
 			const indices = {
 				...state.indices,
-				[event.lens]: Math.floor(event.random * pools[event.lens].length),
+				[event.lens]: repoolIndex(pools, event.lens, event.random),
 			};
 			const next = { ...state, indices };
 			return event.lens === state.lens ? restart(next) : next;

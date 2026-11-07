@@ -598,7 +598,7 @@ export function getSignMeta(code: QuizSign): SignMeta {
 	return QUIZ_SIGNS.find((s) => s.code === code) ?? QUIZ_SIGNS[0]!;
 }
 
-export type QuizLens = "irab" | "sarf" | "mutashabih";
+export type QuizLens = "irab" | "sarf" | "mutashabih" | "usul";
 
 export const SARF_CLASSES: Record<
 	string,
@@ -879,6 +879,11 @@ export function getLensLabel(
 			en: { title: "Similar Verses", badge: "متشابه" },
 			ar: { title: "المتشابه اللفظي", badge: "متشابه" },
 			id: { title: "Ayat Mirip", badge: "متشابه" },
+		},
+		usul: {
+			en: { title: "Usūl al-Fiqh", badge: "أصول" },
+			ar: { title: "دلالات الألفاظ وأصول الفقه", badge: "أصول" },
+			id: { title: "Ushul Fikih", badge: "أصول" },
 		},
 	};
 	return map[lens][locale];

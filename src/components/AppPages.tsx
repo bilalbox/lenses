@@ -82,6 +82,7 @@ export function AppPages({
 			return (
 				<QuizScreen
 					manifest={manifest}
+					initialLens={route.tab === "usul" ? "usul" : undefined}
 					onOpenInReader={openVersePath}
 					onOpenSearch={openSearch}
 					hideDiacritics={quizPrefs.hideDiacritics}

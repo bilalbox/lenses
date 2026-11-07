@@ -4,7 +4,7 @@ import { useI18n } from "../lib/i18n/I18nContext";
 import { getLensLabel, type QuizLens } from "../lib/quizCatalog";
 import type { QuizSessionState, WizardStep } from "../lib/quizSession";
 
-export const LENS_ORDER: QuizLens[] = ["irab", "sarf", "mutashabih"];
+export const LENS_ORDER: QuizLens[] = ["irab", "sarf", "mutashabih", "usul"];
 
 export function QuizLensSwitcher({
 	lens,

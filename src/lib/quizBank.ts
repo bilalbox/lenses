@@ -13,6 +13,7 @@ import {
 } from "./quizCatalog";
 import type { ExampleQuery } from "./search";
 import type { SurahFile, Verse, Word } from "./types";
+import type { UsuliShahid } from "./usulTypes";
 
 /** Fast initial surahs loaded immediately on quiz open */
 export const CURATED_SURAHS = [
@@ -73,14 +74,24 @@ export interface SarfQuestion {
 	searchSeed: Partial<ExampleQuery>;
 }
 
+export interface UsulQuestion {
+	id: string;
+	sura: number;
+	suraName: string;
+	suraPhonetic: string;
+	verse: Verse;
+	shahid: UsuliShahid;
+}
+
 export interface QuizPools {
 	irab: QuizQuestion[];
 	sarf: SarfQuestion[];
 	mutashabih: MutashabihQuestion[];
+	usul?: UsulQuestion[];
 }
 
-/** The pools built from surah morphology and treebanks; mutashabih comes from its own bank. */
-export type GrammarPools = Omit<QuizPools, "mutashabih">;
+/** The pools built from surah morphology and treebanks; mutashabih and usul come from their own banks. */
+export type GrammarPools = Omit<QuizPools, "mutashabih" | "usul">;
 
 const HARAKAT_RE = /[ً-ْٰـۡۥۦ]/g;
 

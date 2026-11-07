@@ -13,9 +13,11 @@ import {
 	hydrateQuizPools,
 	type QuizBankFile,
 	type QuizPools,
+	type UsulQuestion,
 } from "../../lib/quizBank";
 import { rolesFor } from "../../lib/quizCatalog";
 import type { Manifest, MutashabihQuizFile, SurahFile } from "../../lib/types";
+import type { UsuliShahid } from "../../lib/usulTypes";
 
 const NO_GRAMMAR: GrammarPools = { irab: [], sarf: [] };
 
@@ -28,6 +30,8 @@ export function useQuizPools(
 	const [loading, setLoading] = useState(true);
 	const [mutashabihBank, setMutashabihBank] =
 		useState<MutashabihQuizFile | null>(null);
+	const [usulBank, setUsulBank] = useState<UsuliShahid[] | null>(null);
+	const [surah2, setSurah2] = useState<SurahFile | null>(null);
 
 	// Wave 1: Load CURATED_SURAHS immediately for fast initial paint
 	useEffect(() => {
@@ -38,12 +42,16 @@ export function useQuizPools(
 			// Each bank is one file; without one only its lenses are empty.
 			loadLayer("quizBank").catch(() => null),
 			loadLayer("mutashabihQuiz").catch(() => null),
+			loadLayer("usul", 2).catch(() => null),
+			loadLayer("surah", 2).catch(() => null),
 		])
-			.then(([files, bank, mutashabih]) => {
+			.then(([files, bank, mutashabih, usul, s2]) => {
 				if (cancel) return;
 				setLoadedFiles(files);
 				setGrammarBank(bank);
 				setMutashabihBank(mutashabih);
+				setUsulBank(usul ? usul.shawahid : null);
+				setSurah2(s2);
 				setLoading(false);
 
 				// Wave 2: Load EXTENDED_QUIZ_SURAHS in the background for deeper variety
@@ -75,6 +83,26 @@ export function useQuizPools(
 			grammarBank ? hydrateQuizPools(grammarBank, loadedFiles) : NO_GRAMMAR,
 		[grammarBank, loadedFiles],
 	);
+	const usulPool = useMemo<UsulQuestion[]>(() => {
+		if (!usulBank) return [];
+		return usulBank.map((s) => {
+			const verse = surah2?.verses.find((v) => v.v === s.ayahNumber) ?? {
+				v: s.ayahNumber,
+				ar: s.shahidPhraseAr,
+				en: "",
+				w: [],
+			};
+			return {
+				id: s.id,
+				sura: 2,
+				suraName: surah2?.name ?? "البقرة",
+				suraPhonetic: surah2?.phonetic ?? "Al-Baqarah",
+				verse,
+				shahid: s,
+			};
+		});
+	}, [usulBank, surah2]);
+
 	const pools = useMemo<QuizPools>(() => {
 		const offered = new Set(rolesFor(extendedRoles).map((r) => r.code));
 		return {
@@ -83,8 +111,9 @@ export function useQuizPools(
 			mutashabih: mutashabihBank
 				? toMutashabihQuestions(mutashabihBank, manifest.units)
 				: [],
+			usul: usulPool,
 		};
-	}, [grammarPools, extendedRoles, mutashabihBank, manifest.units]);
+	}, [grammarPools, extendedRoles, mutashabihBank, manifest.units, usulPool]);
 
 	return { pools, loading };
 }

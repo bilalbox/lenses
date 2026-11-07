@@ -4,6 +4,7 @@ import type {
 	QuizPools,
 	QuizQuestion,
 	SarfQuestion,
+	UsulQuestion,
 } from "../../src/lib/quizBank";
 import {
 	activeQuestion,
@@ -48,10 +49,41 @@ const mutashabih = {
 	answer: 1,
 } as MutashabihQuestion;
 
+const usulMock: UsulQuestion = {
+	id: "u1",
+	sura: 2,
+	suraName: "البقرة",
+	suraPhonetic: "Al-Baqarah",
+	verse: verse(43),
+	shahid: {
+		id: "u1",
+		verseKey: "2:43",
+		ayahNumber: 43,
+		wordStart: 1,
+		wordEnd: 4,
+		shahidPhraseAr: "وَأَقِيمُوا الصَّلَاةَ",
+		taxonomyId: "AMR_WUJUB",
+		categoryGroup: "AMR_NAHY",
+		linguisticTriggerAr: "صيغة أمر",
+		defaultDalalahAr: "الوجوب",
+		actualDalalahAr: "الوجوب",
+		hasQarinahSarifah: false,
+		qarinahTextAr: null,
+		qarinahVerseKey: null,
+		wajhAlDilalahAr: "أمر للوجوب",
+		derivedFiqhRulingAr: "وجوب الصلاة",
+		khilafUsuliAr: null,
+		classicalSources: [],
+		extractionStage: "GOLDEN_SEED",
+		isCanonicalShahid: true,
+	},
+};
+
 const pools: QuizPools = {
 	irab: [irab("a", 1, 1), irab("b", 1, 1), irab("c", 2, 5)],
 	sarf: [sarf],
 	mutashabih: [mutashabih],
+	usul: [usulMock],
 };
 
 function run(...events: QuizSessionEvent[]): QuizSessionState {
@@ -72,13 +104,14 @@ describe("quizSession: seeding and questions", () => {
 	it("seeds one random question per lens", () => {
 		const state = run({
 			type: "seed",
-			random: { irab: 0.99, sarf: 0, mutashabih: 0.5 },
+			random: { irab: 0.99, sarf: 0, mutashabih: 0.5, usul: 0 },
 		});
 		expect(state.seeded).toBe(true);
 		expect(state.indices).toEqual({
 			irab: 2,
 			sarf: 0,
 			mutashabih: 0,
+			usul: 0,
 		});
 		expect(activeQuestion(state, pools)?.id).toBe("c");
 	});
@@ -355,5 +388,20 @@ describe("quizSession: wizard navigation and lenses", () => {
 			classCode: true,
 			structureCode: true,
 		});
+	});
+
+	it("grades the usul lens on dalalah taxonomyId and updates score", () => {
+		const state = run(
+			{ type: "selectLens", lens: "usul" },
+			{ type: "answer", field: "option", value: "AMR_WUJUB" },
+			{ type: "submit" },
+		);
+		expect(state.lens).toBe("usul");
+		expect(state.verdict).toEqual({
+			fields: { option: true },
+			allCorrect: true,
+		});
+		expect(state.score).toEqual({ solved: 1, attempts: 1 });
+		expect(state.streak).toBe(1);
 	});
 });
