@@ -79,6 +79,15 @@ export const UsuliShahidSchema = z.object({
 
 export type UsuliShahid = z.infer<typeof UsuliShahidSchema>;
 
+export interface UsuliSpanAnchor {
+	shahidId: string;
+	verseKey: string;
+	ayahNumber: number;
+	wordStart: number;
+	wordEnd: number;
+	shahidPhraseAr: string;
+}
+
 export interface UsuliTaxonomyNode {
 	id: UsuliTaxonomyId;
 	categoryGroup: UsuliCategoryGroup;

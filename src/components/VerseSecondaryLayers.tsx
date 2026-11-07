@@ -327,6 +327,7 @@ export function VerseSecondaryLayers({
 					<div className="verse-layer-body">
 						<UsulSection
 							shawahid={usulShawahid}
+							allShawahid={layers.usul.allShawahid}
 							onSelectWord={onSelect}
 							onNavigateAyah={(targetSura, targetAyah) =>
 								onNavigate?.(targetSura, targetAyah, 1, {

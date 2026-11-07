@@ -422,6 +422,142 @@ GOLDEN_SEED: list[dict[str, Any]] = [
     },
 ]
 
+USULI_EXTRACTION_PROMPT: str = (
+    "أنت خبير في أصول الفقه ودلالات الألفاظ وتفسير آيات الأحكام "
+    "(كأحكام القرآن للجصاص وابن العربي والكيا الهراسي، والمستصفى للغزالي، "
+    "والإحكام للآمدي، وإرشاد الفحول للشوكاني). حلل الآية والمواضع الصرفية المرشحة "
+    "من سورة البقرة، واستخرج الشواهد الأصولية ودلالات الألفاظ مع تحرير (وجه الدلالة) "
+    "و(القرينة الصارفة إن وجدت) و(الخلاف الأصولي) وفق المخطط المحدد."
+)
+
+STAGE2_ENRICHED_SHAWAHID: list[dict[str, Any]] = [
+    {
+        "id": "2-183-4-6-khabar-amr",
+        "verseKey": "2:183",
+        "ayahNumber": 183,
+        "wordStart": 4,
+        "wordEnd": 6,
+        "shahidPhraseAr": "كُتِبَ عَلَيْكُمُ ٱلصِّيَامُ",
+        "taxonomyId": "KHABAR_BIMAANA_AMR",
+        "categoryGroup": "AMR_NAHY",
+        "linguisticTriggerAr": "الإخبار بلفظ الفرض والكتب (كتب)",
+        "defaultDalalahAr": "الخبر المحض",
+        "actualDalalahAr": "الوجوب الحتمي المؤكد",
+        "hasQarinahSarifah": True,
+        "qarinahTextAr": "سياق التشريع والخطاب التكليفي",
+        "qarinahVerseKey": "2:183",
+        "wajhAlDilalahAr": (
+            "لفظ (كُتِبَ) جملة خبرية لفظاً مراد بها الإنشاء والطلب الجازم، وصدرت بصيغة "
+            "الإخبار للإشعار بأن الصيام فريضة متأصلة مقررة لا تقبل التردد."
+        ),
+        "derivedFiqhRulingAr": "وجوب صيام شهر رمضان فرض عين على المكلفين",
+        "khilafUsuliAr": "دلالة مادة (كتب) وفرض على الوجوب قطعية كصيغة الأمر عند عامة الأصوليين",
+        "classicalSources": ["أحكام القرآن للجصاص", "المستصفى للغزالي"],
+        "extractionStage": "STAGE2_LLM_VERIFIED",
+        "isCanonicalShahid": False,
+    },
+    {
+        "id": "2-185-13-17-amr-wujub",
+        "verseKey": "2:185",
+        "ayahNumber": 185,
+        "wordStart": 13,
+        "wordEnd": 17,
+        "shahidPhraseAr": "فَمَن شَهِدَ مِنكُمُ ٱلشَّهْرَ فَلْيَصُمْهُ",
+        "taxonomyId": "AMR_WUJUB",
+        "categoryGroup": "AMR_NAHY",
+        "linguisticTriggerAr": "اسم شرط عام (من) مقترن بجوابه المتضمن للام الأمر (فليصمه)",
+        "defaultDalalahAr": "الوجوب المطلق",
+        "actualDalalahAr": "الوجوب العيني المنسوخ به التخيير المتقدم",
+        "hasQarinahSarifah": True,
+        "qarinahTextAr": "وَعَلَى الَّذِينَ يُطِيقُونَهُ فِدْيَةٌ طَعَامُ مِسْكِينٍ",
+        "qarinahVerseKey": "2:184",
+        "wajhAlDilalahAr": (
+            "صيغة أمر بلام الأمر (فليصمه) بعد شرط عام (فمن شهد)، نسخت التخيير المتقدم في "
+            "آية الفدية (2:184) وأوجبت الصيام عيناً على كل قادر غير مسافر."
+        ),
+        "derivedFiqhRulingAr": "فرضيّة الصوم العينية على من شهد الشهر صحيحاً مقيماً",
+        "khilafUsuliAr": "نسخ القرآن بالقرآن ونسخ التخيير بالتعيين مجمع عليه عند الأصوليين",
+        "classicalSources": ["أحكام القرآن للجصاص", "المستصفى للغزالي", "الإحكام للآمدي"],
+        "extractionStage": "STAGE2_LLM_VERIFIED",
+        "isCanonicalShahid": False,
+    },
+    {
+        "id": "2-238-1-5-amm-makhsus",
+        "verseKey": "2:238",
+        "ayahNumber": 238,
+        "wordStart": 1,
+        "wordEnd": 5,
+        "shahidPhraseAr": "حَٰفِظُوا۟ عَلَى ٱلصَّلَوَٰتِ وَٱلصَّلَوٰةِ ٱلْوُسْطَىٰ",
+        "taxonomyId": "AMM_MAKHSUS_MUTTASIL",
+        "categoryGroup": "AMM_KHASS",
+        "linguisticTriggerAr": "عطف الخاص (الصلاة الوسطى) على العام (الصلوات)",
+        "defaultDalalahAr": "دخول الخاص في عموم الصلوات",
+        "actualDalalahAr": "العام المعطوف عليه خاص لمزيد العناية والفضل دون خروج من الوجوب",
+        "hasQarinahSarifah": False,
+        "qarinahTextAr": None,
+        "qarinahVerseKey": None,
+        "wajhAlDilalahAr": (
+            "لفظ (الصلوات) جمع محلى بأل يفيد استغراق الفرائض كلها، وعطف (الصلاة الوسطى) "
+            "عليها عطف خاص على عام للتنويه بشأنها ومزيد التأكيد على المحافظة عليها."
+        ),
+        "derivedFiqhRulingAr": "وجوب المحافظة على الصلوات الخمس والتأكيد على صلاة العصر",
+        "khilafUsuliAr": "عطف الخاص على العام لا يخرجه من حكم العام عند جماهير الأصوليين",
+        "classicalSources": ["أحكام القرآن لابن العربي", "المستصفى للغزالي"],
+        "extractionStage": "STAGE2_LLM_VERIFIED",
+        "isCanonicalShahid": False,
+    },
+    {
+        "id": "2-278-6-10-amr-wujub",
+        "verseKey": "2:278",
+        "ayahNumber": 278,
+        "wordStart": 6,
+        "wordEnd": 10,
+        "shahidPhraseAr": "وَذَرُوا۟ مَا بَقِىَ مِنَ ٱلرِّبَوٰٓا۟",
+        "taxonomyId": "AMR_WUJUB",
+        "categoryGroup": "AMR_NAHY",
+        "linguisticTriggerAr": "فعل أمر صريح دال على الترك (ذروا)",
+        "defaultDalalahAr": "الوجوب",
+        "actualDalalahAr": "الوجوب القطعي لترك بقايا الربا وبطلانها",
+        "hasQarinahSarifah": False,
+        "qarinahTextAr": None,
+        "qarinahVerseKey": None,
+        "wajhAlDilalahAr": (
+            "صيغة الأمر (ذروا) تقتضي وجوب الكف فوراً وبطلان استيفاء أي ربا مشروط "
+            "في المعاملات الجارية قبل ورود النهي."
+        ),
+        "derivedFiqhRulingAr": "تحريم استيفاء أي زيادة ربوية وبطلان ترتبها في الذمة شرعاً",
+        "khilafUsuliAr": "الأمر بالترك يقتضي النهي عن الفعل والنهي يقتضي الفساد والبطلان",
+        "classicalSources": ["أحكام القرآن للجصاص", "الإحكام للآمدي"],
+        "extractionStage": "STAGE2_LLM_VERIFIED",
+        "isCanonicalShahid": False,
+    },
+    {
+        "id": "2-283-14-17-amr-wujub",
+        "verseKey": "2:283",
+        "ayahNumber": 283,
+        "wordStart": 14,
+        "wordEnd": 17,
+        "shahidPhraseAr": "فَلْيُؤَدِّ ٱلَّذِى ٱؤْتُمِنَ أَمَٰنَتَهُۥ",
+        "taxonomyId": "AMR_WUJUB",
+        "categoryGroup": "AMR_NAHY",
+        "linguisticTriggerAr": "لام الأمر المقترنة بالفعل المضارع المجزوم (فليؤد)",
+        "defaultDalalahAr": "الوجوب",
+        "actualDalalahAr": "الوجوب العيني للأداء وهو القرينة الصارفة لأمر الكتابة في 2:282",
+        "hasQarinahSarifah": False,
+        "qarinahTextAr": None,
+        "qarinahVerseKey": "2:282",
+        "wajhAlDilalahAr": (
+            "صيغة أمر بلام الأمر تفيد وجوب أداء الأمانة والوفاء بالدين عند الائتمان، "
+            "وهي القرينة الصارفة لأمر الكتابة في الآية السابقة (2:282 فاكتبوه) إلى الندب والإرشاد."
+        ),
+        "derivedFiqhRulingAr": "وجوب أداء الأمانات والديون عند الائتمان وسقوط شرط الكتابة",
+        "khilafUsuliAr": "الجمهور استدلوا بهذه الآية على صرف الأمر في آية المداينة من الوجوب للندب",
+        "classicalSources": ["أحكام القرآن للجصاص", "المستصفى للغزالي", "إرشاد الفحول للشوكاني"],
+        "extractionStage": "STAGE2_LLM_VERIFIED",
+        "isCanonicalShahid": False,
+    },
+]
+
 
 def make_candidate(
     *,
@@ -605,6 +741,33 @@ def scan_stage1_candidates(verse: dict[str, Any]) -> list[dict[str, Any]]:
                     )
                     break
 
+        # 5. Check for General Pronouns / Particles and Plural with DET (CAND_AMM_SHART_MAWSUL)
+        has_shart_or_mawsul = word["a"] in ("مَن", "مَا", "كُلّ", "جَمِيع", "ٱلَّذِينَ") or any(
+            s.get("p") == "REL" for s in segments
+        )
+        is_plural_with_det = any(
+            s.get("p") == "N" and s.get("f", {}).get("num") == "P" for s in segments
+        ) and any(s.get("p") == "DET" for s in segments)
+        if (has_shart_or_mawsul or is_plural_with_det) and not is_dua_context(words, idx):
+            candidates.append(
+                make_candidate(
+                    id_=f"2-{v_num}-{w_num}-{w_num}-cand-amm-mawsul",
+                    verse_key=f"2:{v_num}",
+                    ayah_number=v_num,
+                    word_start=w_num,
+                    word_end=w_num,
+                    shahid_phrase_ar=word["a"],
+                    taxonomy_id="AMM_BAQI",
+                    category_group="AMM_KHASS",
+                    linguistic_trigger_ar="الأسماء الموصولة وصيغ العموم الشمولية",
+                    default_dalalah_ar="استغراق جميع الأفراد الصالحة للفظ",
+                    actual_dalalah_ar="العام الباقي على عمومه",
+                    wajh_al_dilalah_ar="الاسم الموصول أو المعرف بأل الاستغراقية يفيد العموم لجميع ما يصدق عليه",
+                    derived_fiqh_ruling_ar="شمول الحكم العام لكل فرد يدخل تحت اللفظ",
+                    classical_sources=["المستصفى للغزالي"],
+                )
+            )
+
     return candidates
 
 
@@ -613,13 +776,13 @@ def build_usul_spike_dataset() -> dict[str, Any]:
     with open(SURAH_002_PATH, encoding="utf-8") as f:
         surah_data = json.load(f)
 
-    all_shawahid: list[dict[str, Any]] = list(GOLDEN_SEED)
-    golden_verse_keys = {g["verseKey"] for g in GOLDEN_SEED}
+    all_shawahid: list[dict[str, Any]] = list(GOLDEN_SEED) + list(STAGE2_ENRICHED_SHAWAHID)
+    reserved_verse_keys = {g["verseKey"] for g in all_shawahid}
 
     for verse in surah_data.get("verses", []):
         v_key = f"2:{verse['v']}"
-        # For non-golden verses, scan Stage 1 syntactic candidates
-        if v_key not in golden_verse_keys:
+        # For non-golden/non-enriched verses, scan Stage 1 syntactic candidates
+        if v_key not in reserved_verse_keys:
             cands = scan_stage1_candidates(verse)
             all_shawahid.extend(cands)
 

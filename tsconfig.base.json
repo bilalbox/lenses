@@ -13,6 +13,7 @@
 		"moduleResolution": "Bundler",
 		"isolatedModules": true,
 		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true
 	}
 }

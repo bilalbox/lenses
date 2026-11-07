@@ -11,7 +11,7 @@ import type {
 	VerseRow,
 	WordIndex,
 } from "./types";
-import type { SurahUsulFile } from "./usulTypes";
+import type { SurahUsulFile, UsuliTaxonomyNode } from "./usulTypes";
 
 /** One file for the whole corpus, at `/data/quran/{kind}.json`. */
 interface CorpusLayers {
@@ -21,6 +21,7 @@ interface CorpusLayers {
 	asbab: AsbabData;
 	mutashabihQuiz: MutashabihQuizFile;
 	quizBank: QuizBankFile;
+	usulTaxonomy: UsuliTaxonomyNode[];
 }
 
 /** One file per surah, at `/data/quran/{kind}/{nnn}.json`. */

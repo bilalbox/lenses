@@ -45,6 +45,7 @@ export interface ReaderLayers {
 	usul: {
 		loading: boolean;
 		shawahid: UsuliShahid[];
+		allShawahid: UsuliShahid[];
 	};
 	drawers: Drawers;
 	setDrawer: (key: DrawerKey, open: boolean) => void;
@@ -156,6 +157,8 @@ export function useReaderLayers(
 		usul: {
 			loading: sura === 2 ? usul.loading : false,
 			shawahid: usulShawahid,
+			allShawahid:
+				sura === 2 && usul.data?.shawahid ? usul.data.shawahid : NO_SHAWAHID,
 		},
 		drawers,
 		setDrawer,

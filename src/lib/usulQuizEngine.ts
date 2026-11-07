@@ -3,21 +3,30 @@ import {
 	nodesForCategory,
 	USULI_TAXONOMY_NODES,
 } from "./usulTaxonomy";
-import type { UsuliShahid, UsuliTaxonomyId } from "./usulTypes";
+import type {
+	UsuliShahid,
+	UsuliSpanAnchor,
+	UsuliTaxonomyId,
+} from "./usulTypes";
+
+export function extractSpanAnchor(shahid: UsuliShahid): UsuliSpanAnchor {
+	return {
+		shahidId: shahid.id,
+		verseKey: shahid.verseKey,
+		ayahNumber: shahid.ayahNumber,
+		wordStart: shahid.wordStart,
+		wordEnd: shahid.wordEnd,
+		shahidPhraseAr: shahid.shahidPhraseAr,
+	};
+}
 
 export interface IdentifyDalalahOption {
 	id: UsuliTaxonomyId;
 	labelAr: string;
 }
 
-export interface IdentifyDalalahDrill {
+export interface IdentifyDalalahDrill extends UsuliSpanAnchor {
 	mode: "IDENTIFY_DALALAH";
-	shahidId: string;
-	verseKey: string;
-	ayahNumber: number;
-	wordStart: number;
-	wordEnd: number;
-	shahidPhraseAr: string;
 	questionAr: string;
 	correctTaxonomyId: UsuliTaxonomyId;
 	options: IdentifyDalalahOption[];
@@ -28,14 +37,8 @@ export interface SpotTheQarinahOption {
 	isCorrect: boolean;
 }
 
-export interface SpotTheQarinahDrill {
+export interface SpotTheQarinahDrill extends UsuliSpanAnchor {
 	mode: "SPOT_THE_QARINAH";
-	shahidId: string;
-	verseKey: string;
-	ayahNumber: number;
-	wordStart: number;
-	wordEnd: number;
-	shahidPhraseAr: string;
 	questionAr: string;
 	defaultDalalahAr: string;
 	actualDalalahAr: string;
@@ -45,13 +48,8 @@ export interface SpotTheQarinahDrill {
 	options: SpotTheQarinahOption[];
 }
 
-export interface LocateShahidSpanDrill {
+export interface LocateShahidSpanDrill extends UsuliSpanAnchor {
 	mode: "LOCATE_SHAHID_SPAN";
-	shahidId: string;
-	verseKey: string;
-	ayahNumber: number;
-	wordStart: number;
-	wordEnd: number;
 	promptAr: string;
 	taxonomyNameAr: string;
 	derivedFiqhRulingAr: string;
@@ -62,14 +60,8 @@ export interface UsuliKhilafOption {
 	isCorrect: boolean;
 }
 
-export interface UsuliKhilafDrill {
+export interface UsuliKhilafDrill extends UsuliSpanAnchor {
 	mode: "USULI_KHILAF_DRILL";
-	shahidId: string;
-	verseKey: string;
-	ayahNumber: number;
-	wordStart: number;
-	wordEnd: number;
-	shahidPhraseAr: string;
 	questionAr: string;
 	khilafUsuliAr: string;
 	derivedFiqhRulingAr: string;
@@ -142,12 +134,7 @@ export function generateIdentifyDalalahDrill(
 
 	return {
 		mode: "IDENTIFY_DALALAH",
-		shahidId: shahid.id,
-		verseKey: shahid.verseKey,
-		ayahNumber: shahid.ayahNumber,
-		wordStart: shahid.wordStart,
-		wordEnd: shahid.wordEnd,
-		shahidPhraseAr: shahid.shahidPhraseAr,
+		...extractSpanAnchor(shahid),
 		questionAr: "ما نوع الدلالة الأصولية في الموضع المحدد من الآية؟",
 		correctTaxonomyId: shahid.taxonomyId,
 		options,
@@ -204,12 +191,7 @@ export function generateSpotTheQarinahDrill(
 
 	return {
 		mode: "SPOT_THE_QARINAH",
-		shahidId: shahid.id,
-		verseKey: shahid.verseKey,
-		ayahNumber: shahid.ayahNumber,
-		wordStart: shahid.wordStart,
-		wordEnd: shahid.wordEnd,
-		shahidPhraseAr: shahid.shahidPhraseAr,
+		...extractSpanAnchor(shahid),
 		questionAr:
 			"ميّز دلالة الصيغة المحددة: هل بقيت على مقتضاها الأصلي أم صُرِفت بقرينة؟",
 		defaultDalalahAr: defaultImport,
@@ -227,11 +209,7 @@ export function generateLocateSpanDrill(
 	const taxonomyNode = getTaxonomyNode(shahid.taxonomyId);
 	return {
 		mode: "LOCATE_SHAHID_SPAN",
-		shahidId: shahid.id,
-		verseKey: shahid.verseKey,
-		ayahNumber: shahid.ayahNumber,
-		wordStart: shahid.wordStart,
-		wordEnd: shahid.wordEnd,
+		...extractSpanAnchor(shahid),
 		promptAr: `اضغط على اللفظ الذي استدل به الأصوليون على: [${taxonomyNode.nameAr}] لاستنباط: [${shahid.derivedFiqhRulingAr}]`,
 		taxonomyNameAr: taxonomyNode.nameAr,
 		derivedFiqhRulingAr: shahid.derivedFiqhRulingAr,
@@ -266,12 +244,7 @@ export function generateKhilafDrill(
 
 	return {
 		mode: "USULI_KHILAF_DRILL",
-		shahidId: shahid.id,
-		verseKey: shahid.verseKey,
-		ayahNumber: shahid.ayahNumber,
-		wordStart: shahid.wordStart,
-		wordEnd: shahid.wordEnd,
-		shahidPhraseAr: shahid.shahidPhraseAr,
+		...extractSpanAnchor(shahid),
 		questionAr: `ما هو تحرير الخلاف الأصولي ووجه الدلالة في قوله تعالى: ﴿${shahid.shahidPhraseAr}﴾؟`,
 		khilafUsuliAr: shahid.khilafUsuliAr,
 		derivedFiqhRulingAr: shahid.derivedFiqhRulingAr,
