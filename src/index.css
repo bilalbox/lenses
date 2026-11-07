@@ -3682,6 +3682,229 @@ main {
 }
 
 /* ==========================================================================
+   Usul al-Fiqh & Dalalat al-Alfaz Lens
+   ========================================================================== */
+.usul-section-body {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	flex: 1;
+}
+
+.usul-card {
+	background: color-mix(in srgb, var(--panel) 40%, var(--paper));
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 1.1rem 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+.usul-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.usul-badge-group {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.usul-cat-badge {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.78rem;
+	font-weight: 700;
+	padding: 0.15rem 0.6rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--indigo) 16%, var(--paper));
+	color: color-mix(in srgb, var(--indigo) 72%, var(--ink));
+	border: 1px solid color-mix(in srgb, var(--indigo) 42%, var(--line));
+}
+
+.usul-tax-badge {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.78rem;
+	font-weight: 700;
+	padding: 0.15rem 0.6rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--teal) 16%, var(--paper));
+	color: color-mix(in srgb, var(--teal) 72%, var(--ink));
+	border: 1px solid color-mix(in srgb, var(--teal) 42%, var(--line));
+}
+
+.usul-canonical-badge {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.75rem;
+	font-weight: 700;
+	padding: 0.12rem 0.5rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--amber) 16%, var(--paper));
+	color: color-mix(in srgb, var(--amber) 80%, var(--ink));
+	border: 1px solid color-mix(in srgb, var(--amber) 42%, var(--line));
+}
+
+.usul-index-meta {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--muted);
+}
+
+.usul-phrase-row {
+	display: flex;
+	align-items: center;
+}
+
+.usul-phrase-btn {
+	background: var(--paper);
+	border: 1px solid color-mix(in srgb, var(--teal) 35%, var(--line));
+	border-radius: 6px;
+	padding: 0.5rem 0.85rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	text-align: right;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
+}
+
+.usul-phrase-btn:hover {
+	background: color-mix(in srgb, var(--teal) 8%, var(--paper));
+	border-color: var(--teal);
+}
+
+.usul-phrase-quote {
+	font-family: var(--arabic);
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--ink);
+}
+
+.usul-span-coords {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.8rem;
+	color: var(--muted);
+}
+
+.usul-details-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+
+.usul-detail-item {
+	display: flex;
+	align-items: baseline;
+	gap: 0.6rem;
+	font-size: 0.95rem;
+}
+
+.usul-detail-label {
+	font-family: var(--arabic-ui, var(--sans));
+	font-weight: 700;
+	font-size: 0.84rem;
+	color: var(--muted);
+	flex-shrink: 0;
+}
+
+.usul-detail-value {
+	font-family: var(--arabic-ui, var(--sans));
+	color: var(--ink);
+}
+
+.usul-detail-value.is-shifted {
+	color: color-mix(in srgb, var(--rose) 80%, var(--ink));
+}
+
+.usul-qarinah-box,
+.usul-wajh-box,
+.usul-ruling-box,
+.usul-khilaf-box {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 0.65rem 0.85rem;
+}
+
+.usul-qarinah-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.25rem;
+}
+
+.usul-qarinah-label {
+	font-family: var(--arabic-ui, var(--sans));
+	font-weight: 700;
+	font-size: 0.82rem;
+	color: var(--rose);
+}
+
+.usul-nav-verse-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--teal);
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.8rem;
+	font-weight: 600;
+	padding: 0;
+}
+
+.usul-nav-verse-btn:hover {
+	text-decoration: underline;
+}
+
+.usul-qarinah-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.12rem;
+	line-height: 1.7;
+	color: var(--ink);
+}
+
+.usul-prose-text {
+	margin: 0.25rem 0 0;
+	font-family: var(--arabic);
+	font-size: 1.08rem;
+	line-height: 1.75;
+	color: var(--ink);
+}
+
+.usul-sources-row {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+	padding-top: 0.35rem;
+}
+
+.usul-source-tags {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	flex-wrap: wrap;
+}
+
+.usul-source-tag {
+	font-family: var(--arabic-ui, var(--sans));
+	font-size: 0.78rem;
+	padding: 0.15rem 0.5rem;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	color: var(--muted);
+}
+
+/* ==========================================================================
    Dedicated Nahw Tab & NoorBayan Treebank
    ========================================================================== */
 .noorbayan-nahw-section {

@@ -162,6 +162,9 @@ export const ar: Translations = {
 		asbabBadge: (count: number) => `سبب النزول (${formatNum(count, "ar")})`,
 		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
 		asbabSectionTitle: "أسباب النزول",
+		usulBadge: (count: number) =>
+			`دلالات الألفاظ والأصول (${formatNum(count, "ar")})`,
+		usulSectionTitle: "دلالات الألفاظ والشواهد الأصولية",
 		nahwTabTitle: "النحو وشجرة الإعراب",
 		treebankNoorBayan: "شجرة نور البيان القرآنية",
 		mutashabihBadge: (count: number) =>

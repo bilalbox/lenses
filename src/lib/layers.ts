@@ -11,6 +11,7 @@ import type {
 	VerseRow,
 	WordIndex,
 } from "./types";
+import type { SurahUsulFile } from "./usulTypes";
 
 /** One file for the whole corpus, at `/data/quran/{kind}.json`. */
 interface CorpusLayers {
@@ -28,6 +29,7 @@ interface SurahLayers {
 	syntax: SurahSyntaxFile;
 	qiraat: SurahQiraatFile;
 	mutashabih: SurahMutashabihFile;
+	usul: SurahUsulFile;
 }
 
 type CorpusLayer = keyof CorpusLayers;

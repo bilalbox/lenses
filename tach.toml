@@ -27,3 +27,7 @@ depends_on = []
 [[modules]]
 path = "build_syntax"
 depends_on = []
+
+[[modules]]
+path = "usul_baqarah_spike"
+depends_on = []

@@ -157,6 +157,8 @@ export interface Translations {
 		asbabBadge: (count: number) => string;
 		asbabDrawerTitle: string;
 		asbabSectionTitle: string;
+		usulBadge: (count: number) => string;
+		usulSectionTitle: string;
 		nahwTabTitle: string;
 		treebankNoorBayan: string;
 		mutashabihBadge: (count: number) => string;

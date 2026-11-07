@@ -165,6 +165,9 @@ export const en: Translations = {
 			`Cause of Revelation (${formatNum(count, "en")})`,
 		asbabDrawerTitle: "Causes of Revelation (Asbāb al-Nuzūl)",
 		asbabSectionTitle: "Asbāb al-Nuzūl (Causes of Revelation)",
+		usulBadge: (count: number) =>
+			`Usul & Legal Semantics (${formatNum(count, "en")})`,
+		usulSectionTitle: "Usul al-Fiqh & Legal Semantics",
 		nahwTabTitle: "Nahw & Syntax Tree",
 		treebankNoorBayan: "NoorBayan Quranic Treebank",
 		mutashabihBadge: (count: number) =>

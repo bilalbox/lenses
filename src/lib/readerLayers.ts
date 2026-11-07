@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Locale } from "./i18n/types";
 import { useLayer, useVerseLayer } from "./layers";
 import type { ReaderPrefs } from "./readerPrefs";
@@ -9,9 +9,10 @@ import type {
 	Verse,
 	VerseSyntax,
 } from "./types";
+import type { UsuliShahid } from "./usulTypes";
 
 /** Reader layers shown as collapsible drawers under the ayah. */
-export type DrawerKey = "irab" | "mutashabih" | "asbab";
+export type DrawerKey = "irab" | "mutashabih" | "asbab" | "usul";
 export type Drawers = Record<DrawerKey, boolean>;
 
 /**
@@ -23,6 +24,7 @@ export function drawersForTab(tab?: string): Drawers {
 		irab: false,
 		mutashabih: tab === "mutashabih",
 		asbab: tab === "asbab",
+		usul: tab === "usul",
 	};
 }
 
@@ -40,12 +42,17 @@ export interface ReaderLayers {
 		matches: MutashabihMatch[];
 	};
 	asbab: { narrations: AsbabNarration[] };
+	usul: {
+		loading: boolean;
+		shawahid: UsuliShahid[];
+	};
 	drawers: Drawers;
 	setDrawer: (key: DrawerKey, open: boolean) => void;
 }
 
 const NO_MATCHES: MutashabihMatch[] = [];
 const NO_NARRATIONS: AsbabNarration[] = [];
+const NO_SHAWAHID: UsuliShahid[] = [];
 
 /** Translation for the meaning layer, from QuranEnc. */
 function useVerseTranslation(
@@ -122,6 +129,11 @@ export function useReaderLayers(
 	const mutashabih = useVerseLayer("mutashabih", sura, verse.v, {
 		enabled: prefs.mutashabih,
 	});
+	const usul = useLayer("usul", sura, { enabled: sura === 2 });
+	const usulShawahid = useMemo(() => {
+		if (sura !== 2 || !usul.data?.shawahid) return NO_SHAWAHID;
+		return usul.data.shawahid.filter((s) => s.ayahNumber === verse.v);
+	}, [sura, usul.data, verse.v]);
 	const translation = useVerseTranslation(prefs.meaning, sura, verse.v, locale);
 	const { drawers, setDrawer } = useDrawers(tab);
 
@@ -140,6 +152,10 @@ export function useReaderLayers(
 		},
 		asbab: {
 			narrations: asbab.data?.[`${sura}:${verse.v}`] ?? NO_NARRATIONS,
+		},
+		usul: {
+			loading: sura === 2 ? usul.loading : false,
+			shawahid: usulShawahid,
 		},
 		drawers,
 		setDrawer,

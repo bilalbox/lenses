@@ -6,6 +6,7 @@ import { verseRefParam } from "../lib/route";
 import type { Manifest, Verse, VerseRef } from "../lib/types";
 import { AsbabSection } from "./AsbabSection";
 import { MutashabihSection } from "./MutashabihSection";
+import { UsulSection } from "./UsulSection";
 
 interface MeaningProps {
 	verse: Verse;
@@ -190,6 +191,7 @@ export function VerseSecondaryLayers({
 	const classicalIrab = layers.irab.classical;
 	const mutashabihMatches = layers.mutashabih.matches;
 	const verseAsbab = layers.asbab.narrations;
+	const usulShawahid = layers.usul.shawahid;
 	const showNahw = Boolean(nahwPanel);
 
 	return (
@@ -304,6 +306,34 @@ export function VerseSecondaryLayers({
 					</summary>
 					<div className="verse-layer-body">
 						<AsbabSection narrations={verseAsbab} />
+					</div>
+				</details>
+			) : null}
+
+			{usulShawahid.length > 0 ? (
+				<details
+					className="verse-layer usul-block"
+					open={drawers.usul}
+					onToggle={(event) => setDrawer("usul", event.currentTarget.open)}
+				>
+					<summary>
+						<span className="verse-layer-title">
+							{t.verse.usulSectionTitle}
+						</span>
+						<span className="verse-layer-meta">
+							{t.verse.usulBadge(usulShawahid.length)}
+						</span>
+					</summary>
+					<div className="verse-layer-body">
+						<UsulSection
+							shawahid={usulShawahid}
+							onSelectWord={onSelect}
+							onNavigateAyah={(targetSura, targetAyah) =>
+								onNavigate?.(targetSura, targetAyah, 1, {
+									tab: "usul",
+								})
+							}
+						/>
 					</div>
 				</details>
 			) : null}

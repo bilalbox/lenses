@@ -165,6 +165,8 @@ export const id: Translations = {
 		asbabBadge: (count: number) => `Sebab Turun (${formatNum(count, "id")})`,
 		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
 		asbabSectionTitle: "Asbabun Nuzul (Sebab Turunnya Ayat)",
+		usulBadge: (count: number) => `Dalil Ushul (${formatNum(count, "id")})`,
+		usulSectionTitle: "Ushul Fikih & Dalalat al-Alfaz",
 		nahwTabTitle: "Nahwu & Pohon Sintaksis",
 		treebankNoorBayan: "Treebank Al-Qur'an NoorBayan",
 		mutashabihBadge: (count: number) =>

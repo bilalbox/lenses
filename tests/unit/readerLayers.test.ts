@@ -8,11 +8,12 @@ describe("readerLayers: drawers on arrival", () => {
 			irab: false,
 			mutashabih: false,
 			asbab: false,
+			usul: false,
 		});
 	});
 
 	it("opens only the deep-linked drawer", () => {
-		for (const tab of ["mutashabih", "asbab"] as const) {
+		for (const tab of ["mutashabih", "asbab", "usul"] as const) {
 			const drawers = drawersForTab(tab);
 			expect(drawers[tab], tab).toBe(true);
 			expect(
