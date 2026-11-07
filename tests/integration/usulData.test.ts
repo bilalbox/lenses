@@ -34,6 +34,9 @@ describe("integration: Usul al-Fiqh & Dalalat al-Alfaz Dataset (Surah Al-Baqarah
 		expect(file.surah).toBe(2);
 		expect(file.shawahid.length).toBeGreaterThanOrEqual(8);
 
+		const categoryGroups = new Set(file.shawahid.map((s) => s.categoryGroup));
+		expect(categoryGroups.size).toBe(5);
+
 		for (const item of file.shawahid) {
 			const parsed = UsuliShahidSchema.parse(item);
 			expect(parsed.ayahNumber).toBeGreaterThanOrEqual(1);

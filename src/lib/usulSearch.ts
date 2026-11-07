@@ -47,9 +47,7 @@ export function searchUsuliShawahid(
 				item.shahidPhraseAr,
 				item.wajhAlDilalahAr,
 				item.derivedFiqhRulingAr,
-				item.linguisticTriggerAr,
 				item.qarinahTextAr ?? "",
-				item.khilafUsuliAr ?? "",
 			]
 				.map((field) => stripDiacritics(field))
 				.join(" ");

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	parseVerseKey,
 	UsuliCategoryGroupSchema,
 	UsuliShahidSchema,
 	UsuliTaxonomyIdSchema,
@@ -115,5 +116,12 @@ describe("Usuli Zod Schemas", () => {
 		expect(() =>
 			UsuliShahidSchema.parse({ ...base, verseKey: "2:0" }),
 		).toThrow();
+	});
+
+	it("parses valid verse keys into VerseRef and rejects invalid ones", () => {
+		expect(parseVerseKey("2:282")).toEqual({ sura: 2, verse: 282 });
+		expect(parseVerseKey("5:5")).toEqual({ sura: 5, verse: 5 });
+		expect(parseVerseKey("invalid")).toBeNull();
+		expect(parseVerseKey("")).toBeNull();
 	});
 });

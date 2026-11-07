@@ -1,6 +1,6 @@
 import { useI18n } from "../lib/i18n/I18nContext";
 import { getTaxonomyNode, USULI_CATEGORY_LABELS } from "../lib/usulTaxonomy";
-import type { UsuliShahid } from "../lib/usulTypes";
+import { parseVerseKey, type UsuliShahid } from "../lib/usulTypes";
 
 interface Props {
 	shawahid: UsuliShahid[];
@@ -20,8 +20,8 @@ export function UsulSection({ shawahid, onSelectWord, onNavigateAyah }: Props) {
 			{shawahid.map((item, index) => {
 				const taxonomy = getTaxonomyNode(item.taxonomyId);
 				const category = USULI_CATEGORY_LABELS[item.categoryGroup];
-				const qarinahVerse = item.qarinahVerseKey
-					? item.qarinahVerseKey.split(":")
+				const qarinahRef = item.qarinahVerseKey
+					? parseVerseKey(item.qarinahVerseKey)
 					: null;
 
 				return (
@@ -82,15 +82,12 @@ export function UsulSection({ shawahid, onSelectWord, onNavigateAyah }: Props) {
 								<div className="usul-qarinah-box">
 									<div className="usul-qarinah-head">
 										<span className="usul-qarinah-label">القرينة الصارفة:</span>
-										{qarinahVerse && onNavigateAyah ? (
+										{qarinahRef && onNavigateAyah ? (
 											<button
 												type="button"
 												className="usul-nav-verse-btn"
 												onClick={() =>
-													onNavigateAyah(
-														Number(qarinahVerse[0]),
-														Number(qarinahVerse[1]),
-													)
+													onNavigateAyah(qarinahRef.sura, qarinahRef.verse)
 												}
 											>
 												انتقل إلى الآية {item.qarinahVerseKey} ↗

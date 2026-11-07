@@ -146,4 +146,15 @@ describe("Usuli Quiz Engine (4 Drill Modes)", () => {
 		const drillNull = generateKhilafDrill(s0);
 		expect(drillNull).toBeNull();
 	});
+
+	it("randomizes option positions rather than pinning correct answer to index 0", () => {
+		const positions = new Set<number>();
+		for (let i = 0; i < 20; i++) {
+			const drill = generateIdentifyDalalahDrill(s1, `test-seed-${i}`);
+			const correctIdx = drill.options.findIndex((o) => o.id === "AMR_NADB");
+			positions.add(correctIdx);
+		}
+		// Over 20 iterations, the correct answer appears in more than 1 distinct slot
+		expect(positions.size).toBeGreaterThan(1);
+	});
 });

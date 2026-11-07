@@ -76,6 +76,35 @@ export interface UsuliKhilafDrill {
 	options: UsuliKhilafOption[];
 }
 
+function hashCode(str: string): number {
+	let h = 0;
+	for (let i = 0; i < str.length; i++) {
+		h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+	}
+	return h >>> 0;
+}
+
+export function shuffle<T>(items: readonly T[], seed?: string | number): T[] {
+	const out = [...items];
+	let s = typeof seed === "number" ? seed : seed ? hashCode(seed) : 0;
+	for (let i = out.length - 1; i > 0; i--) {
+		let j: number;
+		if (seed !== undefined) {
+			s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+			j = s % (i + 1);
+		} else {
+			j = Math.floor(Math.random() * (i + 1));
+		}
+		const tmp = out[i];
+		const target = out[j];
+		if (tmp !== undefined && target !== undefined) {
+			out[i] = target;
+			out[j] = tmp;
+		}
+	}
+	return out;
+}
+
 export function validateSpanClick(
 	wordIndex: number,
 	wordStart: number,
@@ -86,6 +115,7 @@ export function validateSpanClick(
 
 export function generateIdentifyDalalahDrill(
 	shahid: UsuliShahid,
+	seed?: string,
 ): IdentifyDalalahDrill {
 	const correctNode = getTaxonomyNode(shahid.taxonomyId);
 	const sameCategory = nodesForCategory(shahid.categoryGroup).filter(
@@ -96,13 +126,19 @@ export function generateIdentifyDalalahDrill(
 			n.id !== shahid.taxonomyId && n.categoryGroup !== shahid.categoryGroup,
 	);
 
-	const distractorPool = [...sameCategory, ...otherNodes];
+	const distractorPool = shuffle(
+		[...sameCategory, ...otherNodes],
+		seed ? `${seed}:pool` : undefined,
+	);
 	const selectedDistractors = distractorPool.slice(0, 3);
 
-	const options: IdentifyDalalahOption[] = [
-		{ id: correctNode.id, labelAr: correctNode.nameAr },
-		...selectedDistractors.map((d) => ({ id: d.id, labelAr: d.nameAr })),
-	];
+	const options: IdentifyDalalahOption[] = shuffle(
+		[
+			{ id: correctNode.id, labelAr: correctNode.nameAr },
+			...selectedDistractors.map((d) => ({ id: d.id, labelAr: d.nameAr })),
+		],
+		seed ? `${seed}:opts` : undefined,
+	);
 
 	return {
 		mode: "IDENTIFY_DALALAH",
@@ -120,12 +156,13 @@ export function generateIdentifyDalalahDrill(
 
 export function generateSpotTheQarinahDrill(
 	shahid: UsuliShahid,
+	seed?: string,
 ): SpotTheQarinahDrill {
 	const defaultImport = shahid.defaultDalalahAr;
 	const actualImport = shahid.actualDalalahAr;
 	const isShifted = shahid.hasQarinahSarifah;
 
-	const options: SpotTheQarinahOption[] = isShifted
+	const rawOptions: SpotTheQarinahOption[] = isShifted
 		? [
 				{
 					labelAr: `مصروف عن أصله إلى (${actualImport}) بقرينة صارفة`,
@@ -162,6 +199,8 @@ export function generateSpotTheQarinahDrill(
 					isCorrect: false,
 				},
 			];
+
+	const options = shuffle(rawOptions, seed);
 
 	return {
 		mode: "SPOT_THE_QARINAH",
@@ -201,12 +240,13 @@ export function generateLocateSpanDrill(
 
 export function generateKhilafDrill(
 	shahid: UsuliShahid,
+	seed?: string,
 ): UsuliKhilafDrill | null {
 	if (!shahid.khilafUsuliAr) {
 		return null;
 	}
 
-	const options: UsuliKhilafOption[] = [
+	const rawOptions: UsuliKhilafOption[] = [
 		{
 			labelAr: `وجه الخلاف: ${shahid.khilafUsuliAr}`,
 			isCorrect: true,
@@ -221,6 +261,8 @@ export function generateKhilafDrill(
 			isCorrect: false,
 		},
 	];
+
+	const options = shuffle(rawOptions, seed);
 
 	return {
 		mode: "USULI_KHILAF_DRILL",

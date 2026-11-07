@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { VerseRef } from "./types";
 
 export const UsuliCategoryGroupSchema = z.enum([
 	"AMR_NAHY", // الأمر والنهي
@@ -90,4 +91,13 @@ export interface UsuliTaxonomyNode {
 export interface SurahUsulFile {
 	surah: number;
 	shawahid: UsuliShahid[];
+}
+
+export function parseVerseKey(verseKey: string): VerseRef | null {
+	const match = verseKey.trim().match(/^(\d{1,3}):(\d{1,3})$/);
+	if (!match?.[1] || !match[2]) return null;
+	const sura = Number(match[1]);
+	const verse = Number(match[2]);
+	if (!Number.isFinite(sura) || !Number.isFinite(verse)) return null;
+	return { sura, verse };
 }

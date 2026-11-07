@@ -266,7 +266,221 @@ GOLDEN_SEED: list[dict[str, Any]] = [
         "extractionStage": "GOLDEN_SEED",
         "isCanonicalShahid": True,
     },
+    # Secondary canonical shawahid for dual Usuli classifications in golden verses
+    {
+        "id": "2-43-2-4-mujmal-mubayyan",
+        "verseKey": "2:43",
+        "ayahNumber": 43,
+        "wordStart": 2,
+        "wordEnd": 4,
+        "shahidPhraseAr": "الصَّلَاةَ وَآتُوا الزَّكَاةَ",
+        "taxonomyId": "MUJMAL_MUBAYYAN",
+        "categoryGroup": "WAADIH_MUBHAM",
+        "linguisticTriggerAr": "لفظ مجمل افتقر إلى بيان السنة المطهرة",
+        "defaultDalalahAr": "المجمل المفتقر للبيان",
+        "actualDalalahAr": "المبيَّن بالسنة العملية والقولية",
+        "hasQarinahSarifah": False,
+        "qarinahTextAr": None,
+        "qarinahVerseKey": None,
+        "wajhAlDilalahAr": (
+            "لفظ (الصلاة والزكاة) ورد مجملاً في أصل الوضع الشرعي، وبيّنت السنة النبوية "
+            "القولية والفعلية أركانهما ومقاديرهما وشروطهما."
+        ),
+        "derivedFiqhRulingAr": "وجوب امتثال الصلاة والزكاة وفق البيان النبوي الشريف",
+        "khilafUsuliAr": "تأخير البيان عن وقت الخطاب جائز إلى وقت الحاجة عند الجمهور",
+        "classicalSources": ["المستصفى للغزالي", "أحكام القرآن للجصاص"],
+        "extractionStage": "GOLDEN_SEED",
+        "isCanonicalShahid": True,
+    },
+    {
+        "id": "2-187-33-37-mafhum-ghayah",
+        "verseKey": "2:187",
+        "ayahNumber": 187,
+        "wordStart": 33,
+        "wordEnd": 37,
+        "shahidPhraseAr": "حَتَّىٰ يَتَبَيَّنَ لَكُمُ الْخَيْطُ الْأَبْيَضُ",
+        "taxonomyId": "MAFHUM_MUKHALAFAH_GHAYAH",
+        "categoryGroup": "MANTOOQ_MAFHUM",
+        "linguisticTriggerAr": "حرف الغاية (حتى)",
+        "defaultDalalahAr": "انتهاء الحكم المغيّا",
+        "actualDalalahAr": "مفهوم المخالفة للغاية المفيد للتحريم بعد طلوع الفجر",
+        "hasQarinahSarifah": False,
+        "qarinahTextAr": None,
+        "qarinahVerseKey": None,
+        "wajhAlDilalahAr": (
+            "دلالة الغاية بـ(حتى) تدل بمنطوقها على إباحة الأكل إلى الفجر، "
+            "وبمفهوم المخالفة على حرمة الأكل والشرب بمجرد تبين طلوع الفجر الصادق."
+        ),
+        "derivedFiqhRulingAr": "تحريم المفطرات ووجوب الإمساك بطلوع الفجر الصادق",
+        "khilafUsuliAr": "مفهوم الغاية حجة متفق عليها عند القائلين بالمفاهيم",
+        "classicalSources": ["المستصفى للغزالي", "الإحكام للآمدي"],
+        "extractionStage": "GOLDEN_SEED",
+        "isCanonicalShahid": True,
+    },
+    {
+        "id": "2-196-49-50-mutlaq-baqi",
+        "verseKey": "2:196",
+        "ayahNumber": 196,
+        "wordStart": 49,
+        "wordEnd": 50,
+        "shahidPhraseAr": "ثَلَاثَةِ أَيَّامٍ",
+        "taxonomyId": "MUTLAQ_BAQI",
+        "categoryGroup": "MUTLAQ_MUQAYYAD",
+        "linguisticTriggerAr": "اسم جنس مجرد عن القيد اللفظي",
+        "defaultDalalahAr": "المطلق الجاري على إطلاقه في الشياع",
+        "actualDalalahAr": "المطلق الباقي على إطلاقه",
+        "hasQarinahSarifah": False,
+        "qarinahTextAr": None,
+        "qarinahVerseKey": None,
+        "wajhAlDilalahAr": (
+            "لفظ (ثلاثة أيام) مطلق لم يقيد بالتتابع في نص التنزيل، فيبقى على إطلاقه "
+            "ويجوز تفريق الصيام."
+        ),
+        "derivedFiqhRulingAr": "جواز صيام أيام التمتع الثلاثة متفرقة أو متتابعة لفاقد الهدي",
+        "khilafUsuliAr": (
+            "الحنفية قيّدوا المطلق بقراءة ابن مسعود (متتابعات)، والجمهور لا يقيّدون "
+            "المطلق القرآني بقراءة الآحاد"
+        ),
+        "classicalSources": ["المستصفى للغزالي", "أحكام القرآن للجصاص"],
+        "extractionStage": "GOLDEN_SEED",
+        "isCanonicalShahid": True,
+    },
+    {
+        "id": "2-221-3-3-amm-makhsus",
+        "verseKey": "2:221",
+        "ayahNumber": 221,
+        "wordStart": 3,
+        "wordEnd": 3,
+        "shahidPhraseAr": "الْمُشْرِكَاتِ",
+        "taxonomyId": "AMM_MAKHSUS_MUNFASIL",
+        "categoryGroup": "AMM_KHASS",
+        "linguisticTriggerAr": "جمع محلى بأل الاستغراقية مخصص بدليل منفصل",
+        "defaultDalalahAr": "العموم الشامل لكل مشركة وكتابية",
+        "actualDalalahAr": "العام المخصوص بنساء أهل الكتاب",
+        "hasQarinahSarifah": True,
+        "qarinahTextAr": "وَالْمُحْصَنَاتُ مِنَ الَّذِينَ أُوتُوا الْكِتَابَ",
+        "qarinahVerseKey": "5:5",
+        "wajhAlDilalahAr": (
+            "لفظ (المشركات) عام في جميع الكافرات، خُص منه نساء أهل الكتاب بآية المائدة "
+            "﴿وَالْمُحْصَنَاتُ مِنَ الَّذِينَ أُوتُوا الْكِتَابَ﴾ بمخصص منفصل."
+        ),
+        "derivedFiqhRulingAr": "جواز نكاح الكتابيات العفائف وتحريم نكاح الوثنيات والمشركات",
+        "khilafUsuliAr": "تخصيص القرآن بالقرآن متفق على جوازه ودلالة العام بعد التخصيص ظنية عند الجمهور",
+        "classicalSources": ["أحكام القرآن للجصاص", "الإحكام للآمدي", "المستصفى للغزالي"],
+        "extractionStage": "GOLDEN_SEED",
+        "isCanonicalShahid": True,
+    },
+    {
+        "id": "2-228-5-5-mushtarak-lafzi",
+        "verseKey": "2:228",
+        "ayahNumber": 228,
+        "wordStart": 5,
+        "wordEnd": 5,
+        "shahidPhraseAr": "قُرُوءٍ",
+        "taxonomyId": "MUSHTARAK_LAFZI",
+        "categoryGroup": "WAADIH_MUBHAM",
+        "linguisticTriggerAr": "اسم مشترك لغوي بين معنيين متضادين",
+        "defaultDalalahAr": "التردد بين الحيض والطهر",
+        "actualDalalahAr": "المشترك المحمول على أحد معنييه بمرجح شرعي",
+        "hasQarinahSarifah": True,
+        "qarinahTextAr": "فَطَلِّقُوهُنَّ لِعِدَّتِهِنَّ",
+        "qarinahVerseKey": "65:1",
+        "wajhAlDilalahAr": (
+            "لفظ (القرء) مشترك لغوي بين الطهر والحيض، حمله الشافعية والمالكية على الأطهار "
+            "لقرينة التأنيث في العدد، وحمله الحنفية والحنابلة على الحيض لقرائن أخرى."
+        ),
+        "derivedFiqhRulingAr": "خلاف الفقهاء في انقضاء عدة المطلقة بالأطهار أو بالحيض",
+        "khilafUsuliAr": "هل يجوز استعمال المشترك في كلا معنييه في سياق واحد؟",
+        "classicalSources": ["المستصفى للغزالي", "أحكام القرآن للجصاص", "الإحكام للآمدي"],
+        "extractionStage": "GOLDEN_SEED",
+        "isCanonicalShahid": True,
+    },
+    {
+        "id": "2-275-23-23-amm-makhsus",
+        "verseKey": "2:275",
+        "ayahNumber": 275,
+        "wordStart": 23,
+        "wordEnd": 23,
+        "shahidPhraseAr": "الْبَيْعَ",
+        "taxonomyId": "AMM_MAKHSUS_MUNFASIL",
+        "categoryGroup": "AMM_KHASS",
+        "linguisticTriggerAr": "مفرد محلى بأل الجنسية المفيدة للاستغراق والعموم",
+        "defaultDalalahAr": "العموم الشامل لكل عقود البيع والمعاوضات",
+        "actualDalalahAr": "العام المخصوص بالسنة النبوية",
+        "hasQarinahSarifah": True,
+        "qarinahTextAr": "نهى النبي ﷺ عن بيع الغرر",
+        "qarinahVerseKey": None,
+        "wajhAlDilalahAr": (
+            "لفظ (البيع) مفرد معرف بأل الاستغراقية فيفيد عموم حل كل بيع، "
+            "وخُص منه بالسنة النبوية بيوع الغرر والربا والمجهول والمعدوم."
+        ),
+        "derivedFiqhRulingAr": "أصل الإباحة والصحة في جميع العقود والمعاملات إلا ما خصه الدليل",
+        "khilafUsuliAr": "تخصيص عموم الكتاب بالسنة الآحادية جائز عند الجمهور دون الحنفية",
+        "classicalSources": ["أحكام القرآن للجصاص", "المستصفى للغزالي", "الإحكام للآمدي"],
+        "extractionStage": "GOLDEN_SEED",
+        "isCanonicalShahid": True,
+    },
 ]
+
+
+def make_candidate(
+    *,
+    id_: str,
+    verse_key: str,
+    ayah_number: int,
+    word_start: int,
+    word_end: int,
+    shahid_phrase_ar: str,
+    taxonomy_id: str,
+    category_group: str,
+    linguistic_trigger_ar: str,
+    default_dalalah_ar: str,
+    actual_dalalah_ar: str,
+    has_qarinah_sarifah: bool = False,
+    qarinah_text_ar: str | None = None,
+    qarinah_verse_key: str | None = None,
+    wajh_al_dilalah_ar: str,
+    derived_fiqh_ruling_ar: str,
+    khilaf_usuli_ar: str | None = None,
+    classical_sources: list[str] | None = None,
+    extraction_stage: str = "STAGE1_RULE_ONLY",
+    is_canonical_shahid: bool = False,
+) -> dict[str, Any]:
+    """Factory helper to eliminate candidate structure duplication."""
+    return {
+        "id": id_,
+        "verseKey": verse_key,
+        "ayahNumber": ayah_number,
+        "wordStart": word_start,
+        "wordEnd": word_end,
+        "shahidPhraseAr": shahid_phrase_ar,
+        "taxonomyId": taxonomy_id,
+        "categoryGroup": category_group,
+        "linguisticTriggerAr": linguistic_trigger_ar,
+        "defaultDalalahAr": default_dalalah_ar,
+        "actualDalalahAr": actual_dalalah_ar,
+        "hasQarinahSarifah": has_qarinah_sarifah,
+        "qarinahTextAr": qarinah_text_ar,
+        "qarinahVerseKey": qarinah_verse_key,
+        "wajhAlDilalahAr": wajh_al_dilalah_ar,
+        "derivedFiqhRulingAr": derived_fiqh_ruling_ar,
+        "khilafUsuliAr": khilaf_usuli_ar,
+        "classicalSources": classical_sources or ["المستصفى للغزالي"],
+        "extractionStage": extraction_stage,
+        "isCanonicalShahid": is_canonical_shahid,
+    }
+
+
+def is_dua_context(words: list[dict[str, Any]], idx: int) -> bool:
+    """Detects vocative context to exclude supplications from legal commands/prohibitions."""
+    for i in range(max(0, idx - 3), min(len(words), idx + 4)):
+        w = words[i]
+        text = w.get("a", "")
+        if "رَبَّ" in text or "رَبِّ" in text or "اللَّهُمَّ" in text:
+            return True
+        if any(s.get("p") == "VOC" for s in w.get("s", [])):
+            return True
+    return False
 
 
 def scan_stage1_candidates(verse: dict[str, Any]) -> list[dict[str, Any]]:
@@ -279,84 +493,117 @@ def scan_stage1_candidates(verse: dict[str, Any]) -> list[dict[str, Any]]:
         w_num = word["n"]
         segments: list[dict[str, Any]] = word.get("s", [])
 
-        # Check for Imperative (CAND_AMR)
+        # 1. Check for Imperative (CAND_AMR: POS=V with MOOD=IMP or POS=V with MOOD=JUS + prefix IMPV)
         has_imp = False
         has_lam_amr = False
         for s in segments:
             if s.get("p") == "V" and s.get("f", {}).get("mood") == "IMP":
                 has_imp = True
-            if s.get("a") in ("فَلْ", "وَلْ", "لِ"):
+            if s.get("p") == "IMPV" and any(
+                v.get("p") == "V" and v.get("f", {}).get("mood") == "JUS" for v in segments
+            ):
                 has_lam_amr = True
 
-        if has_imp or (has_lam_amr and any(s.get("p") == "V" for s in segments)):
-            # Check if adjacent to vocative ربنا
-            is_dua = False
-            surrounding = [words[i]["a"] for i in range(max(0, idx - 2), min(len(words), idx + 3))]
-            if any("رَبَّ" in t or "رَبِّ" in t for t in surrounding):
-                is_dua = True
-
-            if not is_dua:
-                candidates.append(
-                    {
-                        "id": f"2-{v_num}-{w_num}-{w_num}-cand-amr",
-                        "verseKey": f"2:{v_num}",
-                        "ayahNumber": v_num,
-                        "wordStart": w_num,
-                        "wordEnd": w_num,
-                        "shahidPhraseAr": word["a"],
-                        "taxonomyId": "AMR_WUJUB",
-                        "categoryGroup": "AMR_NAHY",
-                        "linguisticTriggerAr": "صيغة أمر صريح",
-                        "defaultDalalahAr": "الوجوب",
-                        "actualDalalahAr": "الوجوب",
-                        "hasQarinahSarifah": False,
-                        "qarinahTextAr": None,
-                        "qarinahVerseKey": None,
-                        "wajhAlDilalahAr": "صيغة أمر تدل بأصل وضعها اللغوي والشرعي على الوجوب",
-                        "derivedFiqhRulingAr": "طلب الفعل طلباً جازماً يقتضي الامتثال",
-                        "khilafUsuliAr": None,
-                        "classicalSources": ["المستصفى للغزالي"],
-                        "extractionStage": "STAGE1_RULE_ONLY",
-                        "isCanonicalShahid": False,
-                    }
+        if (has_imp or has_lam_amr) and not is_dua_context(words, idx):
+            candidates.append(
+                make_candidate(
+                    id_=f"2-{v_num}-{w_num}-{w_num}-cand-amr",
+                    verse_key=f"2:{v_num}",
+                    ayah_number=v_num,
+                    word_start=w_num,
+                    word_end=w_num,
+                    shahid_phrase_ar=word["a"],
+                    taxonomy_id="AMR_WUJUB",
+                    category_group="AMR_NAHY",
+                    linguistic_trigger_ar="صيغة أمر صريح",
+                    default_dalalah_ar="الوجوب",
+                    actual_dalalah_ar="الوجوب",
+                    wajh_al_dilalah_ar="صيغة أمر تدل بأصل وضعها اللغوي والشرعي على الوجوب",
+                    derived_fiqh_ruling_ar="طلب الفعل طلباً جازماً يقتضي الامتثال",
                 )
+            )
 
-        # Check for Prohibitive (CAND_NAHY: لا الناهية + فعل مضارع مجزوم)
-        if word["a"] in ("لَا", "وَلَا", "فَلَا") and idx + 1 < len(words):
+        # 2. Check for Prohibitive (CAND_NAHY: POS=PRO لا الناهية + POS=V with MOOD=JUS)
+        has_pro = any(s.get("p") == "PRO" for s in segments)
+        if has_pro and idx + 1 < len(words) and not is_dua_context(words, idx):
             next_word = words[idx + 1]
             next_segs = next_word.get("s", [])
             is_jus_verb = any(
-                s.get("p") == "V" and s.get("f", {}).get("mood") in ("JUS", "SUBJ", "IND")
-                for s in next_segs
+                s.get("p") == "V" and s.get("f", {}).get("mood") == "JUS" for s in next_segs
             )
             if is_jus_verb:
                 phrase = f"{word['a']} {next_word['a']}"
                 candidates.append(
-                    {
-                        "id": f"2-{v_num}-{w_num}-{next_word['n']}-cand-nahy",
-                        "verseKey": f"2:{v_num}",
-                        "ayahNumber": v_num,
-                        "wordStart": w_num,
-                        "wordEnd": next_word["n"],
-                        "shahidPhraseAr": phrase,
-                        "taxonomyId": "NAHY_TAHRIM",
-                        "categoryGroup": "AMR_NAHY",
-                        "linguisticTriggerAr": "لا الناهية المقترنة بالمضارع المجزوم",
-                        "defaultDalalahAr": "التحريم والفساد",
-                        "actualDalalahAr": "التحريم والفساد",
-                        "hasQarinahSarifah": False,
-                        "qarinahTextAr": None,
-                        "qarinahVerseKey": None,
-                        "wajhAlDilalahAr": (
-                            "صيغة نهي صريحة تقتضي التحريم وفساد المنهي عنه عند الإطلاق"
-                        ),
-                        "derivedFiqhRulingAr": "تحريم الفعل المنهي عنه وبطلان ترتبه شرعاً",
-                        "khilafUsuliAr": None,
-                        "classicalSources": ["الإحكام للآمدي"],
-                        "extractionStage": "STAGE1_RULE_ONLY",
-                        "isCanonicalShahid": False,
-                    }
+                    make_candidate(
+                        id_=f"2-{v_num}-{w_num}-{next_word['n']}-cand-nahy",
+                        verse_key=f"2:{v_num}",
+                        ayah_number=v_num,
+                        word_start=w_num,
+                        word_end=next_word["n"],
+                        shahid_phrase_ar=phrase,
+                        taxonomy_id="NAHY_TAHRIM",
+                        category_group="AMR_NAHY",
+                        linguistic_trigger_ar="لا الناهية المقترنة بالمضارع المجزوم",
+                        default_dalalah_ar="التحريم والفساد",
+                        actual_dalalah_ar="التحريم والفساد",
+                        wajh_al_dilalah_ar="صيغة نهي صريحة تقتضي التحريم وفساد المنهي عنه عند الإطلاق",
+                        derived_fiqh_ruling_ar="تحريم الفعل المنهي عنه وبطلان ترتبه شرعاً",
+                        classical_sources=["الإحكام للآمدي"],
+                    )
                 )
+
+        # 3. Check for Exception Particle (CAND_TAKHSIS_MUTTASIL: POS=EXP إلا)
+        has_exp = any(s.get("p") == "EXP" for s in segments)
+        if has_exp and idx + 1 < len(words):
+            next_word = words[idx + 1]
+            candidates.append(
+                make_candidate(
+                    id_=f"2-{v_num}-{w_num}-{next_word['n']}-cand-istithna",
+                    verse_key=f"2:{v_num}",
+                    ayah_number=v_num,
+                    word_start=w_num,
+                    word_end=next_word["n"],
+                    shahid_phrase_ar=f"{word['a']} {next_word['a']}",
+                    taxonomy_id="AMM_MAKHSUS_MUTTASIL",
+                    category_group="AMM_KHASS",
+                    linguistic_trigger_ar="أداة الاستثناء المتصل (إلا)",
+                    default_dalalah_ar="إخراج ما لولاه لدخل في الخطاب",
+                    actual_dalalah_ar="العام المخصوص بالاستثناء المتصل",
+                    wajh_al_dilalah_ar="الاستثناء معيار العموم ومخرج لبعض أفراد العام المتصل به",
+                    derived_fiqh_ruling_ar="قصر الحكم العام على غير المستثنى وحكم المستثنى على النقيض",
+                    classical_sources=["المستصفى للغزالي"],
+                )
+            )
+
+        # 4. Check for Indefinite Noun in Negative/Condition Context (CAND_AMM_NAKIRA_SIYAQ)
+        has_neg_or_cond = any(s.get("p") in ("NEG", "COND") for s in segments)
+        if has_neg_or_cond:
+            for j in range(idx + 1, min(len(words), idx + 4)):
+                cand_w = words[j]
+                cand_segs = cand_w.get("s", [])
+                is_indef_noun = any(
+                    s.get("p") == "N" and s.get("f", {}).get("state") == "INDEF" for s in cand_segs
+                )
+                if is_indef_noun:
+                    candidates.append(
+                        make_candidate(
+                            id_=f"2-{v_num}-{w_num}-{cand_w['n']}-cand-nakira-siyaq",
+                            verse_key=f"2:{v_num}",
+                            ayah_number=v_num,
+                            word_start=w_num,
+                            word_end=cand_w["n"],
+                            shahid_phrase_ar=" ".join(words[k]["a"] for k in range(idx, j + 1)),
+                            taxonomy_id="AMM_BAQI",
+                            category_group="AMM_KHASS",
+                            linguistic_trigger_ar="النكرة في سياق النفي أو الشرط",
+                            default_dalalah_ar="العموم الشمولي الاستغراقي",
+                            actual_dalalah_ar="العام الباقي على عمومه",
+                            wajh_al_dilalah_ar="النكرة إذا وردت في سياق النفي أو الشرط دلت على العموم قطعا أو ظاهرا",
+                            derived_fiqh_ruling_ar="شمول نفي أو تعليق الحكم لجميع أفراد الجنس",
+                            classical_sources=["المستصفى للغزالي", "إرشاد الفحول للشوكاني"],
+                        )
+                    )
+                    break
 
     return candidates
 
