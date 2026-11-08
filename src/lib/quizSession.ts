@@ -30,8 +30,10 @@ export interface MutashabihDraft {
 }
 
 export interface UsulDraft {
-	option: string | null;
 	pickedWord: number | null;
+	dalalah: string | null;
+	qarinah: string | null;
+	ruling: string | null;
 }
 
 export interface Drafts {
@@ -151,11 +153,20 @@ const LENSES: { [L in QuizLens]: LensSpec<L> } = {
 		answer: (q) => ({ wording: q.answer, surah: q.sura }),
 	},
 	usul: {
-		fields: ["option"],
-		empty: () => ({ option: null, pickedWord: null }),
+		fields: ["pickedWord", "dalalah", "qarinah", "ruling"],
+		empty: () => ({
+			pickedWord: null,
+			dalalah: null,
+			qarinah: null,
+			ruling: null,
+		}),
 		answer: (q) => ({
-			option: (q as UsulQuestion).shahid.taxonomyId,
 			pickedWord: (q as UsulQuestion).shahid.wordStart,
+			dalalah: (q as UsulQuestion).shahid.taxonomyId,
+			qarinah: (q as UsulQuestion).shahid.hasQarinahSarifah
+				? "SHIFTED"
+				: "UNSHIFTED",
+			ruling: (q as UsulQuestion).shahid.derivedFiqhRulingAr,
 		}),
 	},
 };
@@ -173,7 +184,7 @@ const MAX_STEP: Record<QuizLens, WizardStep> = {
 	irab: 5,
 	sarf: 5,
 	mutashabih: 3,
-	usul: 2,
+	usul: 5,
 };
 
 /** Last wizard step: the check step. */

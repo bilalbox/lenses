@@ -390,15 +390,23 @@ describe("quizSession: wizard navigation and lenses", () => {
 		});
 	});
 
-	it("grades the usul lens on dalalah taxonomyId and updates score", () => {
+	it("grades the usul lens step-by-step through span, dalalah, qarinah, and ruling", () => {
 		const state = run(
 			{ type: "selectLens", lens: "usul" },
-			{ type: "answer", field: "option", value: "AMR_WUJUB" },
+			{ type: "answer", field: "pickedWord", value: 1, step: 2 },
+			{ type: "answer", field: "dalalah", value: "AMR_WUJUB", step: 3 },
+			{ type: "answer", field: "qarinah", value: "UNSHIFTED", step: 4 },
+			{ type: "answer", field: "ruling", value: "وجوب الصلاة", step: 5 },
 			{ type: "submit" },
 		);
 		expect(state.lens).toBe("usul");
 		expect(state.verdict).toEqual({
-			fields: { option: true },
+			fields: {
+				pickedWord: true,
+				dalalah: true,
+				qarinah: true,
+				ruling: true,
+			},
 			allCorrect: true,
 		});
 		expect(state.score).toEqual({ solved: 1, attempts: 1 });
