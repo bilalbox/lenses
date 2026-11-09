@@ -880,6 +880,191 @@ main {
 	gap: 0.35rem 0.85rem;
 	margin: 0.55rem 0 0;
 }
+.sheet-gloss {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.2rem 0.6rem;
+	margin: -0.35rem 0 0.75rem;
+	color: var(--ink);
+	font-size: 1.05rem;
+}
+.sheet-gloss .source-line {
+	margin: 0;
+	font-size: 0.8rem;
+}
+.wujuh-entry + .wujuh-entry {
+	margin-top: 1rem;
+}
+.wujuh-answer {
+	margin-bottom: 0.7rem;
+	padding: 0.75rem 1rem;
+	border-radius: 12px;
+	background: var(--teal-soft);
+}
+.wujuh-answer p {
+	margin: 0;
+}
+.wujuh-answer-label,
+.wujuh-answer-meta {
+	color: var(--ink-soft);
+	font-size: 0.82rem;
+}
+.wujuh-answer-sense {
+	margin: 0.1rem 0 0.15rem !important;
+	font-family: var(--arabic);
+	font-size: clamp(1.5rem, 4vw, 1.8rem);
+	line-height: 1.5;
+	color: var(--ink);
+}
+.wujuh-answer-meta bdi,
+.wujuh-headword {
+	font-family: var(--arabic);
+	font-size: 1.15em;
+	color: var(--ink);
+}
+.wujuh-uncited {
+	margin: 0 0 0.6rem;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+.wujuh-senses {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	overflow: hidden;
+}
+.wujuh-sense + .wujuh-sense {
+	border-top: 1px solid var(--line);
+}
+.wujuh-sense.is-here {
+	background: color-mix(in srgb, var(--teal) 6%, var(--paper));
+}
+.wujuh-sense-head {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	width: 100%;
+	min-height: 48px;
+	padding: 0.35rem 0.85rem;
+	border: 0;
+	background: transparent;
+	color: var(--ink);
+	text-align: start;
+	cursor: pointer;
+}
+.wujuh-sense-number,
+.wujuh-sense-count {
+	min-width: 1.4rem;
+	color: var(--muted);
+	font-size: 0.82rem;
+	font-variant-numeric: tabular-nums;
+}
+.wujuh-sense-label {
+	flex: 1;
+	font-family: var(--arabic);
+	font-size: 1.15rem;
+	line-height: 1.5;
+}
+.wujuh-badge {
+	padding: 0.1rem 0.55rem;
+	border-radius: 999px;
+	background: var(--teal);
+	color: var(--paper);
+	font-family: var(--sans);
+	font-size: 0.72rem;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.wujuh-cites {
+	margin: 0;
+	padding: 0 0.5rem 0.6rem;
+	list-style: none;
+}
+.wujuh-cite {
+	display: flex;
+	align-items: baseline;
+	gap: 0.7rem;
+	padding: 0.3rem 0.4rem;
+	border-radius: 8px;
+	color: var(--ink);
+	text-decoration: none;
+}
+a.wujuh-cite:hover,
+a.wujuh-cite:focus-visible {
+	background: var(--bg-2);
+}
+.wujuh-cite.is-current {
+	background: var(--teal-soft);
+}
+.wujuh-cite-ref {
+	min-width: 3.2rem;
+	color: var(--muted);
+	font-size: 0.8rem;
+	font-variant-numeric: tabular-nums;
+}
+.wujuh-cite-text {
+	flex: 1;
+	font-family: var(--arabic);
+	font-size: 1.1rem;
+	line-height: 1.8;
+}
+.wujuh-cite-text mark {
+	background: transparent;
+	color: var(--teal);
+	font-weight: 700;
+}
+.wujuh-none {
+	padding: 0.3rem 0.4rem;
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+.sheet-lexicon .lexicon-drawer {
+	margin-block: 0.55rem;
+}
+.lexicon-prose p {
+	margin: 0 0 0.6rem;
+	line-height: 1.9;
+}
+.lexicon-subhead {
+	margin: 0 0 0.35rem;
+	color: var(--muted);
+	font-size: 0.82rem;
+	font-weight: 600;
+}
+.lane-entries {
+	font-family: var(--serif);
+	font-size: 0.95rem;
+	line-height: 1.65;
+}
+.lane-entry {
+	margin: 0 0 0.75rem;
+}
+.lane-form {
+	margin-inline-end: 0.35rem;
+	color: var(--muted);
+	font-family: var(--sans);
+	font-size: 0.78rem;
+	font-variant-numeric: tabular-nums;
+}
+.lane-ar {
+	font-family: var(--arabic);
+	font-size: 1.15em;
+	unicode-bidi: isolate;
+}
+.lexicon-more > summary {
+	cursor: pointer;
+	margin-block: 0.25rem 0.6rem;
+	color: var(--teal);
+	font-weight: 600;
+}
+.sheet-count {
+	color: var(--muted);
+	font-size: 0.92rem;
+	font-variant-numeric: tabular-nums;
+}
 .sheet-root-action .fact-metric {
 	font-family: var(--arabic-ui);
 	color: var(--ink);
@@ -1553,18 +1738,6 @@ main {
 .verse-line button {
 	min-height: 48px;
 	min-width: 48px;
-}
-.verse-span {
-	display: inline-flex;
-	flex-wrap: wrap;
-	gap: 0.15rem;
-	border-radius: 12px;
-}
-.verse-span.is-current {
-	background: var(--teal-soft);
-	padding-block: 0.12em;
-	padding-inline: 0.18em;
-	border-radius: 6px;
 }
 .tree-tools {
 	display: flex;
@@ -4340,4 +4513,33 @@ main {
 	display: flex;
 	flex-direction: column;
 	gap: 0.85rem;
+}
+
+/* Tabs: the word sheet's two views and the verse iʿrāb views */
+.tabs {
+	display: flex;
+	gap: 0.25rem;
+	margin: 0.4rem 0 0.9rem;
+	padding: 0.25rem;
+	border-radius: 12px;
+	background: var(--bg-2);
+}
+.tabs button {
+	flex: 1;
+	min-height: 44px;
+	border: 0;
+	border-radius: 9px;
+	background: transparent;
+	color: var(--muted);
+	font-weight: 600;
+	cursor: pointer;
+}
+.tabs button.is-on {
+	background: var(--paper);
+	color: var(--ink);
+	box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+.tabs button:focus-visible {
+	outline: 2px solid var(--teal);
+	outline-offset: 1px;
 }

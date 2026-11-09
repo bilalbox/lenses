@@ -200,3 +200,46 @@ Tanzil Uthmani Quran text (verbatim notice)
 #====================================================================
 	
 -->
+
+------------------------------------------------------------
+Quranic Arabic Corpus word-by-word English
+Source: Quranic Arabic Corpus (Kais Dukes), https://corpus.quran.com/wordbyword.jsp
+File: https://raw.githubusercontent.com/kaisdukes/quranic-corpus-api/main/src/main/resources/data/translation/word-by-word.txt
+Derived from work compiled by Shehnaz Shaikh and Kausar Khatri, revised
+by the corpus against standard English translations.
+License: GNU General Public License, with the corpus terms of use.
+Each gloss is stored verbatim on its word; none is edited, added, or trimmed.
+
+------------------------------------------------------------
+Lane's Arabic-English Lexicon (Perseus Digital Library)
+Edward William Lane, An Arabic-English Lexicon (London: Williams and Norgate, 1863-1893).
+Digital text: Perseus Digital Library, Tufts University, with XML fixes from
+https://github.com/laneslexicon/lexicon_xml at commit f3c19fb29f2cf2e12de3f97b7ce2b7a0d6682ea6.
+Availability statement, as given in the source files:
+  This text may be freely distributed, subject to the following restrictions:
+  You credit Perseus, as follows, whenever you use the document:
+  Text provided by Perseus Digital Library, with funding from The U.S. Department of Education and The Max Planck Society.
+  You leave this availability statement intact.
+  You offer Perseus any modifications you make.
+Changes made for Lenses: Arabic transliteration converted to Arabic script
+(following laneslexicon/lexicon_parser), markup reduced to plain, italic and
+Arabic text, and only roots that occur in the Qur'an kept.
+
+------------------------------------------------------------
+OpenITI: Maqayis al-Lugha and al-Mufradat
+Source: OpenITI corpus (https://github.com/OpenITI), released under
+CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+Maqayis al-Lugha: 0395IbnFarisQazwini.MucjamMaqayis.Shamela0021710-ara1 at 0400AH@5bb6966d8df2ed22b1bff5cdbe29bb9c24f3ca29.
+al-Mufradat: 0502RaghibIsbahani.Mufradat.Shamela0023636-ara1 at 0525AH@6290621b58e063ed1aa47ffd0a6fc1630191e7cb.
+Lenses keeps the authors' main text only: editors' introductions, indexes,
+footnote markers, page markers and manuscript markers are removed. The
+derived dictionary files are shared under the same CC BY-NC-SA 4.0 terms.
+
+------------------------------------------------------------
+OpenITI: al-Wujuh wa-l-Naza'ir
+al-Husayn ibn Muhammad al-Damaghani (d. 478 AH), Islah al-Wujuh wa-l-Naza'ir
+(ed. 'Abd al-'Aziz Sayyid al-Ahl, Dar al-'Ilm li-l-Malayin).
+Source: OpenITI 0478IbnMuhammadDamghani.QamusQuran.ShamAY0034085-ara1 at 0500AH@fff9e21790e2e54f14826322ae49ab7671f12744,
+released under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+Lenses keeps each entry's senses and maps the verses al-Damaghani cites to
+word positions; the derived file is shared under the same terms.

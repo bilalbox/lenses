@@ -153,7 +153,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 					<input
 						value={query.root}
 						onChange={(event) => set({ root: event.target.value })}
-						placeholder="علم or Elm"
+						placeholder={t.examples.rootPlaceholder}
 					/>
 				</label>
 				<label className="filter-text">
@@ -161,7 +161,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 					<input
 						value={query.lemma}
 						onChange={(event) => set({ lemma: event.target.value })}
-						placeholder="hal"
+						placeholder={t.examples.lemmaPlaceholder}
 					/>
 				</label>
 

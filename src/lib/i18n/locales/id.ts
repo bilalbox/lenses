@@ -166,6 +166,9 @@ export const id: Translations = {
 		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
 		asbabSectionTitle: "Asbabun Nuzul (Sebab Turunnya Ayat)",
 		nahwTabTitle: "Nahwu & Pohon Sintaksis",
+		irabViewsAria: "Tampilan i'rab",
+		irabDiagram: "Diagram",
+		irabClassical: "I'rab klasik",
 		treebankNoorBayan: "Treebank Al-Qur'an NoorBayan",
 		mutashabihBadge: (count: number) =>
 			`Kemiripan Redaksi (${formatNum(count, "id")})`,
@@ -202,6 +205,32 @@ export const id: Translations = {
 		sarf: "Sharaf",
 		wordMeaning: "Arti kata",
 		searchThisRoot: "Cari akar kata ini",
+		searchThisWord: "Cari kata ini",
+		inQuran: "Dalam Al-Qur'an",
+		occurrences: (count: number, verses: number, surahs: number) =>
+			`${formatNum(count, "id")} kali dalam ${formatNum(verses, "id")} ayat di ${formatNum(surahs, "id")} surah`,
+		wordGlossSource: "Bahasa Inggris · Quranic Arabic Corpus",
+		dictionaries: "Kamus",
+		maqayisTitle: "Maqayis al-Lughah · Ibnu Faris",
+		mufradatTitle: "Al-Mufradat · Ar-Raghib al-Ashfahani",
+		laneTitle: "Kamus Arab–Inggris Lane",
+		laneThisWord: "Kata ini",
+		laneOtherEntries: (count: number) =>
+			`${formatNum(count, "id")} entri lain untuk akar kata ini`,
+		lanePage: (page: number) => `hlm. ${formatNum(page, "id")}`,
+		tabsAria: "Analisis kata",
+		tabHere: "Dalam ayat ini",
+		tabAcross: "Di seluruh Al-Qur'an",
+		wujuhTitle: "Ragam makna dalam Al-Qur'an · ad-Damaghani",
+		wujuhSeparator: " · ",
+		wujuhInThisVerse: "Dalam ayat ini",
+		wujuhSenseOf: (sense: number, total: number) =>
+			`makna ke-${formatNum(sense, "id")} dari ${formatNum(total, "id")}`,
+		wujuhNotCited: (total: number) =>
+			`${formatNum(total, "id")} makna. Ayat ini tidak termasuk contoh yang disebut ad-Damaghani.`,
+		wujuhThisVerse: "ayat ini",
+		wujuhUnnamedSense: (sense: number) => `Makna ke-${formatNum(sense, "id")}`,
+		wujuhNoVerses: "Ayat contoh untuk makna ini belum dapat dipetakan.",
 		qiraatTitle: "Sepuluh Qira'at Mutawatirah",
 		qiraatIsolation: "Saat Berhenti (Waqaf)",
 		qiraatWasl: "Saat Bersambung (Washal)",
@@ -212,6 +241,8 @@ export const id: Translations = {
 		pageTitle: "Jelajahi Al-Qur'an",
 	},
 	examples: {
+		rootPlaceholder: "علم atau Elm",
+		lemmaPlaceholder: "hal",
 		pageTitle: "Temukan pola",
 		lead: "Cari dalam korpus berdasarkan akar kata, bentuk dasar, jenis kata, wazan verba, atau relasi sintaksis.",
 		presetHal: "Pertanyaan hal",
@@ -252,8 +283,50 @@ export const id: Translations = {
 			asbab: "Asbabun Nuzul",
 			qiraat: "Qira'at Asyrah",
 			mutashabih: "Kesamaan Verbal",
+			"word-translation": "Terjemahan Per Kata",
+			dictionary: "Kamus",
 		},
 		items: {
+			"openiti-wujuh": {
+				title: "Al-Wujuh wa an-Nazha'ir (ad-Damaghani)",
+				attribution:
+					"Al-Husain bin Muhammad ad-Damaghani (w. 478 H); teks digital dari korpus OpenITI (tahqiq 'Abd al-'Aziz Sayyid al-Ahl)",
+				description:
+					"Ragam makna setiap kata Al-Qur'an beserta ayat contohnya, dipetakan ke posisi kata.",
+				license: "CC BY-NC-SA 4.0 (rilis korpus OpenITI)",
+			},
+			"qac-word-by-word": {
+				title: "Terjemahan per kata bahasa Inggris Quranic Arabic Corpus",
+				attribution:
+					"Kais Dukes dan Quranic Arabic Corpus, dari karya Shehnaz Shaikh dan Kausar Khatri",
+				description:
+					"Terjemahan bahasa Inggris untuk setiap kata Al-Qur'an, ditampilkan apa adanya di kartu kata.",
+				license:
+					"GPL, dengan ketentuan korpus: salinan apa adanya dan korpus disebutkan sebagai sumber.",
+			},
+			"lane-lexicon": {
+				title: "Kamus Arab–Inggris Lane",
+				attribution:
+					"Edward William Lane (1863-1893). Text provided by Perseus Digital Library, with funding from The U.S. Department of Education and The Max Planck Society.",
+				description:
+					"Entri kamus Lane untuk setiap akar kata Al-Qur'an, dengan transliterasi Perseus diubah ke huruf Arab.",
+				license:
+					"Ketentuan Perseus: bebas disebarkan dengan menyebut Perseus, mempertahankan pernyataan ketersediaan, dan menawarkan perubahan kepada Perseus.",
+			},
+			"openiti-maqayis": {
+				title: "Mu'jam Maqayis al-Lughah (Ibnu Faris)",
+				attribution:
+					"Ibnu Faris (w. 395 H); teks digital dari korpus OpenITI (tahqiq 'Abd al-Salam Harun, 1979)",
+				description: "Makna pokok setiap akar kata, hanya teks utama.",
+				license: "CC BY-NC-SA 4.0 (rilis korpus OpenITI)",
+			},
+			"openiti-mufradat": {
+				title: "Al-Mufradat fi Gharib al-Qur'an (Ar-Raghib al-Ashfahani)",
+				attribution:
+					"Ar-Raghib al-Ashfahani (w. 502 H); teks digital dari korpus OpenITI (tahqiq Shafwan al-Dawudi)",
+				description: "Makna Qur'ani setiap akar kata, hanya teks utama.",
+				license: "CC BY-NC-SA 4.0 (rilis korpus OpenITI)",
+			},
 			"qac-morphology": {
 				title: "Morfologi Quranic Arabic Corpus 0.4",
 				attribution: "Kais Dukes dan Quranic Arabic Corpus",

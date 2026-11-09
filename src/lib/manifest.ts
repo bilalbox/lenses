@@ -10,3 +10,11 @@ export function surahTitle(
 	if (!unit) return `S${sura}`;
 	return locale === "ar" ? unit.name : unit.phonetic;
 }
+
+/** A surah's name for display: Arabic in the Arabic UI, the transliteration otherwise. */
+export function surahLabel(
+	unit: { name: string; phonetic: string },
+	locale: string,
+): string {
+	return locale === "ar" ? unit.name : unit.phonetic;
+}

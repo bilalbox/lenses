@@ -87,11 +87,11 @@ function sameLexeme(query: string, entry: Lexeme | undefined): boolean {
 	if (!query.trim()) return true;
 	if (!entry?.b) return false;
 	const q = query.trim();
-	if (q.toLowerCase() === entry.b.toLowerCase()) return true;
-	const arabic = hasArabic(q) ? stripDiacritics(q) : stripDiacritics(q);
+	// Buckwalter is case-sensitive: `nws` is ن و س and `nwS` is ن و ص.
+	if (q === entry.b) return true;
+	const arabic = stripDiacritics(q);
 	if (arabic && stripDiacritics(entry.a) === arabic) return true;
-	const encoded = hasArabic(q) ? toBuckwalter(q) : q;
-	return encoded.toLowerCase() === entry.b.toLowerCase();
+	return hasArabic(q) && toBuckwalter(q) === entry.b;
 }
 
 function parseFeatures(text: string): Record<string, string> {

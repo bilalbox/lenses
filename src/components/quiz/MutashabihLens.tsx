@@ -1,5 +1,7 @@
 /** The mutashabih lens: fill the word where an ayah parts from a similar one, then name its surah. */
+
 import { useI18n } from "../../lib/i18n/I18nContext";
+import { surahLabel } from "../../lib/manifest";
 import {
 	ayahWithBlank,
 	type MutashabihQuestion,
@@ -27,7 +29,7 @@ import {
 type Show = (text: string) => string;
 
 export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
-	const { t } = useI18n();
+	const { locale, t } = useI18n();
 	const copy = t.quiz.mutashabih;
 	const { question: q, session, dispatch, show } = props;
 	const draft = session.drafts.mutashabih;
@@ -63,7 +65,7 @@ export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 	const surahChoices: Choice[] = q.surahs.map((s) => ({
 		code: String(s.n),
 		ar: s.name,
-		sub: s.phonetic,
+		sub: locale === "ar" ? undefined : s.phonetic,
 	}));
 
 	return (
@@ -84,7 +86,12 @@ export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 			// Naming the surah is step 2, so the reference stays hidden until checked.
 			place={
 				complete
-					? { phonetic: q.suraPhonetic, sura: q.sura, verse: q.verse.v }
+					? {
+							name: q.suraName,
+							phonetic: q.suraPhonetic,
+							sura: q.sura,
+							verse: q.verse.v,
+						}
 					: null
 			}
 			onOpenReader={() =>
@@ -257,7 +264,7 @@ function MutashabihReveal({
 	onNext,
 	wordingLabel,
 }: LensProps<MutashabihQuestion> & { wordingLabel: (text: string) => string }) {
-	const { t, formatNumber } = useI18n();
+	const { locale, t, formatNumber } = useI18n();
 	const copy = t.quiz.mutashabih;
 	const fields = session.verdict?.fields ?? {};
 	const draft = session.drafts.mutashabih;
@@ -305,7 +312,8 @@ function MutashabihReveal({
 									className="quiz-mt-ref"
 									onClick={() => onOpenInReader(r.sura, r.verse)}
 								>
-									{r.phonetic} {formatNumber(r.sura)}:{formatNumber(r.verse)}
+									{surahLabel(r, locale)} {formatNumber(r.sura)}:
+									{formatNumber(r.verse)}
 									{i === q.answer ? ` · ${copy.thisAyah}` : ""}
 								</button>
 							))}

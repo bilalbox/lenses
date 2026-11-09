@@ -163,6 +163,9 @@ export const ar: Translations = {
 		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
 		asbabSectionTitle: "أسباب النزول",
 		nahwTabTitle: "النحو وشجرة الإعراب",
+		irabViewsAria: "عرض الإعراب",
+		irabDiagram: "المشجّر",
+		irabClassical: "الإعراب",
 		treebankNoorBayan: "شجرة نور البيان القرآنية",
 		mutashabihBadge: (count: number) =>
 			`المتشابه اللفظي (${formatNum(count, "ar")})`,
@@ -198,6 +201,32 @@ export const ar: Translations = {
 		sarf: "الصرف والبنية",
 		wordMeaning: "معنى الكلمة",
 		searchThisRoot: "ابحث عن هذا الجذر",
+		searchThisWord: "ابحث عن هذه الكلمة",
+		inQuran: "في القرآن",
+		occurrences: (count: number, verses: number, surahs: number) =>
+			`عدد المرات: ${formatNum(count, "ar")} · الآيات: ${formatNum(verses, "ar")} · السور: ${formatNum(surahs, "ar")}`,
+		wordGlossSource: "بالإنجليزية · المدوّنة القرآنية العربية",
+		dictionaries: "المعاجم",
+		maqayisTitle: "مقاييس اللغة لابن فارس",
+		mufradatTitle: "المفردات في غريب القرآن للراغب الأصفهاني",
+		laneTitle: "معجم لين العربي الإنجليزي",
+		laneThisWord: "هذه الكلمة",
+		laneOtherEntries: (count: number) =>
+			`مواد أخرى من الجذر (${formatNum(count, "ar")})`,
+		lanePage: (page: number) => `ص ${formatNum(page, "ar")}`,
+		tabsAria: "تحليل الكلمة",
+		tabHere: "في هذه الآية",
+		tabAcross: "في القرآن كله",
+		wujuhTitle: "وجوه الكلمة في القرآن للدامغاني",
+		wujuhSeparator: "، ",
+		wujuhInThisVerse: "في هذه الآية",
+		wujuhSenseOf: (sense: number, total: number) =>
+			`الوجه ${formatNum(sense, "ar")} من ${formatNum(total, "ar")}`,
+		wujuhNotCited: (total: number) =>
+			`عدد الأوجه: ${formatNum(total, "ar")}. وليست هذه الآية من شواهد الدامغاني.`,
+		wujuhThisVerse: "هذه الآية",
+		wujuhUnnamedSense: (sense: number) => `الوجه ${formatNum(sense, "ar")}`,
+		wujuhNoVerses: "لم يُعثر على موضع شاهد هذا الوجه.",
 		qiraatTitle: "القراءات العشر المتواترة",
 		qiraatIsolation: "عند الوقف والانفراد",
 		qiraatWasl: "عند الوصل والدرج",
@@ -208,6 +237,8 @@ export const ar: Translations = {
 		pageTitle: "تصفح القرآن الكريم",
 	},
 	examples: {
+		rootPlaceholder: "علم",
+		lemmaPlaceholder: "هَل",
 		pageTitle: "استكشف الأنماط النحوية",
 		lead: "ابحث في متن المدونة بالجذر، أو اللفظ المعجمي، أو نوع الكلمة، أو الوزن الصرفي، أو العلاقة الإعرابية.",
 		presetHal: "استفهام هل",
@@ -258,8 +289,50 @@ export const ar: Translations = {
 			asbab: "أسباب النزول",
 			qiraat: "القراءات العشر",
 			mutashabih: "المتشابه اللفظي",
+			"word-translation": "ترجمة الكلمات",
+			dictionary: "المعاجم",
 		},
 		items: {
+			"openiti-wujuh": {
+				title: "إصلاح الوجوه والنظائر للدامغاني",
+				attribution:
+					"الحسين بن محمد الدامغاني (ت 478هـ)، النص الرقمي من مدونة OpenITI (تحقيق عبد العزيز سيد الأهل)",
+				description:
+					"الأوجه التي تأتي عليها الكلمة في القرآن وشواهد كل وجه، مربوطة بمواضع الكلمات.",
+				license: "CC BY-NC-SA 4.0 (إصدار مدونة OpenITI)",
+			},
+			"qac-word-by-word": {
+				title: "ترجمة كلمات القرآن إلى الإنجليزية (المدونة القرآنية العربية)",
+				attribution:
+					"قيس دوكس والمدونة القرآنية العربية، عن عمل شهناز شيخ وكوثر خطري",
+				description:
+					"ترجمة إنجليزية لكل كلمة من كلمات القرآن، تُعرض كما هي في بطاقة الكلمة.",
+				license:
+					"رخصة جنو العمومية (GPL) مع شروط المدونة: النقل الحرفي ونسبة المصدر.",
+			},
+			"lane-lexicon": {
+				title: "معجم لين العربي الإنجليزي",
+				attribution:
+					"إدوارد وليم لين (1863-1893). Text provided by Perseus Digital Library, with funding from The U.S. Department of Education and The Max Planck Society.",
+				description:
+					"مواد معجم لين لكل جذر قرآني، بعد تحويل نقحرة بيرسيوس إلى الحرف العربي.",
+				license:
+					"شروط بيرسيوس: حرية النشر مع نسبة النص إلى بيرسيوس، وإبقاء بيان الإتاحة، وعرض التعديلات عليهم.",
+			},
+			"openiti-maqayis": {
+				title: "معجم مقاييس اللغة لابن فارس",
+				attribution:
+					"ابن فارس (ت 395هـ)، النص الرقمي من مدونة OpenITI (تحقيق عبد السلام هارون، 1979)",
+				description: "الأصل الذي يرجع إليه كل جذر، من متن الكتاب وحده.",
+				license: "CC BY-NC-SA 4.0 (إصدار مدونة OpenITI)",
+			},
+			"openiti-mufradat": {
+				title: "المفردات في غريب القرآن للراغب الأصفهاني",
+				attribution:
+					"الراغب الأصفهاني (ت 502هـ)، النص الرقمي من مدونة OpenITI (تحقيق صفوان الداودي)",
+				description: "معاني كل جذر في القرآن، من متن الكتاب وحده.",
+				license: "CC BY-NC-SA 4.0 (إصدار مدونة OpenITI)",
+			},
 			"qac-morphology": {
 				title: "الصرف والتحليل المورفولوجي 0.4 (المدونة النحوية)",
 				attribution:

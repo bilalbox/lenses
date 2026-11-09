@@ -98,7 +98,12 @@ export function GrammarFrame({
 			props={props}
 			crumbs={crumbs}
 			picking={picking}
-			place={{ phonetic: q.suraPhonetic, sura: q.sura, verse: q.verse.v }}
+			place={{
+				name: q.suraName,
+				phonetic: q.suraPhonetic,
+				sura: q.sura,
+				verse: q.verse.v,
+			}}
 			onOpenReader={() =>
 				props.onOpenInReader(q.sura, q.verse.v, q.targetWord.n)
 			}

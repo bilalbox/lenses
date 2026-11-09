@@ -11,6 +11,7 @@ import { findVerse, useLayer } from "../lib/layers";
 import { sentenceOfWord } from "../lib/noorBayan";
 import { useReaderLayers } from "../lib/readerLayers";
 import type { ReaderPrefs } from "../lib/readerPrefs";
+import type { ExampleQuery } from "../lib/search";
 import type { Manifest, Verse, VerseRef, VerseSyntax } from "../lib/types";
 import { NoorBayanTree } from "./NoorBayanTree";
 import { VerseSecondaryLayers } from "./VerseSecondaryLayers";
@@ -30,7 +31,7 @@ interface Props {
 		word?: number,
 		params?: Record<string, string>,
 	) => void;
-	onSearchRoot: (root: string) => void;
+	onSearch: (query: Partial<ExampleQuery>) => void;
 }
 
 export function VerseScreen({
@@ -42,7 +43,7 @@ export function VerseScreen({
 	target,
 	readerPrefs,
 	onNavigate,
-	onSearchRoot,
+	onSearch,
 }: Props) {
 	const { t } = useI18n();
 	const { data: file, error } = useLayer("surah", sura);
@@ -174,7 +175,7 @@ export function VerseScreen({
 					segmentIndex={segment}
 					onSelectSegment={setSegment}
 					onClose={() => onNavigate(sura, verse.v)}
-					onSearchRoot={onSearchRoot}
+					onSearch={onSearch}
 				/>
 			) : null}
 		</div>
@@ -221,7 +222,7 @@ function VerseBody({
 	) => void;
 }) {
 	const { locale, formatNumber } = useI18n();
-	// One clause index for the ayah line and the NoorBayan tree.
+	// The diagram's clause; tapping a verse word moves it to that word's clause.
 	const [clauseIndex, setClauseIndex] = useState(0);
 	const layers = useReaderLayers(readerPrefs, sura, verse, locale, tab);
 	const verseAsbab = layers.asbab.narrations;
@@ -246,10 +247,6 @@ function VerseBody({
 		() => sentenceOfWord(sentences ?? []),
 		[sentences],
 	);
-	const segments = useMemo(
-		() => groupWords(verse.w, membership),
-		[verse.w, membership],
-	);
 	return (
 		<>
 			<VerseHeaderCard
@@ -267,39 +264,21 @@ function VerseBody({
 				onOpenAsbab={handleOpenAsbab}
 			/>
 			<p className="verse-line" dir="rtl" lang="ar">
-				{segments.map((segment) =>
-					segment.clause === null ? (
-						segment.words.map((word) => (
-							<button
-								key={word.n}
-								type="button"
-								className={selected === word.n ? "is-on" : ""}
-								onClick={() => onSelect(word.n)}
-							>
-								{word.a}
-							</button>
-						))
-					) : (
-						<span
-							key={segment.words[0]?.n ?? segment.clause}
-							className={`verse-span${segment.clause === clauseIndex ? " is-current" : ""}`}
-						>
-							{segment.words.map((word) => (
-								<button
-									key={word.n}
-									type="button"
-									className={selected === word.n ? "is-on" : ""}
-									onClick={() => {
-										onSelect(word.n);
-										setClauseIndex(segment.clause as number);
-									}}
-								>
-									{word.a}
-								</button>
-							))}
-						</span>
-					),
-				)}
+				{verse.w.map((word) => (
+					<button
+						key={word.n}
+						type="button"
+						className={selected === word.n ? "is-on" : ""}
+						onClick={() => {
+							onSelect(word.n);
+							// The diagram follows the tapped word to its clause.
+							const clause = membership.get(word.n);
+							if (clause !== undefined) setClauseIndex(clause);
+						}}
+					>
+						{word.a}
+					</button>
+				))}
 				<span className="ayah-mark">{formatNumber(verse.v)}</span>
 			</p>
 
@@ -330,17 +309,6 @@ function VerseBody({
 	);
 }
 
-function groupWords(words: Verse["w"], membership: Map<number, number>) {
-	const segments: { clause: number | null; words: Verse["w"] }[] = [];
-	for (const word of words) {
-		const clause = membership.get(word.n) ?? null;
-		const last = segments[segments.length - 1];
-		if (last && last.clause === clause) last.words.push(word);
-		else segments.push({ clause, words: [word] });
-	}
-	return segments;
-}
-
 function VerseHeaderCard({
 	unitName,
 	phonetic,
@@ -368,13 +336,13 @@ function VerseHeaderCard({
 	asbabOpen: boolean;
 	onOpenAsbab: () => void;
 }) {
-	const { t, formatNumber } = useI18n();
+	const { locale, t, formatNumber } = useI18n();
 	const revelationLabel =
 		revelation === "Madinah" ? t.verse.madinan : t.verse.meccan;
 	const metaParts = [
 		revelationLabel,
 		`${formatNumber(sura)}:${formatNumber(verseNumber)}`,
-		phonetic,
+		locale === "ar" ? null : phonetic,
 		goal ? t.verse.surahGoalLabel : null,
 		revSeq ? t.verse.revelationOrder(revSeq) : null,
 	].filter(Boolean);

@@ -65,3 +65,4 @@ coverage/
 
 # Project tools
 agent-tools/
+.claude/

@@ -7,7 +7,7 @@ interface Props {
 }
 
 export function SurahIndex({ manifest, onOpen }: Props) {
-	const { t, formatNumber } = useI18n();
+	const { locale, t, formatNumber } = useI18n();
 	return (
 		<div className="surah-page anim-soft-enter">
 			<header className="page-intro">
@@ -26,12 +26,16 @@ export function SurahIndex({ manifest, onOpen }: Props) {
 									type="button"
 									className="surah-card-btn"
 									onClick={() => onOpen(unit.n)}
-									aria-label={`${unit.name} (${unit.phonetic})`}
+									aria-label={
+										locale === "ar"
+											? unit.name
+											: `${unit.name} (${unit.phonetic})`
+									}
 								>
 									<span className="names">
 										<b lang="ar">{unit.name}</b>
 										<small>
-											{unit.phonetic} ·{" "}
+											{locale === "ar" ? "" : `${unit.phonetic} · `}
 											{unit.rev === "Madinah"
 												? t.verse.madinan
 												: t.verse.meccan}

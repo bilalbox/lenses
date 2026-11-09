@@ -11,7 +11,7 @@ export interface WordingChoice {
 	/** Uthmani words; empty when the ayah has no word at the blank. */
 	text: string;
 	/** The ayahs that read this wording at the blank. */
-	refs: { sura: number; verse: number; phonetic: string }[];
+	refs: { sura: number; verse: number; name: string; phonetic: string }[];
 }
 
 export interface MutashabihQuestion {
@@ -59,6 +59,7 @@ export function toMutashabihQuestions(
 					refs: o.refs.map(([sura, verse]) => ({
 						sura,
 						verse,
+						name: byNumber.get(sura)?.name ?? "",
 						phonetic: byNumber.get(sura)?.phonetic ?? "",
 					})),
 				})),

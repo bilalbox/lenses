@@ -1,0 +1,8 @@
+# Lenses additions to the shared .betterleaks.toml (appended by
+# tools/quality/run-secret-scan.sh). Tables only: no top-level keys.
+
+[[allowlists]]
+description = "lenses: gitignored upstream downloads (Lane's Lexicon TEI uses key= for headwords)"
+paths = [
+  '''^data/cache/''',
+]

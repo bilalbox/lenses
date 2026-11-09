@@ -1,0 +1,10 @@
+{
+	"skillOverrides": {
+		"anthropic-skills:docs": "user-invocable-only",
+		"anthropic-skills:docx": "user-invocable-only",
+		"anthropic-skills:google-workspace": "off",
+		"anthropic-skills:pdf": "user-invocable-only",
+		"anthropic-skills:pptx": "off",
+		"anthropic-skills:xlsx": "user-invocable-only"
+	}
+}

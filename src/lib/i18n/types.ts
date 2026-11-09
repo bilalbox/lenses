@@ -159,6 +159,9 @@ export interface Translations {
 		asbabSectionTitle: string;
 		nahwTabTitle: string;
 		treebankNoorBayan: string;
+		irabViewsAria: string;
+		irabDiagram: string;
+		irabClassical: string;
 		mutashabihBadge: (count: number) => string;
 		mutashabihSectionTitle: string;
 		mutashabihCounterpartAyah: string;
@@ -189,6 +192,30 @@ export interface Translations {
 		sarf: string;
 		wordMeaning: string;
 		searchThisRoot: string;
+		searchThisWord: string;
+		inQuran: string;
+		/** Occurrences, distinct verses, distinct surahs. */
+		occurrences: (count: number, verses: number, surahs: number) => string;
+		wordGlossSource: string;
+		dictionaries: string;
+		maqayisTitle: string;
+		mufradatTitle: string;
+		laneTitle: string;
+		laneThisWord: string;
+		laneOtherEntries: (count: number) => string;
+		tabsAria: string;
+		tabHere: string;
+		tabAcross: string;
+		wujuhTitle: string;
+		/** Between the headword and what follows it. */
+		wujuhSeparator: string;
+		wujuhInThisVerse: string;
+		wujuhSenseOf: (sense: number, total: number) => string;
+		wujuhNotCited: (total: number) => string;
+		wujuhThisVerse: string;
+		wujuhUnnamedSense: (sense: number) => string;
+		wujuhNoVerses: string;
+		lanePage: (page: number) => string;
 		qiraatTitle: string;
 		qiraatIsolation: string;
 		qiraatWasl: string;
@@ -199,6 +226,8 @@ export interface Translations {
 		pageTitle: string;
 	};
 	examples: {
+		rootPlaceholder: string;
+		lemmaPlaceholder: string;
 		pageTitle: string;
 		lead: string;
 		presetHal: string;

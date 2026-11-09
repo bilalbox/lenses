@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { formatIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type { ReaderLayers } from "../lib/readerLayers";
 import { verseRefParam } from "../lib/route";
 import type { Manifest, Verse, VerseRef } from "../lib/types";
 import { AsbabSection } from "./AsbabSection";
+import { IrabViews } from "./IrabViews";
 import { MutashabihSection } from "./MutashabihSection";
 
 interface MeaningProps {
@@ -210,37 +210,9 @@ export function VerseSecondaryLayers({
 				>
 					<summary>
 						<span className="verse-layer-title">{t.verse.irabTitle}</span>
-						<span className="verse-layer-meta">
-							{classicalIrab
-								? t.common.tafsirCenterSource
-								: t.verse.treebankNoorBayan}
-						</span>
 					</summary>
 					<div className="verse-layer-body">
-						{classicalIrab ? (
-							<>
-								<p className="source-line">
-									{t.common.tafsirCenterSource} ·{" "}
-									<a
-										href="https://tafsir.net/"
-										target="_blank"
-										rel="noreferrer"
-									>
-										tafsir.net
-									</a>
-								</p>
-								<div className="prose irab-prose" dir="rtl" lang="ar">
-									{formatIrabText(classicalIrab)}
-								</div>
-							</>
-						) : null}
-						{showNahw ? (
-							<div
-								className={`irab-nahw-embed${classicalIrab ? " has-classical" : ""}`}
-							>
-								{nahwPanel}
-							</div>
-						) : null}
+						<IrabViews classical={classicalIrab} diagram={nahwPanel} />
 					</div>
 				</details>
 			) : null}

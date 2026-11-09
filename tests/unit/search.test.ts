@@ -130,6 +130,32 @@ describe("search: searchExamples & countExamples", () => {
 		expect(bwHits).toHaveLength(2);
 	});
 
+	it("tells Buckwalter roots apart by case (s is س, S is ص)", () => {
+		const index: WordIndex = {
+			roots: [
+				{ a: "نوس", b: "nws" },
+				{ a: "نوص", b: "nwS" },
+			],
+			lemmas: [
+				{ a: "نَّاس", b: "n~aAs" },
+				{ a: "مَنَاص", b: "manaAS" },
+			],
+			rows: [
+				[2, 8, 2, "ٱلنَّاسِ", 0, 0, "N", "N", "", ""],
+				[38, 3, 7, "مَنَاصٍ", 1, 1, "N", "N", "", ""],
+			],
+		};
+		for (const root of ["nws", "نوس"]) {
+			const hits = searchExamples(index, { ...baseQuery, root });
+			expect(
+				hits.map((hit) => hit.root),
+				root,
+			).toEqual(["nws"]);
+		}
+		expect(countExamples(index, { ...baseQuery, root: "nwS" })).toBe(1);
+		expect(countExamples(index, { ...baseQuery, lemma: "n~aAs" })).toBe(1);
+	});
+
 	it("filters examples by part of speech", () => {
 		const nounHits = searchExamples(mockIndex, { ...baseQuery, pos: "N" });
 		expect(nounHits).toHaveLength(1);

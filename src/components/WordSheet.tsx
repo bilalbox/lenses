@@ -1,11 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { spaceLetters } from "../lib/arabic";
-import { formatIrabText, formatWordIrabText } from "../lib/formatIrab";
 import { kindGloss } from "../lib/glossary";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { useVerseLayer } from "../lib/layers";
+import type { ExampleQuery } from "../lib/search";
 import type { QiraatRule, Verse, Word, WordQiraat } from "../lib/types";
+import { primaryStem } from "../lib/wordStats";
 import { CloseIcon } from "./Icons";
+import { Tabs } from "./Tabs";
+import { WordCounts } from "./WordCounts";
+import { WordLexicon } from "./WordLexicon";
+import {
+	WordGloss,
+	WordIrab,
+	WordMeaning,
+	WordSarf,
+} from "./WordSheetSections";
+import { WordWujuh } from "./WordWujuh";
 
 interface Props {
 	sura: number;
@@ -16,7 +26,7 @@ interface Props {
 	segmentIndex?: number;
 	onSelectSegment: (index: number) => void;
 	onClose: () => void;
-	onSearchRoot: (root: string) => void;
+	onSearch: (query: Partial<ExampleQuery>) => void;
 }
 
 export function WordSheet({
@@ -27,12 +37,11 @@ export function WordSheet({
 	segmentIndex,
 	onSelectSegment,
 	onClose,
-	onSearchRoot,
+	onSearch,
 }: Props) {
 	const { locale, t, formatNumber } = useI18n();
 	const stem = word.s.find((segment) => segment.k === "m") ?? word.s[0];
 	const selected = word.s.find((_, index) => index === segmentIndex) ?? stem;
-	const rootValue = stem?.ra || stem?.r || "";
 	const [expanded, setExpanded] = useState(false);
 	const [closing, setClosing] = useState(false);
 	const [isMobileModal, setIsMobileModal] = useState(
@@ -158,6 +167,22 @@ export function WordSheet({
 	}, []);
 
 	if (!selected) return null;
+	const primary = primaryStem(word);
+	const chips = (
+		<div className="chips" dir="rtl">
+			{word.s.map((segment, index) => (
+				<button
+					key={`${segment.a}-${index}`}
+					type="button"
+					className={`chip kind-${segment.k}${segment === selected ? " is-on" : ""}`}
+					onClick={() => onSelectSegment(index)}
+				>
+					<b lang="ar">{segment.a}</b>
+					<small lang="ar">{kindGloss(segment.k, locale).name}</small>
+				</button>
+			))}
+		</div>
+	);
 
 	return (
 		<div
@@ -204,79 +229,52 @@ export function WordSheet({
 				<p className="sheet-word" dir="rtl" lang="ar">
 					{word.a}
 				</p>
-				<div className="chips" dir="rtl">
-					{word.s.map((segment, index) => (
-						<button
-							key={`${segment.a}-${index}`}
-							type="button"
-							className={`chip kind-${segment.k}${segment === selected ? " is-on" : ""}`}
-							onClick={() => onSelectSegment(index)}
-						>
-							<b lang="ar">{segment.a}</b>
-							<small lang="ar">{kindGloss(segment.k, locale).name}</small>
-						</button>
-					))}
-				</div>
-
-				{word.i ? (
-					<section>
-						<h3 className="sheet-section-label">{t.sheet.classicalIrab}</h3>
-						<p className="source-line">
-							{t.common.tafsirCenterSource} ·{" "}
-							<a href="https://tafsir.net/" target="_blank" rel="noreferrer">
-								tafsir.net
-							</a>
-						</p>
-						<p
-							className="prose irab-prose sheet-metric-prose"
-							dir="rtl"
-							lang="ar"
-						>
-							{formatWordIrabText(word.i)}
-						</p>
-					</section>
-				) : null}
-				{word.sf ? (
-					<section>
-						<h3 className="sheet-section-label">{t.sheet.sarf}</h3>
-						<p className="source-line">
-							{t.common.tafsirCenterSource} ·{" "}
-							<a href="https://tafsir.net/" target="_blank" rel="noreferrer">
-								tafsir.net
-							</a>
-						</p>
-						<p
-							className="prose irab-prose sheet-metric-prose"
-							dir="rtl"
-							lang="ar"
-						>
-							{formatIrabText(word.sf)}
-						</p>
-						{rootValue ? (
-							<p className="sheet-root-action">
-								<span className="fact-metric" lang="ar" dir="rtl">
-									{spaceLetters(rootValue)}
-								</span>
-								<button
-									type="button"
-									className="text-button"
-									onClick={() => onSearchRoot(rootValue)}
-								>
-									{t.sheet.searchThisRoot}
-								</button>
-							</p>
-						) : null}
-					</section>
-				) : null}
-				{wordQiraat ? <WordQiraatSection wordQiraat={wordQiraat} /> : null}
-				{word.m ? (
-					<section>
-						<h3 className="sheet-section-label">{t.sheet.wordMeaning}</h3>
-						<p className="prose sheet-metric-prose" dir="rtl" lang="ar">
-							{word.m}
-						</p>
-					</section>
-				) : null}
+				<WordGloss word={word} />
+				{chips}
+				<Tabs
+					storageKey="lenses-sheet-tab"
+					label={t.sheet.tabsAria}
+					items={[
+						{
+							key: "here",
+							label: t.sheet.tabHere,
+							content: (
+								<>
+									<WordMeaning word={word} />
+									<WordWujuh
+										sura={sura}
+										verse={verse.v}
+										word={word.n}
+										stem={primary}
+										part="answer"
+									/>
+									<WordIrab word={word} />
+									<WordSarf word={word} />
+									{wordQiraat ? (
+										<WordQiraatSection wordQiraat={wordQiraat} />
+									) : null}
+								</>
+							),
+						},
+						{
+							key: "across",
+							label: t.sheet.tabAcross,
+							content: (
+								<>
+									<WordCounts stem={primary} onSearch={onSearch} />
+									<WordWujuh
+										sura={sura}
+										verse={verse.v}
+										word={word.n}
+										stem={primary}
+										part="list"
+									/>
+									<WordLexicon stem={primary} openFirst={false} />
+								</>
+							),
+						},
+					]}
+				/>
 			</aside>
 		</div>
 	);

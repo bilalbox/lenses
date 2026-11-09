@@ -7,6 +7,7 @@ Downloads (cached in data/cache/):
   - Tanzil Uthmani text, CC BY-ND 3.0, as distributed with the corpus
   - Indonesian and English Al-Mukhtasar (QuranEnc indonesian_mokhtasar and english_mokhtasar)
   - Lemma glosses shipped with the corpus API
+  - Corpus word-by-word English glosses, stored verbatim on each word
   - Tafsir Center linguistic database, CC BY 4.0 (word iʿrāb, ṣarf, gloss, verse iʿrāb)
 
 Does not scrape corpus.quran.com or tafsir.app.
@@ -48,6 +49,7 @@ MOKHTASAR_VERSION = "V1.0.0"
 MOKHTASAR_DATE = "23 January 2017"
 LEMMAS_URL = f"{API}/lemmas.txt"
 CHAPTERS_URL = f"{API}/chapters.json"
+WORD_BY_WORD_URL = f"{API}/translation/word-by-word.txt"
 DB_URL = "https://huggingface.co/datasets/tafsircenter/tafsir-mcp-data/resolve/main/quran.db"
 DB_SHA256 = "10e61f615ab5e6a3440e8ecc8ba1dc2273d12cd9048752760fe53a44d191cc27"
 
@@ -394,6 +396,38 @@ def load_lemmas(path: Path) -> dict[str, str]:
     return glosses
 
 
+def load_word_by_word(path: Path, expected: int) -> list[str]:
+    """One English gloss per corpus word, in corpus order, kept byte-for-byte."""
+    glosses = path.read_text(encoding="utf-8").split("\n")
+    if glosses and glosses[-1] == "":
+        glosses.pop()
+    if len(glosses) != expected:
+        raise SystemExit(f"word-by-word has {len(glosses)} lines, corpus has {expected} words")
+    return glosses
+
+
+def word_stats(
+    rows: list[list[Any]], roots: list[dict[str, str]], lemmas: list[dict[str, str]]
+) -> dict[str, dict[str, list[int]]]:
+    """Per root and per lemma: [occurrences, distinct verses, distinct surahs].
+
+    Counts the same rows the example search filters, so a count shown in the
+    word sheet equals the hits of a search on that root or lemma.
+    """
+    out: dict[str, dict[str, list[int]]] = {}
+    for kind, column, lexemes in (("roots", 4, roots), ("lemmas", 5, lemmas)):
+        hits: dict[str, int] = defaultdict(int)
+        verses: dict[str, set[tuple[int, int]]] = defaultdict(set)
+        surahs: dict[str, set[int]] = defaultdict(set)
+        for row in rows:
+            key = lexemes[row[column]]["b"]
+            hits[key] += 1
+            verses[key].add((row[0], row[1]))
+            surahs[key].add(row[0])
+        out[kind] = {key: [hits[key], len(verses[key]), len(surahs[key])] for key in hits if key}
+    return out
+
+
 def load_center(path: Path) -> dict:
     digest = sha256(path)
     if digest != DB_SHA256:
@@ -562,6 +596,18 @@ def build_sources() -> list[dict[str, Any]]:
             "url": "https://corpus.quran.com/download/",
         },
         {
+            "id": "qac-word-by-word",
+            "title": "Quranic Arabic Corpus word-by-word English",
+            "kind": "word-translation",
+            "attribution": (
+                "Kais Dukes and the Quranic Arabic Corpus, from work compiled by "
+                "Shehnaz Shaikh and Kausar Khatri"
+            ),
+            "description": "An English gloss for each word of the Qur'an, shown verbatim in the word sheet.",
+            "license": "GPL, with the corpus terms of use: verbatim copies, and the corpus is credited",
+            "url": "https://corpus.quran.com/wordbyword.jsp",
+        },
+        {
             "id": "noorbayan-syntax",
             "title": "The Quranic Treebank (NoorBayan)",
             "kind": "syntax",
@@ -629,17 +675,26 @@ def build_sources() -> list[dict[str, Any]]:
         },
         {
             "id": "indonesian-sabiq",
-            "title": "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
+            "title": "Indonesian translation of the Qur'an (PT. Sabiq)",
             "kind": "translation",
-            "attribution": "PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad), via QuranEnc.com (indonesian_sabiq)",
-            "description": "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
-            "license": "Distribusi terbuka / QuranEnc republication terms.",
+            "attribution": "PT. Sabiq (supervised by the Rowwad Translation Center), via QuranEnc.com (indonesian_sabiq)",
+            "description": "A concise, plain Indonesian translation of the meanings of the Qur'an, revised periodically.",
+            "license": "QuranEnc republication terms: verbatim text with attribution.",
             "url": "https://quranenc.com/en/browse/indonesian_sabiq",
         },
     ]
 
 
 NOTICE_SECTIONS: list[list[str]] = [
+    [
+        "Quranic Arabic Corpus word-by-word English",
+        "Source: Quranic Arabic Corpus (Kais Dukes), https://corpus.quran.com/wordbyword.jsp",
+        f"File: {WORD_BY_WORD_URL}",
+        "Derived from work compiled by Shehnaz Shaikh and Kausar Khatri, revised",
+        "by the corpus against standard English translations.",
+        "License: GNU General Public License, with the corpus terms of use.",
+        "Each gloss is stored verbatim on its word; none is edited, added, or trimmed.",
+    ],
     [
         "English Al-Mukhtasar",
         "Title: Al-Mukhtasar in Interpreting the Noble Quran",
@@ -741,16 +796,19 @@ def main() -> None:
         "lemmas": CACHE / "lemmas.txt",
         "chapters": CACHE / "chapters.json",
         "db": CACHE / "quran.db",
+        "wbw": CACHE / "qac-word-by-word.txt",
     }
     fetch_cached(MORPH_URL, files["morph"])
     fetch_cached(UTHMANI_URL, files["uthmani"])
     fetch_cached(LEMMAS_URL, files["lemmas"])
     fetch_cached(CHAPTERS_URL, files["chapters"])
     fetch_cached(DB_URL, files["db"])
+    fetch_cached(WORD_BY_WORD_URL, files["wbw"])
 
     morph_header, morphology = load_morphology(files["morph"])
     uthmani_header, surahs = load_uthmani(files["uthmani"])
     glosses = load_lemmas(files["lemmas"])
+    word_glosses = load_word_by_word(files["wbw"], len(morphology))
     chapters = {item["chapterNumber"]: item for item in json.loads(files["chapters"].read_text())}
     center = load_center(files["db"])
     expected = {surah["n"]: len(surah["verses"]) for surah in surahs}
@@ -807,7 +865,7 @@ def main() -> None:
                     compact_segment(seg, piece, glosses)
                     for seg, piece in zip(segments, sliced, strict=False)
                 ]
-                word = {"n": index, "a": arabic, "s": compact}
+                word = {"n": index, "a": arabic, "s": compact, "e": word_glosses[len(word_rows)]}
                 center_index = mapping[index - 1]
                 if center_index is not None:
                     key = (sura, number, center_index + 1)
@@ -911,6 +969,7 @@ def main() -> None:
             "g": glosses.get(key, ""),
         }
     write_json(OUT / "words.json", {"roots": roots, "lemmas": lemmas, "rows": word_rows})
+    write_json(OUT / "wordStats.json", word_stats(word_rows, roots, lemmas))
     write_json(OUT / "verses.json", verse_rows)
     partial = [u for u in units if 0 < u["syntax"] < u["verses"]]
     missing = [u["n"] for u in units if u["syntax"] == 0]

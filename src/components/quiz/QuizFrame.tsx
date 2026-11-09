@@ -71,7 +71,7 @@ export function QuizFrame({
 	/** The current step is answered by tapping a word in the ayah. */
 	picking?: boolean;
 	/** Where the ayah is; null while naming its place is part of the question. */
-	place: { phonetic: string; sura: number; verse: number } | null;
+	place: { name: string; phonetic: string; sura: number; verse: number } | null;
 	onOpenReader: () => void;
 	children: ReactNode;
 }) {

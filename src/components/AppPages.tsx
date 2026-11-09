@@ -64,7 +64,7 @@ export function AppPages({
 							word ? `/${sura}/${verse}/${word}${q}` : `/${sura}/${verse}${q}`,
 						);
 					}}
-					onSearchRoot={(root) => openSearch({ root })}
+					onSearch={openSearch}
 				/>
 			);
 		case "search":
