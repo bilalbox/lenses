@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
 	countExamples,
 	type ExampleQuery,
+	exampleFacets,
+	featureSummary,
 	searchExamples,
 	searchVerses,
 } from "../../src/lib/search";
@@ -183,5 +185,24 @@ describe("search: searchExamples & countExamples", () => {
 			root: "غير_موجود",
 		});
 		expect(zeroCount).toBe(0);
+	});
+
+	it("computes lemma and form facets for matching examples", () => {
+		const indexWithForm: WordIndex = {
+			...mockIndex,
+			rows: [
+				...mockIndex.rows,
+				[1, 2, 1, "عَلَّمَ", 0, 0, "V", "V", "form=II", ""],
+			],
+		};
+		const facets = exampleFacets(indexWithForm, { ...baseQuery, pos: "V" });
+		expect(facets.lemmas.length).toBeGreaterThan(0);
+		expect(facets.forms).toEqual([{ key: "II", label: "II", count: 1 }]);
+	});
+
+	it("summarizes morphological features", () => {
+		expect(featureSummary("")).toBe("");
+		const summary = featureSummary("form=II asp=PERF voice=ACT");
+		expect(summary).toBe("ماض · فَعَّلَ · معلوم");
 	});
 });

@@ -21,4 +21,17 @@ describe("lexicon", () => {
 		expect(rest.map((e) => e.h)).toEqual(["نَاسَ"]);
 		expect(laneEntriesFor(entries, undefined).rest).toHaveLength(2);
 	});
+
+	it("falls back to bare-letter match when exact vowelling differs", () => {
+		const entries: LaneEntry[] = [
+			{ h: "كَتَبَ", t: ["he wrote"] },
+			{ h: "قَرَأَ", t: ["he read"] },
+		];
+		// "كُتِبَ" stripped is "كتب", same as "كَتَبَ" stripped. But vowelled doesn't match if different vowels.
+		// Wait, vowelled("كُتِبَ") strips tanwin, shadda, sukun, dagger alif, alif wasla, but keeps fatha/damma/kasra!
+		// So vowelled("كُتِبَ") !== vowelled("كَتَبَ"), hence exact is empty!
+		const { word, rest } = laneEntriesFor(entries, "كُتِبَ");
+		expect(word.map((e) => e.h)).toEqual(["كَتَبَ"]);
+		expect(rest.map((e) => e.h)).toEqual(["قَرَأَ"]);
+	});
 });
