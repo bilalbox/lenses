@@ -18,10 +18,17 @@ export function isCite(
 	return cite[0] === sura && cite[1] === verse && cite[2] === word;
 }
 
+/** Where a word's entries are filed: its root, or for a particle (في, لعل)
+ * its lemma, as `~` and the lemma. */
+export function wujuhKey(stem: Segment | undefined): string | undefined {
+	if (stem?.r) return stem.r;
+	return stem?.l ? `~${stem.l}` : undefined;
+}
+
 /**
- * The entries of the word's root that are about this word: one that cites
- * this very occurrence, or one headed by the word's lemma or by its root
- * letters. Another word of the same root (أَمَام under أمة) gets none.
+ * The entries of the word's root (or particle) that are about this word: one
+ * that cites this very occurrence, or one headed by the word's lemma or by
+ * its root letters. Another word of the same root (أَمَام under أمة) gets none.
  */
 export function wujuhFor(
 	file: WujuhFile | undefined,
@@ -30,11 +37,15 @@ export function wujuhFor(
 	verse: number,
 	word: number,
 ): WujuhView[] {
-	const entries = stem?.r ? file?.[stem.r] : undefined;
+	const key = wujuhKey(stem);
+	const entries = key ? file?.[key] : undefined;
 	if (!entries || !stem) return [];
 	const names = new Set(
 		[stem.la, stem.ra].filter((n): n is string => Boolean(n)).map(bare),
 	);
+	// Filed under a lemma, an entry is about that very word; under a root,
+	// only one headed by the word (أمة, not أمام) is.
+	const ofLemma = key?.startsWith("~") ?? false;
 	return entries
 		.map((entry) => ({
 			entry,
@@ -42,5 +53,7 @@ export function wujuhFor(
 				sense.c.some((cite) => isCite(cite, sura, verse, word)),
 			),
 		}))
-		.filter((view) => view.here >= 0 || names.has(bare(view.entry.h)));
+		.filter(
+			(view) => ofLemma || view.here >= 0 || names.has(bare(view.entry.h)),
+		);
 }

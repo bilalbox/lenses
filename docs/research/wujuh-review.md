@@ -55,6 +55,8 @@ To maintain textual integrity while systematically curing errors, the system ope
 - `gloss-differs`: al-Dāmaghānī's local explanation (`يعني ...`) right after the citation contradicts the extracted sense label.
 - `weak-match`: Verse fuzzy matching score was `< 0.9` or runner-up score was within `0.05`.
 - `word-outside-quote`: The highlighted token falls outside the quoted fragment.
+- `other-surah`: Not found in the surah al-Dāmaghānī names (a slip such as يونس for يوسف) or he names none; found by a stricter search of the whole Qurʾān.
+- `parallel`: A bare reference (`مثلها في سورة الحج`) with no quotation; placed on the verse of that surah that echoes the citation before it.
 
 ### Tier 2: Semantic Adjudication Queue
 
@@ -66,13 +68,14 @@ Citations with no lint flags whose sense shares content words with the Tafsir Ce
 
 Verdicts are stored in `data/curation/wujuh-verdicts.json` keyed by `"sura:verse:word:headword"`.
 
-| Verdict (`v`) | Meaning                                                                                                 | Effect on Build                                |
-| ------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `agree`       | al-Dāmaghānī's sense agrees in substance with the word gloss (`m`), despite using different vocabulary. | No change to data. Marks citation as reviewed. |
-| `viewpoint`   | Legitimate alternative classical interpretation/viewpoint specific to al-Dāmaghānī.                     | No change to data. Marks citation as reviewed. |
-| `label`       | The extracted sense label is erroneous or noisy; provides a clean, accurate label.                      | Overrides `sense.label` in the built dataset.  |
-| `move`        | The citation was misattributed to this sense and belongs under sense number `to` (1-based).             | Moves the citation to `entry.senses[to - 1]`.  |
-| `drop`        | The citation is invalid (wrong word, unsupported match, or spurious entry).                             | Removes the citation from the built dataset.   |
+| Verdict (`v`) | Meaning                                                                                                       | Effect on Build                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `agree`       | al-Dāmaghānī's sense agrees in substance with the word gloss (`m`), despite using different vocabulary.       | No change to data. Marks citation as reviewed. |
+| `viewpoint`   | Legitimate alternative classical interpretation/viewpoint specific to al-Dāmaghānī.                           | No change to data. Marks citation as reviewed. |
+| `label`       | The extracted sense label is erroneous or noisy; provides a clean, accurate label.                            | Overrides `sense.label` in the built dataset.  |
+| `move`        | The citation was misattributed to this sense and belongs under sense number `to` (1-based).                   | Moves the citation to `entry.senses[to - 1]`.  |
+| `drop`        | The citation is invalid (wrong word, unsupported match, or spurious entry).                                   | Removes the citation from the built dataset.   |
+| `word`        | The quotation holds two words of the root and the wrong one is highlighted; `to` is the right word (1-based). | Points the citation at word `to` of the verse. |
 
 ### Record Format
 

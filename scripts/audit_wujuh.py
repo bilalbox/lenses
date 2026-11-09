@@ -137,6 +137,10 @@ def cite_lints(cite: Cite, label: str, heading: str) -> list[str]:
         flags.append("word-outside-quote")
     if cite.match.score < WEAK_SCORE or cite.match.margin < WEAK_MARGIN:
         flags.append("weak-match")
+    if cite.match.elsewhere:
+        flags.append("other-surah")  # not in the surah he names, or he names none
+    if cite.match.parallel:
+        flags.append("parallel")  # a bare مثلها في سورة …: the verse echoing the one before
     return flags
 
 
@@ -302,6 +306,10 @@ def verdict_error(verdict: Any, item: dict[str, Any] | None, senses: int) -> str
         isinstance(to, int) and 1 <= to <= senses and to != item["sense"]
     ):
         return f"a move verdict needs to: another sense 1..{senses}"
+    if verdict["v"] == "word" and not (
+        isinstance(to, int) and to >= 1 and to != int(item["key"].split(":")[2])
+    ):
+        return "a word verdict needs to: another word of the verse (1-based)"
     return None
 
 

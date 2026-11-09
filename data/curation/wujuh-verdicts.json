@@ -2768,6 +2768,12 @@
     "l": "العذاب",
     "note": "Semantic agreement: al-Damaghani interprets absence of fear as safety from divine punishment (العذاب / لا عذاب عليهم), matching the tafsir; weak-match was due to recurrent formulaic phrasing."
   },
+  "3:173:6:نوس": {
+    "v": "word",
+    "l": "محمد صلى الله عليه وسلم",
+    "to": 4,
+    "note": "The quotation holds two الناس; al-Damaghani's gloss (نعيم بن مسعود الأشجعي) is the one who spoke, the first: قَالَ لَهُمُ ٱلنَّاسُ."
+  },
   "3:183:13:أكل": {
     "v": "agree",
     "l": "الحرق",
@@ -3712,6 +3718,12 @@
     "v": "agree",
     "l": "الراحة",
     "note": "Direct semantic agreement: al-Damaghani glosses 'رَوْح' as comfort/rest (الراحة), matching the word gloss and tafsir ('فله راحة لا تعب بعدها') verbatim."
+  },
+  "56:89:2:روح:1": {
+    "v": "word",
+    "l": "الراحة",
+    "to": 1,
+    "note": "The quotation فروح وريحان holds both words of the root; the sense الراحة is رَوْح, the first, not رَيْحَان (the ريحان entry keeps word 2)."
   },
   "56:91:1:سلم": {
     "v": "agree",

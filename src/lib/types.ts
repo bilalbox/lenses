@@ -176,7 +176,8 @@ export interface WujuhEntry {
 	s: WujuhSense[];
 }
 
-/** `wujuh.json`: al-Dāmaghānī's entries, keyed by Buckwalter root. */
+/** `wujuh.json`: al-Dāmaghānī's entries, keyed by Buckwalter root, or for a
+ * particle by `~` and its Buckwalter lemma (`~fiY`). */
 export type WujuhFile = Record<string, WujuhEntry[]>;
 
 /** Occurrences, distinct verses, distinct surahs. */
