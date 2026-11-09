@@ -145,7 +145,6 @@ export const id: Translations = {
 		meccan: "Makkiyah",
 		madinan: "Madaniyah",
 		verseMeaningTitle: "Makna Ayat",
-		verseMeaningSub: "Terjemahan Sabiq & Al-Mukhtasar · QuranEnc",
 		translationBadge: "Terjemahan Makna",
 		tafsirBadge: "Tafsir (Al-Mukhtasar)",
 		mukhtasarEnTitle: "Al-Mukhtasar",
@@ -161,6 +160,7 @@ export const id: Translations = {
 		noTreeTitle: "Belum ada pohon ketergantungan untuk ayat ini.",
 		classicalIrabShort: "I'rab",
 		surahGoalLabel: "Tujuan Surah",
+		surahDetails: "Detail surah",
 		revelationOrder: (seq: number) => `Urutan Turun #${formatNum(seq, "id")}`,
 		asbabBadge: (count: number) => `Sebab Turun (${formatNum(count, "id")})`,
 		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
@@ -264,6 +264,8 @@ export const id: Translations = {
 		showMore: "Tampilkan lebih banyak",
 		chooseCriteriaHint:
 			"Pilih akar kata, bentuk dasar, jenis kata, wazan, atau relasi.",
+		moreFilters: "Filter lainnya",
+		fewerFilters: "Lebih sedikit filter",
 	},
 	sources: {
 		pageTitle: "Sumber edisi ini dibangun",

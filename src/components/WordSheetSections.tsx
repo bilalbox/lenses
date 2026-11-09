@@ -7,7 +7,7 @@ export function WordGloss({ word }: { word: Word }) {
 	const { locale, t } = useI18n();
 	if (locale !== "en" || !word.e) return null;
 	return (
-		<p className="sheet-gloss">
+		<p className="sheet-gloss" dir="ltr">
 			<span lang="en">{word.e}</span>
 			<small className="source-line">{t.sheet.wordGlossSource}</small>
 		</p>

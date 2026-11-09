@@ -17,6 +17,7 @@ import {
 	startLibrary,
 	watchLibrary,
 } from "./lib/library";
+import { adjacentVerse } from "./lib/manifest";
 import {
 	loadQuizPrefs,
 	type QuizPrefKey,
@@ -58,22 +59,12 @@ function stepAdjacentVerse(
 	verse: number,
 	delta: number,
 ) {
-	const unit = manifest.units.find((item) => item.n === sura);
-	if (!unit) return;
-	let nextVerse = verse + delta;
-	let nextSura = sura;
-	if (nextVerse < 1) {
-		nextSura = sura === 1 ? 114 : sura - 1;
-		nextVerse = manifest.units.find((item) => item.n === nextSura)?.verses ?? 1;
-	} else if (nextVerse > unit.verses) {
-		nextSura = sura === 114 ? 1 : sura + 1;
-		nextVerse = 1;
-	}
-	navigateHash(`/${nextSura}/${nextVerse}`);
+	const next = adjacentVerse(manifest, sura, verse, delta);
+	if (next) navigateHash(`/${next.sura}/${next.verse}`);
 }
 
 export function App() {
-	const { t, dir } = useI18n();
+	const { t, dir, formatNumber } = useI18n();
 	const [route, setRoute] = useState(() => parseRoute(location.hash));
 	const { data: manifest, error } = useLayer("manifest");
 	const [theme, setTheme] = useState(
@@ -111,32 +102,12 @@ export function App() {
 	}, [route.page, route.sura, route.verse]);
 
 	useEffect(() => {
-		return watchLibrary((progress) => {
-			setLibrary(progress);
-			if (progress.total > 0 && progress.done >= progress.total) {
-				window.setTimeout(() => {
-					setLibrary((current) =>
-						current && current.done >= current.total ? null : current,
-					);
-				}, 2600);
-			}
-		});
+		return watchLibrary(setLibrary);
 	}, []);
 
 	useEffect(() => {
 		if (manifest) startLibrary(manifest);
 	}, [manifest]);
-
-	useEffect(() => {
-		const onScroll = () =>
-			document.documentElement.classList.toggle(
-				"is-scrolled",
-				window.scrollY > 28,
-			);
-		onScroll();
-		window.addEventListener("scroll", onScroll, { passive: true });
-		return () => window.removeEventListener("scroll", onScroll);
-	}, []);
 
 	useEffect(() => {
 		if (route) setSearchOpen(false);
@@ -211,10 +182,11 @@ export function App() {
 		setSearchOpen(false);
 	};
 
-	const showDock = route.page !== "quiz";
+	// Verse stepping only means something in the reader.
+	const showDock = route.page === "verse";
 
 	return (
-		<div className="app">
+		<div className={`app page-${route.page}`}>
 			<header className="topbar">
 				<a
 					className="mark"
@@ -299,13 +271,6 @@ export function App() {
 				</nav>
 			</header>
 			<main>
-				{library ? (
-					<p className="library-status" role="status">
-						{library.done >= library.total
-							? t.common.offlineReady
-							: t.common.savingOffline(library.done, library.total)}
-					</p>
-				) : null}
 				{error ? <p className="banner error">{error}</p> : null}
 				{!manifest && !error ? (
 					<div className="skeleton page-skeleton" aria-hidden="true">
@@ -367,7 +332,7 @@ export function App() {
 						<input
 							name="jump"
 							aria-label={t.common.chapterAndVerse}
-							defaultValue={`${route.sura}:${route.verse}`}
+							defaultValue={`${formatNumber(route.sura)}:${formatNumber(route.verse)}`}
 							key={`${route.sura}:${route.verse}`}
 						/>
 					</form>
@@ -407,6 +372,7 @@ export function App() {
 				onToggleQuizPref={toggleQuizPref}
 				readerPrefs={readerPrefs}
 				onToggleReaderPref={toggleReaderPref}
+				library={library}
 				canInstall={Boolean(install)}
 				onInstall={() => {
 					if (install) {

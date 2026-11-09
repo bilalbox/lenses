@@ -23,9 +23,6 @@ function VerseMeaningPanel({
 		<details className="verse-layer verse-meaning-block">
 			<summary>
 				<span className="verse-layer-title">{t.verse.verseMeaningTitle}</span>
-				<span className="verse-layer-meta">
-					{t.verse.verseMeaningSub} · QuranEnc
-				</span>
 			</summary>
 			<div className="verse-layer-body">
 				{locale === "en" && (
@@ -142,6 +139,16 @@ function VerseMeaningPanel({
 					<div className="verse-meaning-content">
 						{verse.ma ? (
 							<div className="verse-meaning-section is-tafsir">
+								<small className="source-line">
+									{t.common.tafsirCenterSource} ·{" "}
+									<a
+										href="https://quranenc.com/ar/browse/arabic_mokhtasar"
+										target="_blank"
+										rel="noreferrer"
+									>
+										quranenc.com
+									</a>
+								</small>
 								<p className="prose-ar" lang="ar" dir="rtl">
 									{verse.ma}
 								</p>

@@ -129,7 +129,7 @@ export function NoorBayanTree({
 								y1={baseline - 35}
 								x2={x}
 								y2={baseline - 95}
-								stroke="var(--muted, #6f675e)"
+								stroke="var(--muted, #685f56)"
 								strokeDasharray="3 3"
 								strokeWidth="1.5"
 							/>
@@ -201,7 +201,7 @@ export function NoorBayanTree({
 									fontFamily="var(--arabic)"
 									fontWeight="600"
 									fill={
-										tok.text ? "var(--ink, #1c1915)" : "var(--muted, #6f675e)"
+										tok.text ? "var(--ink, #1c1915)" : "var(--muted, #685f56)"
 									}
 									className="noorbayan-token-text"
 								>
@@ -288,7 +288,7 @@ export function NoorBayanTree({
 									height="24"
 									rx="6"
 									fill="var(--bg-2, #e7e0d2)"
-									stroke="var(--muted, #6f675e)"
+									stroke="var(--muted, #685f56)"
 									strokeDasharray="3 3"
 									strokeWidth="1.2"
 								/>

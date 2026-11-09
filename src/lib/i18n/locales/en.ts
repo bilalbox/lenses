@@ -144,7 +144,6 @@ export const en: Translations = {
 		meccan: "Meccan",
 		madinan: "Madinan",
 		verseMeaningTitle: "Verse Meaning",
-		verseMeaningSub: "Saheeh International & Al-Mukhtasar · QuranEnc",
 		translationBadge: "Translation",
 		tafsirBadge: "Commentary (Al-Mukhtasar)",
 		mukhtasarEnTitle: "Al-Mukhtasar",
@@ -160,6 +159,7 @@ export const en: Translations = {
 		noTreeTitle: "No dependency tree for this verse.",
 		classicalIrabShort: "Iʿrāb",
 		surahGoalLabel: "Surah Goal",
+		surahDetails: "Surah details",
 		revelationOrder: (seq: number) => `Revelation #${formatNum(seq, "en")}`,
 		asbabBadge: (count: number) =>
 			`Cause of Revelation (${formatNum(count, "en")})`,
@@ -264,6 +264,8 @@ export const en: Translations = {
 		showMore: "Show more",
 		chooseCriteriaHint:
 			"Choose a root, a lemma, a part of speech, a form, or a relation.",
+		moreFilters: "More filters",
+		fewerFilters: "Fewer filters",
 	},
 	sources: {
 		pageTitle: "What this edition is built from",

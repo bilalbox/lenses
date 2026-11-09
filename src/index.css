@@ -5,7 +5,7 @@
 	--paper: #fffdf8;
 	--ink: #1c1915;
 	--ink-soft: #4a453e;
-	--muted: #6f675e;
+	--muted: #685f56;
 	--line: #e3d9c8;
 	--teal: #0f6e66;
 	--teal-soft: #e5f3f0;
@@ -297,21 +297,6 @@ main {
 	margin: 0 auto;
 	padding: 1.2rem 0 4rem;
 }
-.library-status {
-	position: fixed;
-	z-index: 35;
-	left: 50%;
-	bottom: 5.4rem;
-	transform: translateX(-50%);
-	margin: 0;
-	padding: 0.45rem 0.8rem;
-	border-radius: 999px;
-	background: var(--ink);
-	color: var(--paper);
-	font-size: 0.92rem;
-	white-space: nowrap;
-	animation: softRiseInCentered var(--duration-med) var(--ease-out);
-}
 
 /* Soft content enter — verse swaps, route pages, quiz question changes */
 .anim-soft-enter {
@@ -326,17 +311,6 @@ main {
 	to {
 		opacity: 1;
 		transform: translateY(0);
-	}
-}
-
-@keyframes softRiseInCentered {
-	from {
-		opacity: 0;
-		transform: translate(-50%, 8px);
-	}
-	to {
-		opacity: 1;
-		transform: translate(-50%, 0);
 	}
 }
 
@@ -365,35 +339,85 @@ main {
 	color: var(--muted);
 	flex: 1;
 }
-.verse-title h1 {
-	margin: 0.15rem 0 0.8rem;
-	font-family: var(--serif);
-	font-weight: 600;
-	font-size: clamp(1.8rem, 3vw, 2.6rem);
+.verse-title {
+	margin-bottom: 0.5rem;
 }
-.verse-title h1 > span {
+.verse-title h1 {
+	margin: 0;
 	font-family: var(--arabic);
 	font-weight: 700;
-	margin-inline-end: 0.4rem;
+	font-size: clamp(1.7rem, 3vw, 2.3rem);
+	line-height: 1.35;
 }
-.verse-title h1 small {
-	display: block;
-	font-family: var(--sans);
-	font-size: 0.95rem;
+.verse-ref-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-height: 44px;
+	padding: 0 0.6rem;
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
 	color: var(--muted);
-	font-weight: 400;
+	font-size: 0.95rem;
+	transition:
+		background-color var(--duration-fast) ease,
+		color var(--duration-fast) ease;
 }
+.verse-ref-toggle:hover,
+.verse-ref-toggle[aria-expanded="true"] {
+	background: var(--bg-2);
+	color: var(--ink);
+}
+.verse-ref {
+	color: var(--ink-soft);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+.verse-ref-chevron {
+	width: 14px;
+	height: 14px;
+	transform: rotate(90deg);
+	transition: transform var(--duration-fast) var(--ease-out);
+}
+.verse-ref-toggle[aria-expanded="true"] .verse-ref-chevron {
+	transform: rotate(-90deg);
+}
+.surah-about {
+	max-width: 65ch;
+	margin: 0.2rem 0 0.4rem;
+	color: var(--muted);
+	font-size: 0.95rem;
+}
+.surah-about-facts {
+	margin: 0;
+}
+.surah-about-label {
+	margin: 0.7rem 0 0.1rem;
+	font-family: var(--sans);
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--ink-soft);
+}
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+/* The ayah sits directly on the canvas: no card, border or shadow. */
 .verse-line {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.15rem 0.15rem;
 	align-items: baseline;
-	margin: 0;
-	padding: 1rem 1.1rem 0.8rem;
-	background: var(--paper);
-	border: 1px solid var(--line);
-	border-radius: var(--radius);
-	box-shadow: var(--shadow);
+	margin: 0 0 0.6rem;
+	padding: 0.25rem 0 0.5rem;
 }
 .verse-line button {
 	border: 0;
@@ -825,11 +849,23 @@ main {
 	font-weight: 600;
 	margin: 0;
 }
+.sheet:focus {
+	outline: none;
+}
+.sheet-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.2rem 1rem;
+	margin: 0 0 0.6rem;
+}
 .sheet-word {
 	font-family: var(--arabic);
-	font-size: clamp(2.75rem, 5vw, 3.45rem);
+	font-size: clamp(2.4rem, 5vw, 3.45rem);
+	font-weight: 400;
 	line-height: 1.35;
-	margin: 0.1rem 0 0.55rem;
+	margin: 0;
 	color: var(--ink);
 }
 /* Sheet padding ≈ 16px → concentric chip radius 22 − 16 = 6 */
@@ -882,12 +918,12 @@ main {
 }
 .sheet-gloss {
 	display: flex;
-	flex-wrap: wrap;
-	align-items: baseline;
-	gap: 0.2rem 0.6rem;
-	margin: -0.35rem 0 0.75rem;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.1rem;
+	margin: 0;
 	color: var(--ink);
-	font-size: 1.05rem;
+	font-size: 1.1rem;
 }
 .sheet-gloss .source-line {
 	margin: 0;
@@ -1153,6 +1189,40 @@ a.wujuh-cite:focus-visible {
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 0.75rem;
 }
+.filters-more {
+	display: contents;
+}
+.filters-more[hidden] {
+	display: none;
+}
+.filters-toggle {
+	grid-column: 1 / -1;
+	justify-self: start;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	min-height: 44px;
+	margin-inline-start: -0.6rem;
+	padding: 0.4rem 0.6rem;
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
+	color: var(--teal);
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+.filters-toggle:hover {
+	background: var(--teal-soft);
+}
+.filters-toggle-chevron {
+	width: 14px;
+	height: 14px;
+	transform: rotate(90deg);
+	transition: transform var(--duration-fast) var(--ease-out);
+}
+.filters-toggle[aria-expanded="true"] .filters-toggle-chevron {
+	transform: rotate(-90deg);
+}
 .filters .filter-text {
 	display: grid;
 	gap: 0.25rem;
@@ -1236,7 +1306,10 @@ a.wujuh-cite:focus-visible {
 .filters .combobox input {
 	padding-inline-end: 2.6rem;
 }
+/* A chosen value is Arabic, so dir="auto" flips the input to RTL and its own
+ * inline-end moves to the far side; reserve room for the clear button on both. */
 .filters .combobox input.has-value {
+	padding-inline: 2.6rem;
 	font-family: var(--arabic-ui);
 	font-weight: 600;
 	border-color: var(--teal);
@@ -1512,9 +1585,6 @@ a.wujuh-cite:focus-visible {
 		gap: 1rem;
 		align-items: start;
 	}
-	.sheet-backdrop {
-		display: contents;
-	}
 	.sheet {
 		position: sticky;
 		top: 5.2rem;
@@ -1542,17 +1612,27 @@ a.wujuh-cite:focus-visible {
 	.results button {
 		grid-template-columns: 1fr;
 	}
-	.sheet-backdrop {
-		position: fixed;
-		inset: 0;
-		z-index: 40;
-		background: rgba(0, 0, 0, 0.45);
-		backdrop-filter: blur(4px);
-		animation: fadeIn 0.15s ease-out;
+	/* The sheet docks without a scrim: the verse above stays readable and
+	 * tappable, and the page keeps room to scroll the ayah clear of it. */
+	.stage.has-sheet .reading {
+		padding-bottom: calc(45vh + 1.5rem);
 	}
-	.sheet-backdrop.is-closing {
-		animation: fadeOut 0.2s ease-in forwards;
-		pointer-events: none;
+	.verse-line button {
+		scroll-margin-top: 1rem;
+		scroll-margin-bottom: calc(45vh + 1rem);
+	}
+	.sheet .sheet-head {
+		padding: 0 0 0.2rem;
+	}
+	/* Without a body scroll lock, keep sheet scrolling from chaining to the page. */
+	.sheet {
+		overscroll-behavior: contain;
+	}
+	.sheet .chip {
+		min-height: 44px;
+	}
+	.sheet .chip b {
+		font-size: 1.4rem;
 	}
 	.sheet {
 		position: fixed;
@@ -1590,43 +1670,57 @@ a.wujuh-cite:focus-visible {
 	.verse-toolbar {
 		display: none;
 	}
+	/* One compact, always-present row (DESIGN.md: mobile navigation stays
+	 * reachable while scrolling). */
 	.topbar {
-		grid-template-columns: minmax(0, 1fr);
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 0.5rem;
+		padding: 0.2rem 0.6rem;
+		background: color-mix(in srgb, var(--bg) 97%, transparent);
+		backdrop-filter: none;
+	}
+	/* Bilingual wordmark kept, stacked no wider than عدسات. */
+	.mark {
+		min-height: 44px;
+		align-items: center;
+		padding-inline: 0.2rem;
+	}
+	.mark-ar {
+		font-size: 1.3rem;
+	}
+	.mark-en {
+		font-size: 0.7rem;
+		letter-spacing: 0.02em;
 	}
 	.topbar nav {
-		justify-content: start;
-		overflow: auto;
-		gap: 0.5rem;
+		justify-content: end;
+		overflow-x: auto;
+		gap: 0;
 	}
 	.topbar nav a,
 	.topbar nav button {
-		min-height: 48px;
-		padding: 0.55rem 0.75rem;
+		min-height: 44px;
+		padding: 0.5rem 0.6rem;
+		font-size: 0.95rem;
 		flex: 0 0 auto;
 	}
 	.finder:not(.is-open) {
 		display: none;
 	}
+	/* The surah index is where verses are looked up, so its finder stays out. */
+	.page-surahs .finder {
+		display: block;
+		padding-bottom: 0.4rem;
+	}
 	.dock input {
 		min-height: 48px;
-	}
-	html.is-scrolled .finder {
-		display: none;
-	}
-	html.is-scrolled .topbar {
-		padding-block: 0.3rem;
-	}
-	html.is-scrolled .topbar nav {
-		gap: 0.35rem;
-	}
-	html.is-scrolled .topbar nav a,
-	html.is-scrolled .topbar nav button {
-		min-height: 44px;
-		padding: 0.35rem 0.65rem;
-		font-size: 0.88rem;
+		text-align: center;
+		font-variant-numeric: tabular-nums;
 	}
 	.dock {
 		display: flex;
+		background: color-mix(in srgb, var(--bg) 97%, transparent);
+		backdrop-filter: none;
 	}
 	.clause-outline {
 		display: none;
@@ -1940,7 +2034,6 @@ a.wujuh-cite:focus-visible {
 	pointer-events: none;
 }
 
-:root[data-theme="dark"] .sheet-backdrop,
 :root[data-theme="dark"] .settings-backdrop {
 	background: rgba(0, 0, 0, 0.65);
 }
@@ -1982,6 +2075,14 @@ a.wujuh-cite:focus-visible {
 	gap: 0.55rem;
 }
 
+.settings-offline {
+	margin: 0;
+	padding: 0.75rem 1.25rem 1.25rem;
+	color: var(--muted);
+	font-size: 0.88rem;
+	font-variant-numeric: tabular-nums;
+}
+
 .settings-section h3 {
 	margin: 0;
 	font-size: 0.78rem;
@@ -1998,7 +2099,7 @@ a.wujuh-cite:focus-visible {
 
 .segmented-group {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(3, auto);
 	gap: 0.35rem;
 	background: var(--bg-2);
 	padding: 0.25rem;
@@ -2244,12 +2345,6 @@ a.wujuh-cite:focus-visible {
 	}
 }
 
-@media (min-width: 721px) {
-	.library-status {
-		bottom: 1.2rem;
-	}
-}
-
 @media (prefers-reduced-motion: reduce) {
 	html {
 		scroll-behavior: auto;
@@ -2260,12 +2355,9 @@ a.wujuh-cite:focus-visible {
 	.settings-dialog.is-closing,
 	.sheet,
 	.sheet.is-closing,
-	.sheet-backdrop,
-	.sheet-backdrop.is-closing,
 	.quiz-wizard-pane.anim-forward,
 	.quiz-wizard-pane.anim-backward,
-	.anim-soft-enter,
-	.library-status {
+	.anim-soft-enter {
 		transform: none !important;
 		animation: none !important;
 		opacity: 1 !important;
@@ -2275,6 +2367,11 @@ a.wujuh-cite:focus-visible {
 	.skeleton span {
 		animation: none !important;
 		background: var(--bg-2) !important;
+	}
+
+	.verse-ref-chevron,
+	.filters-toggle-chevron {
+		transition: none !important;
 	}
 }
 
@@ -3572,10 +3669,11 @@ a.wujuh-cite:focus-visible {
 .verse-title-header-row {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 0.75rem 1rem;
-	margin-bottom: 0.35rem;
+	align-items: center;
+	gap: 0.25rem 0.6rem;
+}
+.verse-title-header-row .asbab-badge-button {
+	margin-inline-start: auto;
 }
 
 /* Unified Reader Verse Meaning & Commentary Tab */
@@ -3631,7 +3729,7 @@ a.wujuh-cite:focus-visible {
 }
 
 .maqasid-goal-text {
-	margin: 0.35rem 0 0;
+	margin: 0;
 	font-family: var(--arabic);
 	font-size: 1.05rem;
 	line-height: 1.7;
@@ -3641,13 +3739,6 @@ a.wujuh-cite:focus-visible {
 /* ==========================================================================
    Verse Header Action Buttons (Asbāb badge & deep links)
    ========================================================================== */
-.verse-actions-header {
-	display: flex;
-	align-items: center;
-	gap: 0.6rem;
-	flex-wrap: wrap;
-}
-
 .asbab-badge-button {
 	display: inline-flex;
 	align-items: center;

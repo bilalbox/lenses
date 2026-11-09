@@ -44,12 +44,7 @@ export function WordSheet({
 	const selected = word.s.find((_, index) => index === segmentIndex) ?? stem;
 	const [expanded, setExpanded] = useState(false);
 	const [closing, setClosing] = useState(false);
-	const [isMobileModal, setIsMobileModal] = useState(
-		() =>
-			typeof window !== "undefined" &&
-			window.matchMedia("(max-width: 1099px)").matches,
-	);
-	const touchY = useRef(0);
+	const touchY = useRef<number | null>(null);
 	const closingTimerRef = useRef<number | null>(null);
 	const sheetRef = useRef<HTMLElement | null>(null);
 	const triggerRef = useRef<HTMLElement | null>(null);
@@ -79,47 +74,12 @@ export function WordSheet({
 		}, 200);
 	}, [closing, onClose]);
 
-	// Focus trap while the sheet is the modal dialog (≤1099px)
+	// Below 1100px the sheet docks over the lower screen without blocking the
+	// verse, so neighbouring words stay tappable. Focus moves in once on open.
 	useEffect(() => {
-		const media = window.matchMedia("(max-width: 1099px)");
-		const sheetEl = sheetRef.current;
-		if (!sheetEl) return;
-
-		const FOCUSABLE =
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-		const bind = () => {
-			if (!media.matches) return undefined;
-			const focusable = sheetEl.querySelectorAll<HTMLElement>(FOCUSABLE);
-			focusable[0]?.focus();
-			const onKey = (event: KeyboardEvent) => {
-				if (event.key !== "Tab") return;
-				const elements = sheetEl.querySelectorAll<HTMLElement>(FOCUSABLE);
-				if (elements.length === 0) return;
-				const first = elements[0];
-				const last = elements[elements.length - 1];
-				if (event.shiftKey && document.activeElement === first) {
-					event.preventDefault();
-					last?.focus();
-				} else if (!event.shiftKey && document.activeElement === last) {
-					event.preventDefault();
-					first?.focus();
-				}
-			};
-			window.addEventListener("keydown", onKey);
-			return () => window.removeEventListener("keydown", onKey);
-		};
-
-		let unbind = bind();
-		const onChange = () => {
-			unbind?.();
-			unbind = bind();
-		};
-		media.addEventListener("change", onChange);
-		return () => {
-			unbind?.();
-			media.removeEventListener("change", onChange);
-		};
+		if (window.matchMedia("(max-width: 1099px)").matches) {
+			sheetRef.current?.focus({ preventScroll: true });
+		}
 	}, []);
 
 	useEffect(() => {
@@ -151,21 +111,6 @@ export function WordSheet({
 			window.removeEventListener("keydown", onKeyDown, { capture: true });
 	}, [handleClose]);
 
-	// Track mobile modal mode + lock body scroll
-	useEffect(() => {
-		const media = window.matchMedia("(max-width: 1099px)");
-		const update = () => {
-			setIsMobileModal(media.matches);
-			document.body.style.overflow = media.matches ? "hidden" : "";
-		};
-		update();
-		media.addEventListener("change", update);
-		return () => {
-			document.body.style.overflow = "";
-			media.removeEventListener("change", update);
-		};
-	}, []);
-
 	if (!selected) return null;
 	const primary = primaryStem(word);
 	const chips = (
@@ -185,98 +130,100 @@ export function WordSheet({
 	);
 
 	return (
-		<div
-			className={`sheet-backdrop${closing ? " is-closing" : ""}`}
-			onClick={handleClose}
-			role="presentation"
+		<aside
+			ref={sheetRef}
+			className={`sheet${expanded ? " is-expanded" : ""}${closing ? " is-closing" : ""}`}
+			aria-label={t.sheet.analysisAria(word.n)}
+			tabIndex={-1}
 		>
-			<aside
-				ref={sheetRef}
-				className={`sheet${expanded ? " is-expanded" : ""}${closing ? " is-closing" : ""}`}
-				role="dialog"
-				aria-modal={isMobileModal ? true : undefined}
-				aria-label={t.sheet.analysisAria(word.n)}
-				onClick={(event) => event.stopPropagation()}
-			>
+			<button
+				type="button"
+				className="sheet-handle"
+				aria-label={expanded ? t.sheet.collapseAria : t.sheet.expandAria}
+				onClick={() => setExpanded((value) => !value)}
+				onTouchStart={(event) => {
+					touchY.current = event.touches[0]?.clientY ?? null;
+				}}
+				onTouchEnd={(event) => {
+					const start = touchY.current;
+					touchY.current = null;
+					const end = event.changedTouches[0]?.clientY;
+					if (start === null || end === undefined) return;
+					const delta = end - start;
+					if (delta > 48) {
+						if (expanded) setExpanded(false);
+						else handleClose();
+					} else if (delta < -48) setExpanded(true);
+				}}
+				onTouchCancel={() => {
+					touchY.current = null;
+				}}
+			/>
+			<header className="sheet-head">
+				<p className="sheet-ref">
+					{formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
+				</p>
 				<button
 					type="button"
-					className="sheet-handle"
-					aria-label={expanded ? t.sheet.collapseAria : t.sheet.expandAria}
-					onClick={() => setExpanded((value) => !value)}
-					onTouchStart={(event) => {
-						touchY.current = event.touches[0]?.clientY ?? 0;
-					}}
-					onTouchEnd={(event) => {
-						const end = event.changedTouches[0]?.clientY ?? touchY.current;
-						const delta = end - touchY.current;
-						if (delta > 48) handleClose();
-						else if (delta < -48) setExpanded(true);
-					}}
-				/>
-				<header className="sheet-head">
-					<p className="sheet-ref">
-						{formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
-					</p>
-					<button
-						type="button"
-						className="icon-button"
-						onClick={handleClose}
-						aria-label={t.sheet.closeAria}
-					>
-						<CloseIcon />
-					</button>
-				</header>
-				<p className="sheet-word" dir="rtl" lang="ar">
+					className="icon-button"
+					onClick={handleClose}
+					aria-label={t.sheet.closeAria}
+				>
+					<CloseIcon />
+				</button>
+			</header>
+			<div className="sheet-title" dir="rtl">
+				<h2 className="sheet-word" lang="ar">
 					{word.a}
-				</p>
+				</h2>
 				<WordGloss word={word} />
-				{chips}
-				<Tabs
-					storageKey="lenses-sheet-tab"
-					label={t.sheet.tabsAria}
-					items={[
-						{
-							key: "here",
-							label: t.sheet.tabHere,
-							content: (
-								<>
-									<WordMeaning word={word} />
-									<WordWujuh
-										sura={sura}
-										verse={verse.v}
-										word={word.n}
-										stem={primary}
-										part="answer"
-									/>
-									<WordIrab word={word} />
-									<WordSarf word={word} />
-									{wordQiraat ? (
-										<WordQiraatSection wordQiraat={wordQiraat} />
-									) : null}
-								</>
-							),
-						},
-						{
-							key: "across",
-							label: t.sheet.tabAcross,
-							content: (
-								<>
-									<WordCounts stem={primary} onSearch={onSearch} />
-									<WordWujuh
-										sura={sura}
-										verse={verse.v}
-										word={word.n}
-										stem={primary}
-										part="list"
-									/>
-									<WordLexicon stem={primary} openFirst={false} />
-								</>
-							),
-						},
-					]}
-				/>
-			</aside>
-		</div>
+			</div>
+			{chips}
+			<Tabs
+				storageKey="lenses-sheet-tab"
+				label={t.sheet.tabsAria}
+				items={[
+					{
+						key: "here",
+						label: t.sheet.tabHere,
+						content: (
+							<>
+								<WordMeaning word={word} />
+								<WordWujuh
+									sura={sura}
+									verse={verse.v}
+									word={word.n}
+									stem={primary}
+									part="answer"
+								/>
+								<WordIrab word={word} />
+								<WordSarf word={word} />
+								{wordQiraat ? (
+									<WordQiraatSection wordQiraat={wordQiraat} />
+								) : null}
+							</>
+						),
+					},
+					{
+						key: "across",
+						label: t.sheet.tabAcross,
+						content: (
+							<>
+								<WordCounts stem={primary} onSearch={onSearch} />
+								<WordWujuh
+									sura={sura}
+									verse={verse.v}
+									word={word.n}
+									stem={primary}
+									part="list"
+								/>
+								<WordLexicon stem={primary} openFirst={false} />
+							</>
+						),
+					},
+				]}
+			/>
+		</aside>
 	);
 }
 

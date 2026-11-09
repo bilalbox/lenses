@@ -142,7 +142,6 @@ export const ar: Translations = {
 		meccan: "مكية",
 		madinan: "مدنية",
 		verseMeaningTitle: "تفسير الآية",
-		verseMeaningSub: "المختصر في التفسير · QuranEnc",
 		translationBadge: "الترجمة",
 		tafsirBadge: "التفسير (المختصر)",
 		mukhtasarEnTitle: "المختصر في التفسير",
@@ -158,6 +157,7 @@ export const ar: Translations = {
 		noTreeTitle: "لا توجد شجرة إعراب لهذه الآية.",
 		classicalIrabShort: "إعراب",
 		surahGoalLabel: "مقصد السورة",
+		surahDetails: "تفاصيل السورة",
 		revelationOrder: (seq: number) => `ترتيب النزول #${formatNum(seq, "ar")}`,
 		asbabBadge: (count: number) => `سبب النزول (${formatNum(count, "ar")})`,
 		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
@@ -270,6 +270,8 @@ export const ar: Translations = {
 		showMore: "عرض المزيد",
 		chooseCriteriaHint:
 			"اختر جذراً أو أصلاً أو نوعاً أو وزناً أو علاقة نحوية لبدء البحث.",
+		moreFilters: "خيارات بحث أخرى",
+		fewerFilters: "خيارات أقل",
 	},
 	sources: {
 		pageTitle: "المصادر المعتمدة في هذا الإصدار",

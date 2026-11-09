@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { LOCALES, type Locale } from "../lib/i18n/types";
+import type { LibraryProgress } from "../lib/library";
 import {
 	QUIZ_PREF_KEYS,
 	type QuizPrefKey,
@@ -23,6 +24,8 @@ interface Props {
 	onToggleQuizPref: (key: QuizPrefKey, next: boolean) => void;
 	readerPrefs: ReaderPrefs;
 	onToggleReaderPref: (key: ReaderLayerKey, next: boolean) => void;
+	/** Background offline download; null until it starts (or with Data Saver on). */
+	library: LibraryProgress | null;
 	canInstall: boolean;
 	onInstall: () => void;
 }
@@ -36,6 +39,7 @@ export function SettingsModal({
 	onToggleQuizPref,
 	readerPrefs,
 	onToggleReaderPref,
+	library,
 	canInstall,
 	onInstall,
 }: Props) {
@@ -212,6 +216,14 @@ export function SettingsModal({
 						</span>
 					</a>
 				</section>
+
+				{library ? (
+					<p className="settings-offline" role="status">
+						{library.done >= library.total
+							? t.common.offlineReady
+							: t.common.savingOffline(library.done, library.total)}
+					</p>
+				) : null}
 
 				{canInstall ? (
 					<section className="settings-section">

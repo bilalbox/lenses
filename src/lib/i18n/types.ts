@@ -138,7 +138,6 @@ export interface Translations {
 		meccan: string;
 		madinan: string;
 		verseMeaningTitle: string;
-		verseMeaningSub: string;
 		translationBadge: string;
 		tafsirBadge: string;
 		mukhtasarEnTitle: string;
@@ -153,6 +152,7 @@ export interface Translations {
 		noTreeTitle: string;
 		classicalIrabShort: string;
 		surahGoalLabel: string;
+		surahDetails: string;
 		revelationOrder: (seq: number) => string;
 		asbabBadge: (count: number) => string;
 		asbabDrawerTitle: string;
@@ -247,6 +247,8 @@ export interface Translations {
 		noWordsMatch: string;
 		showMore: string;
 		chooseCriteriaHint: string;
+		moreFilters: string;
+		fewerFilters: string;
 	};
 	sources: {
 		pageTitle: string;

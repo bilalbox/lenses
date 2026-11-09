@@ -19,6 +19,7 @@ import {
 	searchExamples,
 } from "../lib/search";
 import { Combobox, type ComboboxOption } from "./Combobox";
+import { ChevronRightIcon } from "./Icons";
 
 const empty: ExampleQuery = {
 	root: "",
@@ -44,6 +45,15 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 	const { data: verses } = useLayer("verses");
 	const [query, setQuery] = useState<ExampleQuery>({ ...empty, ...initial });
 	const [limit, setLimit] = useState(40);
+	const advancedActive = Boolean(
+		query.lemma || query.pos || query.form || query.relation,
+	);
+	// Root is the common entry point; the finer filters wait behind a toggle
+	// and open by themselves when a preset or quiz link fills one.
+	const [moreOpen, setMoreOpen] = useState(advancedActive);
+	useEffect(() => {
+		if (advancedActive) setMoreOpen(true);
+	}, [advancedActive]);
 
 	const presets = useMemo(
 		() => [
@@ -131,7 +141,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 				<h1>{t.examples.pageTitle}</h1>
 				<p className="search-lead">{t.examples.lead}</p>
 			</header>
-			<div className="presets" dir="rtl" lang="ar">
+			<div className="presets">
 				{presets.map((preset) => (
 					<button
 						key={preset.label}
@@ -156,42 +166,58 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 						placeholder={t.examples.rootPlaceholder}
 					/>
 				</label>
-				<label className="filter-text">
-					{t.examples.filterLemma}
-					<input
-						value={query.lemma}
-						onChange={(event) => set({ lemma: event.target.value })}
-						placeholder={t.examples.lemmaPlaceholder}
-					/>
-				</label>
+				<button
+					type="button"
+					className="filters-toggle"
+					aria-expanded={moreOpen}
+					aria-controls="example-filters-more"
+					onClick={() => setMoreOpen((open) => !open)}
+				>
+					{moreOpen ? t.examples.fewerFilters : t.examples.moreFilters}
+					<ChevronRightIcon className="filters-toggle-chevron" />
+				</button>
+				<div
+					id="example-filters-more"
+					className="filters-more"
+					hidden={!moreOpen}
+				>
+					<label className="filter-text">
+						{t.examples.filterLemma}
+						<input
+							value={query.lemma}
+							onChange={(event) => set({ lemma: event.target.value })}
+							placeholder={t.examples.lemmaPlaceholder}
+						/>
+					</label>
 
-				<Combobox
-					label={t.examples.filterPos}
-					options={withCurrent(posOptions, query.pos, POS)}
-					value={query.pos}
-					placeholder={t.examples.anyOption}
-					emptyText={t.examples.noOptionMatch}
-					clearLabel={t.examples.clearFilter(t.examples.filterPos)}
-					onChange={pickPos}
-				/>
-				<Combobox
-					label={t.examples.filterRelation}
-					options={withCurrent(relationOptions, query.relation, RELATIONS)}
-					value={query.relation}
-					placeholder={t.examples.anyOption}
-					emptyText={t.examples.noOptionMatch}
-					clearLabel={t.examples.clearFilter(t.examples.filterRelation)}
-					onChange={(relation) => set({ relation })}
-				/>
-				{showForm ? (
-					<FormChips
-						label={t.examples.filterForm}
-						anyLabel={t.examples.anyOption}
-						options={formOptions}
-						value={query.form}
-						onPick={pickForm}
+					<Combobox
+						label={t.examples.filterPos}
+						options={withCurrent(posOptions, query.pos, POS)}
+						value={query.pos}
+						placeholder={t.examples.anyOption}
+						emptyText={t.examples.noOptionMatch}
+						clearLabel={t.examples.clearFilter(t.examples.filterPos)}
+						onChange={pickPos}
 					/>
-				) : null}
+					<Combobox
+						label={t.examples.filterRelation}
+						options={withCurrent(relationOptions, query.relation, RELATIONS)}
+						value={query.relation}
+						placeholder={t.examples.anyOption}
+						emptyText={t.examples.noOptionMatch}
+						clearLabel={t.examples.clearFilter(t.examples.filterRelation)}
+						onChange={(relation) => set({ relation })}
+					/>
+					{showForm ? (
+						<FormChips
+							label={t.examples.filterForm}
+							anyLabel={t.examples.anyOption}
+							options={formOptions}
+							value={query.form}
+							onPick={pickForm}
+						/>
+					) : null}
+				</div>
 			</form>
 			{error ? <p className="banner error">{error}</p> : null}
 			{!index && !error ? (

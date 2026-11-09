@@ -8,11 +8,13 @@ import {
 import { normalizeDigits } from "../lib/i18n/format";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { findVerse, useLayer } from "../lib/layers";
+import { adjacentVerse } from "../lib/manifest";
 import { sentenceOfWord } from "../lib/noorBayan";
 import { useReaderLayers } from "../lib/readerLayers";
 import type { ReaderPrefs } from "../lib/readerPrefs";
 import type { ExampleQuery } from "../lib/search";
 import type { Manifest, Verse, VerseRef, VerseSyntax } from "../lib/types";
+import { ChevronRightIcon } from "./Icons";
 import { NoorBayanTree } from "./NoorBayanTree";
 import { VerseSecondaryLayers } from "./VerseSecondaryLayers";
 import { WordSheet } from "./WordSheet";
@@ -71,20 +73,11 @@ export function VerseScreen({
 
 	const step = useCallback(
 		(delta: number) => {
-			if (!unit || !file) return;
-			let nextVerse = verseNumber + delta;
-			let nextSura = sura;
-			if (nextVerse < 1) {
-				nextSura = sura === 1 ? 114 : sura - 1;
-				nextVerse =
-					manifest.units.find((item) => item.n === nextSura)?.verses ?? 1;
-			} else if (nextVerse > unit.verses) {
-				nextSura = sura === 114 ? 1 : sura + 1;
-				nextVerse = 1;
-			}
-			onNavigate(nextSura, nextVerse);
+			if (!file) return;
+			const next = adjacentVerse(manifest, sura, verseNumber, delta);
+			if (next) onNavigate(next.sura, next.verse);
 		},
-		[file, manifest.units, onNavigate, sura, unit, verseNumber],
+		[file, manifest, onNavigate, sura, verseNumber],
 	);
 
 	useEffect(() => {
@@ -152,6 +145,11 @@ export function VerseScreen({
 							verse={verse}
 							selected={word?.n}
 							onSelect={(wordIndex, segmentIndex) => {
+								// Tapping the open word again puts the sheet away.
+								if (wordIndex === word?.n && segmentIndex === undefined) {
+									onNavigate(sura, verse.v);
+									return;
+								}
 								setSegment(segmentIndex);
 								onNavigate(sura, verse.v, wordIndex);
 							}}
@@ -269,8 +267,14 @@ function VerseBody({
 						key={word.n}
 						type="button"
 						className={selected === word.n ? "is-on" : ""}
-						onClick={() => {
+						aria-pressed={selected === word.n}
+						onClick={(event) => {
 							onSelect(word.n);
+							// Keep the tapped word above the docked sheet (scroll-margin, ≤1099px).
+							const button = event.currentTarget;
+							requestAnimationFrame(() =>
+								button.scrollIntoView({ block: "nearest" }),
+							);
 							// The diagram follows the tapped word to its clause.
 							const clause = membership.get(word.n);
 							if (clause !== undefined) setClauseIndex(clause);
@@ -337,50 +341,65 @@ function VerseHeaderCard({
 	onOpenAsbab: () => void;
 }) {
 	const { locale, t, formatNumber } = useI18n();
+	// Surah facts stay one tap away so the ayah is the first thing read.
+	const [aboutOpen, setAboutOpen] = useState(false);
 	const revelationLabel =
 		revelation === "Madinah" ? t.verse.madinan : t.verse.meccan;
-	const metaParts = [
+	const facts = [
 		revelationLabel,
-		`${formatNumber(sura)}:${formatNumber(verseNumber)}`,
-		locale === "ar" ? null : phonetic,
-		goal ? t.verse.surahGoalLabel : null,
 		revSeq ? t.verse.revelationOrder(revSeq) : null,
 	].filter(Boolean);
+	const aboutId = `surah-about-${sura}`;
 
 	return (
 		<header className="verse-title">
 			<div className="verse-title-header-row">
-				<h1>
-					<span lang="ar">{unitName}</span>
-					<small>
-						{metaParts.join(" · ")}
-						{surahClass ? (
-							<>
-								{" · "}
-								<span lang="ar">{surahClass}</span>
-							</>
-						) : null}
-					</small>
-				</h1>
+				<h1 lang="ar">{unitName}</h1>
+				<button
+					type="button"
+					className="verse-ref-toggle"
+					aria-expanded={aboutOpen}
+					aria-controls={aboutId}
+					onClick={() => setAboutOpen((open) => !open)}
+				>
+					<span className="verse-ref">
+						{formatNumber(sura)}:{formatNumber(verseNumber)}
+					</span>
+					{locale === "ar" ? null : <span>{phonetic}</span>}
+					<span className="visually-hidden">{t.verse.surahDetails}</span>
+					<ChevronRightIcon className="verse-ref-chevron" />
+				</button>
 				{showAsbab ? (
-					<div className="verse-actions-header">
-						<button
-							type="button"
-							className={`asbab-badge-button${asbabOpen ? " is-active" : ""}`}
-							onClick={onOpenAsbab}
-							title={t.verse.asbabSectionTitle}
-						>
-							{t.verse.asbabBadge(asbabCount)}
-						</button>
-					</div>
+					<button
+						type="button"
+						className={`asbab-badge-button${asbabOpen ? " is-active" : ""}`}
+						onClick={onOpenAsbab}
+						title={t.verse.asbabSectionTitle}
+					>
+						{t.verse.asbabBadge(asbabCount)}
+					</button>
 				) : null}
 			</div>
 
-			{goal ? (
-				<p className="maqasid-goal-text" lang="ar" dir="rtl">
-					{goal}
+			<div id={aboutId} className="surah-about" hidden={!aboutOpen}>
+				<p className="surah-about-facts">
+					{facts.join(" · ")}
+					{surahClass ? (
+						<>
+							{" · "}
+							<span lang="ar">{surahClass}</span>
+						</>
+					) : null}
 				</p>
-			) : null}
+				{goal ? (
+					<>
+						<h2 className="surah-about-label">{t.verse.surahGoalLabel}</h2>
+						<p className="maqasid-goal-text" lang="ar" dir="rtl">
+							{goal}
+						</p>
+					</>
+				) : null}
+			</div>
 		</header>
 	);
 }
