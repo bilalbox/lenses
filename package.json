@@ -11,6 +11,8 @@
 		"data:quiz": "tsx scripts/build_quiz_bank.ts",
 		"data:lexicon": "python3 scripts/build_lexicon.py",
 		"data:wujuh": "python3 scripts/build_wujuh.py",
+		"audit:wujuh": "python3 scripts/audit_wujuh.py",
+		"audit:wujuh:merge": "python3 scripts/audit_wujuh.py --merge",
 		"data:all": "pnpm data && pnpm data:syntax && pnpm data:mutashabih && pnpm data:enrichment && pnpm data:lexicon && pnpm data:wujuh && pnpm data:quiz",
 		"dev": "vite --host 127.0.0.1 --port 43123",
 		"build": "tsc -b && vite build",

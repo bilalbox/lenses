@@ -14,6 +14,10 @@ be placed in data/cache/review/wujuh-unmatched.json. Run after build_data.py.
 An entry is kept only when its senses parse cleanly (ordinals in sequence and
 as many senses as the heading declares); a citation is kept only when it
 resolves to one verse and one word of the entry's root. Nothing is guessed.
+
+Reviewed corrections in data/curation/wujuh-verdicts.json (see
+docs/research/wujuh-review.md) are applied last: a citation can be renamed,
+moved to another sense or dropped. audit_wujuh.py finds what needs review.
 """
 
 from __future__ import annotations
@@ -23,9 +27,19 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
+from pathlib import Path
 from typing import Any
 
-from pipeline import CACHE, OUT, add_notice, edit_manifest, fetch_cached, upsert_source, write_json
+from pipeline import (
+    CACHE,
+    OUT,
+    ROOT,
+    add_notice,
+    edit_manifest,
+    fetch_cached,
+    upsert_source,
+    write_json,
+)
 
 DAMGHANI = (
     "0500AH",
@@ -38,7 +52,8 @@ DAMGHANI_URL = (
 )
 REVIEW = CACHE / "review" / "wujuh-unmatched.json"
 
-MARKS = re.compile(r"[ً-ٰٟـۖ-ۭ]")
+MARKS = re.compile(r"[ً-ٰٟـۖ-ۭ()\[\]{}]")
+DASH_VOCAL = re.compile(r"[-–]\s*(?:بكسر|بضم|بفتح|بنصب|بتشديد|بالتخفيف)[^–-]+[-–]")
 LETTERS = str.maketrans(
     {"أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ى": "ي", "ة": "ه", "ؤ": "و", "ئ": "ي"}
 )
@@ -99,6 +114,9 @@ class Entry:
     declared: int | None
     body: str
     senses: list[str] = field(default_factory=list)
+    # The headword as written, in letter groups. A word of the text before it
+    # can be caught as a first group (`قوة ب ط ل`); see `headword`.
+    groups: list[str] = field(default_factory=list)
 
 
 def body_text(raw: str) -> str:
@@ -114,8 +132,9 @@ def split_entries(text: str) -> list[Entry]:
     for i, mark in enumerate(marks):
         end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
         count = mark.group(3) if mark.group(3) == "وجهين" else (mark.group(2) or "").strip()
+        groups = mark.group(1).split()
         entries.append(
-            Entry(mark.group(1).replace(" ", ""), COUNT_WORDS.get(count), text[mark.end() : end])
+            Entry("".join(groups), COUNT_WORDS.get(count), text[mark.end() : end], groups=groups)
         )
     return entries
 
@@ -144,22 +163,86 @@ def split_senses(body: str) -> list[str]:
 
 # Where a sense's name ends and its first citation begins.
 LABEL_END = re.compile(
-    r"[.\"(،,:]|(?<![ء-ي])(?:قوله|كقوله|وقوله|نظيرها|مثلها|في سورة|يعني)(?![ء-ي])"
+    r"[.\"(،,:]|(?<![ء-ي])(?:قوله|كقوله|وقوله|نظيرها|مثلها|في سورة)(?![ء-ي])"
+    r"|(?<![ء-ي])و?قال\s+(?:الله|تعالى|سبحانه|عز)"
 )
+# Where the first citation begins; the later part of the book drops the quotes.
+CITATION = re.compile(r"\"|(?<![ء-ي])(?:قوله|كقوله|وقوله|في سورة)(?![ء-ي])")
+NAMING = re.compile(r"(?<![ء-ي])(?:يعني|بمعن[ىي])\s+(?:به\s+)?")
+# Before the first citation, أي or يقول names the sense too: `أوزعني أي ألهمني`, `احلل يقول أبسط`.
+HEAD_NAMING = re.compile(r"(?<![ء-ي])(?:يعني|بمعن[ىي]|أي|يقول|أراد)\s+(?:به\s+)?")
 LABEL_WORDS = 6
+# Words a clause can be cut off after: `شبانا ويقال : …`, `الطعام فذلك …`.
+DANGLING = {"ويقال", "يقال", "فذلك", "وذلك", "أي", "أو", "و", "ثم"}
 
 
-def sense_label(chunk: str) -> str:
-    """The sense, as al-Damaghani names it: the words after the first يعني or
-    بمعنى (`امة يعني ملة . قوله …` → ملة), else the opening clause, in his
+def is_headword(word: str, heading: str) -> bool:
+    """The word is a form of the headword: its root letters appear in order
+    (الحكمة for حكم, التأويل for أول)."""
+    letters = iter(squash(word))
+    root = squash(heading)
+    root = root[:-1] if len(root) > 2 and root.endswith("ه") else root
+    return bool(root) and all(letter in letters for letter in root)
+
+
+def opening_clause(text: str, heading: str) -> list[str]:
+    """The text's first clause, without a leading headword with the article
+    (`الحكمة القرآن قوله …` → القرآن, `الإثم والذنب` → الذنب). `الوجه بعينه`,
+    the word's own sense, stays whole."""
+    words = LABEL_END.split(text, maxsplit=1)[0].split()
+    while len(words) > 1 and (
+        (words[0].startswith("ال") and is_headword(words[0], heading) and words[1] != "بعينه")
+        or (words[0].startswith("وال") and is_headword(words[0][1:], heading))
+    ):
+        words = words[1:]
+        if words and words[0].startswith("وال") and len(words[0]) > 3:
+            words[0] = words[0][1:]
+    # If the first word is the bare headword itself before the sense
+    # (`أحد ساقي الملك` → ساقي الملك, `أنى من أين` → من أين, `بحر تحت العرش` → تحت العرش).
+    if (
+        len(words) > 1
+        and norm(words[0]) == norm(heading)
+        and words[1] != "بعينه"
+        and words[0] not in {"أمة", "أول"}
+    ):
+        words = words[1:]
+    # If the first word is a bare headword verb followed by its gloss verb
+    # (`أوى انتهى` → انتهى, `اتبعوا عملوا` → عملوا, `أحصى شكر` → شكر).
+    if (
+        len(words) > 1
+        and is_headword(words[0], heading)
+        and not words[0].startswith("ال")
+        and words[1] not in {"الله", "النبي", "من", "في", "على", "عن", "إلى", "أن", "إن", "الذين"}
+        and (
+            any(words[0].endswith(e) for e in ("وا", "نا", "ته", "ه", "ى", "ا"))
+            or words[0] in {"أحصى", "أوى", "سعى", "احلل", "ألقى", "أرسل", "أشرب", "أدرك"}
+        )
+    ):
+        words = words[1:]
+    return words
+
+
+def sense_label(chunk: str, heading: str = "") -> str:
+    """The sense, as al-Damaghani names it before his first citation: the
+    words after يعني or بمعنى (`امة يعني ملة . قوله …` → ملة), else the opening
+    clause. Only when that names nothing, the يعني after a quotation. In his
     spelling, at most six words."""
-    match = re.search(r"(?<![ء-ي])(?:يعني|بمعنى)\s+(?:به\s+)?", chunk)
-    text = chunk[match.end() :] if match else chunk
-    clause = LABEL_END.split(MARKS.sub("", text), maxsplit=1)[0]
-    words = clause.split()
-    if not words and match:  # "… يعني ." names nothing: use the opening clause
-        words = LABEL_END.split(MARKS.sub("", chunk), maxsplit=1)[0].split()
-    return " ".join(words[:LABEL_WORDS])
+    plain = MARKS.sub("", chunk)
+    cleaned = DASH_VOCAL.sub(" ", plain)
+    head = CITATION.split(cleaned, maxsplit=1)[0]
+    naming = HEAD_NAMING.search(head)
+    if naming:
+        words = LABEL_END.split(head[naming.end() :], maxsplit=1)[0].split()
+    else:
+        words = opening_clause(head, heading)
+    if not words and (later := NAMING.search(cleaned)):
+        words = LABEL_END.split(cleaned[later.end() :], maxsplit=1)[0].split()
+    if not words:  # "… يعني ." names nothing: use the opening clause
+        words = LABEL_END.split(cleaned, maxsplit=1)[0].split()
+    words = words[:LABEL_WORDS]
+    while len(words) > 1 and words[-1] in DANGLING:
+        words.pop()
+    return " ".join(words)
 
 
 # --- Citations ----------------------------------------------------------------
@@ -250,9 +333,18 @@ def window_score(fragment: list[str], verse: list[str]) -> tuple[float, int]:
 
 
 MATCH_FLOOR = 0.8
+TIE = 0.02
 
 
-def find_verse(fragment: str, sura: int, keys: set[str], corpus: Corpus) -> tuple[int, int] | None:
+@dataclass
+class VerseMatch:
+    verse: int
+    start: int  # where the quote starts in the verse (0-based word)
+    score: float
+    margin: float  # lead over the next-best verse; 1.0 when no other fits
+
+
+def find_verse(fragment: str, sura: int, keys: set[str], corpus: Corpus) -> VerseMatch | None:
     """The one verse of the surah quoting the fragment and holding a word of
     the root, and where the quote starts. None when no verse or several fit."""
     frag = [w for w in (squash(x) for x in fragment.split()) if w]
@@ -272,9 +364,11 @@ def find_verse(fragment: str, sura: int, keys: set[str], corpus: Corpus) -> tupl
     if not scored:
         return None
     scored.sort(reverse=True)
-    if len(scored) > 1 and scored[1][0] >= scored[0][0] - 0.02:
+    margin = scored[0][0] - scored[1][0] if len(scored) > 1 else 1.0
+    if margin <= TIE:
         return None  # a repeated phrase: more than one verse fits
-    return scored[0][1], scored[0][2]
+    score, verse, start = scored[0]
+    return VerseMatch(verse, start, score, margin)
 
 
 def find_word(roots: list[str], keys: set[str], start: int, length: int) -> int | None:
@@ -332,6 +426,56 @@ def root_keys(heading: str, by_letters: dict[str, list[str]]) -> set[str]:
 # --- Build --------------------------------------------------------------------
 
 
+def headword(groups: list[str], by_letters: dict[str, list[str]]) -> tuple[str, set[str]]:
+    """The headword and its root keys. When the letter groups name no root, a
+    word of the text before the heading may have been caught as a first group
+    (`قوة ب ط ل` → بطل): drop leading groups until the rest names one. A
+    two-letter rest must be a doubled root (`ذلك أم` → أمم); otherwise particles
+    (إن, ما) would pass for weak roots."""
+    for first in range(len(groups)):
+        heading = "".join(groups[first:])
+        letters = norm(heading)
+        if len(letters) < 2 or (
+            first and len(letters) == 2 and letters + letters[-1] not in by_letters
+        ):
+            break
+        if keys := root_keys(heading, by_letters):
+            return heading, keys
+    return "".join(groups), set()
+
+
+@dataclass
+class Cite:
+    sura: int
+    verse: int
+    word: int
+    fragment: str  # the quotation as al-Damaghani writes it
+    match: VerseMatch
+    gloss: str  # his يعني / أي right after the quotation, if any
+
+    @property
+    def position(self) -> tuple[int, int, int]:
+        return (self.sura, self.verse, self.word)
+
+
+@dataclass
+class Sense:
+    chunk: str  # al-Damaghani's text for the sense
+    label: str
+    cites: list[Cite]
+
+
+@dataclass
+class Parsed:
+    heading: str
+    keys: set[str]
+    senses: list[Sense]
+
+    @property
+    def root(self) -> str:
+        return sorted(self.keys)[0]
+
+
 @dataclass
 class Review:
     no_root: list[str] = field(default_factory=list)
@@ -341,12 +485,26 @@ class Review:
     counts: dict[str, int] = field(default_factory=lambda: defaultdict(int))
 
 
-def build_sense(
-    chunk: str, keys: set[str], corpus: Corpus, names: dict[str, int], review: Review
-) -> dict[str, Any]:
-    cites: list[list[Any]] = []
+GLOSS = re.compile(r"^\s*[.،,]?\s*(?:يعني|أي)\s+")
+
+
+def local_gloss(after: str) -> str:
+    """The يعني or أي that glosses a quotation: `" … " يعني ثوابهم` → ثوابهم."""
+    match = GLOSS.match(MARKS.sub("", after))
+    if not match:
+        return ""
+    words = LABEL_END.split(MARKS.sub("", after)[match.end() :], maxsplit=1)[0].split()
+    return " ".join(words[:LABEL_WORDS])
+
+
+def parse_sense(
+    chunk: str, heading: str, keys: set[str], corpus: Corpus, names: dict[str, int], review: Review
+) -> Sense:
+    cites: list[Cite] = []
     sura: int | None = None
-    for raw_surah, fragment in CITE.findall(chunk):
+    quotes = list(CITE.finditer(chunk))
+    for i, quote in enumerate(quotes):
+        raw_surah, fragment = quote.group(1) or "", quote.group(2)
         review.counts["citations"] += 1
         sura = resolve_surah(raw_surah, names) if raw_surah else sura
         if sura is None:
@@ -356,42 +514,122 @@ def build_sense(
         if not found:
             review.no_verse.append(f"{sura} | {fragment}")
             continue
-        verse, start = found
-        word = find_word(corpus.roots[(sura, verse)], keys, start, len(fragment.split()))
+        word = find_word(
+            corpus.roots[(sura, found.verse)], keys, found.start, len(fragment.split())
+        )
         if word is None:
             continue
-        cite = [sura, verse, word, *excerpt(corpus.words[(sura, verse)], word)]
-        if cite[:3] not in [c[:3] for c in cites]:
+        after = chunk[quote.end() : quotes[i + 1].start() if i + 1 < len(quotes) else None]
+        cite = Cite(sura, found.verse, word, fragment, found, local_gloss(after))
+        if cite.position not in [c.position for c in cites]:
             cites.append(cite)
             review.counts["placed"] += 1
-    return {"l": sense_label(chunk), "c": cites}
+    return Sense(chunk, sense_label(chunk, heading), cites)
 
 
-def build(text: str) -> tuple[dict[str, list[dict[str, Any]]], Review]:
+def parse(text: str, corpus: Corpus, review: Review) -> list[Parsed]:
+    """Every entry whose senses parse cleanly, with its citations placed."""
     names = surah_names()
-    corpus = load_corpus()
     by_letters = root_index()
-    review = Review()
-    out: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    parsed = []
     for entry in split_entries(text):
         review.counts["entries"] += 1
-        keys = root_keys(entry.heading, by_letters)
+        heading, keys = headword(entry.groups, by_letters)
         if not keys:
             review.no_root.append(entry.heading)
             continue
         senses = split_senses(entry.body)
         if not senses or (entry.declared and len(senses) != entry.declared):
-            review.unclean.append(f"{entry.heading}: {len(senses)} of {entry.declared}")
+            review.unclean.append(f"{heading}: {len(senses)} of {entry.declared}")
             continue
         review.counts["kept"] += 1
-        built = [build_sense(chunk, keys, corpus, names, review) for chunk in senses]
-        out[sorted(keys)[0]].append({"h": entry.heading, "s": built})
-    return dict(out), review
+        built = [parse_sense(c, heading, keys, corpus, names, review) for c in senses]
+        parsed.append(Parsed(heading, keys, built))
+    return parsed
+
+
+def parse_book() -> tuple[list[Parsed], Corpus, Review]:
+    path = fetch_cached(DAMGHANI_URL, CACHE / "openiti" / f"damghani-{DAMGHANI[1][:12]}.txt")
+    corpus = load_corpus()
+    review = Review()
+    return parse(body_text(path.read_text(encoding="utf-8")), corpus, review), corpus, review
+
+
+# --- Verdicts -----------------------------------------------------------------
+
+# Reviewed citations, committed: `data/curation/wujuh-verdicts.json`.
+# {"sura:verse:word:headword": {"v": verdict, "l": label reviewed, ...}}
+VERDICTS = ROOT / "data" / "curation" / "wujuh-verdicts.json"
+# agree / viewpoint leave the data as is; label renames the citation's sense,
+# move files the citation under sense `to` (1-based), drop removes it.
+VERDICT_KINDS = ("agree", "viewpoint", "label", "move", "drop")
+
+
+def cite_key(heading: str, cite: Cite) -> str:
+    return f"{cite.sura}:{cite.verse}:{cite.word}:{heading}"
+
+
+def lookup_verdict(
+    verdicts: dict[str, dict[str, Any]], heading: str, cite: Cite, sense_idx: int
+) -> dict[str, Any]:
+    base = cite_key(heading, cite)
+    return verdicts.get(f"{base}:{sense_idx + 1}") or verdicts.get(base, {})
+
+
+def load_verdicts(path: Path = VERDICTS) -> dict[str, dict[str, Any]]:
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def apply_verdicts(parsed: list[Parsed], verdicts: dict[str, dict[str, Any]]) -> int:
+    """Apply label, move and drop verdicts in place; the number applied."""
+    applied = 0
+    for entry in parsed:
+        moves: list[tuple[int, Cite]] = []
+        for s_idx, sense in enumerate(entry.senses):
+            kept = []
+            for cite in sense.cites:
+                verdict = lookup_verdict(verdicts, entry.heading, cite, s_idx)
+                kind = verdict.get("v")
+                if kind == "drop" or (
+                    kind == "move" and 1 <= verdict.get("to", 0) <= len(entry.senses)
+                ):
+                    applied += 1
+                    if kind == "move":
+                        moves.append((verdict["to"] - 1, cite))
+                    continue
+                if kind == "label":
+                    sense.label = verdict["label"]
+                    applied += 1
+                kept.append(cite)
+            sense.cites = kept
+        for to, cite in moves:
+            target = entry.senses[to].cites
+            if cite.position not in [c.position for c in target]:
+                target.append(cite)
+    return applied
+
+
+def to_json(parsed: list[Parsed], corpus: Corpus) -> dict[str, list[dict[str, Any]]]:
+    out: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for entry in parsed:
+        senses = [
+            {
+                "l": sense.label,
+                "c": [
+                    [*c.position, *excerpt(corpus.words[(c.sura, c.verse)], c.word)]
+                    for c in sense.cites
+                ],
+            }
+            for sense in entry.senses
+        ]
+        out[entry.root].append({"h": entry.heading, "s": senses})
+    return dict(out)
 
 
 def main() -> None:
-    path = fetch_cached(DAMGHANI_URL, CACHE / "openiti" / f"damghani-{DAMGHANI[1][:12]}.txt")
-    out, review = build(body_text(path.read_text(encoding="utf-8")))
+    parsed, corpus, review = parse_book()
+    applied = apply_verdicts(parsed, load_verdicts())
+    out = to_json(parsed, corpus)
     write_json(OUT / "wujuh.json", out)
     write_json(
         REVIEW,
@@ -406,6 +644,7 @@ def main() -> None:
     counts = review.counts
     print(f"entries {counts['entries']}, kept {counts['kept']} for {len(out)} roots")
     print(f"citations {counts['citations']}, placed on a word {counts['placed']}")
+    print(f"verdicts applied {applied} (label, move, drop) from {VERDICTS.relative_to(ROOT)}")
     print(f"review list in {REVIEW.relative_to(CACHE.parent.parent)}")
 
     def edit(manifest: dict[str, Any]) -> None:

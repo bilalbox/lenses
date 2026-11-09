@@ -35,3 +35,7 @@ depends_on = []
 [[modules]]
 path = "build_wujuh"
 depends_on = []
+
+[[modules]]
+path = "audit_wujuh"
+depends_on = ["build_wujuh"]
