@@ -8,6 +8,7 @@ import {
 	type ReaderPrefs,
 } from "../lib/readerPrefs";
 import { useModalLifecycle } from "../lib/useModal";
+import { useSheetDrag } from "../lib/useSheetGestures";
 import { BookIcon, CheckIcon, CloseIcon, MoonIcon, SunIcon } from "./Icons";
 
 interface Props {
@@ -35,9 +36,13 @@ export function SettingsModal({
 	onInstall,
 }: Props) {
 	const { locale, setLocale, t } = useI18n();
-	const touchY = useRef(0);
 	const modalRef = useRef<HTMLDivElement>(null);
 	const { rendered, isClosing } = useModalLifecycle(isOpen, onClose, modalRef);
+	// Same grab bar as the word sheet: drag down (or tap) to put it away.
+	const handleDrag = useSheetDrag(modalRef, {
+		onDismiss: onClose,
+		onTap: onClose,
+	});
 
 	if (!rendered) return null;
 
@@ -63,21 +68,14 @@ export function SettingsModal({
 					type="button"
 					className="sheet-handle settings-sheet-handle"
 					aria-label={t.settings.closeAria}
-					onTouchStart={(event) => {
-						touchY.current = event.touches[0]?.clientY ?? 0;
-					}}
-					onTouchEnd={(event) => {
-						const end = event.changedTouches[0]?.clientY ?? touchY.current;
-						if (end - touchY.current > 48) onClose();
-					}}
-					onClick={onClose}
+					{...handleDrag}
 				/>
 
 				<header className="settings-head">
 					<h2 id="settings-title">{t.settings.title}</h2>
 					<button
 						type="button"
-						className="icon-button"
+						className="icon-button sheet-close"
 						onClick={onClose}
 						aria-label={t.settings.closeAria}
 					>

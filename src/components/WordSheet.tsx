@@ -4,6 +4,11 @@ import { useI18n } from "../lib/i18n/I18nContext";
 import { useVerseLayer } from "../lib/layers";
 import type { ExampleQuery } from "../lib/search";
 import type { QiraatRule, Verse, Word, WordQiraat } from "../lib/types";
+import {
+	DOCKED_SHEET_QUERY,
+	useDismissOnOutsideTap,
+	useSheetDrag,
+} from "../lib/useSheetGestures";
 import { primaryStem } from "../lib/wordStats";
 import { CloseIcon } from "./Icons";
 import { Tabs } from "./Tabs";
@@ -51,7 +56,6 @@ export function WordSheet({
 	const selected = word.s.find((_, index) => index === segmentIndex) ?? stem;
 	const [expanded, setExpanded] = useState(false);
 	const [closing, setClosing] = useState(false);
-	const touchY = useRef<number | null>(null);
 	const closingTimerRef = useRef<number | null>(null);
 	const sheetRef = useRef<HTMLElement | null>(null);
 	const triggerRef = useRef<HTMLElement | null>(null);
@@ -66,25 +70,33 @@ export function WordSheet({
 		triggerRef.current = document.activeElement as HTMLElement | null;
 	}, []);
 
+	const dismissNow = useCallback(() => {
+		onClose();
+		triggerRef.current?.focus?.({ preventScroll: true });
+	}, [onClose]);
+
 	const handleClose = useCallback(() => {
 		if (closing) return;
-		const isMobile = window.matchMedia("(max-width: 1099px)").matches;
+		const isMobile = window.matchMedia(DOCKED_SHEET_QUERY).matches;
 		if (!isMobile) {
-			onClose();
-			triggerRef.current?.focus?.();
+			dismissNow();
 			return;
 		}
 		setClosing(true);
-		closingTimerRef.current = window.setTimeout(() => {
-			onClose();
-			triggerRef.current?.focus?.();
-		}, 200);
-	}, [closing, onClose]);
+		closingTimerRef.current = window.setTimeout(dismissNow, 200);
+	}, [closing, dismissNow]);
+
+	const handleDrag = useSheetDrag(sheetRef, {
+		expanded,
+		setExpanded,
+		onDismiss: dismissNow,
+	});
+	useDismissOnOutsideTap(sheetRef, handleClose);
 
 	// Below 1100px the sheet docks over the lower screen without blocking the
 	// verse, so neighbouring words stay tappable. Focus moves in once on open.
 	useEffect(() => {
-		if (window.matchMedia("(max-width: 1099px)").matches) {
+		if (window.matchMedia(DOCKED_SHEET_QUERY).matches) {
 			sheetRef.current?.focus({ preventScroll: true });
 		}
 	}, []);
@@ -147,32 +159,17 @@ export function WordSheet({
 				type="button"
 				className="sheet-handle"
 				aria-label={expanded ? t.sheet.collapseAria : t.sheet.expandAria}
-				onClick={() => setExpanded((value) => !value)}
-				onTouchStart={(event) => {
-					touchY.current = event.touches[0]?.clientY ?? null;
-				}}
-				onTouchEnd={(event) => {
-					const start = touchY.current;
-					touchY.current = null;
-					const end = event.changedTouches[0]?.clientY;
-					if (start === null || end === undefined) return;
-					const delta = end - start;
-					if (delta > 48) {
-						if (expanded) setExpanded(false);
-						else handleClose();
-					} else if (delta < -48) setExpanded(true);
-				}}
-				onTouchCancel={() => {
-					touchY.current = null;
-				}}
+				{...handleDrag}
 			/>
 			<header className="sheet-head">
 				<p className="sheet-ref">
 					{formatNumber(sura)}:{formatNumber(verse.v)}:{formatNumber(word.n)}
 				</p>
+				{/* Docked, the grab bar and an outside tap put the sheet away; the
+				    desktop sidebar has neither, so it keeps a quiet ×. */}
 				<button
 					type="button"
-					className="icon-button"
+					className="icon-button sheet-close"
 					onClick={handleClose}
 					aria-label={t.sheet.closeAria}
 				>

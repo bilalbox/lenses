@@ -24,10 +24,11 @@ export interface SourceItemTranslation {
 
 export interface Translations {
 	common: {
-		appNameAr: string;
-		appNameEn: string;
+		/** The wordmark: one name, in the interface language. */
+		appName: string;
 		searchPlaceholder: string;
 		searchAria: string;
+		closeSearchAria: string;
 		versesCount: (count: number) => string;
 		noVersesMatch: string;
 		surahsNav: string;

@@ -3,10 +3,10 @@ import type { Translations } from "../types";
 
 export const en: Translations = {
 	common: {
-		appNameAr: "عدسات",
-		appNameEn: "Lenses",
+		appName: "Lenses",
 		searchPlaceholder: "Surah:verse, or word",
 		searchAria: "Search verses",
+		closeSearchAria: "Close search",
 		versesCount: (count: number) =>
 			`${formatNum(count, "en")} ${count === 1 ? "verse" : "verses"}`,
 		noVersesMatch: "No verses match.",

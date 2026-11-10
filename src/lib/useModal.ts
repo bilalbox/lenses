@@ -20,17 +20,22 @@ export function useModalLifecycle(
 			setIsClosing(false);
 			return undefined;
 		}
-		if (rendered && !isClosing) {
-			setIsClosing(true);
-			const timer = window.setTimeout(() => {
-				setRendered(false);
-				setIsClosing(false);
-				triggerRef.current?.focus?.();
-			}, 200);
-			return () => clearTimeout(timer);
-		}
+		if (rendered) setIsClosing(true);
 		return undefined;
-	}, [isOpen, rendered, isClosing]);
+	}, [isOpen, rendered]);
+
+	// The unmount timer lives in its own effect: kept beside the state it
+	// sets, flipping isClosing re-ran the effect and cancelled it, leaving an
+	// invisible dialog (and the body scroll lock) behind.
+	useEffect(() => {
+		if (!isClosing) return undefined;
+		const timer = window.setTimeout(() => {
+			setRendered(false);
+			setIsClosing(false);
+			triggerRef.current?.focus?.();
+		}, 200);
+		return () => clearTimeout(timer);
+	}, [isClosing]);
 
 	// Lock body scroll
 	useEffect(() => {

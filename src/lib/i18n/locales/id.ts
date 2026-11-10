@@ -3,10 +3,10 @@ import type { Translations } from "../types";
 
 export const id: Translations = {
 	common: {
-		appNameAr: "عدسات",
-		appNameEn: "Lenses",
+		appName: "Lensa",
 		searchPlaceholder: "Surah:ayat, atau kata",
 		searchAria: "Cari ayat",
+		closeSearchAria: "Tutup pencarian",
 		versesCount: (count: number) => `${formatNum(count, "id")} ayat`,
 		noVersesMatch: "Tidak ada ayat yang cocok.",
 		surahsNav: "Surah",

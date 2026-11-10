@@ -3,10 +3,10 @@ import type { Translations } from "../types";
 
 export const ar: Translations = {
 	common: {
-		appNameAr: "عدسات",
-		appNameEn: "Lenses",
+		appName: "عدسات",
 		searchPlaceholder: "سورة:آية، أو كلمة",
 		searchAria: "ابحث في الآيات",
+		closeSearchAria: "إغلاق البحث",
 		versesCount: (count: number) => {
 			const n = formatNum(count, "ar");
 			if (count === 1) return "آية واحدة";
