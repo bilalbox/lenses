@@ -26,12 +26,10 @@ import {
 	VerdictChip,
 } from "./QuizParts";
 
-type Show = (text: string) => string;
-
 export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 	const { locale, t } = useI18n();
 	const copy = t.quiz.mutashabih;
-	const { question: q, session, dispatch, show } = props;
+	const { question: q, session, dispatch } = props;
 	const draft = session.drafts.mutashabih;
 	const complete = session.verdict !== null;
 	const step = currentStep(session);
@@ -39,7 +37,7 @@ export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 	const pickedSurah = q.surahs.find((s) => s.n === draft.surah) ?? null;
 	const { filled, total } = progress(session);
 	const goTo = (next: WizardStep) => dispatch({ type: "goToStep", step: next });
-	const wordingLabel = (text: string) => (text ? show(text) : copy.noWord);
+	const wordingLabel = (text: string) => text || copy.noWord;
 
 	const crumbs: QuizCrumb[] = [
 		{
@@ -79,7 +77,6 @@ export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 					question={q}
 					fill={fill}
 					complete={complete}
-					show={show}
 					noWord={copy.noWord}
 				/>
 			}
@@ -168,13 +165,11 @@ function AyahLine({
 	question,
 	fill,
 	complete,
-	show,
 	noWord,
 }: {
 	question: MutashabihQuestion;
 	fill: string | null;
 	complete: boolean;
-	show: Show;
 	noWord: string;
 }) {
 	const { formatNumber } = useI18n();
@@ -184,7 +179,7 @@ function AyahLine({
 				if (piece.kind === "word")
 					return (
 						<span key={piece.index} className="quiz-word-token">
-							<span className="quiz-word-arabic">{show(piece.text)}</span>
+							<span className="quiz-word-arabic">{piece.text}</span>
 						</span>
 					);
 				if (complete && piece.text === "") return null;
@@ -195,7 +190,7 @@ function AyahLine({
 					>
 						<span className="quiz-word-arabic">
 							{piece.text === null ? "\u2003\u2003" : null}
-							{piece.text ? show(piece.text) : null}
+							{piece.text ? piece.text : null}
 							{piece.text === "" ? <small>{noWord}</small> : null}
 						</span>
 					</span>

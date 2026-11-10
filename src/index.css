@@ -1060,6 +1060,92 @@ a.wujuh-cite:focus-visible {
 .sheet-lexicon .lexicon-drawer {
 	margin-block: 0.55rem;
 }
+.sheet-irab-ref .irab-ref-drawer {
+	margin-block: 0.55rem;
+}
+.irab-ref-citations-box {
+	margin-top: 0.75rem;
+	padding-top: 0.5rem;
+	border-top: 1px dashed var(--line);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	font-size: 0.82rem;
+}
+.irab-ref-citations-label {
+	color: var(--muted);
+	font-weight: 500;
+}
+.irab-ref-citations-list {
+	display: inline-flex;
+	gap: 0.35rem;
+	flex-wrap: wrap;
+}
+.irab-ref-cite-chip {
+	display: inline-flex;
+	padding: 0.15rem 0.45rem;
+	border-radius: 4px;
+	background: var(--bg-2);
+	color: var(--teal);
+	text-decoration: none;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	transition: background 0.15s ease;
+}
+.irab-ref-cite-chip:hover {
+	background: var(--line);
+}
+.irab-ref-cite-more {
+	color: var(--muted);
+	font-size: 0.78rem;
+}
+.irab-citation-intro {
+	color: var(--muted);
+	font-size: 0.88rem;
+	margin: 0 0 0.75rem;
+}
+.irab-citation-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+.irab-citation-card {
+	background: var(--bg-1);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm, 6px);
+	padding: 0.75rem 1rem;
+}
+.irab-citation-head {
+	margin: 0 0 0.5rem;
+	color: var(--ink);
+	font-size: 1.15rem;
+	font-weight: 700;
+}
+.irab-citation-meta {
+	font-size: 0.82rem;
+	color: var(--muted);
+	font-weight: 400;
+}
+.model-irab-sentence {
+	margin-top: 0.75rem;
+	padding-top: 0.5rem;
+	border-top: 1px dashed var(--line);
+	color: var(--ink);
+}
+.model-irab-notes {
+	margin-top: 0.75rem;
+	padding-top: 0.5rem;
+	border-top: 1px solid var(--line);
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+.model-irab-note {
+	color: var(--muted);
+	font-size: 0.82rem;
+	line-height: 1.6;
+}
 .lexicon-prose p {
 	margin: 0 0 0.6rem;
 	line-height: 1.9;

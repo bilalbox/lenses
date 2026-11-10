@@ -345,3 +345,36 @@ export interface MutashabihQuizFile {
 	version: number;
 	questions: MutashabihQuizEntry[];
 }
+
+export interface IrabEntry {
+	id: number;
+	title: string;
+	bab: string;
+	page: number;
+	body: string[];
+	citations: [number, number][];
+}
+
+export interface IrabAppendixVerse {
+	sura: number;
+	verse: number;
+	text: string;
+	words: { w: string; i: string }[];
+	sentences: string[];
+	notes: string[];
+}
+
+export interface IrabDictionaryFile {
+	metadata: {
+		title: string;
+		author: string;
+		reviewer: string;
+		entriesCount: number;
+		citationsCount: number;
+		appendixVersesCount: number;
+	};
+	entries: IrabEntry[];
+	byWord: Record<string, number[]>;
+	byVerse: Record<string, number[]>;
+	appendix: Record<string, IrabAppendixVerse>;
+}

@@ -25,8 +25,6 @@ export interface LensProps<Q> {
 	question: Q;
 	session: QuizSessionState;
 	dispatch: Dispatch<QuizSessionEvent>;
-	/** How Quranic text renders (diacritics on or off). */
-	show: (text: string) => string;
 	onSubmit: () => void;
 	onNext: () => void;
 	onSelectLens: (lens: QuizLens) => void;

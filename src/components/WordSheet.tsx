@@ -8,6 +8,7 @@ import { primaryStem } from "../lib/wordStats";
 import { CloseIcon } from "./Icons";
 import { Tabs } from "./Tabs";
 import { WordCounts } from "./WordCounts";
+import { WordIrabReference } from "./WordIrabReference";
 import { WordLexicon } from "./WordLexicon";
 import {
 	WordGloss,
@@ -25,6 +26,8 @@ interface Props {
 	qiraatEnabled: boolean;
 	/** Reader pref: when off al-Dāmaghānī's wujūh are not fetched. */
 	wujuhEnabled: boolean;
+	/** Reader pref: when off al-Khaṭīb's grammar dictionary is not fetched. */
+	khatibEnabled: boolean;
 	segmentIndex?: number;
 	onSelectSegment: (index: number) => void;
 	onClose: () => void;
@@ -37,6 +40,7 @@ export function WordSheet({
 	word,
 	qiraatEnabled,
 	wujuhEnabled,
+	khatibEnabled,
 	segmentIndex,
 	onSelectSegment,
 	onClose,
@@ -203,6 +207,9 @@ export function WordSheet({
 								) : null}
 								<WordIrab word={word} />
 								<WordSarf word={word} />
+								{khatibEnabled ? (
+									<WordIrabReference word={word} segment={selected} />
+								) : null}
 								{wordQiraat ? (
 									<WordQiraatSection wordQiraat={wordQiraat} />
 								) : null}

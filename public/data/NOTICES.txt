@@ -243,3 +243,14 @@ Source: OpenITI 0478IbnMuhammadDamghani.QamusQuran.ShamAY0034085-ara1 at 0500AH@
 released under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/).
 Lenses keeps each entry's senses and maps the verses al-Damaghani cites to
 word positions; the derived file is shared under the same terms.
+
+------------------------------------------------------------
+Al-Mu'jam al-Mufassal fi al-I'rab (al-Khatib)
+Title: Al-Mu'jam al-Mufassal fi al-I'rab (المعجم المفصل في الإعراب)
+Author: Tahir Yusuf al-Khatib (طاهر يوسف الخطيب)
+Review and Introduction: Dr. Emil Badi' Ya'qub (د. إميل بديع يعقوب)
+Publisher: Dar al-Kutub al-Ilmiyyah, Beirut (1991)
+Source: Digitized edition via thahabi.org (https://thahabi.org/book/20680)
+Description: Alphabetical reference compendium of Arabic grammatical particles,
+syntactical tools, and i'rab parse models with Quranic verse citations, and an
+appendix of complete model parsing for Surah al-Fatihah and al-Baqarah 1-25.

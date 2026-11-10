@@ -171,6 +171,7 @@ export function VerseScreen({
 					word={word}
 					qiraatEnabled={readerPrefs.qiraat}
 					wujuhEnabled={readerPrefs.wujuh}
+					khatibEnabled={readerPrefs.khatib}
 					segmentIndex={segment}
 					onSelectSegment={setSegment}
 					onClose={() => onNavigate(sura, verse.v)}
@@ -295,6 +296,7 @@ function VerseBody({
 				target={target}
 				onSelect={onSelect}
 				onNavigate={onNavigate}
+				khatibEnabled={readerPrefs.khatib}
 				nahwPanel={
 					layers.nahw.enabled ? (
 						<NahwSyntaxSection

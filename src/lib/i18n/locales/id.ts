@@ -112,19 +112,6 @@ export const id: Translations = {
 		themeSection: "Tampilan",
 		themeLight: "Terang",
 		themeDark: "Gelap",
-		quizSection: "Kuis",
-		quizPrefs: {
-			hideDiacritics: {
-				label: "Sembunyikan harakat di kuis",
-				description:
-					"Tampilkan ayat Al-Qur'an tanpa harakat untuk tantangan yang lebih sulit.",
-			},
-			extendedRoles: {
-				label: "Kedudukan i'rab tambahan",
-				description:
-					"Tambahkan jar majrur (syibhul jumlah), zharaf, mustatsna, maf'ul li ajlih, dan taukid ke pilihan i'rab, dan tanyakan ayat yang memuatnya.",
-			},
-		},
 		readerSection: "Lapisan pembaca",
 		readerSectionHint:
 			"Sembunyikan lapisan yang tidak Anda pelajari. Lapisan yang dimatikan hilang dari tampilan ayat dan tidak diunduh sebelum diaktifkan.",
@@ -136,6 +123,7 @@ export const id: Translations = {
 			asbab: "Sebab turun",
 			qiraat: "Sepuluh qira'at di lembar kata",
 			wujuh: "Ragam makna ad-Damaghani di lembar kata",
+			khatib: "Referensi tata bahasa & iʿrāb (al-Khatib)",
 		},
 		sourcesLink: "Sumber Data",
 		sourcesDescription: "Jelajahi sumber data korpus dan lisensi",
@@ -195,6 +183,15 @@ export const id: Translations = {
 		mutashabihEmptyState:
 			"Tidak ada ayat mutasyabih lafzhi yang tercatat untuk ayat ini.",
 		mutashabihReturnToAyah: (coord: string) => `Kembali ke ${coord}`,
+		irabModel: "I'rab Teladan (Ya'qub)",
+		irabModelTitle: "I'rab Teladan Rinci",
+		irabModelSource: "Lampiran Al-Mu'jam al-Mufassal · Dr. Émile Badīʿ Yaʿqūb",
+		irabCitationTitle: "Rujukan I'rab (al-Khatib)",
+		irabCitationBadge: (count: number) => `${formatNum(count, "id")} entri`,
+		irabCitationSource:
+			"Al-Mu'jam al-Mufassal fi al-I'rab · Tahir Yusuf al-Khatib",
+		irabCitationIntro: (verseRef: string) =>
+			`Ayat ini (${verseRef}) dijadikan dalil tata bahasa pada entri-entri berikut:`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -204,6 +201,12 @@ export const id: Translations = {
 		collapseAria: "Kecilkan analisis",
 		classicalIrab: "I'rab klasik",
 		sarf: "Sharaf",
+		irabReferenceTitle: "Referensi Tata Bahasa (al-Khatib)",
+		irabReferenceSource: (page: number) =>
+			`Al-Mu'jam al-Mufassal fi al-I'rab · hlm. ${formatNum(page, "id")}`,
+		irabReferenceBab: (bab: string) => bab,
+		irabReferenceCitations: (count: number) =>
+			`${formatNum(count, "id")} rujukan Al-Qur'an`,
 		wordMeaning: "Arti kata",
 		searchThisRoot: "Cari akar kata ini",
 		searchThisWord: "Cari kata ini",
@@ -290,6 +293,14 @@ export const id: Translations = {
 			dictionary: "Kamus",
 		},
 		items: {
+			"khatib-irab": {
+				title: "Al-Mu'jam al-Mufassal fi al-I'rab (al-Khatib)",
+				attribution:
+					"Tahir Yusuf al-Khatib, ditinjau dan diberi pengantar oleh Dr. Émile Badīʿ Yaʿqūb (Dar al-Kutub al-Ilmiyyah, Beirut)",
+				description:
+					"Kamus referensi alfabetis partikel tata bahasa Arab, kata fungsional, dan kaidah i'rab dengan dalil ayat Al-Qur'an serta i'rab teladan.",
+				license: "Penggunaan edukasi publik; edisi digital via thahabi.org",
+			},
 			"openiti-wujuh": {
 				title: "Ishlah al-Wujuh wa an-Nazha'ir (ad-Damaghani)",
 				attribution:

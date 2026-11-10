@@ -111,19 +111,6 @@ export const en: Translations = {
 		themeSection: "Appearance",
 		themeLight: "Light",
 		themeDark: "Dark",
-		quizSection: "Quiz",
-		quizPrefs: {
-			hideDiacritics: {
-				label: "Hide diacritics in quizzes",
-				description:
-					"Show Quran verses without harakat for a harder challenge.",
-			},
-			extendedRoles: {
-				label: "Extended iʿrāb roles",
-				description:
-					"Add jārr wa-majrūr (prepositional phrases), ẓarf, mustathnā, mafʿūl li-ajlih and tawkīd to the iʿrāb roles, and ask the ayahs that have them.",
-			},
-		},
 		readerSection: "Reader layers",
 		readerSectionHint:
 			"Hide layers you are not studying. Disabled layers leave the verse reader entirely and are not downloaded until enabled.",
@@ -135,6 +122,7 @@ export const en: Translations = {
 			asbab: "Causes of revelation",
 			qiraat: "Ten readings (qirāʾāt) in the word sheet",
 			wujuh: "Qurʾānic senses (al-Dāmaghānī) in the word sheet",
+			khatib: "Grammar & parse reference (al-Khaṭīb)",
 		},
 		sourcesLink: "Data Sources",
 		sourcesDescription: "Explore corpus data sources and licenses.",
@@ -195,6 +183,17 @@ export const en: Translations = {
 		mutashabihEmptyState:
 			"No verbal similarities (mutashābihāt) are recorded for this verse.",
 		mutashabihReturnToAyah: (coord: string) => `Return to ${coord}`,
+		irabModel: "Model parse (Yaʿqūb)",
+		irabModelTitle: "Detailed Model Parsing",
+		irabModelSource:
+			"Al-Muʿjam al-Mufaṣṣal (Appendix) · Dr. Émile Badīʿ Yaʿqūb",
+		irabCitationTitle: "Grammar Citations (al-Khatib)",
+		irabCitationBadge: (count: number) =>
+			`${formatNum(count, "en")} ${count === 1 ? "entry" : "entries"}`,
+		irabCitationSource:
+			"Al-Muʿjam al-Mufaṣṣal fī al-Iʿrāb · Ṭāhir Yūsuf al-Khaṭīb",
+		irabCitationIntro: (verseRef: string) =>
+			`This ayah (${verseRef}) is cited as a grammatical proof text under the following entries:`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -204,6 +203,12 @@ export const en: Translations = {
 		collapseAria: "Collapse analysis",
 		classicalIrab: "Classical iʿrāb",
 		sarf: "Ṣarf",
+		irabReferenceTitle: "Grammar Reference (al-Khatib)",
+		irabReferenceSource: (page: number) =>
+			`Al-Muʿjam al-Mufaṣṣal fī al-Iʿrāb · p. ${formatNum(page, "en")}`,
+		irabReferenceBab: (bab: string) => bab,
+		irabReferenceCitations: (count: number) =>
+			`${formatNum(count, "en")} Quranic citation${count === 1 ? "" : "s"}`,
 		wordMeaning: "Word meaning",
 		searchThisRoot: "Search this root",
 		searchThisWord: "Search this word",

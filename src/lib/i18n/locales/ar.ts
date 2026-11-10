@@ -110,18 +110,6 @@ export const ar: Translations = {
 		themeSection: "المظهر",
 		themeLight: "فاتح",
 		themeDark: "داكن",
-		quizSection: "الاختبار",
-		quizPrefs: {
-			hideDiacritics: {
-				label: "إخفاء التشكيل في الاختبارات",
-				description: "عرض آيات القرآن بدون حركات لتحدٍّ أصعب.",
-			},
-			extendedRoles: {
-				label: "مواقع إعرابية إضافية",
-				description:
-					"أضف الجار والمجرور (شبه الجملة) والظرف والمستثنى والمفعول لأجله والتوكيد إلى مواقع الإعراب، واسأل عنها حيث وردت.",
-			},
-		},
 		readerSection: "طبقات القارئ",
 		readerSectionHint:
 			"أخفِ الطبقات التي لا تدرسها. الطبقات المعطّلة تُزال من شاشة الآية ولا تُحمَّل حتى تُفعَّل.",
@@ -133,6 +121,7 @@ export const ar: Translations = {
 			asbab: "أسباب النزول",
 			qiraat: "القراءات العشر في بطاقة الكلمة",
 			wujuh: "وجوه الدامغاني في بطاقة الكلمة",
+			khatib: "معجم قواعد الإعراب وشواهده (الخطيب)",
 		},
 		sourcesLink: "مصادر البيانات",
 		sourcesDescription: "استكشف مصادر البيانات اللغوية وتراخيصها.",
@@ -191,6 +180,15 @@ export const ar: Translations = {
 			`البعد: ${formatNum(count, "ar")} سور`,
 		mutashabihEmptyState: "لا توجد مواضع متشابه لفظي مسجلة لهذه الآية.",
 		mutashabihReturnToAyah: (coord: string) => `العودة إلى ${coord}`,
+		irabModel: "الإعراب النموذجي (يعقوب)",
+		irabModelTitle: "إعراب نموذجي مفصل",
+		irabModelSource: "ملحق المعجم المفصل في الإعراب · د. إميل بديع يعقوب",
+		irabCitationTitle: "شواهد معجم الإعراب (الخطيب)",
+		irabCitationBadge: (count: number) =>
+			`${formatNum(count, "ar")} ${count === 1 ? "مدخل" : "مداخل"}`,
+		irabCitationSource: "المعجم المفصل في الإعراب · طاهر يوسف الخطيب",
+		irabCitationIntro: (verseRef: string) =>
+			`ورد الاستشهاد بهذه الآية (${verseRef}) كشاهد نحوي في المداخل التالية:`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -200,6 +198,12 @@ export const ar: Translations = {
 		collapseAria: "طي التحليل",
 		classicalIrab: "الإعراب المفرد",
 		sarf: "الصرف والبنية",
+		irabReferenceTitle: "معجم قواعد الإعراب (الخطيب)",
+		irabReferenceSource: (page: number) =>
+			`المعجم المفصل في الإعراب · ص ${formatNum(page, "ar")}`,
+		irabReferenceBab: (bab: string) => bab,
+		irabReferenceCitations: (count: number) =>
+			`${formatNum(count, "ar")} شواهد قرآنية`,
 		wordMeaning: "معنى الكلمة",
 		searchThisRoot: "ابحث عن هذا الجذر",
 		searchThisWord: "ابحث عن هذه الكلمة",
@@ -296,6 +300,14 @@ export const ar: Translations = {
 			dictionary: "المعاجم",
 		},
 		items: {
+			"khatib-irab": {
+				title: "المعجم المفصل في الإعراب (الخطيب)",
+				attribution:
+					"طاهر يوسف الخطيب، تقديم ومراجعة د. إميل بديع يعقوب (دار الكتب العلمية، بيروت)",
+				description:
+					"معجم أبجدي شامل لحروف المعاني والأدوات النحوية وقواعد الإعراب مع شواهد قرآنية وإعراب نموذجي، وملحق لإعراب الفاتحة وأول البقرة.",
+				license: "استخدام تعليمي وبحثي عام؛ النسخة الرقمية عبر thahabi.org",
+			},
 			"openiti-wujuh": {
 				title: "إصلاح الوجوه والنظائر للدامغاني",
 				attribution:

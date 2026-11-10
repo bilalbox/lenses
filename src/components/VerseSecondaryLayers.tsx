@@ -6,6 +6,7 @@ import type { Manifest, Verse, VerseRef } from "../lib/types";
 import { AsbabSection } from "./AsbabSection";
 import { IrabViews } from "./IrabViews";
 import { MutashabihSection } from "./MutashabihSection";
+import { VerseIrabCitations } from "./VerseIrabCitations";
 
 interface MeaningProps {
 	verse: Verse;
@@ -180,6 +181,8 @@ interface Props {
 		params?: Record<string, string>,
 	) => void;
 	nahwPanel?: ReactNode;
+	/** Reader pref: when off al-Khaṭīb's grammar dictionary citations & model parse are not displayed. */
+	khatibEnabled?: boolean;
 }
 
 export function VerseSecondaryLayers({
@@ -191,6 +194,7 @@ export function VerseSecondaryLayers({
 	onSelect,
 	onNavigate,
 	nahwPanel,
+	khatibEnabled = false,
 }: Props) {
 	const { locale, t } = useI18n();
 	const { drawers, setDrawer } = layers;
@@ -219,10 +223,18 @@ export function VerseSecondaryLayers({
 						<span className="verse-layer-title">{t.verse.irabTitle}</span>
 					</summary>
 					<div className="verse-layer-body">
-						<IrabViews classical={classicalIrab} diagram={nahwPanel} />
+						<IrabViews
+							classical={classicalIrab}
+							diagram={nahwPanel}
+							sura={sura}
+							verseNumber={verse.v}
+							khatibEnabled={khatibEnabled}
+						/>
 					</div>
 				</details>
 			) : null}
+
+			{khatibEnabled ? <VerseIrabCitations sura={sura} verse={verse} /> : null}
 
 			{mutashabihMatches.length > 0 ? (
 				<details

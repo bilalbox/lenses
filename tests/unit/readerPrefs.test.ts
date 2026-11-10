@@ -37,6 +37,7 @@ describe("readerPrefs", () => {
 		expect(DEFAULT_READER_PREFS.asbab).toBe(false);
 		expect(DEFAULT_READER_PREFS.qiraat).toBe(false);
 		expect(DEFAULT_READER_PREFS.wujuh).toBe(false);
+		expect(DEFAULT_READER_PREFS.khatib).toBe(false);
 	});
 
 	it("persists and reloads toggles, filling missing keys from defaults", () => {
@@ -44,10 +45,12 @@ describe("readerPrefs", () => {
 			...DEFAULT_READER_PREFS,
 			meaning: false,
 			asbab: true,
+			khatib: true,
 		});
 		const loaded = loadReaderPrefs();
 		expect(loaded.meaning).toBe(false);
 		expect(loaded.asbab).toBe(true);
+		expect(loaded.khatib).toBe(true);
 		expect(loaded.nahw).toBe(false);
 	});
 

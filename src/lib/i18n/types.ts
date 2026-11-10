@@ -1,4 +1,3 @@
-import type { QuizPrefKey } from "../quizPrefs";
 import type { Manifest } from "../types";
 
 export type Locale = "en" | "ar" | "id";
@@ -117,8 +116,6 @@ export interface Translations {
 		themeSection: string;
 		themeLight: string;
 		themeDark: string;
-		quizSection: string;
-		quizPrefs: Record<QuizPrefKey, { label: string; description: string }>;
 		readerSection: string;
 		readerSectionHint: string;
 		readerLayers: {
@@ -129,6 +126,7 @@ export interface Translations {
 			asbab: string;
 			qiraat: string;
 			wujuh: string;
+			khatib: string;
 		};
 		sourcesLink: string;
 		sourcesDescription: string;
@@ -183,6 +181,13 @@ export interface Translations {
 		mutashabihSurahDistance: (count: number) => string;
 		mutashabihEmptyState: string;
 		mutashabihReturnToAyah: (coord: string) => string;
+		irabModel: string;
+		irabModelTitle: string;
+		irabModelSource: string;
+		irabCitationTitle: string;
+		irabCitationBadge: (count: number) => string;
+		irabCitationSource: string;
+		irabCitationIntro: (verseRef: string) => string;
 	};
 	sheet: {
 		analysisAria: (wordNumber: number) => string;
@@ -191,6 +196,10 @@ export interface Translations {
 		collapseAria: string;
 		classicalIrab: string;
 		sarf: string;
+		irabReferenceTitle: string;
+		irabReferenceSource: (page: number) => string;
+		irabReferenceBab: (bab: string) => string;
+		irabReferenceCitations: (count: number) => string;
 		wordMeaning: string;
 		searchThisRoot: string;
 		searchThisWord: string;

@@ -37,13 +37,11 @@ function tokenClass(marks: TokenMarks): string {
 function AyahToken({
 	word,
 	marks,
-	show,
 	buttonRef,
 	onTap,
 }: {
 	word: Word;
 	marks: TokenMarks;
-	show: (text: string) => string;
 	buttonRef?: RefObject<HTMLButtonElement | null>;
 	onTap: () => void;
 }) {
@@ -55,7 +53,7 @@ function AyahToken({
 			className={tokenClass(marks)}
 			onClick={onTap}
 		>
-			<span className="quiz-word-arabic">{show(word.a)}</span>
+			<span className="quiz-word-arabic">{word.a}</span>
 			{marked && (
 				<span
 					className={`quiz-token-mark ${marks.target ? "mark-target" : ""} ${marks.head ? "mark-head" : ""}`}
@@ -114,7 +112,6 @@ export function GrammarFrame({
 							key={w.n}
 							word={w}
 							marks={marks(w)}
-							show={props.show}
 							buttonRef={
 								w.n === q.targetWord.n ? props.targetBtnRef : undefined
 							}

@@ -43,8 +43,6 @@ export interface RoleMeta {
 	family: "core" | "nom" | "clause";
 	/** Learner-facing heading the role is listed under in the quiz picker. */
 	group: RoleGroup;
-	/** Asked only when the reader turns on the extended iʿrāb roles. */
-	extended?: boolean;
 	governorLabel: {
 		ar: string;
 		en: string;
@@ -197,7 +195,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		id: "Jar Majrur (Syibhul Jumlah)",
 		family: "clause",
 		group: "genitives",
-		extended: true,
 		governorLabel: {
 			ar: "المتعلَّق به",
 			en: "Attached Governor (Mutaʿallaq bihi)",
@@ -327,7 +324,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		id: "Zharaf (Maf'ul Fih)",
 		family: "clause",
 		group: "complements",
-		extended: true,
 		governorLabel: {
 			ar: "المتعلَّق به",
 			en: "Attached Governor (Mutaʿallaq bihi)",
@@ -347,7 +343,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		id: "Maf'ul Li Ajlih",
 		family: "nom",
 		group: "complements",
-		extended: true,
 		governorLabel: {
 			ar: "الفعل المعلَّل",
 			en: "Explained Verb (Fiʿl)",
@@ -367,7 +362,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		id: "Mustatsna",
 		family: "nom",
 		group: "complements",
-		extended: true,
 		governorLabel: {
 			ar: "أداة الاستثناء",
 			en: "Exception Particle (Adāt al-Istithnāʾ)",
@@ -387,7 +381,6 @@ export const QUIZ_ROLES: RoleMeta[] = [
 		id: "Taukid (Penegas)",
 		family: "nom",
 		group: "followers",
-		extended: true,
 		governorLabel: {
 			ar: "المؤكَّد",
 			en: "Emphasized Word (Muʾakkad)",
@@ -579,11 +572,6 @@ export function signsForCase(grammaticalCase: QuizCase | null): SignMeta[] {
  */
 export function isPhraseRole(relation: QuizRelation | null): boolean {
 	return relation === "pp";
-}
-
-/** Roles the picker offers: the core set, plus the extended ones when turned on. */
-export function rolesFor(extended: boolean): RoleMeta[] {
-	return extended ? QUIZ_ROLES : QUIZ_ROLES.filter((r) => !r.extended);
 }
 
 export function getRoleMeta(code: QuizRelation): RoleMeta {

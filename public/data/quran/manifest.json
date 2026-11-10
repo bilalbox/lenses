@@ -1663,6 +1663,15 @@
       "description": "The senses each Qur'anic word carries and the verses al-Dāmaghānī cites for each, mapped to word positions.",
       "license": "CC BY-NC-SA 4.0 (OpenITI corpus release)",
       "url": "https://github.com/OpenITI/0500AH"
+    },
+    {
+      "id": "khatib-irab",
+      "title": "Al-Mu'jam al-Mufassal fi al-I'rab (al-Khatib)",
+      "kind": "classical-irab",
+      "attribution": "Tahir Yusuf al-Khatib, with review and introduction by Dr. Emil Badi' Ya'qub",
+      "description": "Alphabetical reference dictionary of Arabic grammatical particles, functional words, and syntactic rules with model parsing and Quranic citations, plus model parsing of Surah al-Fatihah and Surah al-Baqarah (1-25).",
+      "license": "Public educational use; digitized via thahabi.org (book 20680)",
+      "url": "https://thahabi.org/book/20680"
     }
   ]
 }

@@ -39,3 +39,7 @@ depends_on = []
 [[modules]]
 path = "audit_wujuh"
 depends_on = ["build_wujuh"]
+
+[[modules]]
+path = "build_irab_dictionary"
+depends_on = []

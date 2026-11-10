@@ -3,6 +3,7 @@ import { lexiconUrl } from "./lexicon";
 import type { QuizBankFile } from "./quizBank";
 import type {
 	AsbabData,
+	IrabDictionaryFile,
 	LexiconFile,
 	Manifest,
 	MutashabihQuizFile,
@@ -26,6 +27,7 @@ interface CorpusLayers {
 	asbab: AsbabData;
 	mutashabihQuiz: MutashabihQuizFile;
 	quizBank: QuizBankFile;
+	irabDictionary: IrabDictionaryFile;
 }
 
 /** One file per surah, at `/data/quran/{kind}/{nnn}.json`. */

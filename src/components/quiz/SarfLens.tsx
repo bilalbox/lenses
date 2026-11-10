@@ -29,7 +29,6 @@ import {
 } from "./QuizParts";
 
 type SarfField = DraftField<"sarf">;
-type Show = (text: string) => string;
 
 const spaced = (root: string) => root.split("").join(" ");
 const classAr = (code: string) => SARF_CLASSES[code]?.ar;
@@ -38,20 +37,17 @@ const structureAr = (code: string) => SARF_STRUCTURES[code]?.ar;
 type T = ReturnType<typeof useI18n>["t"];
 
 /** Step headings, by step; the verb and noun steps 3–4 ask different things. */
-const TITLES: Record<
-	1 | 2 | 3 | 4,
-	(q: SarfQuestion, t: T, show: Show) => string
-> = {
-	1: (q, t, show) => t.quiz.sarf.rootQuestion(show(q.targetWord.a)),
-	2: (q, t, show) => t.quiz.sarf.waznQuestion(show(q.headAr)),
-	3: (q, t, show) =>
+const TITLES: Record<1 | 2 | 3 | 4, (q: SarfQuestion, t: T) => string> = {
+	1: (q, t) => t.quiz.sarf.rootQuestion(q.targetWord.a),
+	2: (q, t) => t.quiz.sarf.waznQuestion(q.headAr),
+	3: (q, t) =>
 		(q.kind === "verb"
 			? t.quiz.sarf.verbClassQuestion
-			: t.quiz.sarf.nounClassQuestion)(show(q.headAr)),
-	4: (q, t, show) =>
+			: t.quiz.sarf.nounClassQuestion)(q.headAr),
+	4: (q, t) =>
 		(q.kind === "verb"
 			? t.quiz.sarf.verbStructureQuestion
-			: t.quiz.sarf.nounStructureQuestion)(show(q.headAr)),
+			: t.quiz.sarf.nounStructureQuestion)(q.headAr),
 };
 
 /** A crumb's label: the answer once picked, else the field name. */
@@ -167,7 +163,6 @@ function SarfChoiceStep({
 	question: q,
 	session,
 	dispatch,
-	show,
 	step,
 	onEdit,
 }: LensProps<SarfQuestion> & {
@@ -176,12 +171,12 @@ function SarfChoiceStep({
 }) {
 	const { locale, t } = useI18n();
 	const { field, options, layout: Layout } = STEPS[step - 1]!;
-	const focus = show(step === 1 ? q.targetWord.a : q.headAr);
+	const focus = step === 1 ? q.targetWord.a : q.headAr;
 	const back = step > 1 ? ((step - 1) as WizardStep) : undefined;
 	return (
 		<StepBody>
 			<QuizStepHead
-				title={TITLES[step](q, t, show)}
+				title={TITLES[step](q, t)}
 				focus={focus}
 				{...(back
 					? { backLabel: t.quiz.backButton, onBack: () => onEdit(back) }
@@ -206,7 +201,6 @@ function SarfChoiceStep({
 function SarfCheck({
 	question: q,
 	session,
-	show,
 	onSubmit,
 	onEdit,
 }: LensProps<SarfQuestion> & { onEdit: (step: WizardStep) => void }) {
@@ -218,7 +212,7 @@ function SarfCheck({
 		classCode: t.quiz.fieldClass,
 		structureCode: t.quiz.fieldStructure,
 	};
-	const word = show(q.targetWord.a);
+	const word = q.targetWord.a;
 	return (
 		<>
 			<QuizStepHead
@@ -229,7 +223,7 @@ function SarfCheck({
 			/>
 
 			<FormulaPreview>
-				<strong className="formula-target">{show(q.headAr)}:</strong>{" "}
+				<strong className="formula-target">{q.headAr}:</strong>{" "}
 				<span>من مادة</span>{" "}
 				<FormulaPart
 					step={1}
@@ -276,7 +270,6 @@ function SarfCheck({
 function SarfReveal({
 	question: q,
 	session,
-	show,
 	onNext,
 	onOpenSearch,
 }: LensProps<SarfQuestion> & {
@@ -285,7 +278,7 @@ function SarfReveal({
 	const { t } = useI18n();
 	const d = session.drafts.sarf;
 	const ok = (field: SarfField) => session.verdict?.fields[field] ?? false;
-	const word = show(q.targetWord.a);
+	const word = q.targetWord.a;
 	return (
 		<RevealCard
 			correct={session.verdict?.allCorrect ?? false}

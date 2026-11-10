@@ -19,12 +19,6 @@ import {
 } from "./lib/library";
 import { adjacentVerse } from "./lib/manifest";
 import {
-	loadQuizPrefs,
-	type QuizPrefKey,
-	type QuizPrefs,
-	saveQuizPref,
-} from "./lib/quizPrefs";
-import {
 	loadReaderPrefs,
 	type ReaderLayerKey,
 	type ReaderPrefs,
@@ -70,7 +64,6 @@ export function App() {
 	const [theme, setTheme] = useState(
 		() => document.documentElement.dataset.theme || "light",
 	);
-	const [quizPrefs, setQuizPrefs] = useState<QuizPrefs>(loadQuizPrefs);
 	const [readerPrefs, setReaderPrefs] = useState<ReaderPrefs>(() =>
 		loadReaderPrefs(),
 	);
@@ -155,11 +148,6 @@ export function App() {
 				next === "dark" ? "#101311" : "#0f6e66",
 			);
 		}
-	};
-
-	const toggleQuizPref = (key: QuizPrefKey, next: boolean) => {
-		setQuizPrefs((prev) => ({ ...prev, [key]: next }));
-		saveQuizPref(key, next);
 	};
 
 	const toggleReaderPref = (key: ReaderLayerKey, next: boolean) => {
@@ -294,7 +282,6 @@ export function App() {
 							route={route}
 							readerPrefs={readerPrefs}
 							seed={seed}
-							quizPrefs={quizPrefs}
 							openSearch={openSearch}
 						/>
 					) : null}
@@ -368,8 +355,6 @@ export function App() {
 				onClose={() => setSettingsOpen(false)}
 				theme={theme}
 				onSelectTheme={selectTheme}
-				quizPrefs={quizPrefs}
-				onToggleQuizPref={toggleQuizPref}
 				readerPrefs={readerPrefs}
 				onToggleReaderPref={toggleReaderPref}
 				library={library}
