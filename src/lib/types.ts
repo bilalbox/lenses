@@ -107,6 +107,7 @@ export interface Manifest {
 		qiraatVerses?: number;
 		mutashabihVerses?: number;
 		mutashabihPairs?: number;
+		wujuhRoots?: number;
 	};
 	sources: SourceMeta[];
 }

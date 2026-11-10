@@ -134,6 +134,7 @@ export const en: Translations = {
 			mutashabih: "Verbal similarities",
 			asbab: "Causes of revelation",
 			qiraat: "Ten readings (qirāʾāt) in the word sheet",
+			wujuh: "Qurʾānic senses (al-Dāmaghānī) in the word sheet",
 		},
 		sourcesLink: "Data Sources",
 		sourcesDescription: "Explore corpus data sources and licenses.",
@@ -273,7 +274,7 @@ export const en: Translations = {
 			"Lenses is a reader for analyses other people published. The Arabic Quranic text is stored verbatim. Grammatical layers stay attributed to their sources, and a verse can show more than one of them at once.",
 		coverageHeading: "Corpus & Layer Coverage",
 		coverageBody: (stats) =>
-			`Morphology and Tafsir Center classical iʿrāb, ṣarf, and word meanings cover all ${formatNum(stats.words, "en")} words across all 114 surahs (${formatNum(stats.syntaxVerses, "en")} verses), alongside surah maqāṣid and verse commentary in Arabic, English, and Indonesian. The NoorBayan treebank spans all ${formatNum(stats.syntaxVerses, "en")} verses (${formatNum(stats.syntaxGraphs, "en")} clause trees). Canonical qirāʾāt cover ${formatNum(stats.qiraatWords ?? 0, "en")} words in ${formatNum(stats.qiraatVerses ?? 0, "en")} verses, verbal similarities link ${formatNum(stats.mutashabihPairs ?? 0, "en")} verse pairs across ${formatNum(stats.mutashabihVerses ?? 0, "en")} verses, and authenticated asbāb al-nuzūl cover ${formatNum(stats.asbabVerses ?? 0, "en")} verses.`,
+			`Morphology and Tafsir Center classical iʿrāb, ṣarf, and word meanings cover all ${formatNum(stats.words, "en")} words across all 114 surahs (${formatNum(stats.syntaxVerses, "en")} verses), alongside surah maqāṣid and verse commentary in Arabic, English, and Indonesian. The NoorBayan treebank spans all ${formatNum(stats.syntaxVerses, "en")} verses (${formatNum(stats.syntaxGraphs, "en")} clause trees). Canonical qirāʾāt cover ${formatNum(stats.qiraatWords ?? 0, "en")} words in ${formatNum(stats.qiraatVerses ?? 0, "en")} verses, verbal similarities link ${formatNum(stats.mutashabihPairs ?? 0, "en")} verse pairs across ${formatNum(stats.mutashabihVerses ?? 0, "en")} verses, and authenticated asbāb al-nuzūl cover ${formatNum(stats.asbabVerses ?? 0, "en")} verses. Al-Dāmaghānī's wujūh record the senses of ${formatNum(stats.wujuhRoots ?? 0, "en")} roots.`,
 		licenseLabel: "License:",
 		kinds: {
 			morphology: "Morphology",

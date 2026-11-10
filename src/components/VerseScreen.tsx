@@ -170,6 +170,7 @@ export function VerseScreen({
 					verse={verse}
 					word={word}
 					qiraatEnabled={readerPrefs.qiraat}
+					wujuhEnabled={readerPrefs.wujuh}
 					segmentIndex={segment}
 					onSelectSegment={setSegment}
 					onClose={() => onNavigate(sura, verse.v)}

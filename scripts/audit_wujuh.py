@@ -316,12 +316,13 @@ def verdict_error(verdict: Any, item: dict[str, Any] | None, senses: int) -> str
 def merge(audit: Audit, verdicts: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Fold valid verdicts from the inbox into `verdicts`; print the rest."""
     items = {item["key"]: item for item in audit.items}
+    items.update({f"{item['key']}:{item['sense']}": item for item in audit.items})
     merged = dict(verdicts)
     taken = rejected = 0
     for path in sorted(INBOX.glob("*.json")):
         for key, verdict in json.loads(path.read_text(encoding="utf-8")).items():
             item = items.get(key)
-            heading = key.split(":", 3)[-1]
+            heading = key.split(":")[3]
             senses = len(audit.entries.get(heading, {}).get("senses", []))
             if error := verdict_error(verdict, item, senses):
                 rejected += 1

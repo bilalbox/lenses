@@ -128,6 +128,7 @@ export interface Translations {
 			mutashabih: string;
 			asbab: string;
 			qiraat: string;
+			wujuh: string;
 		};
 		sourcesLink: string;
 		sourcesDescription: string;

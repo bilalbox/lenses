@@ -36,6 +36,7 @@ describe("readerPrefs", () => {
 		expect(DEFAULT_READER_PREFS.mutashabih).toBe(false);
 		expect(DEFAULT_READER_PREFS.asbab).toBe(false);
 		expect(DEFAULT_READER_PREFS.qiraat).toBe(false);
+		expect(DEFAULT_READER_PREFS.wujuh).toBe(false);
 	});
 
 	it("persists and reloads toggles, filling missing keys from defaults", () => {

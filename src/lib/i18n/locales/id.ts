@@ -135,6 +135,7 @@ export const id: Translations = {
 			mutashabih: "Kesamaan verbal",
 			asbab: "Sebab turun",
 			qiraat: "Sepuluh qira'at di lembar kata",
+			wujuh: "Ragam makna ad-Damaghani di lembar kata",
 		},
 		sourcesLink: "Sumber Data",
 		sourcesDescription: "Jelajahi sumber data korpus dan lisensi",
@@ -273,7 +274,7 @@ export const id: Translations = {
 			"Lenses adalah pembaca untuk analisis yang dipublikasikan secara terbuka. Teks Al-Qur'an bahasa Arab disimpan tanpa perubahan. Lapisan tata bahasa diatribusikan ke sumber aslinya.",
 		coverageHeading: "Cakupan Korpus & Lapisan Analisis",
 		coverageBody: (stats) =>
-			`Morfologi serta i'rab klasik, sharaf, dan makna kata dari Markaz Tafsir mencakup seluruh ${formatNum(stats.words, "id")} kata di 114 surah (${formatNum(stats.syntaxVerses, "id")} ayat), bersama maqashid surah dan tafsir Al-Mukhtashar dalam bahasa Arab, Inggris, dan Indonesia. Pohon sintaksis NoorBayan mencakup seluruh ${formatNum(stats.syntaxVerses, "id")} ayat (${formatNum(stats.syntaxGraphs, "id")} pohon klausa), Qira'at Asyrah mencakup ${formatNum(stats.qiraatWords ?? 0, "id")} kata pada ${formatNum(stats.qiraatVerses ?? 0, "id")} ayat, mutasyabih lafzhi menghubungkan ${formatNum(stats.mutashabihPairs ?? 0, "id")} pasangan pada ${formatNum(stats.mutashabihVerses ?? 0, "id")} ayat, dan asbabun nuzul terverifikasi mencakup ${formatNum(stats.asbabVerses ?? 0, "id")} ayat.`,
+			`Morfologi serta i'rab klasik, sharaf, dan makna kata dari Markaz Tafsir mencakup seluruh ${formatNum(stats.words, "id")} kata di 114 surah (${formatNum(stats.syntaxVerses, "id")} ayat), bersama maqashid surah dan tafsir Al-Mukhtashar dalam bahasa Arab, Inggris, dan Indonesia. Pohon sintaksis NoorBayan mencakup seluruh ${formatNum(stats.syntaxVerses, "id")} ayat (${formatNum(stats.syntaxGraphs, "id")} pohon klausa), Qira'at Asyrah mencakup ${formatNum(stats.qiraatWords ?? 0, "id")} kata pada ${formatNum(stats.qiraatVerses ?? 0, "id")} ayat, mutasyabih lafzhi menghubungkan ${formatNum(stats.mutashabihPairs ?? 0, "id")} pasangan pada ${formatNum(stats.mutashabihVerses ?? 0, "id")} ayat, dan asbabun nuzul terverifikasi mencakup ${formatNum(stats.asbabVerses ?? 0, "id")} ayat. Wujuh ad-Damaghani mencatat ragam makna ${formatNum(stats.wujuhRoots ?? 0, "id")} akar kata.`,
 		licenseLabel: "Lisensi:",
 		kinds: {
 			morphology: "Morfologi",
@@ -290,7 +291,7 @@ export const id: Translations = {
 		},
 		items: {
 			"openiti-wujuh": {
-				title: "Al-Wujuh wa an-Nazha'ir (ad-Damaghani)",
+				title: "Ishlah al-Wujuh wa an-Nazha'ir (ad-Damaghani)",
 				attribution:
 					"Al-Husain bin Muhammad ad-Damaghani (w. 478 H); teks digital dari korpus OpenITI (tahqiq 'Abd al-'Aziz Sayyid al-Ahl)",
 				description:

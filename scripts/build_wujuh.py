@@ -1291,7 +1291,7 @@ def main() -> None:
 
 SOURCE: dict[str, Any] = {
     "id": "openiti-wujuh",
-    "title": "al-Wujūh wa-l-Naẓāʾir (al-Dāmaghānī)",
+    "title": "Iṣlāḥ al-Wujūh wa-l-Naẓāʾir (al-Dāmaghānī)",
     "kind": "dictionary",
     "attribution": (
         "al-Ḥusayn ibn Muḥammad al-Dāmaghānī (d. 478 AH); digital text from the OpenITI "

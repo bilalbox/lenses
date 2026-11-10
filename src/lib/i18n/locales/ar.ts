@@ -132,6 +132,7 @@ export const ar: Translations = {
 			mutashabih: "المتشابه اللفظي",
 			asbab: "أسباب النزول",
 			qiraat: "القراءات العشر في بطاقة الكلمة",
+			wujuh: "وجوه الدامغاني في بطاقة الكلمة",
 		},
 		sourcesLink: "مصادر البيانات",
 		sourcesDescription: "استكشف مصادر البيانات اللغوية وتراخيصها.",
@@ -279,7 +280,7 @@ export const ar: Translations = {
 			"تطبيق عدسات هو قارئ تحليلي يجمع دراسات قرآنية منشورة بترخيص مفتوح. النص القرآني محفوظ دون أدنى تبديل. تُنسب كل طبقة إعرابية لمصدرها، ويمكن عرض أكثر من طبقة في آن واحد.",
 		coverageHeading: "تغطية المتن والطبقات التحليلية",
 		coverageBody: (stats) =>
-			`يغطي التحليل الصرفي والإعراب المفرد والصرف ومعاني الكلمات من مركز تفسير كامل كلمات القرآن البالغة ${formatNum(stats.words, "ar")} كلمة في جميع السور الـ ١١٤ (${formatNum(stats.syntaxVerses, "ar")} آية)، مع مقاصد السور والمختصر في التفسير بالعربية والإنجليزية والإندونيسية. وتشمل شجرة الإعراب الكاملة (نور البيان) جميع الآيات (${formatNum(stats.syntaxGraphs, "ar")} جملة تركيبية)، وتغطي القراءات العشر ${formatNum(stats.qiraatWords ?? 0, "ar")} كلمة في ${formatNum(stats.qiraatVerses ?? 0, "ar")} آية، ويرصد المتشابه اللفظي ${formatNum(stats.mutashabihPairs ?? 0, "ar")} نظير في ${formatNum(stats.mutashabihVerses ?? 0, "ar")} آية، وتوثق أسباب النزول المحررة ${formatNum(stats.asbabVerses ?? 0, "ar")} آية.`,
+			`يغطي التحليل الصرفي والإعراب المفرد والصرف ومعاني الكلمات من مركز تفسير كامل كلمات القرآن البالغة ${formatNum(stats.words, "ar")} كلمة في جميع السور الـ ١١٤ (${formatNum(stats.syntaxVerses, "ar")} آية)، مع مقاصد السور والمختصر في التفسير بالعربية والإنجليزية والإندونيسية. وتشمل شجرة الإعراب الكاملة (نور البيان) جميع الآيات (${formatNum(stats.syntaxGraphs, "ar")} جملة تركيبية)، وتغطي القراءات العشر ${formatNum(stats.qiraatWords ?? 0, "ar")} كلمة في ${formatNum(stats.qiraatVerses ?? 0, "ar")} آية، ويرصد المتشابه اللفظي ${formatNum(stats.mutashabihPairs ?? 0, "ar")} نظير في ${formatNum(stats.mutashabihVerses ?? 0, "ar")} آية، وتوثق أسباب النزول المحررة ${formatNum(stats.asbabVerses ?? 0, "ar")} آية، وتغطي وجوه الدامغاني ${formatNum(stats.wujuhRoots ?? 0, "ar")} جذراً.`,
 		licenseLabel: "الترخيص:",
 		kinds: {
 			morphology: "الصرف والاشتقاق",

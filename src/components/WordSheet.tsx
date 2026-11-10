@@ -23,6 +23,8 @@ interface Props {
 	word: Word;
 	/** Reader pref: when off the qirāʾāt file is not fetched. */
 	qiraatEnabled: boolean;
+	/** Reader pref: when off al-Dāmaghānī's wujūh are not fetched. */
+	wujuhEnabled: boolean;
 	segmentIndex?: number;
 	onSelectSegment: (index: number) => void;
 	onClose: () => void;
@@ -34,6 +36,7 @@ export function WordSheet({
 	verse,
 	word,
 	qiraatEnabled,
+	wujuhEnabled,
 	segmentIndex,
 	onSelectSegment,
 	onClose,
@@ -189,13 +192,15 @@ export function WordSheet({
 						content: (
 							<>
 								<WordMeaning word={word} />
-								<WordWujuh
-									sura={sura}
-									verse={verse.v}
-									word={word.n}
-									stem={primary}
-									part="answer"
-								/>
+								{wujuhEnabled ? (
+									<WordWujuh
+										sura={sura}
+										verse={verse.v}
+										word={word.n}
+										stem={primary}
+										part="answer"
+									/>
+								) : null}
 								<WordIrab word={word} />
 								<WordSarf word={word} />
 								{wordQiraat ? (
@@ -210,13 +215,15 @@ export function WordSheet({
 						content: (
 							<>
 								<WordCounts stem={primary} onSearch={onSearch} />
-								<WordWujuh
-									sura={sura}
-									verse={verse.v}
-									word={word.n}
-									stem={primary}
-									part="list"
-								/>
+								{wujuhEnabled ? (
+									<WordWujuh
+										sura={sura}
+										verse={verse.v}
+										word={word.n}
+										stem={primary}
+										part="list"
+									/>
+								) : null}
 								<WordLexicon stem={primary} openFirst={false} />
 							</>
 						),
