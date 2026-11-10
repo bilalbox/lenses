@@ -59,7 +59,7 @@
 		"rev-dep": "^3.3.0",
 		"tsx": "^4.23.15",
 		"typescript": "^7.0.2",
-		"vite": "^8.3.6",
+		"vite": "^8.3.7",
 		"vite-plugin-pwa": "^2.0.0",
 		"vitest": "^5.1.0",
 		"wrangler": "^4.158.0"

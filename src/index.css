@@ -826,6 +826,48 @@ main {
 	box-decoration-break: clone;
 	-webkit-box-decoration-break: clone;
 }
+button.irab-target-word {
+	border: 0;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+	cursor: pointer;
+	text-align: inherit;
+	display: inline;
+	transition:
+		background-color var(--duration-fast) ease,
+		color var(--duration-fast) ease;
+}
+button.irab-target-word:hover {
+	background: color-mix(in srgb, var(--gold) 35%, transparent);
+}
+button.irab-target-word.is-on {
+	background: var(--teal-soft);
+	color: var(--teal);
+}
+.irab-quote-word {
+	border: 0;
+	background: transparent;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+	color: inherit;
+	padding: 0.05em 0.28em;
+	border-radius: 6px;
+	cursor: pointer;
+	display: inline;
+	transition:
+		background-color var(--duration-fast) ease,
+		color var(--duration-fast) ease;
+}
+.irab-quote-word:hover {
+	background: var(--paper-hover, rgba(0, 0, 0, 0.05));
+}
+.irab-quote-word.is-on {
+	background: var(--teal-soft);
+	color: var(--teal);
+	font-weight: 700;
+}
 .irab-colon {
 	font-weight: 600;
 	color: var(--gold);
@@ -1148,33 +1190,273 @@ a.wujuh-cite:focus-visible {
 }
 .lexicon-prose p {
 	margin: 0 0 0.6rem;
-	line-height: 1.9;
+	line-height: 1.95;
 }
 .lexicon-subhead {
-	margin: 0 0 0.35rem;
+	margin: 0 0 0.5rem;
 	color: var(--muted);
 	font-size: 0.82rem;
-	font-weight: 600;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
 }
+
+/* Lexicon shared card elements */
+.lexicon-card-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.4rem;
+}
+.lexicon-badge {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--sans);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	padding: 0.12rem 0.5rem;
+	border-radius: 999px;
+}
+.lexicon-badge.is-gold {
+	background: color-mix(in srgb, var(--gold) 15%, var(--paper));
+	color: var(--gold-ink);
+	border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+.lexicon-badge.is-teal {
+	background: color-mix(in srgb, var(--teal) 12%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+}
+
+/* Maqāyīs al-Lughah */
+.maqayis-principle-card {
+	background: color-mix(in srgb, var(--gold) 8%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1.1rem;
+	margin: 0 0 0.85rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.maqayis-principle-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.25rem;
+	font-weight: 600;
+	line-height: 1.85;
+	color: var(--ink);
+}
+.maqayis-section {
+	margin: 0 0 0.65rem;
+	line-height: 1.95;
+	font-family: var(--arabic);
+	font-size: 1.08rem;
+}
+.lexicon-branch-lead {
+	color: var(--teal);
+	font-weight: 700;
+	font-family: var(--arabic-ui);
+	font-size: 0.95em;
+}
+
+/* Quranic citations in lexicon */
+.lexicon-quran-wrap {
+	display: inline;
+}
+.lexicon-quran-quote {
+	color: var(--ink);
+	font-family: var(--arabic);
+	font-weight: 600;
+	background: color-mix(in srgb, var(--gold) 14%, transparent);
+	padding: 0.05rem 0.25rem;
+	border-radius: 4px;
+}
+.lexicon-ayah-badge {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--arabic-ui);
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--teal);
+	background: color-mix(in srgb, var(--teal) 10%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+	border-radius: 999px;
+	padding: 0.08rem 0.45rem;
+	margin-inline: 0.25rem;
+	vertical-align: baseline;
+}
+.lexicon-authority {
+	color: var(--ink);
+	font-weight: 700;
+	font-family: var(--arabic-ui);
+	font-size: 0.95em;
+}
+.lexicon-tafsir-lead {
+	color: var(--teal);
+	font-weight: 700;
+	font-family: var(--arabic-ui);
+	font-size: 0.95em;
+}
+
+/* al-Mufradāt */
+.mufradat-lead-card {
+	background: color-mix(in srgb, var(--teal) 7%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1.1rem;
+	margin: 0 0 0.85rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.mufradat-lead-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.18rem;
+	line-height: 1.85;
+	color: var(--ink);
+}
+.mufradat-block {
+	margin: 0 0 0.65rem;
+	padding: 0.65rem 0.85rem;
+	background: var(--bg-1);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 4px);
+	line-height: 1.95;
+	font-family: var(--arabic);
+	font-size: 1.08rem;
+}
+
+/* Lane's Arabic-English Lexicon */
 .lane-entries {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
 	font-family: var(--serif);
 	font-size: 0.95rem;
 	line-height: 1.65;
 }
-.lane-entry {
-	margin: 0 0 0.75rem;
+.lane-entry-card {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
-.lane-form {
-	margin-inline-end: 0.35rem;
-	color: var(--muted);
+.lane-entry-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.45rem;
+	padding-bottom: 0.45rem;
+	border-bottom: 1px solid var(--line);
+}
+.lane-ar-head {
+	font-family: var(--arabic);
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: var(--ink);
+	unicode-bidi: isolate;
+}
+.lane-form-badge {
 	font-family: var(--sans);
-	font-size: 0.78rem;
-	font-variant-numeric: tabular-nums;
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 0.15rem 0.55rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--teal) 12%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+}
+.lane-senses-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+.lane-sense-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+.lane-sense-card + .lane-sense-card {
+	border-top: 1px dashed var(--line);
+	padding-top: 0.65rem;
+}
+.lane-main-sense {
+	display: block;
+	line-height: 1.7;
+}
+.lane-sense-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.6rem;
+	height: 1.4rem;
+	font-family: var(--sans);
+	font-size: 0.75rem;
+	font-weight: 700;
+	border-radius: 4px;
+	background: var(--bg-2);
+	color: var(--muted);
+	margin-right: 0.45rem;
+	vertical-align: middle;
+	user-select: none;
+}
+.lane-subsense {
+	margin: 0.35rem 0 0 1.1rem;
+	padding-left: 0.65rem;
+	border-left: 2px solid color-mix(in srgb, var(--teal) 35%, transparent);
+	font-size: 0.92rem;
+	line-height: 1.65;
+}
+.lane-subsense-badge {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--sans);
+	font-size: 0.72rem;
+	font-weight: 700;
+	color: var(--teal);
+	background: color-mix(in srgb, var(--teal) 8%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 20%, transparent);
+	padding: 0.06rem 0.35rem;
+	border-radius: 4px;
+	margin-right: 0.35rem;
+	vertical-align: middle;
+}
+.lane-source {
+	font-size: 0.82rem;
+	color: var(--muted);
+	font-style: normal;
+	letter-spacing: 0.02em;
+}
+.lane-quran-cite {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--sans);
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--teal);
+	background: color-mix(in srgb, var(--teal) 8%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 20%, transparent);
+	padding: 0.08rem 0.4rem;
+	border-radius: 999px;
+	margin: 0 0.25rem;
+	vertical-align: middle;
 }
 .lane-ar {
 	font-family: var(--arabic);
-	font-size: 1.15em;
+	font-size: 1.25em;
+	color: var(--ink);
+	font-weight: 600;
 	unicode-bidi: isolate;
+}
+.lane-em {
+	font-style: italic;
+	color: var(--ink);
 }
 .lexicon-more > summary {
 	cursor: pointer;
@@ -4660,6 +4942,7 @@ a.wujuh-cite:focus-visible {
 	font-size: 1.12rem;
 	line-height: 1.8;
 	color: var(--ink);
+	white-space: pre-line;
 }
 
 .exegesis-text-en {
@@ -4667,6 +4950,7 @@ a.wujuh-cite:focus-visible {
 	font-size: 0.85rem;
 	line-height: 1.6;
 	color: var(--ink-soft);
+	white-space: pre-line;
 }
 
 .settings-section-hint {

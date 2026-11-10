@@ -83,6 +83,8 @@ export const en: Translations = {
 			submitButton: "Check",
 			placesHeading: "Where each wording occurs",
 			thisAyah: "this ayah",
+			dabtHeading: "Memorization Rule (Ḍabṭ)",
+			tawjihHeading: "Rhetorical Exegesis (Tawjīh)",
 		},
 		sarf: {
 			rootQuestion: (wordAr: string) =>

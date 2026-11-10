@@ -173,6 +173,7 @@ interface Props {
 	verse: Verse;
 	layers: ReaderLayers;
 	target?: VerseRef;
+	selected?: number;
 	onSelect: (word: number, segment?: number) => void;
 	onNavigate?: (
 		sura: number,
@@ -191,6 +192,7 @@ export function VerseSecondaryLayers({
 	verse,
 	layers,
 	target,
+	selected,
 	onSelect,
 	onNavigate,
 	nahwPanel,
@@ -229,6 +231,9 @@ export function VerseSecondaryLayers({
 							sura={sura}
 							verseNumber={verse.v}
 							khatibEnabled={khatibEnabled}
+							words={verse.w}
+							selectedWord={selected}
+							onSelectWord={onSelect}
 						/>
 					</div>
 				</details>

@@ -339,6 +339,12 @@ export interface MutashabihQuizEntry {
 	ans: number;
 	/** Surah choices, the ayah's own among them. */
 	surahs: number[];
+	/** Classical memorization rule / trick (ḍābiṭ), if available for this divergence. */
+	dabt?: string;
+	/** Classical rhetorical explanation (tawjīh), if available. */
+	tawjih?: string;
+	/** English mnemonic / difference note, if available. */
+	noteEn?: string;
 }
 
 export interface MutashabihQuizFile {

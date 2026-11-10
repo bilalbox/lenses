@@ -84,6 +84,8 @@ export const ar: Translations = {
 			submitButton: "تحقق",
 			placesHeading: "مواضع كل لفظ",
 			thisAyah: "هذه الآية",
+			dabtHeading: "قاعدة الضبط والحفظ",
+			tawjihHeading: "توجيه الاختلاف والبلاغة",
 		},
 		sarf: {
 			rootQuestion: (wordAr: string) =>

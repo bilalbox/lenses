@@ -63,3 +63,18 @@ def test_a_wording_that_makes_the_partner_ayah_is_not_a_wrong_option() -> None:
         (3, 60): "الحق من ربك فلا تكن من الممترين",
     }
     assert build_questions(corpus(texts, [((2, 147), (3, 60))])) == []
+
+
+def test_questions_include_classical_dabt_when_available() -> None:
+    texts = {(2, 49): " ".join(A), (7, 141): " ".join(B)}
+    c = corpus(texts, [((2, 49), (7, 141))])
+    c.notes[((2, 49), (7, 141))] = {
+        "dabt": "قاعدة: يذبحون في البقرة وإبراهيم، ويقتلون في الأعراف",
+        "tawjih": "توجيه بلاغي",
+        "noteEn": "Mnemonic rule in English",
+    }
+    questions = build_questions(c)
+    first = next(q for q in questions if q["s"] == 2)
+    assert first.get("dabt") == "قاعدة: يذبحون في البقرة وإبراهيم، ويقتلون في الأعراف"
+    assert first.get("tawjih") == "توجيه بلاغي"
+    assert first.get("noteEn") == "Mnemonic rule in English"

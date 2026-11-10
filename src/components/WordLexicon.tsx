@@ -1,8 +1,13 @@
 import type { ReactNode } from "react";
+import {
+	formatLaneEntries,
+	formatMaqayis,
+	formatMufradat,
+} from "../lib/formatLexicon";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { useLexicon } from "../lib/layers";
 import { laneEntriesFor } from "../lib/lexicon";
-import type { LaneEntry, LaneRun, Segment } from "../lib/types";
+import type { LaneEntry, Segment } from "../lib/types";
 
 // Perseus asks for this exact credit wherever Lane's text is used.
 const PERSEUS_CREDIT =
@@ -16,10 +21,9 @@ interface Props {
 
 /** Classical dictionary entries for the word's root, one drawer per dictionary. */
 export function WordLexicon({ stem, openFirst = true }: Props) {
-	const { locale, t } = useI18n();
+	const { t } = useI18n();
 	const { data } = useLexicon(stem?.r);
-	// Lane is an English dictionary; the Arabic and Indonesian views show the Arabic ones.
-	const lane = locale === "en" ? data?.lane : undefined;
+	const lane = data?.lane;
 	if (!data || data.r !== stem?.r) return null;
 
 	return (
@@ -27,12 +31,12 @@ export function WordLexicon({ stem, openFirst = true }: Props) {
 			<h3 className="sheet-section-label">{t.sheet.dictionaries}</h3>
 			{data.maqayis ? (
 				<Drawer title={t.sheet.maqayisTitle} open={openFirst}>
-					<ArabicParagraphs paragraphs={data.maqayis} />
+					{formatMaqayis(data.maqayis)}
 				</Drawer>
 			) : null}
 			{data.mufradat ? (
 				<Drawer title={t.sheet.mufradatTitle}>
-					<ArabicParagraphs paragraphs={data.mufradat} />
+					{formatMufradat(data.mufradat)}
 				</Drawer>
 			) : null}
 			{lane ? (
@@ -73,16 +77,6 @@ function Drawer({
 	);
 }
 
-function ArabicParagraphs({ paragraphs }: { paragraphs: string[] }) {
-	return (
-		<div className="prose lexicon-prose" dir="rtl" lang="ar">
-			{paragraphs.map((text, index) => (
-				<p key={index}>{text}</p>
-			))}
-		</div>
-	);
-}
-
 function LaneEntries({
 	entries,
 	lemma,
@@ -92,51 +86,17 @@ function LaneEntries({
 }) {
 	const { t } = useI18n();
 	const { word, rest } = laneEntriesFor(entries, lemma);
-	if (word.length === 0) return <LaneList entries={rest} />;
+	if (word.length === 0) return <>{formatLaneEntries(rest)}</>;
 	return (
 		<>
 			<h4 className="lexicon-subhead">{t.sheet.laneThisWord}</h4>
-			<LaneList entries={word} />
+			{formatLaneEntries(word)}
 			{rest.length > 0 ? (
 				<details className="lexicon-more">
 					<summary>{t.sheet.laneOtherEntries(rest.length)}</summary>
-					<LaneList entries={rest} />
+					{formatLaneEntries(rest)}
 				</details>
 			) : null}
-		</>
-	);
-}
-
-function LaneList({ entries }: { entries: LaneEntry[] }) {
-	return (
-		<div className="lane-entries" dir="ltr" lang="en">
-			{entries.map((entry, index) => (
-				<p key={index} className="lane-entry">
-					{entry.f ? <span className="lane-form">{entry.f}</span> : null}
-					<b className="lane-ar" lang="ar" dir="rtl">
-						{entry.h}
-					</b>{" "}
-					<LaneText runs={entry.t} />
-				</p>
-			))}
-		</div>
-	);
-}
-
-function LaneText({ runs }: { runs: LaneRun[] }) {
-	return (
-		<>
-			{runs.map((run, index) => {
-				if (typeof run === "string") return run;
-				const [kind, text] = run;
-				return kind === 1 ? (
-					<em key={index}>{text}</em>
-				) : (
-					<span key={index} className="lane-ar" lang="ar" dir="rtl">
-						{text}
-					</span>
-				);
-			})}
 		</>
 	);
 }

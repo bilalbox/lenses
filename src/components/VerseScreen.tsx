@@ -294,6 +294,7 @@ function VerseBody({
 				verse={verse}
 				layers={layers}
 				target={target}
+				selected={selected}
 				onSelect={onSelect}
 				onNavigate={onNavigate}
 				khatibEnabled={readerPrefs.khatib}

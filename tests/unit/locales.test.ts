@@ -108,6 +108,14 @@ describe("i18n locales", () => {
 				t.quiz.sarf.rootInExamples("علم"),
 				`${code} rootInExamples`,
 			).toBeTruthy();
+			expect(
+				t.quiz.mutashabih.dabtHeading,
+				`${code} mutashabih dabtHeading`,
+			).toBeTruthy();
+			expect(
+				t.quiz.mutashabih.tawjihHeading,
+				`${code} mutashabih tawjihHeading`,
+			).toBeTruthy();
 		}
 	});
 

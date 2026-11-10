@@ -293,6 +293,36 @@ function MutashabihReveal({
 			}
 			onNext={onNext}
 		>
+			{q.dabt ? (
+				<div className="mutashabih-exegesis-card is-dabt">
+					<div className="exegesis-header">
+						<h4 className="exegesis-heading">{copy.dabtHeading}</h4>
+					</div>
+					<p className="exegesis-text" lang="ar" dir="rtl">
+						{q.dabt}
+					</p>
+				</div>
+			) : null}
+
+			{q.tawjih ? (
+				<div className="mutashabih-exegesis-card is-tawjih">
+					<div className="exegesis-header">
+						<h4 className="exegesis-heading">{copy.tawjihHeading}</h4>
+					</div>
+					<p className="exegesis-text" lang="ar" dir="rtl">
+						{q.tawjih}
+					</p>
+				</div>
+			) : null}
+
+			{q.noteEn ? (
+				<div className="mutashabih-exegesis-card is-note-en">
+					<p className="exegesis-text-en" lang="en" dir="ltr">
+						{q.noteEn}
+					</p>
+				</div>
+			) : null}
+
 			<ul className="quiz-mt-places">
 				{ownFirst.map(({ w, i }) => (
 					<li key={w.text} className={i === q.answer ? "is-own" : undefined}>

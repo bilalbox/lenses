@@ -95,6 +95,8 @@ export interface Translations {
 			submitButton: string;
 			placesHeading: string;
 			thisAyah: string;
+			dabtHeading: string;
+			tawjihHeading: string;
 		};
 		sarf: {
 			rootQuestion: (wordAr: string) => string;

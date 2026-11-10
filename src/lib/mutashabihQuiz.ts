@@ -28,6 +28,12 @@ export interface MutashabihQuestion {
 	/** Index into `wordings` of the ayah's own wording. */
 	answer: number;
 	surahs: SurahChoice[];
+	/** Classical memorization rule / trick (ḍābiṭ), if available. */
+	dabt?: string;
+	/** Classical rhetorical explanation (tawjīh), if available. */
+	tawjih?: string;
+	/** English mnemonic / difference note, if available. */
+	noteEn?: string;
 }
 
 /** The quiz bank with surah names from the manifest; entries naming an unknown surah are dropped. */
@@ -65,6 +71,9 @@ export function toMutashabihQuestions(
 				})),
 				answer: q.ans,
 				surahs: surahs as SurahChoice[],
+				dabt: q.dabt,
+				tawjih: q.tawjih,
+				noteEn: q.noteEn,
 			},
 		];
 	});

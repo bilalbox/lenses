@@ -85,6 +85,8 @@ export const id: Translations = {
 			submitButton: "Periksa",
 			placesHeading: "Letak setiap lafaz",
 			thisAyah: "ayat ini",
+			dabtHeading: "Kaidah / Rumus Hafalan (Dzabit)",
+			tawjihHeading: "Tawjih Balaghah & Perbedaan",
 		},
 		sarf: {
 			rootQuestion: (wordAr: string) =>
