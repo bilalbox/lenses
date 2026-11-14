@@ -187,17 +187,21 @@ describe("search: searchExamples & countExamples", () => {
 		expect(zeroCount).toBe(0);
 	});
 
-	it("computes lemma and form facets for matching examples", () => {
+	it("computes lemma, form, POS, and non-particle relation facets", () => {
 		const indexWithForm: WordIndex = {
 			...mockIndex,
 			rows: [
 				...mockIndex.rows,
-				[1, 2, 1, "عَلَّمَ", 0, 0, "V", "V", "form=II", ""],
+				[1, 2, 1, "عَلَّمَ", 0, 0, "V", "V", "form=II", "circ,neg"],
 			],
 		};
 		const facets = exampleFacets(indexWithForm, { ...baseQuery, pos: "V" });
 		expect(facets.lemmas.length).toBeGreaterThan(0);
 		expect(facets.forms).toEqual([{ key: "II", label: "II", count: 1 }]);
+		expect(facets.poses).toEqual([{ key: "V", label: "V", count: 1 }]);
+		expect(facets.relations).toEqual([
+			{ key: "circ", label: "circ", count: 1 },
+		]);
 	});
 
 	it("summarizes morphological features", () => {

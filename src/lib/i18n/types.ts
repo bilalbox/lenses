@@ -251,8 +251,24 @@ export interface Translations {
 		filterRoot: string;
 		filterLemma: string;
 		filterPos: string;
+		posHint: string;
+		posGroups: {
+			word: string;
+			particle: string;
+			clitic: string;
+		};
 		filterForm: string;
 		filterRelation: string;
+		relationHint: string;
+		relationGroups: {
+			core: string;
+			nom: string;
+			clause: string;
+		};
+		facetPos: string;
+		facetForm: string;
+		facetLemma: string;
+		facetRelation: string;
 		anyOption: string;
 		noOptionMatch: string;
 		clearFilter: (label: string) => string;

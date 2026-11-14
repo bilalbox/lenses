@@ -4,7 +4,7 @@ import {
 	stripDiacritics,
 	toBuckwalter,
 } from "./arabic";
-import { featureLines } from "./glossary";
+import { featureLines, relationFamily } from "./glossary";
 import type { Features, Lexeme, VerseRow, WordIndex, WordRow } from "./types";
 
 export interface VerseHit {
@@ -180,35 +180,52 @@ function rowMatches(
 	);
 }
 
+export interface ExampleFacets {
+	lemmas: Facet[];
+	forms: Facet[];
+	poses: Facet[];
+	relations: Facet[];
+}
+
+function bumpFacet(map: Map<string, Facet>, key: string, label = key) {
+	if (!key) return;
+	const current = map.get(key) ?? { key, label, count: 0 };
+	current.count += 1;
+	map.set(key, current);
+}
+
 export function exampleFacets(
 	index: WordIndex,
 	query: ExampleQuery,
-): { lemmas: Facet[]; forms: Facet[] } {
+): ExampleFacets {
 	const lemmas = new Map<string, Facet>();
 	const forms = new Map<string, Facet>();
+	const poses = new Map<string, Facet>();
+	const relations = new Map<string, Facet>();
 	for (const row of index.rows) {
 		if (!rowMatches(index, row, query)) continue;
 		const lemma = index.lemmas[row[5]];
 		const lemmaKey = lemma?.b || "";
-		if (lemmaKey) {
-			const current = lemmas.get(lemmaKey) ?? {
-				key: lemmaKey,
-				label: lemma?.a || lemmaKey,
-				count: 0,
-			};
-			current.count += 1;
-			lemmas.set(lemmaKey, current);
-		}
+		if (lemmaKey) bumpFacet(lemmas, lemmaKey, lemma?.a || lemmaKey);
 		const form = parseFeatures(row[8]).form;
-		if (form) {
-			const current = forms.get(form) ?? { key: form, label: form, count: 0 };
-			current.count += 1;
-			forms.set(form, current);
+		if (form) bumpFacet(forms, form);
+		if (row[6]) bumpFacet(poses, row[6]);
+		if (row[9]) {
+			const seen = new Set<string>();
+			for (const rel of row[9].split(",")) {
+				if (!rel || seen.has(rel) || relationFamily(rel) === "particle")
+					continue;
+				seen.add(rel);
+				bumpFacet(relations, rel);
+			}
 		}
 	}
+	const byCount = (a: Facet, b: Facet) => b.count - a.count;
 	return {
-		lemmas: [...lemmas.values()].sort((a, b) => b.count - a.count).slice(0, 6),
-		forms: [...forms.values()].sort((a, b) => b.count - a.count),
+		lemmas: [...lemmas.values()].sort(byCount).slice(0, 6),
+		forms: [...forms.values()].sort(byCount),
+		poses: [...poses.values()].sort(byCount).slice(0, 6),
+		relations: [...relations.values()].sort(byCount).slice(0, 6),
 	};
 }
 

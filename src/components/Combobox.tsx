@@ -14,10 +14,13 @@ export interface ComboboxOption {
 	value: string;
 	/** One-line gloss in the reader's language; also searched. */
 	about: string;
+	/** Optional section label for grouping options in the dropdown. */
+	group?: string;
 }
 
 interface Props {
 	label: string;
+	hint?: string;
 	options: ComboboxOption[];
 	value: string;
 	/** Shown in the empty input; the selected option's name replaces it. */
@@ -63,6 +66,7 @@ function nextIndex(key: string, current: number, count: number) {
  */
 export function Combobox({
 	label,
+	hint,
 	options,
 	value,
 	placeholder,
@@ -80,15 +84,15 @@ export function Combobox({
 	const [active, setActive] = useState(0);
 
 	const selected = options.find((o) => o.value === value);
+	const needle = fold(text.trim());
 	const matches = useMemo(() => {
-		const needle = fold(text.trim());
 		if (!needle) return options;
 		return options
 			.map((option) => ({ option, rank: matchRank(option, needle) }))
 			.filter((m) => m.rank >= 0)
 			.sort((x, y) => x.rank - y.rank)
 			.map((m) => m.option);
-	}, [options, text]);
+	}, [options, needle]);
 
 	useEffect(() => {
 		if (!open) return;
@@ -149,17 +153,25 @@ export function Combobox({
 		if (event.key === "Enter" && activeOption) pick(activeOption);
 	};
 
+	const hintId = hint ? `${id}-hint` : undefined;
+
 	return (
 		<div ref={rootRef} className="combobox">
 			<label className="combobox-label" htmlFor={inputId}>
 				{label}
 			</label>
+			{hint ? (
+				<span id={hintId} className="combobox-hint">
+					{hint}
+				</span>
+			) : null}
 			<div className="combobox-field">
 				<input
 					id={inputId}
 					role="combobox"
 					aria-expanded={open}
 					aria-controls={listId}
+					aria-describedby={hintId}
 					aria-autocomplete="list"
 					aria-activedescendant={
 						activeOption ? `${id}-opt-${active}` : undefined
@@ -207,25 +219,46 @@ export function Combobox({
 							{emptyText}
 						</p>
 					) : (
-						matches.map((option, index) => (
-							<div
-								key={option.value}
-								id={`${id}-opt-${index}`}
-								role="option"
-								tabIndex={-1}
-								aria-selected={option.value === value}
-								className={`combobox-option${index === active ? " is-active" : ""}`}
-								onMouseDown={(event) => event.preventDefault()}
-								onMouseMove={() => setActive(index)}
-								onClick={() => pick(option)}
-								onKeyDown={onOptionKey}
-							>
-								<b lang="ar" dir="rtl">
-									{option.name}
-								</b>
-								{option.about ? <small dir="auto">{option.about}</small> : null}
-							</div>
-						))
+						matches.map((option, index) => {
+							const showHeader =
+								!needle &&
+								Boolean(option.group) &&
+								option.group !== matches[index - 1]?.group;
+							return (
+								<div key={option.value} className="combobox-item">
+									{showHeader ? (
+										<div role="presentation" className="combobox-group">
+											{option.group}
+										</div>
+									) : null}
+									<div
+										id={`${id}-opt-${index}`}
+										role="option"
+										tabIndex={-1}
+										aria-selected={option.value === value}
+										className={`combobox-option${index === active ? " is-active" : ""}`}
+										onMouseDown={(event) => event.preventDefault()}
+										onMouseMove={() => setActive(index)}
+										onClick={() => pick(option)}
+										onKeyDown={onOptionKey}
+									>
+										<div className="combobox-option-head">
+											<b lang="ar" dir="rtl">
+												{option.name}
+											</b>
+											{needle && option.group ? (
+												<span className="combobox-option-group">
+													{option.group}
+												</span>
+											) : null}
+										</div>
+										{option.about ? (
+											<small dir="auto">{option.about}</small>
+										) : null}
+									</div>
+								</div>
+							);
+						})
 					)}
 				</div>
 			) : null}

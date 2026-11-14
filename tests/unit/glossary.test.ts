@@ -3,8 +3,11 @@ import {
 	featureLines,
 	formGloss,
 	kindGloss,
+	POS,
 	phraseGloss,
+	posFamily,
 	posGloss,
+	RELATIONS,
 	relationFamily,
 	relationGloss,
 } from "../../src/lib/glossary";
@@ -29,12 +32,26 @@ describe("glossary", () => {
 		expect(kindGloss("p", "en").about).toBeTruthy();
 	});
 
-	it("classifies relations into families", () => {
+	it("classifies relations and POS into families without Arabic label overlap", () => {
 		expect(relationFamily("subj")).toBe("core");
 		expect(relationFamily("obj")).toBe("core");
 		expect(relationFamily("poss")).toBe("nom");
+		expect(relationFamily("state")).toBe("nom");
 		expect(relationFamily("conj")).toBe("clause");
 		expect(relationFamily("other")).toBe("particle");
+
+		expect(posFamily("N")).toBe("word");
+		expect(posFamily("NEG")).toBe("particle");
+		expect(posFamily("CIRC")).toBe("clitic");
+
+		const posNames = new Set(Object.values(POS).map((entry) => entry.name));
+		const nonParticleRelNames = Object.entries(RELATIONS)
+			.filter(([code]) => relationFamily(code) !== "particle")
+			.map(([, entry]) => entry.name);
+		for (const name of nonParticleRelNames) {
+			expect(posNames.has(name), name).toBe(false);
+		}
+		expect(posGloss("CIRC").name).not.toBe(relationGloss("circ").name);
 	});
 
 	it("builds feature lines from morphological features object", () => {
