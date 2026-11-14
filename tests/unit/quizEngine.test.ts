@@ -11,7 +11,6 @@ import {
 	type QuizCase,
 	type QuizRelation,
 	type QuizSign,
-	rolesFor,
 	signsForCase,
 } from "../../src/lib/quizCatalog";
 import { extractQuizPools } from "../../src/lib/quizEngine";
@@ -109,12 +108,11 @@ describe("quizEngine: metadata lookup", () => {
 		});
 	});
 
-	it("filters signs and roles properly", () => {
+	it("filters signs by case", () => {
 		expect(signsForCase(null)).toHaveLength(8);
 		expect(signsForCase("NOM")).toHaveLength(4);
 		expect(isPhraseRole("pp")).toBe(true);
 		expect(isPhraseRole("subj")).toBe(false);
-		expect(rolesFor(true).length).toBeGreaterThan(rolesFor(false).length);
 	});
 });
 

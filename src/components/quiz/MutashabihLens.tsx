@@ -1,5 +1,7 @@
 /** The mutashabih lens: fill the word where an ayah parts from a similar one, then name its surah. */
+
 import { useI18n } from "../../lib/i18n/I18nContext";
+import { surahLabel } from "../../lib/manifest";
 import {
 	ayahWithBlank,
 	type MutashabihQuestion,
@@ -24,12 +26,10 @@ import {
 	VerdictChip,
 } from "./QuizParts";
 
-type Show = (text: string) => string;
-
 export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
-	const { t } = useI18n();
+	const { locale, t } = useI18n();
 	const copy = t.quiz.mutashabih;
-	const { question: q, session, dispatch, show } = props;
+	const { question: q, session, dispatch } = props;
 	const draft = session.drafts.mutashabih;
 	const complete = session.verdict !== null;
 	const step = currentStep(session);
@@ -37,7 +37,7 @@ export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 	const pickedSurah = q.surahs.find((s) => s.n === draft.surah) ?? null;
 	const { filled, total } = progress(session);
 	const goTo = (next: WizardStep) => dispatch({ type: "goToStep", step: next });
-	const wordingLabel = (text: string) => (text ? show(text) : copy.noWord);
+	const wordingLabel = (text: string) => text || copy.noWord;
 
 	const crumbs: QuizCrumb[] = [
 		{
@@ -63,7 +63,7 @@ export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 	const surahChoices: Choice[] = q.surahs.map((s) => ({
 		code: String(s.n),
 		ar: s.name,
-		sub: s.phonetic,
+		sub: locale === "ar" ? undefined : s.phonetic,
 	}));
 
 	return (
@@ -77,14 +77,18 @@ export function MutashabihLens(props: LensProps<MutashabihQuestion>) {
 					question={q}
 					fill={fill}
 					complete={complete}
-					show={show}
 					noWord={copy.noWord}
 				/>
 			}
 			// Naming the surah is step 2, so the reference stays hidden until checked.
 			place={
 				complete
-					? { phonetic: q.suraPhonetic, sura: q.sura, verse: q.verse.v }
+					? {
+							name: q.suraName,
+							phonetic: q.suraPhonetic,
+							sura: q.sura,
+							verse: q.verse.v,
+						}
 					: null
 			}
 			onOpenReader={() =>
@@ -161,13 +165,11 @@ function AyahLine({
 	question,
 	fill,
 	complete,
-	show,
 	noWord,
 }: {
 	question: MutashabihQuestion;
 	fill: string | null;
 	complete: boolean;
-	show: Show;
 	noWord: string;
 }) {
 	const { formatNumber } = useI18n();
@@ -177,7 +179,7 @@ function AyahLine({
 				if (piece.kind === "word")
 					return (
 						<span key={piece.index} className="quiz-word-token">
-							<span className="quiz-word-arabic">{show(piece.text)}</span>
+							<span className="quiz-word-arabic">{piece.text}</span>
 						</span>
 					);
 				if (complete && piece.text === "") return null;
@@ -188,7 +190,7 @@ function AyahLine({
 					>
 						<span className="quiz-word-arabic">
 							{piece.text === null ? "\u2003\u2003" : null}
-							{piece.text ? show(piece.text) : null}
+							{piece.text ? piece.text : null}
 							{piece.text === "" ? <small>{noWord}</small> : null}
 						</span>
 					</span>
@@ -257,7 +259,7 @@ function MutashabihReveal({
 	onNext,
 	wordingLabel,
 }: LensProps<MutashabihQuestion> & { wordingLabel: (text: string) => string }) {
-	const { t, formatNumber } = useI18n();
+	const { locale, t, formatNumber } = useI18n();
 	const copy = t.quiz.mutashabih;
 	const fields = session.verdict?.fields ?? {};
 	const draft = session.drafts.mutashabih;
@@ -291,6 +293,36 @@ function MutashabihReveal({
 			}
 			onNext={onNext}
 		>
+			{q.dabt ? (
+				<div className="mutashabih-exegesis-card is-dabt">
+					<div className="exegesis-header">
+						<h4 className="exegesis-heading">{copy.dabtHeading}</h4>
+					</div>
+					<p className="exegesis-text" lang="ar" dir="rtl">
+						{q.dabt}
+					</p>
+				</div>
+			) : null}
+
+			{q.tawjih ? (
+				<div className="mutashabih-exegesis-card is-tawjih">
+					<div className="exegesis-header">
+						<h4 className="exegesis-heading">{copy.tawjihHeading}</h4>
+					</div>
+					<p className="exegesis-text" lang="ar" dir="rtl">
+						{q.tawjih}
+					</p>
+				</div>
+			) : null}
+
+			{q.noteEn ? (
+				<div className="mutashabih-exegesis-card is-note-en">
+					<p className="exegesis-text-en" lang="en" dir="ltr">
+						{q.noteEn}
+					</p>
+				</div>
+			) : null}
+
 			<ul className="quiz-mt-places">
 				{ownFirst.map(({ w, i }) => (
 					<li key={w.text} className={i === q.answer ? "is-own" : undefined}>
@@ -305,7 +337,8 @@ function MutashabihReveal({
 									className="quiz-mt-ref"
 									onClick={() => onOpenInReader(r.sura, r.verse)}
 								>
-									{r.phonetic} {formatNumber(r.sura)}:{formatNumber(r.verse)}
+									{surahLabel(r, locale)} {formatNumber(r.sura)}:
+									{formatNumber(r.verse)}
 									{i === q.answer ? ` · ${copy.thisAyah}` : ""}
 								</button>
 							))}

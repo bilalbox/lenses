@@ -4,8 +4,12 @@ import {
 	FORMS,
 	formGloss,
 	POS,
+	type PosFamily,
+	posFamily,
 	posGloss,
 	RELATIONS,
+	type RelationFamily,
+	relationFamily,
 	relationGloss,
 } from "../lib/glossary";
 import { useI18n } from "../lib/i18n/I18nContext";
@@ -13,12 +17,15 @@ import type { Locale } from "../lib/i18n/types";
 import { useLayer } from "../lib/layers";
 import {
 	countExamples,
+	type ExampleHit,
 	type ExampleQuery,
 	exampleFacets,
+	type Facet,
 	featureSummary,
 	searchExamples,
 } from "../lib/search";
 import { Combobox, type ComboboxOption } from "./Combobox";
+import { ChevronRightIcon } from "./Icons";
 
 const empty: ExampleQuery = {
 	root: "",
@@ -44,6 +51,15 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 	const { data: verses } = useLayer("verses");
 	const [query, setQuery] = useState<ExampleQuery>({ ...empty, ...initial });
 	const [limit, setLimit] = useState(40);
+	const advancedActive = Boolean(
+		query.lemma || query.pos || query.form || query.relation,
+	);
+	// Root is the common entry point; the finer filters wait behind a toggle
+	// and open by themselves when a preset or quiz link fills one.
+	const [moreOpen, setMoreOpen] = useState(advancedActive);
+	useEffect(() => {
+		if (advancedActive) setMoreOpen(true);
+	}, [advancedActive]);
 
 	const presets = useMemo(
 		() => [
@@ -68,10 +84,22 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 		[t],
 	);
 
-	const posOptions = useMemo(
-		() => glossOptions(POS, locale, posGloss),
-		[locale],
-	);
+	const posOptions = useMemo(() => {
+		const groups: PosFamily[] = ["word", "particle", "clitic"];
+		return groups.flatMap((group) =>
+			Object.keys(POS)
+				.filter((code) => posFamily(code) === group)
+				.map((code) => {
+					const gloss = posGloss(code, locale);
+					return {
+						name: gloss.name,
+						value: code,
+						about: gloss.about,
+						group: t.examples.posGroups[group],
+					};
+				}),
+		);
+	}, [locale, t]);
 	const formOptions = useMemo(
 		() =>
 			Object.entries(FORMS).map(([value, gloss]) => ({
@@ -81,10 +109,26 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 			})),
 		[locale],
 	);
-	const relationOptions = useMemo(
-		() => glossOptions(RELATIONS, locale, relationGloss),
-		[locale],
-	);
+	const relationOptions = useMemo(() => {
+		const groups: Exclude<RelationFamily, "particle">[] = [
+			"core",
+			"nom",
+			"clause",
+		];
+		return groups.flatMap((group) =>
+			Object.keys(RELATIONS)
+				.filter((code) => relationFamily(code) === group)
+				.map((code) => {
+					const gloss = relationGloss(code, locale);
+					return {
+						name: gloss.name,
+						value: code,
+						about: gloss.about,
+						group: t.examples.relationGroups[group],
+					};
+				}),
+		);
+	}, [locale, t]);
 
 	useEffect(() => {
 		if (initial) setQuery({ ...empty, ...initial });
@@ -99,7 +143,9 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 	);
 	const facets = useMemo(
 		() =>
-			index && active ? exampleFacets(index, query) : { lemmas: [], forms: [] },
+			index && active
+				? exampleFacets(index, query)
+				: { lemmas: [], forms: [], poses: [], relations: [] },
 		[index, query, active],
 	);
 	const verseOf = useMemo(() => {
@@ -131,7 +177,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 				<h1>{t.examples.pageTitle}</h1>
 				<p className="search-lead">{t.examples.lead}</p>
 			</header>
-			<div className="presets" dir="rtl" lang="ar">
+			<div className="presets">
 				{presets.map((preset) => (
 					<button
 						key={preset.label}
@@ -153,45 +199,63 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 					<input
 						value={query.root}
 						onChange={(event) => set({ root: event.target.value })}
-						placeholder="علم or Elm"
+						placeholder={t.examples.rootPlaceholder}
 					/>
 				</label>
-				<label className="filter-text">
-					{t.examples.filterLemma}
-					<input
-						value={query.lemma}
-						onChange={(event) => set({ lemma: event.target.value })}
-						placeholder="hal"
-					/>
-				</label>
+				<button
+					type="button"
+					className="filters-toggle"
+					aria-expanded={moreOpen}
+					aria-controls="example-filters-more"
+					onClick={() => setMoreOpen((open) => !open)}
+				>
+					{moreOpen ? t.examples.fewerFilters : t.examples.moreFilters}
+					<ChevronRightIcon className="filters-toggle-chevron" />
+				</button>
+				<div
+					id="example-filters-more"
+					className="filters-more"
+					hidden={!moreOpen}
+				>
+					<label className="filter-text">
+						{t.examples.filterLemma}
+						<input
+							value={query.lemma}
+							onChange={(event) => set({ lemma: event.target.value })}
+							placeholder={t.examples.lemmaPlaceholder}
+						/>
+					</label>
 
-				<Combobox
-					label={t.examples.filterPos}
-					options={withCurrent(posOptions, query.pos, POS)}
-					value={query.pos}
-					placeholder={t.examples.anyOption}
-					emptyText={t.examples.noOptionMatch}
-					clearLabel={t.examples.clearFilter(t.examples.filterPos)}
-					onChange={pickPos}
-				/>
-				<Combobox
-					label={t.examples.filterRelation}
-					options={withCurrent(relationOptions, query.relation, RELATIONS)}
-					value={query.relation}
-					placeholder={t.examples.anyOption}
-					emptyText={t.examples.noOptionMatch}
-					clearLabel={t.examples.clearFilter(t.examples.filterRelation)}
-					onChange={(relation) => set({ relation })}
-				/>
-				{showForm ? (
-					<FormChips
-						label={t.examples.filterForm}
-						anyLabel={t.examples.anyOption}
-						options={formOptions}
-						value={query.form}
-						onPick={pickForm}
+					<Combobox
+						label={t.examples.filterPos}
+						hint={t.examples.posHint}
+						options={withCurrent(posOptions, query.pos, POS)}
+						value={query.pos}
+						placeholder={t.examples.anyOption}
+						emptyText={t.examples.noOptionMatch}
+						clearLabel={t.examples.clearFilter(t.examples.filterPos)}
+						onChange={pickPos}
 					/>
-				) : null}
+					<Combobox
+						label={t.examples.filterRelation}
+						hint={t.examples.relationHint}
+						options={withCurrent(relationOptions, query.relation, RELATIONS)}
+						value={query.relation}
+						placeholder={t.examples.anyOption}
+						emptyText={t.examples.noOptionMatch}
+						clearLabel={t.examples.clearFilter(t.examples.filterRelation)}
+						onChange={(relation) => set({ relation })}
+					/>
+					{showForm ? (
+						<FormChips
+							label={t.examples.filterForm}
+							anyLabel={t.examples.anyOption}
+							options={formOptions}
+							value={query.form}
+							onPick={pickForm}
+						/>
+					) : null}
+				</div>
 			</form>
 			{error ? <p className="banner error">{error}</p> : null}
 			{!index && !error ? (
@@ -209,37 +273,22 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 						<strong>{formatNumber(total)}</strong>
 						<span>{t.examples.wordsFound(total, hits.length)}</span>
 					</p>
-					{(!showForm && facets.forms.length > 1) ||
-					facets.lemmas.length > 1 ? (
-						<div className="facets" dir="rtl">
-							{(showForm ? [] : facets.forms).map((facet) => (
-								<button
-									key={facet.key}
-									type="button"
-									className={query.form === facet.key ? "is-on" : ""}
-									onClick={() =>
-										set({ form: query.form === facet.key ? "" : facet.key })
-									}
-								>
-									<b lang="ar">{FORMS[facet.key]?.name ?? facet.label}</b>
-									<small>{formatNumber(facet.count)}</small>
-								</button>
-							))}
-							{facets.lemmas.map((facet) => (
-								<button
-									key={facet.key}
-									type="button"
-									className={query.lemma === facet.key ? "is-on" : ""}
-									onClick={() =>
-										set({ lemma: query.lemma === facet.key ? "" : facet.key })
-									}
-								>
-									<b lang="ar">{facet.label}</b>
-									<small>{formatNumber(facet.count)}</small>
-								</button>
-							))}
-						</div>
-					) : null}
+					<SearchFacets
+						facets={facets}
+						query={query}
+						showForm={showForm}
+						locale={locale}
+						formatNumber={formatNumber}
+						labels={t.examples}
+						onPickPos={(pos) => pickPos(query.pos === pos ? "" : pos)}
+						onPickForm={pickForm}
+						onPickRelation={(relation) =>
+							set({ relation: query.relation === relation ? "" : relation })
+						}
+						onPickLemma={(lemma) =>
+							set({ lemma: query.lemma === lemma ? "" : lemma })
+						}
+					/>
 					{total === 0 ? (
 						<p className="hint">{t.examples.noWordsMatch}</p>
 					) : null}
@@ -263,18 +312,7 @@ export function ExampleSearch({ initial, onOpen }: Props) {
 										<span className="hit-snippet" lang="ar" dir="rtl">
 											{markSnippet(snippet, needle)}
 										</span>
-										<span className="hit-meta">
-											<span dir="rtl" lang="ar">
-												{POS[hit.pos]?.name ?? hit.pos}
-												{featureSummary(hit.features)
-													? ` · ${featureSummary(hit.features)}`
-													: ""}
-												{hit.relations.length
-													? ` · ${[...new Set(hit.relations.map((code) => relationGloss(code, locale).name))].join("، ")}`
-													: ""}
-											</span>
-											{hit.gloss ? ` · ${hit.gloss}` : ""}
-										</span>
+										<HitMeta hit={hit} locale={locale} />
 									</button>
 								</li>
 							);
@@ -348,20 +386,130 @@ function withCurrent(
 	return [{ name, value, about: "" }, ...options];
 }
 
-function glossOptions(
-	table: Record<string, { name: string }>,
-	locale: Locale,
-	glossFn: (code: string, locale: Locale) => { name: string; about: string },
-): FilterOption[] {
-	const grouped = new Map<string, string[]>();
-	for (const [code, gloss] of Object.entries(table)) {
-		grouped.set(gloss.name, [...(grouped.get(gloss.name) ?? []), code]);
+function SearchFacets({
+	facets,
+	query,
+	showForm,
+	locale,
+	formatNumber,
+	labels,
+	onPickPos,
+	onPickForm,
+	onPickRelation,
+	onPickLemma,
+}: {
+	facets: {
+		poses: Facet[];
+		forms: Facet[];
+		relations: Facet[];
+		lemmas: Facet[];
+	};
+	query: ExampleQuery;
+	showForm: boolean;
+	locale: Locale;
+	formatNumber: (n: number) => string;
+	labels: {
+		facetPos: string;
+		facetForm: string;
+		facetRelation: string;
+		facetLemma: string;
+	};
+	onPickPos: (key: string) => void;
+	onPickForm: (key: string) => void;
+	onPickRelation: (key: string) => void;
+	onPickLemma: (key: string) => void;
+}) {
+	const groups: Array<{
+		title: string;
+		active: string;
+		items: Facet[];
+		labelOf: (facet: Facet) => string;
+		onPick: (key: string) => void;
+	}> = [];
+	if (!query.pos && facets.poses.length > 1) {
+		groups.push({
+			title: labels.facetPos,
+			active: query.pos,
+			items: facets.poses,
+			labelOf: (f) => posGloss(f.key, locale).name,
+			onPick: onPickPos,
+		});
 	}
-	return [...grouped.entries()].map(([name, codes]) => ({
-		name,
-		value: codes.join(","),
-		about: glossFn(codes[0] ?? "", locale).about,
-	}));
+	if (!showForm && facets.forms.length > 1) {
+		groups.push({
+			title: labels.facetForm,
+			active: query.form,
+			items: facets.forms,
+			labelOf: (f) => FORMS[f.key]?.name ?? f.label,
+			onPick: onPickForm,
+		});
+	}
+	if (!query.relation && facets.relations.length > 1) {
+		groups.push({
+			title: labels.facetRelation,
+			active: query.relation,
+			items: facets.relations,
+			labelOf: (f) => relationGloss(f.key, locale).name,
+			onPick: onPickRelation,
+		});
+	}
+	if (facets.lemmas.length > 1) {
+		groups.push({
+			title: labels.facetLemma,
+			active: query.lemma,
+			items: facets.lemmas,
+			labelOf: (f) => f.label,
+			onPick: onPickLemma,
+		});
+	}
+	if (groups.length === 0) return null;
+	return (
+		<div className="facet-groups">
+			{groups.map((group) => (
+				<div key={group.title} className="facet-group">
+					<span className="facet-group-label">{group.title}</span>
+					<div className="facets" dir="rtl">
+						{group.items.map((facet) => (
+							<button
+								key={facet.key}
+								type="button"
+								className={group.active === facet.key ? "is-on" : ""}
+								onClick={() => group.onPick(facet.key)}
+							>
+								<b lang="ar">{group.labelOf(facet)}</b>
+								<small>{formatNumber(facet.count)}</small>
+							</button>
+						))}
+					</div>
+				</div>
+			))}
+		</div>
+	);
+}
+
+function HitMeta({ hit, locale }: { hit: ExampleHit; locale: Locale }) {
+	const feat = featureSummary(hit.features);
+	const roles = [
+		...new Set(
+			hit.relations
+				.filter((code) => relationFamily(code) !== "particle")
+				.map((code) => relationGloss(code, locale).name),
+		),
+	];
+	return (
+		<span className="hit-meta">
+			<span className="hit-tag hit-tag-pos" dir="rtl" lang="ar">
+				{posGloss(hit.pos, locale).name}
+				{feat ? ` · ${feat}` : ""}
+			</span>
+			{roles.length ? (
+				<span className="hit-tag hit-tag-rel" dir="rtl" lang="ar">
+					{roles.join("، ")}
+				</span>
+			) : null}
+			{hit.gloss ? <span className="hit-gloss">{hit.gloss}</span> : null}
+		</span>
+	);
 }
 
 function markSnippet(text: string, needle: string) {

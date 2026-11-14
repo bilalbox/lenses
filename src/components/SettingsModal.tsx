@@ -1,17 +1,14 @@
 import { useRef } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
 import { LOCALES, type Locale } from "../lib/i18n/types";
-import {
-	QUIZ_PREF_KEYS,
-	type QuizPrefKey,
-	type QuizPrefs,
-} from "../lib/quizPrefs";
+import type { LibraryProgress } from "../lib/library";
 import {
 	READER_LAYER_KEYS,
 	type ReaderLayerKey,
 	type ReaderPrefs,
 } from "../lib/readerPrefs";
 import { useModalLifecycle } from "../lib/useModal";
+import { useSheetDrag } from "../lib/useSheetGestures";
 import { BookIcon, CheckIcon, CloseIcon, MoonIcon, SunIcon } from "./Icons";
 
 interface Props {
@@ -19,10 +16,10 @@ interface Props {
 	onClose: () => void;
 	theme: string;
 	onSelectTheme: (next: "light" | "dark") => void;
-	quizPrefs: QuizPrefs;
-	onToggleQuizPref: (key: QuizPrefKey, next: boolean) => void;
 	readerPrefs: ReaderPrefs;
 	onToggleReaderPref: (key: ReaderLayerKey, next: boolean) => void;
+	/** Background offline download; null until it starts (or with Data Saver on). */
+	library: LibraryProgress | null;
 	canInstall: boolean;
 	onInstall: () => void;
 }
@@ -32,17 +29,20 @@ export function SettingsModal({
 	onClose,
 	theme,
 	onSelectTheme,
-	quizPrefs,
-	onToggleQuizPref,
 	readerPrefs,
 	onToggleReaderPref,
+	library,
 	canInstall,
 	onInstall,
 }: Props) {
 	const { locale, setLocale, t } = useI18n();
-	const touchY = useRef(0);
 	const modalRef = useRef<HTMLDivElement>(null);
 	const { rendered, isClosing } = useModalLifecycle(isOpen, onClose, modalRef);
+	// Same grab bar as the word sheet: drag down (or tap) to put it away.
+	const handleDrag = useSheetDrag(modalRef, {
+		onDismiss: onClose,
+		onTap: onClose,
+	});
 
 	if (!rendered) return null;
 
@@ -68,21 +68,14 @@ export function SettingsModal({
 					type="button"
 					className="sheet-handle settings-sheet-handle"
 					aria-label={t.settings.closeAria}
-					onTouchStart={(event) => {
-						touchY.current = event.touches[0]?.clientY ?? 0;
-					}}
-					onTouchEnd={(event) => {
-						const end = event.changedTouches[0]?.clientY ?? touchY.current;
-						if (end - touchY.current > 48) onClose();
-					}}
-					onClick={onClose}
+					{...handleDrag}
 				/>
 
 				<header className="settings-head">
 					<h2 id="settings-title">{t.settings.title}</h2>
 					<button
 						type="button"
-						className="icon-button"
+						className="icon-button sheet-close"
 						onClick={onClose}
 						aria-label={t.settings.closeAria}
 					>
@@ -169,36 +162,6 @@ export function SettingsModal({
 				</section>
 
 				<section className="settings-section">
-					<h3>{t.settings.quizSection}</h3>
-					<div className="settings-switch-stack">
-						{QUIZ_PREF_KEYS.map((key) => {
-							const on = quizPrefs[key];
-							return (
-								<button
-									key={key}
-									type="button"
-									role="switch"
-									aria-checked={on}
-									className="settings-switch-card"
-									onClick={() => onToggleQuizPref(key, !on)}
-								>
-									<span className="settings-switch-content">
-										<strong>{t.settings.quizPrefs[key].label}</strong>
-										<small>{t.settings.quizPrefs[key].description}</small>
-									</span>
-									<span
-										className={`settings-switch${on ? " is-on" : ""}`}
-										aria-hidden="true"
-									>
-										<span className="settings-switch-thumb" />
-									</span>
-								</button>
-							);
-						})}
-					</div>
-				</section>
-
-				<section className="settings-section">
 					<a href="#/sources" className="settings-link-card" onClick={onClose}>
 						<div className="settings-link-icon">
 							<BookIcon />
@@ -212,6 +175,14 @@ export function SettingsModal({
 						</span>
 					</a>
 				</section>
+
+				{library ? (
+					<p className="settings-offline" role="status">
+						{library.done >= library.total
+							? t.common.offlineReady
+							: t.common.savingOffline(library.done, library.total)}
+					</p>
+				) : null}
 
 				{canInstall ? (
 					<section className="settings-section">

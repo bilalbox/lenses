@@ -8,7 +8,7 @@ import {
 	type QuizBankFile,
 	toQuizBank,
 } from "../../src/lib/quizBank";
-import { getRoleMeta, QUIZ_ROLES } from "../../src/lib/quizCatalog";
+import { QUIZ_ROLES } from "../../src/lib/quizCatalog";
 import { extractQuizPools, type QuizSource } from "../../src/lib/quizEngine";
 import type { SurahFile } from "../../src/lib/types";
 
@@ -54,14 +54,11 @@ describe("integration: precomputed quiz bank", () => {
 		}
 	});
 
-	it("asks only roles the picker offers, the extended ones flagged", () => {
+	it("asks only roles the picker offers", () => {
 		const codes = new Set(QUIZ_ROLES.map((r) => r.code));
 		const relations = new Set(committed.irab.map((q) => q.rel));
 		for (const rel of relations) expect(codes.has(rel)).toBe(true);
-		const extendedCodes = QUIZ_ROLES.filter((r) => r.extended).map(
-			(r) => r.code,
-		);
-		expect(extendedCodes).toEqual(["pp", "adv", "prp", "exc", "emph"]);
-		expect(getRoleMeta("subj").extended).toBeUndefined();
+		for (const code of ["pp", "adv", "prp", "exc", "emph"] as const)
+			expect(codes.has(code)).toBe(true);
 	});
 });

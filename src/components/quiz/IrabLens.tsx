@@ -14,9 +14,9 @@ import {
 	getSignMeta,
 	isPhraseRole,
 	QUIZ_CASES,
+	QUIZ_ROLES,
 	type QuizRelation,
 	ROLE_GROUPS,
-	rolesFor,
 	signsForCase,
 } from "../../lib/quizCatalog";
 import {
@@ -84,7 +84,6 @@ function headsOf(question: QuizQuestion, draft: IrabDraft): Heads {
 function crumbsOf(
 	session: QuizSessionState,
 	heads: Heads,
-	show: (text: string) => string,
 	t: ReturnType<typeof useI18n>["t"],
 ): QuizCrumb[] {
 	const d = session.drafts.irab;
@@ -98,7 +97,7 @@ function crumbsOf(
 		},
 		{
 			stepNum: 2,
-			label: heads.picked ? show(heads.picked) : t.quiz.headBadge,
+			label: heads.picked ? heads.picked : t.quiz.headBadge,
 			isAr: Boolean(heads.picked),
 			filled: Boolean(d.headWordNum),
 		},
@@ -147,16 +146,13 @@ function signChoices(draft: IrabDraft, locale: Locale): Choice[] {
 	}));
 }
 
-export function IrabLens({
-	extendedRoles,
-	...props
-}: LensProps<QuizQuestion> & { extendedRoles: boolean }) {
+export function IrabLens(props: LensProps<QuizQuestion>) {
 	const { locale, t } = useI18n();
-	const { question: q, session, dispatch, show } = props;
+	const { question: q, session, dispatch } = props;
 	const draft = session.drafts.irab;
 	const step = currentStep(session);
 	const heads = headsOf(q, draft);
-	const targetAr = show(q.targetWord.a);
+	const targetAr = q.targetWord.a;
 	const answer = (
 		field: IrabField,
 		value: string | number,
@@ -186,7 +182,7 @@ export function IrabLens({
 		<GrammarFrame
 			lens="irab"
 			props={props}
-			crumbs={crumbsOf(session, heads, show, t)}
+			crumbs={crumbsOf(session, heads, t)}
 			marks={marks}
 			picking={step === 2}
 			onTapWord={onTapWord}
@@ -198,7 +194,6 @@ export function IrabLens({
 						focus={targetAr}
 					/>
 					<RolePicker
-						extended={extendedRoles}
 						value={draft.relation}
 						locale={locale}
 						onPick={(code) => answer("relation", code, 2)}
@@ -218,7 +213,6 @@ export function IrabLens({
 					<GovernorPicker
 						question={q}
 						value={draft.headWordNum}
-						format={show}
 						onPick={(n) => answer("headWordNum", n, afterGovernor(draft))}
 					/>
 				</StepBody>
@@ -285,7 +279,6 @@ function fieldLabels(
 function IrabCheck({
 	question: q,
 	session,
-	show,
 	onSubmit,
 	heads,
 	onEdit,
@@ -296,13 +289,13 @@ function IrabCheck({
 	const { locale, t } = useI18n();
 	const d = session.drafts.irab;
 	const labels = fieldLabels(q, locale, t);
-	const targetAr = show(q.targetWord.a);
+	const targetAr = q.targetWord.a;
 	const phrase = isPhraseRole(d.relation);
 	const head = (
 		<FormulaPart
 			step={2}
 			label={labels.headWordNum}
-			value={heads.picked && show(heads.picked)}
+			value={heads.picked}
 			onEdit={onEdit}
 		/>
 	);
@@ -316,7 +309,7 @@ function IrabCheck({
 			/>
 
 			<FormulaPreview>
-				<strong className="formula-target">{show(q.targetWord.a)}:</strong>{" "}
+				<strong className="formula-target">{q.targetWord.a}:</strong>{" "}
 				<FormulaPart
 					step={1}
 					label={labels.relation}
@@ -415,7 +408,6 @@ function revealProse(q: QuizQuestion, headAnswer: string): ReactNode {
 function IrabReveal({
 	question: q,
 	session,
-	show,
 	onNext,
 	heads,
 }: LensProps<QuizQuestion> & { heads: Heads }) {
@@ -423,11 +415,11 @@ function IrabReveal({
 	const d = session.drafts.irab;
 	const ok = (field: IrabField) => session.verdict?.fields[field] ?? false;
 	const role = getRoleMeta(q.relation);
-	const headAnswer = show(heads.answer);
+	const headAnswer = heads.answer;
 	return (
 		<RevealCard
 			correct={session.verdict?.allCorrect ?? false}
-			title={t.quiz.classicalHeading(show(q.targetWord.a))}
+			title={t.quiz.classicalHeading(q.targetWord.a)}
 			chips={
 				<>
 					<VerdictChip
@@ -437,7 +429,7 @@ function IrabReveal({
 					/>
 					<VerdictChip
 						ok={ok("headWordNum")}
-						picked={heads.picked && show(heads.picked)}
+						picked={heads.picked}
 						answer={headAnswer}
 						wrongAnswer={`${role.governorLabel.ar}: ${headAnswer}`}
 					/>
@@ -452,13 +444,10 @@ function IrabReveal({
 
 /** The roles under learner-facing headings, so the list scans in four short groups. */
 function RolePicker({
-	extended,
 	value,
 	locale,
 	onPick,
 }: {
-	/** Offer the extended roles too. */
-	extended: boolean;
 	value: QuizRelation | null;
 	locale: Locale;
 	onPick: (code: QuizRelation) => void;
@@ -469,25 +458,23 @@ function RolePicker({
 				<section key={group.code} className="quiz-role-group">
 					<h3 className="quiz-role-group-title">{group.label[locale]}</h3>
 					<div className="quiz-wizard-grid-roles">
-						{rolesFor(extended)
-							.filter((r) => r.group === group.code)
-							.map((r) => (
-								<button
-									key={r.code}
-									type="button"
-									aria-pressed={value === r.code}
-									className={`quiz-rich-card family-${r.family}${value === r.code ? " is-selected" : ""}`}
-									onClick={() => onPick(r.code)}
-								>
-									<div className="quiz-rich-top">
-										<strong lang="ar">{r.ar}</strong>
-										<span className="quiz-rich-dot" />
-									</div>
-									<small>
-										{locale === "ar" ? r.governorLabel.ar : r[locale]}
-									</small>
-								</button>
-							))}
+						{QUIZ_ROLES.filter((r) => r.group === group.code).map((r) => (
+							<button
+								key={r.code}
+								type="button"
+								aria-pressed={value === r.code}
+								className={`quiz-rich-card family-${r.family}${value === r.code ? " is-selected" : ""}`}
+								onClick={() => onPick(r.code)}
+							>
+								<div className="quiz-rich-top">
+									<strong lang="ar">{r.ar}</strong>
+									<span className="quiz-rich-dot" />
+								</div>
+								<small>
+									{locale === "ar" ? r.governorLabel.ar : r[locale]}
+								</small>
+							</button>
+						))}
 					</div>
 				</section>
 			))}
@@ -502,13 +489,10 @@ function RolePicker({
 function GovernorPicker({
 	question,
 	value,
-	format,
 	onPick,
 }: {
 	question: QuizQuestion;
 	value: number | null;
-	/** How the ayah renders a word (diacritics on or off). */
-	format: (text: string) => string;
 	onPick: (wordNum: number) => void;
 }) {
 	return (
@@ -525,7 +509,7 @@ function GovernorPicker({
 						className={`quiz-governor-card${value === w.n ? " is-selected" : ""}`}
 						onClick={() => onPick(w.n)}
 					>
-						{format(text)}
+						{text}
 					</button>
 				);
 			})}

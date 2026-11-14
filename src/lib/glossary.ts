@@ -76,7 +76,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	INTG: {
-		name: "استفهام",
+		name: "أداة استفهام",
 		about: {
 			en: "A question word, such as hal, mā, or the interrogative alif.",
 			ar: "أداة تدل على طلب الفهم والاستعلام مثل هل والهمزة.",
@@ -84,7 +84,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	VOC: {
-		name: "نداء",
+		name: "حرف نداء",
 		about: {
 			en: "A particle used to call someone, typically yā.",
 			ar: "حرف يطلب به إقبال المنادى مثل يا وأي.",
@@ -92,7 +92,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	NEG: {
-		name: "نفي",
+		name: "حرف نفي",
 		about: {
 			en: "A particle that denies, such as lā, mā, lam, or lan.",
 			ar: "حرف يفيد إنكار وقوع الشيء مثل لا وما ولم ولن.",
@@ -100,7 +100,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	EMPH: {
-		name: "توكيد",
+		name: "حرف توكيد",
 		about: {
 			en: "A particle or ending that strengthens the statement, including the emphatic nūn and la-.",
 			ar: "حرف يؤكد الحكم ويثبته مثل لام التوكيد ونون التوكيد الثقيلة والخفيفة.",
@@ -108,7 +108,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	PRP: {
-		name: "تعليل",
+		name: "لام التعليل",
 		about: {
 			en: "A particle introducing a purpose, often li- meaning ‘in order to’.",
 			ar: "حرف يفيد بيان السبب أو الغاية مثل لام التعليل.",
@@ -124,7 +124,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	FUT: {
-		name: "استقبال",
+		name: "حرف استقبال",
 		about: {
 			en: "The prefix sa- or the particle sawfa, marking the future.",
 			ar: "حرف يخصص المضارع للزمن المستقبل مثل السين وسوف.",
@@ -132,7 +132,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	CONJ: {
-		name: "عطف",
+		name: "حرف عطف",
 		about: {
 			en: "A joining word, most often wa- or fa-, linking words or clauses.",
 			ar: "حرف يربط بين كلمتين أو جملتين مثل الواو والفاء وثم.",
@@ -140,7 +140,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	DET: {
-		name: "تعريف",
+		name: "أل التعريف",
 		about: {
 			en: "The definite article al-. It defines the noun.",
 			ar: "أداة التعريف (أل) التي تفيد تعيين الاسم.",
@@ -180,7 +180,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	COND: {
-		name: "شرط",
+		name: "أداة شرط",
 		about: {
 			en: "A particle that sets a condition, such as in or idhā.",
 			ar: "أداة تربط بين جملتي الشرط والجواب مثل إن وإذا.",
@@ -188,7 +188,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	SUB: {
-		name: "مصدري",
+		name: "حرف مصدري",
 		about: {
 			en: "A particle that starts a subordinate clause, such as an or alladhī.",
 			ar: "حرف يؤول مع ما بعده بمصدر صريح مثل أنْ وأنَّ.",
@@ -196,7 +196,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	RES: {
-		name: "حصر",
+		name: "أداة حصر",
 		about: {
 			en: "A particle of restriction or exception, classically ḥaṣr, often illā.",
 			ar: "أداة تفيد قصر الحكم وحصره مثل إلا وإنما.",
@@ -204,7 +204,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	EXP: {
-		name: "استثناء",
+		name: "أداة استثناء",
 		about: {
 			en: "A particle of exception.",
 			ar: "أداة تفيد إخراج ما بعدها من حكم ما قبلها مثل إلا وغير.",
@@ -212,7 +212,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	AVR: {
-		name: "ردع",
+		name: "حرف ردع",
 		about: {
 			en: "A particle that turns the listener away from something, such as kallā.",
 			ar: "حرف يفيد الزجر والردع مثل كلا.",
@@ -220,7 +220,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	CERT: {
-		name: "تحقيق",
+		name: "حرف تحقيق",
 		about: {
 			en: "A particle that presents the statement as certain, such as qad before a perfect verb.",
 			ar: "حرف يفيد التوكيد وتحقق الوقوع مثل قد مع الفعل الماضي.",
@@ -228,7 +228,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	RET: {
-		name: "إضراب",
+		name: "حرف إضراب",
 		about: {
 			en: "A particle that breaks off and corrects, the iḍrāb of bal.",
 			ar: "حرف يفيد العدول عما قبله والإضراب عنه مثل بل.",
@@ -236,7 +236,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	PREV: {
-		name: "كافة",
+		name: "ما الكافة",
 		about: {
 			en: "The preventive particle, classically kāffa, which stops the word before it from governing.",
 			ar: "ما الكافة التي تكف ما قبلها عن العمل مثل إنما.",
@@ -244,7 +244,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	ANS: {
-		name: "جواب",
+		name: "حرف جواب",
 		about: {
 			en: "A particle that answers a question or a condition.",
 			ar: "حرف يقع جواباً لسؤال أو تصديقاً لكلام مثل نعم وبلى.",
@@ -252,7 +252,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	INC: {
-		name: "ابتداء",
+		name: "حرف ابتداء",
 		about: {
 			en: "A particle that opens a new statement.",
 			ar: "حرف يدخل في أول الكلام للتوكيد والابتداء.",
@@ -260,7 +260,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	SUR: {
-		name: "مفاجأة",
+		name: "إذا الفجائية",
 		about: {
 			en: "A particle of suddenness, such as idhā in the sense of ‘lo’.",
 			ar: "أداة تدل على وقوع الأمر فجأة ودون ترقب مثل إذا الفجائية.",
@@ -268,7 +268,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	SUP: {
-		name: "زيادة",
+		name: "حرف زيادة",
 		about: {
 			en: "A particle that adds a further, loosely attached phrase.",
 			ar: "صلة وزيادة في المبنى لإفادة التوكيد في المعنى.",
@@ -276,7 +276,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	EXH: {
-		name: "تحضيض",
+		name: "حرف تحضيض",
 		about: {
 			en: "A particle that urges, such as lawlā in the sense of ‘why not’.",
 			ar: "حرف يفيد الحث والطلب بإلحاح مثل لولا ولوما.",
@@ -292,15 +292,15 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	EXL: {
-		name: "تفسير",
+		name: "أداة تفصيل",
 		about: {
-			en: "A particle that explains what came before.",
-			ar: "حرف يفيد إيضاح ما قبله وتفسيره مثل أيْ وأنْ التفسيرية.",
-			id: "Partikel penjelas (tafsir) seperti ay.",
+			en: "A particle that introduces a detailed breakdown, such as ammā.",
+			ar: "أداة تفيد التفصيل والتوكيد مثل أمّا.",
+			id: "Partikel perincian (tafshil) seperti amma.",
 		},
 	},
 	EQ: {
-		name: "تسوية",
+		name: "همزة التسوية",
 		about: {
 			en: "A particle that presents two options as equal, the hamza of taswiyah.",
 			ar: "همزة التسوية الواقعة بعد سواء.",
@@ -308,7 +308,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	REM: {
-		name: "استئناف",
+		name: "حرف استئناف",
 		about: {
 			en: "Wa- or fa- that starts a new sentence rather than joining inside one.",
 			ar: "واو أو فاء تبدأ كلاماً جديداً منقطعاً عما قبله إعراباً.",
@@ -316,7 +316,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	CAUS: {
-		name: "سببية",
+		name: "فاء السببية",
 		about: {
 			en: "A particle that gives a reason.",
 			ar: "فاء أو حرف يدل على أن ما بعده مسبب عما قبله.",
@@ -324,7 +324,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	AMD: {
-		name: "استدراك",
+		name: "حرف استدراك",
 		about: {
 			en: "A particle that amends or restarts the sentence.",
 			ar: "حرف يفيد رفع ما يتوهم ثبوته مثل لكنَّ.",
@@ -332,7 +332,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	PRO: {
-		name: "نهي",
+		name: "لا الناهية",
 		about: {
 			en: "The negative command, lā with a jussive verb.",
 			ar: "لا الناهية الجازمة التي تفيد طلب الكف عن الفعل.",
@@ -340,7 +340,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	CIRC: {
-		name: "حال",
+		name: "واو الحال",
 		about: {
 			en: "Wa- introducing a ḥāl, describing circumstance.",
 			ar: "واو الحال التي تدخل على جملة تبين هيئة صاحبها.",
@@ -348,7 +348,7 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	RSLT: {
-		name: "نتيجة",
+		name: "فاء الجزاء",
 		about: {
 			en: "A particle that introduces the result.",
 			ar: "فاء الجزاء الرابطة لجواب الشرط.",
@@ -356,15 +356,15 @@ export const POS: Record<string, RawGloss> = {
 		},
 	},
 	INT: {
-		name: "تفسير",
+		name: "أن التفسيرية",
 		about: {
 			en: "A particle of interpretation explaining an earlier word.",
-			ar: "حرف يفسر ما قبله.",
+			ar: "حرف يفسر ما قبله مثل أنْ التفسيرية.",
 			id: "Partikel penafsir makna kata sebelumnya.",
 		},
 	},
 	COM: {
-		name: "معية",
+		name: "واو المعية",
 		about: {
 			en: "Wa- meaning ‘along with’.",
 			ar: "واو المعية التي تدل على المصاحبة.",
@@ -415,11 +415,11 @@ export const RELATIONS: Record<string, RawGloss> = {
 		},
 	},
 	predx: {
-		name: "خبر",
+		name: "خبر النواسخ",
 		about: {
-			en: "The predicate of a nominal sentence or of kāna and its sisters.",
-			ar: "خبر المبتدأ أو خبر كان وأخواتها المنصوب.",
-			id: "Predikat kalimat nominal atau khabar kana.",
+			en: "The predicate of kāna, inna, and their sisters.",
+			ar: "خبر كان وأخواتها أو خبر إن وأخواتها.",
+			id: "Predikat untuk kana, inna, dan saudari-saudarinya.",
 		},
 	},
 	gen: {
@@ -551,7 +551,7 @@ export const RELATIONS: Record<string, RawGloss> = {
 		},
 	},
 	rslt: {
-		name: "جواب",
+		name: "جواب الشرط",
 		about: {
 			en: "The apodosis, the clause resulting from the condition.",
 			ar: "جملة جواب الشرط والجزاء.",
@@ -732,6 +732,14 @@ export const RELATIONS: Record<string, RawGloss> = {
 			en: "The answer to a question or a condition.",
 			ar: "حرف أو جملة واقعة جواباً.",
 			id: "Jawaban atas pertanyaan atau syarat.",
+		},
+	},
+	state: {
+		name: "بيان",
+		about: {
+			en: "An explanatory phrase or appositive clarifying the preceding noun.",
+			ar: "بيان يوضح المقصود بما قبله.",
+			id: "Penjelas atau keterangan (bayan) bagi kata sebelumnya.",
 		},
 	},
 };
@@ -1191,7 +1199,45 @@ export function kindGloss(kind: string, locale: Locale = "en"): Gloss {
 	return resolveGloss(KIND[kind], kind, locale);
 }
 
-export function relationFamily(code: string): string {
+const WORD_POS = new Set([
+	"N",
+	"PN",
+	"ADJ",
+	"V",
+	"PRON",
+	"DEM",
+	"REL",
+	"T",
+	"LOC",
+	"IMPN",
+]);
+
+const CLITIC_POS = new Set([
+	"DET",
+	"REM",
+	"EMPH",
+	"VOC",
+	"RSLT",
+	"PRP",
+	"CIRC",
+	"PREV",
+	"CAUS",
+	"IMPV",
+	"EQ",
+	"COM",
+]);
+
+export type PosFamily = "word" | "particle" | "clitic";
+
+export function posFamily(code: string): PosFamily {
+	if (WORD_POS.has(code)) return "word";
+	if (CLITIC_POS.has(code)) return "clitic";
+	return "particle";
+}
+
+export type RelationFamily = "core" | "nom" | "clause" | "particle";
+
+export function relationFamily(code: string): RelationFamily {
 	if (["subj", "obj", "pass", "pred", "subjx", "predx"].includes(code))
 		return "core";
 	if (
@@ -1207,6 +1253,7 @@ export function relationFamily(code: string): string {
 			"com",
 			"voc",
 			"exp",
+			"state",
 		].includes(code)
 	)
 		return "nom";

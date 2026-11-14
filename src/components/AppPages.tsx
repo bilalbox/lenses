@@ -1,5 +1,4 @@
 import { lazy } from "react";
-import type { QuizPrefs } from "../lib/quizPrefs";
 import type { ReaderPrefs } from "../lib/readerPrefs";
 import type { ExampleQuery } from "../lib/search";
 import type { Manifest, Route } from "../lib/types";
@@ -33,7 +32,6 @@ interface Props {
 	route: Route;
 	readerPrefs: ReaderPrefs;
 	seed?: Partial<ExampleQuery>;
-	quizPrefs: QuizPrefs;
 	openSearch: (next?: Partial<ExampleQuery>) => void;
 }
 
@@ -42,7 +40,6 @@ export function AppPages({
 	route,
 	readerPrefs,
 	seed,
-	quizPrefs,
 	openSearch,
 }: Props) {
 	switch (route.page) {
@@ -64,7 +61,7 @@ export function AppPages({
 							word ? `/${sura}/${verse}/${word}${q}` : `/${sura}/${verse}${q}`,
 						);
 					}}
-					onSearchRoot={(root) => openSearch({ root })}
+					onSearch={openSearch}
 				/>
 			);
 		case "search":
@@ -85,8 +82,6 @@ export function AppPages({
 					initialLens={route.tab === "usul" ? "usul" : undefined}
 					onOpenInReader={openVersePath}
 					onOpenSearch={openSearch}
-					hideDiacritics={quizPrefs.hideDiacritics}
-					extendedRoles={quizPrefs.extendedRoles}
 				/>
 			);
 		default:

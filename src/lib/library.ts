@@ -48,6 +48,7 @@ async function fill(manifest: Manifest) {
 		...surahs.map((sura) => layerUrl("surah", sura)),
 		layerUrl("verses"),
 		layerUrl("words"),
+		layerUrl("wordStats"),
 	];
 	let cursor = 0;
 	let done = 0;

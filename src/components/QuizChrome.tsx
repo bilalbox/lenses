@@ -1,6 +1,8 @@
 /** Quiz chrome shared by every lens: lens tabs, the ayah's place, and the step rail. */
+
 import type { ReactNode } from "react";
 import { useI18n } from "../lib/i18n/I18nContext";
+import { surahLabel } from "../lib/manifest";
 import { getLensLabel, type QuizLens } from "../lib/quizCatalog";
 import type { QuizSessionState, WizardStep } from "../lib/quizSession";
 
@@ -50,10 +52,10 @@ export function QuizPlace({
 	place,
 	onOpenReader,
 }: {
-	place: { phonetic: string; sura: number; verse: number };
+	place: { name: string; phonetic: string; sura: number; verse: number };
 	onOpenReader: () => void;
 }) {
-	const { t, formatNumber } = useI18n();
+	const { locale, t, formatNumber } = useI18n();
 	const label = t.quiz.openReader(place.sura, place.verse);
 	return (
 		<button
@@ -64,7 +66,8 @@ export function QuizPlace({
 			aria-label={label}
 		>
 			<span className="quiz-wizard-ref">
-				{place.phonetic} {formatNumber(place.sura)}:{formatNumber(place.verse)}
+				{surahLabel(place, locale)} {formatNumber(place.sura)}:
+				{formatNumber(place.verse)}
 			</span>
 			<span aria-hidden="true">↗</span>
 		</button>

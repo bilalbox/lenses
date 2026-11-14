@@ -31,6 +31,8 @@ export interface Word {
 	i?: string;
 	sf?: string;
 	m?: string;
+	/** Quranic Arabic Corpus word-by-word English gloss, stored verbatim. */
+	e?: string;
 }
 
 export interface Verse {
@@ -105,6 +107,7 @@ export interface Manifest {
 		qiraatVerses?: number;
 		mutashabihVerses?: number;
 		mutashabihPairs?: number;
+		wujuhRoots?: number;
 	};
 	sources: SourceMeta[];
 }
@@ -135,6 +138,57 @@ export interface WordIndex {
 }
 
 export type VerseRow = [number, number, string, string];
+
+/** Plain English, or [1, italic English] / [2, Arabic] in Lane's text. */
+export type LaneRun = string | [1 | 2, string];
+
+export interface LaneEntry {
+	/** Headword, in Arabic script. */
+	h: string;
+	/** Verb form number Lane gives the entry. */
+	f?: string;
+	t: LaneRun[];
+}
+
+/** `lexicon/{slug}.json`: the dictionaries' entries for one corpus root. */
+export interface LexiconFile {
+	/** Buckwalter root key. */
+	r: string;
+	/** Lane's Lexicon: first page and entries. */
+	lane?: { p: number; e: LaneEntry[] };
+	/** Ibn Fāris, Maqāyīs al-Lugha: paragraphs. */
+	maqayis?: string[];
+	/** al-Rāghib, al-Mufradāt: paragraphs. */
+	mufradat?: string[];
+}
+
+/** A verse al-Dāmaghānī cites: sura, verse, word, then the words before, the word, the words after. */
+export type WujuhCite = [number, number, number, string, string, string];
+
+export interface WujuhSense {
+	/** The sense, in al-Dāmaghānī's words. */
+	l: string;
+	c: WujuhCite[];
+}
+
+export interface WujuhEntry {
+	/** Headword as al-Dāmaghānī heads the entry. */
+	h: string;
+	s: WujuhSense[];
+}
+
+/** `wujuh.json`: al-Dāmaghānī's entries, keyed by Buckwalter root, or for a
+ * particle by `~` and its Buckwalter lemma (`~fiY`). */
+export type WujuhFile = Record<string, WujuhEntry[]>;
+
+/** Occurrences, distinct verses, distinct surahs. */
+export type LexemeCount = [number, number, number];
+
+/** Counts per root and per lemma, keyed by Buckwalter key (`wordStats.json`). */
+export interface WordStats {
+	roots: Record<string, LexemeCount>;
+	lemmas: Record<string, LexemeCount>;
+}
 
 export type VerseRef = { sura: number; verse: number };
 
@@ -285,9 +339,48 @@ export interface MutashabihQuizEntry {
 	ans: number;
 	/** Surah choices, the ayah's own among them. */
 	surahs: number[];
+	/** Classical memorization rule / trick (ḍābiṭ), if available for this divergence. */
+	dabt?: string;
+	/** Classical rhetorical explanation (tawjīh), if available. */
+	tawjih?: string;
+	/** English mnemonic / difference note, if available. */
+	noteEn?: string;
 }
 
 export interface MutashabihQuizFile {
 	version: number;
 	questions: MutashabihQuizEntry[];
+}
+
+export interface IrabEntry {
+	id: number;
+	title: string;
+	bab: string;
+	page: number;
+	body: string[];
+	citations: [number, number][];
+}
+
+export interface IrabAppendixVerse {
+	sura: number;
+	verse: number;
+	text: string;
+	words: { w: string; i: string }[];
+	sentences: string[];
+	notes: string[];
+}
+
+export interface IrabDictionaryFile {
+	metadata: {
+		title: string;
+		author: string;
+		reviewer: string;
+		entriesCount: number;
+		citationsCount: number;
+		appendixVersesCount: number;
+	};
+	entries: IrabEntry[];
+	byWord: Record<string, number[]>;
+	byVerse: Record<string, number[]>;
+	appendix: Record<string, IrabAppendixVerse>;
 }

@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
-import { formatIrabText } from "../lib/formatIrab";
 import { useI18n } from "../lib/i18n/I18nContext";
 import type { ReaderLayers } from "../lib/readerLayers";
 import { verseRefParam } from "../lib/route";
 import type { Manifest, Verse, VerseRef } from "../lib/types";
 import { AsbabSection } from "./AsbabSection";
+import { IrabViews } from "./IrabViews";
 import { MutashabihSection } from "./MutashabihSection";
 import { UsulSection } from "./UsulSection";
+import { VerseIrabCitations } from "./VerseIrabCitations";
 
 interface MeaningProps {
 	verse: Verse;
@@ -24,9 +25,6 @@ function VerseMeaningPanel({
 		<details className="verse-layer verse-meaning-block">
 			<summary>
 				<span className="verse-layer-title">{t.verse.verseMeaningTitle}</span>
-				<span className="verse-layer-meta">
-					{t.verse.verseMeaningSub} · QuranEnc
-				</span>
 			</summary>
 			<div className="verse-layer-body">
 				{locale === "en" && (
@@ -143,6 +141,16 @@ function VerseMeaningPanel({
 					<div className="verse-meaning-content">
 						{verse.ma ? (
 							<div className="verse-meaning-section is-tafsir">
+								<small className="source-line">
+									{t.common.tafsirCenterSource} ·{" "}
+									<a
+										href="https://quranenc.com/ar/browse/arabic_mokhtasar"
+										target="_blank"
+										rel="noreferrer"
+									>
+										quranenc.com
+									</a>
+								</small>
 								<p className="prose-ar" lang="ar" dir="rtl">
 									{verse.ma}
 								</p>
@@ -166,6 +174,7 @@ interface Props {
 	verse: Verse;
 	layers: ReaderLayers;
 	target?: VerseRef;
+	selected?: number;
 	onSelect: (word: number, segment?: number) => void;
 	onNavigate?: (
 		sura: number,
@@ -174,6 +183,8 @@ interface Props {
 		params?: Record<string, string>,
 	) => void;
 	nahwPanel?: ReactNode;
+	/** Reader pref: when off al-Khaṭīb's grammar dictionary citations & model parse are not displayed. */
+	khatibEnabled?: boolean;
 }
 
 export function VerseSecondaryLayers({
@@ -182,9 +193,11 @@ export function VerseSecondaryLayers({
 	verse,
 	layers,
 	target,
+	selected,
 	onSelect,
 	onNavigate,
 	nahwPanel,
+	khatibEnabled = false,
 }: Props) {
 	const { locale, t } = useI18n();
 	const { drawers, setDrawer } = layers;
@@ -212,40 +225,23 @@ export function VerseSecondaryLayers({
 				>
 					<summary>
 						<span className="verse-layer-title">{t.verse.irabTitle}</span>
-						<span className="verse-layer-meta">
-							{classicalIrab
-								? t.common.tafsirCenterSource
-								: t.verse.treebankNoorBayan}
-						</span>
 					</summary>
 					<div className="verse-layer-body">
-						{classicalIrab ? (
-							<>
-								<p className="source-line">
-									{t.common.tafsirCenterSource} ·{" "}
-									<a
-										href="https://tafsir.net/"
-										target="_blank"
-										rel="noreferrer"
-									>
-										tafsir.net
-									</a>
-								</p>
-								<div className="prose irab-prose" dir="rtl" lang="ar">
-									{formatIrabText(classicalIrab)}
-								</div>
-							</>
-						) : null}
-						{showNahw ? (
-							<div
-								className={`irab-nahw-embed${classicalIrab ? " has-classical" : ""}`}
-							>
-								{nahwPanel}
-							</div>
-						) : null}
+						<IrabViews
+							classical={classicalIrab}
+							diagram={nahwPanel}
+							sura={sura}
+							verseNumber={verse.v}
+							khatibEnabled={khatibEnabled}
+							words={verse.w}
+							selectedWord={selected}
+							onSelectWord={onSelect}
+						/>
 					</div>
 				</details>
 			) : null}
+
+			{khatibEnabled ? <VerseIrabCitations sura={sura} verse={verse} /> : null}
 
 			{mutashabihMatches.length > 0 ? (
 				<details

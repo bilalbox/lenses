@@ -3,10 +3,10 @@ import type { Translations } from "../types";
 
 export const ar: Translations = {
 	common: {
-		appNameAr: "عدسات",
-		appNameEn: "Lenses",
+		appName: "عدسات",
 		searchPlaceholder: "سورة:آية، أو كلمة",
 		searchAria: "ابحث في الآيات",
+		closeSearchAria: "إغلاق البحث",
 		versesCount: (count: number) => {
 			const n = formatNum(count, "ar");
 			if (count === 1) return "آية واحدة";
@@ -84,6 +84,8 @@ export const ar: Translations = {
 			submitButton: "تحقق",
 			placesHeading: "مواضع كل لفظ",
 			thisAyah: "هذه الآية",
+			dabtHeading: "قاعدة الضبط والحفظ",
+			tawjihHeading: "توجيه الاختلاف والبلاغة",
 		},
 		sarf: {
 			rootQuestion: (wordAr: string) =>
@@ -110,18 +112,6 @@ export const ar: Translations = {
 		themeSection: "المظهر",
 		themeLight: "فاتح",
 		themeDark: "داكن",
-		quizSection: "الاختبار",
-		quizPrefs: {
-			hideDiacritics: {
-				label: "إخفاء التشكيل في الاختبارات",
-				description: "عرض آيات القرآن بدون حركات لتحدٍّ أصعب.",
-			},
-			extendedRoles: {
-				label: "مواقع إعرابية إضافية",
-				description:
-					"أضف الجار والمجرور (شبه الجملة) والظرف والمستثنى والمفعول لأجله والتوكيد إلى مواقع الإعراب، واسأل عنها حيث وردت.",
-			},
-		},
 		readerSection: "طبقات القارئ",
 		readerSectionHint:
 			"أخفِ الطبقات التي لا تدرسها. الطبقات المعطّلة تُزال من شاشة الآية ولا تُحمَّل حتى تُفعَّل.",
@@ -132,6 +122,8 @@ export const ar: Translations = {
 			mutashabih: "المتشابه اللفظي",
 			asbab: "أسباب النزول",
 			qiraat: "القراءات العشر في بطاقة الكلمة",
+			wujuh: "وجوه الدامغاني في بطاقة الكلمة",
+			khatib: "معجم قواعد الإعراب وشواهده (الخطيب)",
 		},
 		sourcesLink: "مصادر البيانات",
 		sourcesDescription: "استكشف مصادر البيانات اللغوية وتراخيصها.",
@@ -142,7 +134,6 @@ export const ar: Translations = {
 		meccan: "مكية",
 		madinan: "مدنية",
 		verseMeaningTitle: "تفسير الآية",
-		verseMeaningSub: "المختصر في التفسير · QuranEnc",
 		translationBadge: "الترجمة",
 		tafsirBadge: "التفسير (المختصر)",
 		mukhtasarEnTitle: "المختصر في التفسير",
@@ -158,6 +149,7 @@ export const ar: Translations = {
 		noTreeTitle: "لا توجد شجرة إعراب لهذه الآية.",
 		classicalIrabShort: "إعراب",
 		surahGoalLabel: "مقصد السورة",
+		surahDetails: "تفاصيل السورة",
 		revelationOrder: (seq: number) => `ترتيب النزول #${formatNum(seq, "ar")}`,
 		asbabBadge: (count: number) => `سبب النزول (${formatNum(count, "ar")})`,
 		asbabDrawerTitle: "أسباب النزول (المحرر في أسباب نزول القرآن)",
@@ -166,6 +158,9 @@ export const ar: Translations = {
 			`دلالات الألفاظ والأصول (${formatNum(count, "ar")})`,
 		usulSectionTitle: "دلالات الألفاظ والشواهد الأصولية",
 		nahwTabTitle: "النحو وشجرة الإعراب",
+		irabViewsAria: "عرض الإعراب",
+		irabDiagram: "المشجّر",
+		irabClassical: "الإعراب",
 		treebankNoorBayan: "شجرة نور البيان القرآنية",
 		mutashabihBadge: (count: number) =>
 			`المتشابه اللفظي (${formatNum(count, "ar")})`,
@@ -190,6 +185,15 @@ export const ar: Translations = {
 			`البعد: ${formatNum(count, "ar")} سور`,
 		mutashabihEmptyState: "لا توجد مواضع متشابه لفظي مسجلة لهذه الآية.",
 		mutashabihReturnToAyah: (coord: string) => `العودة إلى ${coord}`,
+		irabModel: "الإعراب النموذجي (يعقوب)",
+		irabModelTitle: "إعراب نموذجي مفصل",
+		irabModelSource: "ملحق المعجم المفصل في الإعراب · د. إميل بديع يعقوب",
+		irabCitationTitle: "شواهد معجم الإعراب (الخطيب)",
+		irabCitationBadge: (count: number) =>
+			`${formatNum(count, "ar")} ${count === 1 ? "مدخل" : "مداخل"}`,
+		irabCitationSource: "المعجم المفصل في الإعراب · طاهر يوسف الخطيب",
+		irabCitationIntro: (verseRef: string) =>
+			`ورد الاستشهاد بهذه الآية (${verseRef}) كشاهد نحوي في المداخل التالية:`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -199,8 +203,40 @@ export const ar: Translations = {
 		collapseAria: "طي التحليل",
 		classicalIrab: "الإعراب المفرد",
 		sarf: "الصرف والبنية",
+		irabReferenceTitle: "معجم قواعد الإعراب (الخطيب)",
+		irabReferenceSource: (page: number) =>
+			`المعجم المفصل في الإعراب · ص ${formatNum(page, "ar")}`,
+		irabReferenceBab: (bab: string) => bab,
+		irabReferenceCitations: (count: number) =>
+			`${formatNum(count, "ar")} شواهد قرآنية`,
 		wordMeaning: "معنى الكلمة",
 		searchThisRoot: "ابحث عن هذا الجذر",
+		searchThisWord: "ابحث عن هذه الكلمة",
+		inQuran: "في القرآن",
+		occurrences: (count: number, verses: number, surahs: number) =>
+			`عدد المرات: ${formatNum(count, "ar")} · الآيات: ${formatNum(verses, "ar")} · السور: ${formatNum(surahs, "ar")}`,
+		wordGlossSource: "بالإنجليزية · المدوّنة القرآنية العربية",
+		dictionaries: "المعاجم",
+		maqayisTitle: "مقاييس اللغة لابن فارس",
+		mufradatTitle: "المفردات في غريب القرآن للراغب الأصفهاني",
+		laneTitle: "معجم لين العربي الإنجليزي",
+		laneThisWord: "هذه الكلمة",
+		laneOtherEntries: (count: number) =>
+			`مواد أخرى من الجذر (${formatNum(count, "ar")})`,
+		lanePage: (page: number) => `ص ${formatNum(page, "ar")}`,
+		tabsAria: "تحليل الكلمة",
+		tabHere: "في هذه الآية",
+		tabAcross: "في القرآن كله",
+		wujuhTitle: "وجوه الكلمة في القرآن للدامغاني",
+		wujuhSeparator: "، ",
+		wujuhInThisVerse: "في هذه الآية",
+		wujuhSenseOf: (sense: number, total: number) =>
+			`الوجه ${formatNum(sense, "ar")} من ${formatNum(total, "ar")}`,
+		wujuhNotCited: (total: number) =>
+			`عدد الأوجه: ${formatNum(total, "ar")}. وليست هذه الآية من شواهد الدامغاني.`,
+		wujuhThisVerse: "هذه الآية",
+		wujuhUnnamedSense: (sense: number) => `الوجه ${formatNum(sense, "ar")}`,
+		wujuhNoVerses: "لم يُعثر على موضع شاهد هذا الوجه.",
 		qiraatTitle: "القراءات العشر المتواترة",
 		qiraatIsolation: "عند الوقف والانفراد",
 		qiraatWasl: "عند الوصل والدرج",
@@ -211,18 +247,36 @@ export const ar: Translations = {
 		pageTitle: "تصفح القرآن الكريم",
 	},
 	examples: {
+		rootPlaceholder: "علم",
+		lemmaPlaceholder: "هَل",
 		pageTitle: "استكشف الأنماط النحوية",
-		lead: "ابحث في متن المدونة بالجذر، أو اللفظ المعجمي، أو نوع الكلمة، أو الوزن الصرفي، أو العلاقة الإعرابية.",
+		lead: "ابحث في متن المدونة بالجذر، أو الأصل المعجمي، أو نوع الكلمة (اسم، فعل، حرف)، أو الوزن الصرفي، أو الموقع الإعرابي في الجملة.",
 		presetHal: "استفهام هل",
 		presetAfala: "أَفْعَلَ من نزل",
 		presetFaala: "فَعَّلَ من علم",
 		presetFail: "فاعل",
-		presetHalState: "حال",
+		presetHalState: "حال (موقع إعرابي)",
 		filterRoot: "الجذر",
 		filterLemma: "الأصل المعجمي",
-		filterPos: "النوع",
+		filterPos: "نوع الكلمة",
+		posHint: "بنية الكلمة: اسم، فعل، حرف، أو سابقة متصلة",
+		posGroups: {
+			word: "الأسماء والأفعال",
+			particle: "الحروف والأدوات",
+			clitic: "السوابق واللواحق المتصلة",
+		},
 		filterForm: "الوزن",
-		filterRelation: "العلاقة النحوية",
+		filterRelation: "الموقع الإعرابي",
+		relationHint: "وظيفة الكلمة في الجملة: فاعل، حال، تمييز…",
+		relationGroups: {
+			core: "الأركان الأساسية",
+			nom: "المكملات والتوابع",
+			clause: "الروابط والجمل",
+		},
+		facetPos: "النوع",
+		facetForm: "الوزن",
+		facetLemma: "الأصل",
+		facetRelation: "الإعراب",
 		anyOption: "الكل",
 		noOptionMatch: "لا نتائج مطابقة",
 		clearFilter: (label: string) => `مسح ${label}`,
@@ -241,7 +295,9 @@ export const ar: Translations = {
 		noWordsMatch: "لا توجد كلمات مطابقة لهذا الجمع من المعايير.",
 		showMore: "عرض المزيد",
 		chooseCriteriaHint:
-			"اختر جذراً أو أصلاً أو نوعاً أو وزناً أو علاقة نحوية لبدء البحث.",
+			"اختر جذراً أو أصلاً أو نوع كلمة أو وزناً أو موقعاً إعرابياً لبدء البحث.",
+		moreFilters: "خيارات بحث أخرى",
+		fewerFilters: "خيارات أقل",
 	},
 	sources: {
 		pageTitle: "المصادر المعتمدة في هذا الإصدار",
@@ -249,7 +305,7 @@ export const ar: Translations = {
 			"تطبيق عدسات هو قارئ تحليلي يجمع دراسات قرآنية منشورة بترخيص مفتوح. النص القرآني محفوظ دون أدنى تبديل. تُنسب كل طبقة إعرابية لمصدرها، ويمكن عرض أكثر من طبقة في آن واحد.",
 		coverageHeading: "تغطية المتن والطبقات التحليلية",
 		coverageBody: (stats) =>
-			`يغطي التحليل الصرفي والإعراب المفرد والصرف ومعاني الكلمات من مركز تفسير كامل كلمات القرآن البالغة ${formatNum(stats.words, "ar")} كلمة في جميع السور الـ ١١٤ (${formatNum(stats.syntaxVerses, "ar")} آية)، مع مقاصد السور والمختصر في التفسير بالعربية والإنجليزية والإندونيسية. وتشمل شجرة الإعراب الكاملة (نور البيان) جميع الآيات (${formatNum(stats.syntaxGraphs, "ar")} جملة تركيبية)، وتغطي القراءات العشر ${formatNum(stats.qiraatWords ?? 0, "ar")} كلمة في ${formatNum(stats.qiraatVerses ?? 0, "ar")} آية، ويرصد المتشابه اللفظي ${formatNum(stats.mutashabihPairs ?? 0, "ar")} نظير في ${formatNum(stats.mutashabihVerses ?? 0, "ar")} آية، وتوثق أسباب النزول المحررة ${formatNum(stats.asbabVerses ?? 0, "ar")} آية.`,
+			`يغطي التحليل الصرفي والإعراب المفرد والصرف ومعاني الكلمات من مركز تفسير كامل كلمات القرآن البالغة ${formatNum(stats.words, "ar")} كلمة في جميع السور الـ ١١٤ (${formatNum(stats.syntaxVerses, "ar")} آية)، مع مقاصد السور والمختصر في التفسير بالعربية والإنجليزية والإندونيسية. وتشمل شجرة الإعراب الكاملة (نور البيان) جميع الآيات (${formatNum(stats.syntaxGraphs, "ar")} جملة تركيبية)، وتغطي القراءات العشر ${formatNum(stats.qiraatWords ?? 0, "ar")} كلمة في ${formatNum(stats.qiraatVerses ?? 0, "ar")} آية، ويرصد المتشابه اللفظي ${formatNum(stats.mutashabihPairs ?? 0, "ar")} نظير في ${formatNum(stats.mutashabihVerses ?? 0, "ar")} آية، وتوثق أسباب النزول المحررة ${formatNum(stats.asbabVerses ?? 0, "ar")} آية، وتغطي وجوه الدامغاني ${formatNum(stats.wujuhRoots ?? 0, "ar")} جذراً.`,
 		licenseLabel: "الترخيص:",
 		kinds: {
 			morphology: "الصرف والاشتقاق",
@@ -261,8 +317,58 @@ export const ar: Translations = {
 			asbab: "أسباب النزول",
 			qiraat: "القراءات العشر",
 			mutashabih: "المتشابه اللفظي",
+			"word-translation": "ترجمة الكلمات",
+			dictionary: "المعاجم",
 		},
 		items: {
+			"khatib-irab": {
+				title: "المعجم المفصل في الإعراب (الخطيب)",
+				attribution:
+					"طاهر يوسف الخطيب، تقديم ومراجعة د. إميل بديع يعقوب (دار الكتب العلمية، بيروت)",
+				description:
+					"معجم أبجدي شامل لحروف المعاني والأدوات النحوية وقواعد الإعراب مع شواهد قرآنية وإعراب نموذجي، وملحق لإعراب الفاتحة وأول البقرة.",
+				license: "استخدام تعليمي وبحثي عام؛ النسخة الرقمية عبر thahabi.org",
+			},
+			"openiti-wujuh": {
+				title: "إصلاح الوجوه والنظائر للدامغاني",
+				attribution:
+					"الحسين بن محمد الدامغاني (ت 478هـ)، النص الرقمي من مدونة OpenITI (تحقيق عبد العزيز سيد الأهل)",
+				description:
+					"الأوجه التي تأتي عليها الكلمة في القرآن وشواهد كل وجه، مربوطة بمواضع الكلمات.",
+				license: "CC BY-NC-SA 4.0 (إصدار مدونة OpenITI)",
+			},
+			"qac-word-by-word": {
+				title: "ترجمة كلمات القرآن إلى الإنجليزية (المدونة القرآنية العربية)",
+				attribution:
+					"قيس دوكس والمدونة القرآنية العربية، عن عمل شهناز شيخ وكوثر خطري",
+				description:
+					"ترجمة إنجليزية لكل كلمة من كلمات القرآن، تُعرض كما هي في بطاقة الكلمة.",
+				license:
+					"رخصة جنو العمومية (GPL) مع شروط المدونة: النقل الحرفي ونسبة المصدر.",
+			},
+			"lane-lexicon": {
+				title: "معجم لين العربي الإنجليزي",
+				attribution:
+					"إدوارد وليم لين (1863-1893). Text provided by Perseus Digital Library, with funding from The U.S. Department of Education and The Max Planck Society.",
+				description:
+					"مواد معجم لين لكل جذر قرآني، بعد تحويل نقحرة بيرسيوس إلى الحرف العربي.",
+				license:
+					"شروط بيرسيوس: حرية النشر مع نسبة النص إلى بيرسيوس، وإبقاء بيان الإتاحة، وعرض التعديلات عليهم.",
+			},
+			"openiti-maqayis": {
+				title: "معجم مقاييس اللغة لابن فارس",
+				attribution:
+					"ابن فارس (ت 395هـ)، النص الرقمي من مدونة OpenITI (تحقيق عبد السلام هارون، 1979)",
+				description: "الأصل الذي يرجع إليه كل جذر، من متن الكتاب وحده.",
+				license: "CC BY-NC-SA 4.0 (إصدار مدونة OpenITI)",
+			},
+			"openiti-mufradat": {
+				title: "المفردات في غريب القرآن للراغب الأصفهاني",
+				attribution:
+					"الراغب الأصفهاني (ت 502هـ)، النص الرقمي من مدونة OpenITI (تحقيق صفوان الداودي)",
+				description: "معاني كل جذر في القرآن، من متن الكتاب وحده.",
+				license: "CC BY-NC-SA 4.0 (إصدار مدونة OpenITI)",
+			},
 			"qac-morphology": {
 				title: "الصرف والتحليل المورفولوجي 0.4 (المدونة النحوية)",
 				attribution:

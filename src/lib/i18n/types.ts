@@ -1,4 +1,3 @@
-import type { QuizPrefKey } from "../quizPrefs";
 import type { Manifest } from "../types";
 
 export type Locale = "en" | "ar" | "id";
@@ -25,10 +24,11 @@ export interface SourceItemTranslation {
 
 export interface Translations {
 	common: {
-		appNameAr: string;
-		appNameEn: string;
+		/** The wordmark: one name, in the interface language. */
+		appName: string;
 		searchPlaceholder: string;
 		searchAria: string;
+		closeSearchAria: string;
 		versesCount: (count: number) => string;
 		noVersesMatch: string;
 		surahsNav: string;
@@ -96,6 +96,8 @@ export interface Translations {
 			submitButton: string;
 			placesHeading: string;
 			thisAyah: string;
+			dabtHeading: string;
+			tawjihHeading: string;
 		};
 		sarf: {
 			rootQuestion: (wordAr: string) => string;
@@ -117,8 +119,6 @@ export interface Translations {
 		themeSection: string;
 		themeLight: string;
 		themeDark: string;
-		quizSection: string;
-		quizPrefs: Record<QuizPrefKey, { label: string; description: string }>;
 		readerSection: string;
 		readerSectionHint: string;
 		readerLayers: {
@@ -128,6 +128,8 @@ export interface Translations {
 			mutashabih: string;
 			asbab: string;
 			qiraat: string;
+			wujuh: string;
+			khatib: string;
 		};
 		sourcesLink: string;
 		sourcesDescription: string;
@@ -138,7 +140,6 @@ export interface Translations {
 		meccan: string;
 		madinan: string;
 		verseMeaningTitle: string;
-		verseMeaningSub: string;
 		translationBadge: string;
 		tafsirBadge: string;
 		mukhtasarEnTitle: string;
@@ -153,6 +154,7 @@ export interface Translations {
 		noTreeTitle: string;
 		classicalIrabShort: string;
 		surahGoalLabel: string;
+		surahDetails: string;
 		revelationOrder: (seq: number) => string;
 		asbabBadge: (count: number) => string;
 		asbabDrawerTitle: string;
@@ -161,6 +163,9 @@ export interface Translations {
 		usulSectionTitle: string;
 		nahwTabTitle: string;
 		treebankNoorBayan: string;
+		irabViewsAria: string;
+		irabDiagram: string;
+		irabClassical: string;
 		mutashabihBadge: (count: number) => string;
 		mutashabihSectionTitle: string;
 		mutashabihCounterpartAyah: string;
@@ -181,6 +186,13 @@ export interface Translations {
 		mutashabihSurahDistance: (count: number) => string;
 		mutashabihEmptyState: string;
 		mutashabihReturnToAyah: (coord: string) => string;
+		irabModel: string;
+		irabModelTitle: string;
+		irabModelSource: string;
+		irabCitationTitle: string;
+		irabCitationBadge: (count: number) => string;
+		irabCitationSource: string;
+		irabCitationIntro: (verseRef: string) => string;
 	};
 	sheet: {
 		analysisAria: (wordNumber: number) => string;
@@ -189,8 +201,36 @@ export interface Translations {
 		collapseAria: string;
 		classicalIrab: string;
 		sarf: string;
+		irabReferenceTitle: string;
+		irabReferenceSource: (page: number) => string;
+		irabReferenceBab: (bab: string) => string;
+		irabReferenceCitations: (count: number) => string;
 		wordMeaning: string;
 		searchThisRoot: string;
+		searchThisWord: string;
+		inQuran: string;
+		/** Occurrences, distinct verses, distinct surahs. */
+		occurrences: (count: number, verses: number, surahs: number) => string;
+		wordGlossSource: string;
+		dictionaries: string;
+		maqayisTitle: string;
+		mufradatTitle: string;
+		laneTitle: string;
+		laneThisWord: string;
+		laneOtherEntries: (count: number) => string;
+		tabsAria: string;
+		tabHere: string;
+		tabAcross: string;
+		wujuhTitle: string;
+		/** Between the headword and what follows it. */
+		wujuhSeparator: string;
+		wujuhInThisVerse: string;
+		wujuhSenseOf: (sense: number, total: number) => string;
+		wujuhNotCited: (total: number) => string;
+		wujuhThisVerse: string;
+		wujuhUnnamedSense: (sense: number) => string;
+		wujuhNoVerses: string;
+		lanePage: (page: number) => string;
 		qiraatTitle: string;
 		qiraatIsolation: string;
 		qiraatWasl: string;
@@ -201,6 +241,8 @@ export interface Translations {
 		pageTitle: string;
 	};
 	examples: {
+		rootPlaceholder: string;
+		lemmaPlaceholder: string;
 		pageTitle: string;
 		lead: string;
 		presetHal: string;
@@ -211,8 +253,24 @@ export interface Translations {
 		filterRoot: string;
 		filterLemma: string;
 		filterPos: string;
+		posHint: string;
+		posGroups: {
+			word: string;
+			particle: string;
+			clitic: string;
+		};
 		filterForm: string;
 		filterRelation: string;
+		relationHint: string;
+		relationGroups: {
+			core: string;
+			nom: string;
+			clause: string;
+		};
+		facetPos: string;
+		facetForm: string;
+		facetLemma: string;
+		facetRelation: string;
 		anyOption: string;
 		noOptionMatch: string;
 		clearFilter: (label: string) => string;
@@ -220,6 +278,8 @@ export interface Translations {
 		noWordsMatch: string;
 		showMore: string;
 		chooseCriteriaHint: string;
+		moreFilters: string;
+		fewerFilters: string;
 	};
 	sources: {
 		pageTitle: string;

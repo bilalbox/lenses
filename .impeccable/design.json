@@ -72,7 +72,7 @@
 					"#171d1a",
 					"#1b221e",
 					"#2d3832",
-					"#6f675e",
+					"#685f56",
 					"#b7aea2",
 					"#e3d9c8",
 					"#f3efe6",
@@ -152,7 +152,7 @@
 			"refersTo": "chip-grammar",
 			"description": "Morphological segment token or syntactic category badge.",
 			"html": "<span class=\"ds-grammar-chip\"><b lang=\"ar\">اسم</b><small>Noun</small></span>",
-			"css": ".ds-grammar-chip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.35rem 0.65rem; border-radius: 10px; background: #fffdf8; border: 1px solid #e3d9c8; font-size: 0.85rem; color: #1c1915; line-height: 1.2; } .ds-grammar-chip b { font-family: \"Scheherazade New\", serif; font-size: 1.1rem; font-weight: 600; color: #0f6e66; } .ds-grammar-chip small { font-size: 0.72rem; color: #6f675e; }"
+			"css": ".ds-grammar-chip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.35rem 0.65rem; border-radius: 10px; background: #fffdf8; border: 1px solid #e3d9c8; font-size: 0.85rem; color: #1c1915; line-height: 1.2; } .ds-grammar-chip b { font-family: \"Scheherazade New\", serif; font-size: 1.1rem; font-weight: 600; color: #0f6e66; } .ds-grammar-chip small { font-size: 0.72rem; color: #685f56; }"
 		},
 		{
 			"name": "Finder Search Input",
@@ -168,7 +168,7 @@
 			"refersTo": "card-surface",
 			"description": "Standard container for surah rows, source attributions, and commentary.",
 			"html": "<div class=\"ds-surface-card\"><h4 class=\"ds-card-title\">Surah Al-Baqarah</h4><p class=\"ds-card-desc\">286 verses · Madinah · Full treebank annotation.</p></div>",
-			"css": ".ds-surface-card { background: #fffdf8; border: 1px solid #e3d9c8; border-radius: 16px; padding: 1rem 1.15rem; box-shadow: 0 1px 2px rgba(60, 42, 20, 0.05); } .ds-card-title { margin: 0 0 0.35rem; font-family: Literata, Georgia, serif; font-size: 1.15rem; font-weight: 600; color: #1c1915; } .ds-card-desc { margin: 0; font-size: 0.92rem; color: #6f675e; line-height: 1.5; }"
+			"css": ".ds-surface-card { background: #fffdf8; border: 1px solid #e3d9c8; border-radius: 16px; padding: 1rem 1.15rem; box-shadow: 0 1px 2px rgba(60, 42, 20, 0.05); } .ds-card-title { margin: 0 0 0.35rem; font-family: Literata, Georgia, serif; font-size: 1.15rem; font-weight: 600; color: #1c1915; } .ds-card-desc { margin: 0; font-size: 0.92rem; color: #685f56; line-height: 1.5; }"
 		}
 	],
 	"narrative": {

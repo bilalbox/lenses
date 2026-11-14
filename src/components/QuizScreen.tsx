@@ -3,7 +3,6 @@
  * the active question to its lens view.
  */
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { stripTashkeel } from "../lib/arabic";
 import type { MutashabihQuestion } from "../lib/mutashabihQuiz";
 import type { QuizQuestion, SarfQuestion, UsulQuestion } from "../lib/quizBank";
 import type { QuizLens } from "../lib/quizCatalog";
@@ -28,18 +27,13 @@ export function QuizScreen({
 	initialLens,
 	onOpenInReader,
 	onOpenSearch,
-	hideDiacritics = false,
-	extendedRoles = false,
 }: {
 	manifest: Manifest;
 	initialLens?: QuizLens;
 	onOpenInReader: (sura: number, verse: number, word?: number) => void;
 	onOpenSearch?: (seed: Partial<ExampleQuery>) => void;
-	hideDiacritics?: boolean;
-	/** Also ask the extended iʿrāb roles (ẓarf, mustathnā, …). */
-	extendedRoles?: boolean;
 }) {
-	const { pools: quizPools, loading } = useQuizPools(manifest, extendedRoles);
+	const { pools: quizPools, loading } = useQuizPools(manifest);
 	// The reducer reads the pools of the latest render.
 	const pools = useRef(quizPools);
 	pools.current = quizPools;
@@ -59,15 +53,6 @@ export function QuizScreen({
 	const targetBtnRef = useRef<HTMLButtonElement | null>(null);
 	const ayahBoxRef = useRef<HTMLDivElement | null>(null);
 	const { irab: irabPool, sarf: sarfPool } = quizPools;
-
-	// Turning the extended roles on or off reorders the iʿrāb pool, so the
-	// current index would land on another question: pick afresh.
-	const shownRoles = useRef(extendedRoles);
-	useEffect(() => {
-		if (shownRoles.current === extendedRoles) return;
-		shownRoles.current = extendedRoles;
-		dispatch({ type: "repool", lens: "irab", random: Math.random() });
-	}, [extendedRoles]);
 
 	// Always open quiz on a random verse (once curated pools are ready).
 	useEffect(() => {
@@ -136,7 +121,6 @@ export function QuizScreen({
 	const shared: Omit<LensProps<never>, "question"> = {
 		session,
 		dispatch,
-		show: (text) => (hideDiacritics ? stripTashkeel(text) : text),
 		onSubmit: handleSubmit,
 		onNext: handleNextRandom,
 		onSelectLens: handleSelectLens,
@@ -151,13 +135,7 @@ export function QuizScreen({
 			<MutashabihLens {...shared} question={question as MutashabihQuestion} />
 		);
 	if (lens === "irab")
-		return (
-			<IrabLens
-				{...shared}
-				question={question as QuizQuestion}
-				extendedRoles={extendedRoles}
-			/>
-		);
+		return <IrabLens {...shared} question={question as QuizQuestion} />;
 	return (
 		<SarfLens
 			{...shared}

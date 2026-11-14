@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { lexiconUrl } from "./lexicon";
 import type { QuizBankFile } from "./quizBank";
 import type {
 	AsbabData,
+	IrabDictionaryFile,
+	LexiconFile,
 	Manifest,
 	MutashabihQuizFile,
 	SurahFile,
@@ -10,6 +13,8 @@ import type {
 	SurahSyntaxFile,
 	VerseRow,
 	WordIndex,
+	WordStats,
+	WujuhFile,
 } from "./types";
 import type { SurahUsulFile, UsuliTaxonomyNode } from "./usulTypes";
 
@@ -18,10 +23,13 @@ interface CorpusLayers {
 	manifest: Manifest;
 	verses: VerseRow[];
 	words: WordIndex;
+	wordStats: WordStats;
+	wujuh: WujuhFile;
 	asbab: AsbabData;
 	mutashabihQuiz: MutashabihQuizFile;
 	quizBank: QuizBankFile;
 	usulTaxonomy: UsuliTaxonomyNode[];
+	irabDictionary: IrabDictionaryFile;
 }
 
 /** One file per surah, at `/data/quran/{kind}/{nnn}.json`. */
@@ -189,4 +197,9 @@ export function useVerseLayer<K extends VerseLayer>(
 	const state = useLayer(kind, sura, options);
 	const file = state.data as { verses: VerseEntry<K>[] } | undefined;
 	return { ...state, data: file ? findVerse(file, verse) : undefined };
+}
+
+/** The dictionary file for a Buckwalter root; roots no dictionary covers have none, so expect an error. */
+export function useLexicon(root: string | undefined): LayerState<LexiconFile> {
+	return useRequest<LexiconFile>(root ? lexiconUrl(root) : null);
 }

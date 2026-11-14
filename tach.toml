@@ -31,3 +31,19 @@ depends_on = []
 [[modules]]
 path = "usul_baqarah_spike"
 depends_on = []
+
+[[modules]]
+path = "build_lexicon"
+depends_on = []
+
+[[modules]]
+path = "build_wujuh"
+depends_on = []
+
+[[modules]]
+path = "audit_wujuh"
+depends_on = ["build_wujuh"]
+
+[[modules]]
+path = "build_irab_dictionary"
+depends_on = []

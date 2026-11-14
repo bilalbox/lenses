@@ -1,8 +1,16 @@
-import { type ReactNode, Suspense, useEffect, useState } from "react";
+import {
+	type ReactNode,
+	Suspense,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { AppPages, navigateHash } from "./components/AppPages";
 import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
+	CloseIcon,
 	GearIcon,
 	SearchIcon,
 } from "./components/Icons";
@@ -17,12 +25,7 @@ import {
 	startLibrary,
 	watchLibrary,
 } from "./lib/library";
-import {
-	loadQuizPrefs,
-	type QuizPrefKey,
-	type QuizPrefs,
-	saveQuizPref,
-} from "./lib/quizPrefs";
+import { adjacentVerse } from "./lib/manifest";
 import {
 	loadReaderPrefs,
 	type ReaderLayerKey,
@@ -58,28 +61,47 @@ function stepAdjacentVerse(
 	verse: number,
 	delta: number,
 ) {
-	const unit = manifest.units.find((item) => item.n === sura);
-	if (!unit) return;
-	let nextVerse = verse + delta;
-	let nextSura = sura;
-	if (nextVerse < 1) {
-		nextSura = sura === 1 ? 114 : sura - 1;
-		nextVerse = manifest.units.find((item) => item.n === nextSura)?.verses ?? 1;
-	} else if (nextVerse > unit.verses) {
-		nextSura = sura === 114 ? 1 : sura + 1;
-		nextVerse = 1;
-	}
-	navigateHash(`/${nextSura}/${nextVerse}`);
+	const next = adjacentVerse(manifest, sura, verse, delta);
+	if (next) navigateHash(`/${next.sura}/${next.verse}`);
+}
+
+/** Publishes an element's live height as a root CSS variable, so fixed layers
+ * (word sheet, dock, topbar) can stack against each other without guessing.
+ * Returns a callback ref; it re-attaches whenever the element mounts. */
+function useHeightVar(name: string) {
+	return useCallback(
+		(el: HTMLElement | null) => {
+			if (!el) return;
+			const root = document.documentElement.style;
+			const sync = () => root.setProperty(name, `${el.offsetHeight}px`);
+			sync();
+			const observer = new ResizeObserver(sync);
+			observer.observe(el);
+			return () => {
+				observer.disconnect();
+				root.removeProperty(name);
+			};
+		},
+		[name],
+	);
+}
+
+function isTypingTarget(target: EventTarget | null) {
+	const el = target as HTMLElement | null;
+	return Boolean(
+		el &&
+			(["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName) ||
+				el.isContentEditable),
+	);
 }
 
 export function App() {
-	const { t, dir } = useI18n();
+	const { t, dir, formatNumber } = useI18n();
 	const [route, setRoute] = useState(() => parseRoute(location.hash));
 	const { data: manifest, error } = useLayer("manifest");
 	const [theme, setTheme] = useState(
 		() => document.documentElement.dataset.theme || "light",
 	);
-	const [quizPrefs, setQuizPrefs] = useState<QuizPrefs>(loadQuizPrefs);
 	const [readerPrefs, setReaderPrefs] = useState<ReaderPrefs>(() =>
 		loadReaderPrefs(),
 	);
@@ -93,6 +115,53 @@ export function App() {
 	);
 	const [install, setInstall] = useState<BeforeInstallPromptEvent | null>(null);
 	const [library, setLibrary] = useState<LibraryProgress | null>(null);
+	// Verse stepping only means something in the reader.
+	const showDock = route.page === "verse";
+	const finderRef = useRef<HTMLDivElement | null>(null);
+	const searchToggleRef = useRef<HTMLButtonElement | null>(null);
+	const topbarRef = useHeightVar("--topbar-h");
+	const dockRef = useHeightVar("--dock-h");
+
+	const focusSearch = useCallback(() => {
+		setSearchOpen(true);
+		requestAnimationFrame(() => {
+			const input = finderRef.current?.querySelector("input");
+			input?.focus();
+			input?.select();
+		});
+	}, []);
+
+	const closeSearch = useCallback((returnFocus = false) => {
+		setSearchOpen(false);
+		if (returnFocus) searchToggleRef.current?.focus();
+	}, []);
+
+	// One search, reachable from every screen: "/" or Ctrl/⌘+K focuses it.
+	useEffect(() => {
+		const onKey = (event: KeyboardEvent) => {
+			const combo =
+				(event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+			if (combo || (event.key === "/" && !isTypingTarget(event.target))) {
+				event.preventDefault();
+				focusSearch();
+			}
+		};
+		window.addEventListener("keydown", onKey);
+		return () => window.removeEventListener("keydown", onKey);
+	}, [focusSearch]);
+
+	// A tap anywhere outside the finder puts it away.
+	useEffect(() => {
+		if (!searchOpen) return;
+		const onPointer = (event: PointerEvent) => {
+			const target = event.target as Node;
+			if (finderRef.current?.contains(target)) return;
+			if (searchToggleRef.current?.contains(target)) return;
+			setSearchOpen(false);
+		};
+		document.addEventListener("pointerdown", onPointer);
+		return () => document.removeEventListener("pointerdown", onPointer);
+	}, [searchOpen]);
 
 	useEffect(() => {
 		if (!location.hash) location.replace(`#${openingPath()}`);
@@ -111,32 +180,12 @@ export function App() {
 	}, [route.page, route.sura, route.verse]);
 
 	useEffect(() => {
-		return watchLibrary((progress) => {
-			setLibrary(progress);
-			if (progress.total > 0 && progress.done >= progress.total) {
-				window.setTimeout(() => {
-					setLibrary((current) =>
-						current && current.done >= current.total ? null : current,
-					);
-				}, 2600);
-			}
-		});
+		return watchLibrary(setLibrary);
 	}, []);
 
 	useEffect(() => {
 		if (manifest) startLibrary(manifest);
 	}, [manifest]);
-
-	useEffect(() => {
-		const onScroll = () =>
-			document.documentElement.classList.toggle(
-				"is-scrolled",
-				window.scrollY > 28,
-			);
-		onScroll();
-		window.addEventListener("scroll", onScroll, { passive: true });
-		return () => window.removeEventListener("scroll", onScroll);
-	}, []);
 
 	useEffect(() => {
 		if (route) setSearchOpen(false);
@@ -186,11 +235,6 @@ export function App() {
 		}
 	};
 
-	const toggleQuizPref = (key: QuizPrefKey, next: boolean) => {
-		setQuizPrefs((prev) => ({ ...prev, [key]: next }));
-		saveQuizPref(key, next);
-	};
-
 	const toggleReaderPref = (key: ReaderLayerKey, next: boolean) => {
 		setReaderPrefs((prev) => {
 			const updated = { ...prev, [key]: next };
@@ -211,22 +255,25 @@ export function App() {
 		setSearchOpen(false);
 	};
 
-	const showDock = route.page !== "quiz";
-
 	return (
-		<div className="app">
-			<header className="topbar">
+		<div className={`app page-${route.page}`}>
+			<header className="topbar" ref={topbarRef}>
 				<a
 					className="mark"
 					href={`#${route.page === "verse" ? `/${route.sura}/${route.verse}` : openingPath()}`}
 				>
-					<span className="mark-ar" lang="ar">
-						{t.common.appNameAr}
-					</span>
-					<span className="mark-en">{t.common.appNameEn}</span>
+					{t.common.appName}
 				</a>
-				<div className={`finder${searchOpen ? " is-open" : ""}`}>
+				<div
+					id="finder"
+					ref={finderRef}
+					className={`finder${searchOpen ? " is-open" : ""}`}
+				>
+					<SearchIcon className="finder-icon" aria-hidden="true" />
 					<input
+						type="search"
+						enterKeyHint="go"
+						aria-keyshortcuts="/ Control+K Meta+K"
 						value={query}
 						dir="auto"
 						placeholder={t.common.searchPlaceholder}
@@ -241,9 +288,24 @@ export function App() {
 								event.preventDefault();
 								openHit(hits[0]);
 							}
-							if (event.key === "Escape") setSearchOpen(false);
+							if (event.key === "Escape") {
+								event.stopPropagation();
+								event.currentTarget.blur();
+								closeSearch(searchOpen);
+							}
 						}}
 					/>
+					<span className="finder-kbd" aria-hidden="true">
+						/
+					</span>
+					<button
+						type="button"
+						className="icon-button finder-close"
+						aria-label={t.common.closeSearchAria}
+						onClick={() => closeSearch(true)}
+					>
+						<CloseIcon />
+					</button>
 					{searchOpen && query.trim() ? (
 						<ul className="finder-results">
 							{hits.length ? (
@@ -289,6 +351,17 @@ export function App() {
 						{t.common.quizNav}
 					</a>
 					<button
+						ref={searchToggleRef}
+						type="button"
+						className={`icon-button search-toggle-button${searchOpen ? " is-on" : ""}`}
+						aria-label={t.common.searchAria}
+						aria-expanded={searchOpen}
+						aria-controls="finder"
+						onClick={() => (searchOpen ? closeSearch() : focusSearch())}
+					>
+						<SearchIcon />
+					</button>
+					<button
 						type="button"
 						className="icon-button settings-toggle-button"
 						onClick={() => setSettingsOpen(true)}
@@ -299,13 +372,6 @@ export function App() {
 				</nav>
 			</header>
 			<main>
-				{library ? (
-					<p className="library-status" role="status">
-						{library.done >= library.total
-							? t.common.offlineReady
-							: t.common.savingOffline(library.done, library.total)}
-					</p>
-				) : null}
 				{error ? <p className="banner error">{error}</p> : null}
 				{!manifest && !error ? (
 					<div className="skeleton page-skeleton" aria-hidden="true">
@@ -329,14 +395,13 @@ export function App() {
 							route={route}
 							readerPrefs={readerPrefs}
 							seed={seed}
-							quizPrefs={quizPrefs}
 							openSearch={openSearch}
 						/>
 					) : null}
 				</Suspense>
 			</main>
 			{showDock ? (
-				<nav className="dock" aria-label={t.common.verse}>
+				<nav className="dock" ref={dockRef} aria-label={t.common.verse}>
 					<button
 						type="button"
 						onClick={() =>
@@ -367,7 +432,7 @@ export function App() {
 						<input
 							name="jump"
 							aria-label={t.common.chapterAndVerse}
-							defaultValue={`${route.sura}:${route.verse}`}
+							defaultValue={`${formatNumber(route.sura)}:${formatNumber(route.verse)}`}
 							key={`${route.sura}:${route.verse}`}
 						/>
 					</form>
@@ -381,21 +446,6 @@ export function App() {
 						<span>{t.common.next}</span>
 						{dir === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
 					</button>
-					<button
-						type="button"
-						onClick={() => {
-							setSearchOpen(true);
-							window.scrollTo({ top: 0 });
-							requestAnimationFrame(() =>
-								document
-									.querySelector<HTMLInputElement>(".finder input")
-									?.focus(),
-							);
-						}}
-					>
-						<SearchIcon />
-						<span>{t.common.search}</span>
-					</button>
 				</nav>
 			) : null}
 			<SettingsModal
@@ -403,10 +453,9 @@ export function App() {
 				onClose={() => setSettingsOpen(false)}
 				theme={theme}
 				onSelectTheme={selectTheme}
-				quizPrefs={quizPrefs}
-				onToggleQuizPref={toggleQuizPref}
 				readerPrefs={readerPrefs}
 				onToggleReaderPref={toggleReaderPref}
+				library={library}
 				canInstall={Boolean(install)}
 				onInstall={() => {
 					if (install) {

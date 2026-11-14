@@ -84,4 +84,13 @@ describe("integration: mutashabih quiz bank", () => {
 			expect(pieces.length).toBe(q.words.length - q.length + 1);
 		}
 	});
+
+	it("attaches clean classical dabt notes to over 80% of questions", () => {
+		const withDabt = questions.filter((q) => q.dabt);
+		expect(withDabt.length / questions.length).toBeGreaterThan(0.8);
+		for (const q of withDabt) {
+			expect(q.dabt?.trim().length).toBeGreaterThan(0);
+			expect(q.dabt?.includes("\r")).toBe(false);
+		}
+	});
 });

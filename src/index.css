@@ -5,7 +5,7 @@
 	--paper: #fffdf8;
 	--ink: #1c1915;
 	--ink-soft: #4a453e;
-	--muted: #6f675e;
+	--muted: #685f56;
 	--line: #e3d9c8;
 	--teal: #0f6e66;
 	--teal-soft: #e5f3f0;
@@ -34,6 +34,12 @@
 	--arabic: "Scheherazade New", "Amiri", serif;
 	--arabic-ui: "Noto Sans Arabic", sans-serif;
 	--radius: 18px;
+	/* Docked word sheet: a raised plane with a lit top edge, so an open sheet
+	 * reads as a layer above the verse rather than more page. */
+	--sheet-bg: var(--paper);
+	--sheet-edge: color-mix(in srgb, var(--teal) 22%, var(--line));
+	--sheet-lift:
+		0 -1px 2px rgba(60, 42, 20, 0.05), 0 -14px 34px -12px rgba(60, 42, 20, 0.2);
 }
 
 :root[data-theme="dark"] {
@@ -56,6 +62,10 @@
 	--shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 12px 32px -6px rgba(0, 0, 0, 0.45);
 	--shadow-soft:
 		0 1px 2px rgba(0, 0, 0, 0.22), 0 6px 14px -4px rgba(0, 0, 0, 0.35);
+	--sheet-bg: #1d2622;
+	--sheet-edge: color-mix(in srgb, var(--teal) 42%, var(--line));
+	--sheet-lift:
+		0 -1px 0 rgba(0, 0, 0, 0.4), 0 -18px 44px -10px rgba(0, 0, 0, 0.75);
 }
 
 :root[lang="ar"] {
@@ -132,7 +142,8 @@ code {
 .topbar {
 	position: sticky;
 	top: 0;
-	z-index: 30;
+	/* Above the docked word sheet (41) and dock (42): search results drop over both. */
+	z-index: 45;
 	display: grid;
 	grid-template-columns: auto minmax(0, 1fr) auto;
 	gap: 0.8rem;
@@ -143,31 +154,74 @@ code {
 	backdrop-filter: blur(16px);
 	border-bottom: 1px solid var(--line);
 }
+/* One wordmark in the interface language, set in the reading accent. */
 .mark {
-	display: flex;
-	flex-direction: column;
+	display: inline-flex;
+	align-items: center;
 	width: max-content;
 	justify-self: start;
 	min-height: 48px;
-	justify-content: center;
+	padding-inline: 0.15rem;
 	text-decoration: none;
-	color: var(--ink);
-	line-height: 1;
-	font-weight: 600;
-}
-.mark-ar {
-	font-family: var(--arabic);
-	font-size: 1.55rem;
 	color: var(--teal);
+	font-family: var(--serif);
+	font-size: 1.4rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
 	line-height: 1;
 }
-.mark-en {
-	font-family: var(--serif);
-	font-size: 0.95rem;
-	color: var(--ink);
+:root[lang="ar"] .mark {
+	font-family: var(--arabic);
+	font-size: 1.65rem;
+	font-weight: 700;
+	letter-spacing: normal;
+}
+.mark:hover {
+	color: color-mix(in srgb, var(--teal) 82%, var(--ink));
 }
 .finder {
 	position: relative;
+	display: flex;
+	align-items: center;
+}
+.finder-icon {
+	position: absolute;
+	inset-inline-start: 0.85rem;
+	color: var(--muted);
+	pointer-events: none;
+}
+.topbar .finder input {
+	padding-inline: 2.4rem 2.6rem;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.finder input::-webkit-search-cancel-button {
+	display: none;
+}
+.finder-kbd {
+	position: absolute;
+	inset-inline-end: 0.6rem;
+	min-width: 1.5rem;
+	padding: 0.05rem 0.4rem;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--bg-2);
+	color: var(--muted);
+	font: 600 0.78rem / 1.4 var(--sans);
+	text-align: center;
+	pointer-events: none;
+	transition: opacity var(--duration-fast) ease;
+}
+.finder:focus-within .finder-kbd {
+	opacity: 0;
+}
+.finder .finder-close,
+.topbar .search-toggle-button {
+	display: none;
+}
+.topbar .search-toggle-button.is-on {
+	background: var(--teal-soft);
+	color: var(--teal);
 }
 .finder input,
 .filters input,
@@ -297,21 +351,6 @@ main {
 	margin: 0 auto;
 	padding: 1.2rem 0 4rem;
 }
-.library-status {
-	position: fixed;
-	z-index: 35;
-	left: 50%;
-	bottom: 5.4rem;
-	transform: translateX(-50%);
-	margin: 0;
-	padding: 0.45rem 0.8rem;
-	border-radius: 999px;
-	background: var(--ink);
-	color: var(--paper);
-	font-size: 0.92rem;
-	white-space: nowrap;
-	animation: softRiseInCentered var(--duration-med) var(--ease-out);
-}
 
 /* Soft content enter — verse swaps, route pages, quiz question changes */
 .anim-soft-enter {
@@ -326,17 +365,6 @@ main {
 	to {
 		opacity: 1;
 		transform: translateY(0);
-	}
-}
-
-@keyframes softRiseInCentered {
-	from {
-		opacity: 0;
-		transform: translate(-50%, 8px);
-	}
-	to {
-		opacity: 1;
-		transform: translate(-50%, 0);
 	}
 }
 
@@ -365,35 +393,85 @@ main {
 	color: var(--muted);
 	flex: 1;
 }
-.verse-title h1 {
-	margin: 0.15rem 0 0.8rem;
-	font-family: var(--serif);
-	font-weight: 600;
-	font-size: clamp(1.8rem, 3vw, 2.6rem);
+.verse-title {
+	margin-bottom: 0.5rem;
 }
-.verse-title h1 > span {
+.verse-title h1 {
+	margin: 0;
 	font-family: var(--arabic);
 	font-weight: 700;
-	margin-inline-end: 0.4rem;
+	font-size: clamp(1.7rem, 3vw, 2.3rem);
+	line-height: 1.35;
 }
-.verse-title h1 small {
-	display: block;
-	font-family: var(--sans);
-	font-size: 0.95rem;
+.verse-ref-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-height: 44px;
+	padding: 0 0.6rem;
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
 	color: var(--muted);
-	font-weight: 400;
+	font-size: 0.95rem;
+	transition:
+		background-color var(--duration-fast) ease,
+		color var(--duration-fast) ease;
 }
+.verse-ref-toggle:hover,
+.verse-ref-toggle[aria-expanded="true"] {
+	background: var(--bg-2);
+	color: var(--ink);
+}
+.verse-ref {
+	color: var(--ink-soft);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+.verse-ref-chevron {
+	width: 14px;
+	height: 14px;
+	transform: rotate(90deg);
+	transition: transform var(--duration-fast) var(--ease-out);
+}
+.verse-ref-toggle[aria-expanded="true"] .verse-ref-chevron {
+	transform: rotate(-90deg);
+}
+.surah-about {
+	max-width: 65ch;
+	margin: 0.2rem 0 0.4rem;
+	color: var(--muted);
+	font-size: 0.95rem;
+}
+.surah-about-facts {
+	margin: 0;
+}
+.surah-about-label {
+	margin: 0.7rem 0 0.1rem;
+	font-family: var(--sans);
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--ink-soft);
+}
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+/* The ayah sits directly on the canvas: no card, border or shadow. */
 .verse-line {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.15rem 0.15rem;
 	align-items: baseline;
-	margin: 0;
-	padding: 1rem 1.1rem 0.8rem;
-	background: var(--paper);
-	border: 1px solid var(--line);
-	border-radius: var(--radius);
-	box-shadow: var(--shadow);
+	margin: 0 0 0.6rem;
+	padding: 0.25rem 0 0.5rem;
 }
 .verse-line button {
 	border: 0;
@@ -802,6 +880,48 @@ main {
 	box-decoration-break: clone;
 	-webkit-box-decoration-break: clone;
 }
+button.irab-target-word {
+	border: 0;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+	cursor: pointer;
+	text-align: inherit;
+	display: inline;
+	transition:
+		background-color var(--duration-fast) ease,
+		color var(--duration-fast) ease;
+}
+button.irab-target-word:hover {
+	background: color-mix(in srgb, var(--gold) 35%, transparent);
+}
+button.irab-target-word.is-on {
+	background: var(--teal-soft);
+	color: var(--teal);
+}
+.irab-quote-word {
+	border: 0;
+	background: transparent;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+	color: inherit;
+	padding: 0.05em 0.28em;
+	border-radius: 6px;
+	cursor: pointer;
+	display: inline;
+	transition:
+		background-color var(--duration-fast) ease,
+		color var(--duration-fast) ease;
+}
+.irab-quote-word:hover {
+	background: var(--paper-hover, rgba(0, 0, 0, 0.05));
+}
+.irab-quote-word.is-on {
+	background: var(--teal-soft);
+	color: var(--teal);
+	font-weight: 700;
+}
 .irab-colon {
 	font-weight: 600;
 	color: var(--gold);
@@ -825,11 +945,23 @@ main {
 	font-weight: 600;
 	margin: 0;
 }
+.sheet:focus {
+	outline: none;
+}
+.sheet-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.2rem 1rem;
+	margin: 0 0 0.6rem;
+}
 .sheet-word {
 	font-family: var(--arabic);
-	font-size: clamp(2.75rem, 5vw, 3.45rem);
+	font-size: clamp(2.4rem, 5vw, 3.45rem);
+	font-weight: 400;
 	line-height: 1.35;
-	margin: 0.1rem 0 0.55rem;
+	margin: 0;
 	color: var(--ink);
 }
 /* Sheet padding ≈ 16px → concentric chip radius 22 − 16 = 6 */
@@ -879,6 +1011,517 @@ main {
 	align-items: center;
 	gap: 0.35rem 0.85rem;
 	margin: 0.55rem 0 0;
+}
+.sheet-gloss {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.1rem;
+	margin: 0;
+	color: var(--ink);
+	font-size: 1.1rem;
+}
+.sheet-gloss .source-line {
+	margin: 0;
+	font-size: 0.8rem;
+}
+.wujuh-entry + .wujuh-entry {
+	margin-top: 1rem;
+}
+.wujuh-answer {
+	margin-bottom: 0.7rem;
+	padding: 0.75rem 1rem;
+	border-radius: 12px;
+	background: var(--teal-soft);
+}
+.wujuh-answer p {
+	margin: 0;
+}
+.wujuh-answer-label,
+.wujuh-answer-meta {
+	color: var(--ink-soft);
+	font-size: 0.82rem;
+}
+.wujuh-answer-sense {
+	margin: 0.1rem 0 0.15rem !important;
+	font-family: var(--arabic);
+	font-size: clamp(1.5rem, 4vw, 1.8rem);
+	line-height: 1.5;
+	color: var(--ink);
+}
+.wujuh-answer-meta bdi,
+.wujuh-headword {
+	font-family: var(--arabic);
+	font-size: 1.15em;
+	color: var(--ink);
+}
+.wujuh-uncited {
+	margin: 0 0 0.6rem;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+.wujuh-senses {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	overflow: hidden;
+}
+.wujuh-sense + .wujuh-sense {
+	border-top: 1px solid var(--line);
+}
+.wujuh-sense.is-here {
+	background: color-mix(in srgb, var(--teal) 6%, var(--paper));
+}
+.wujuh-sense-head {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	width: 100%;
+	min-height: 48px;
+	padding: 0.35rem 0.85rem;
+	border: 0;
+	background: transparent;
+	color: var(--ink);
+	text-align: start;
+	cursor: pointer;
+}
+.wujuh-sense-number,
+.wujuh-sense-count {
+	min-width: 1.4rem;
+	color: var(--muted);
+	font-size: 0.82rem;
+	font-variant-numeric: tabular-nums;
+}
+.wujuh-sense-label {
+	flex: 1;
+	font-family: var(--arabic);
+	font-size: 1.15rem;
+	line-height: 1.5;
+}
+.wujuh-badge {
+	padding: 0.1rem 0.55rem;
+	border-radius: 999px;
+	background: var(--teal);
+	color: var(--paper);
+	font-family: var(--sans);
+	font-size: 0.72rem;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.wujuh-cites {
+	margin: 0;
+	padding: 0 0.5rem 0.6rem;
+	list-style: none;
+}
+.wujuh-cite {
+	display: flex;
+	align-items: baseline;
+	gap: 0.7rem;
+	padding: 0.3rem 0.4rem;
+	border-radius: 8px;
+	color: var(--ink);
+	text-decoration: none;
+}
+a.wujuh-cite:hover,
+a.wujuh-cite:focus-visible {
+	background: var(--bg-2);
+}
+.wujuh-cite.is-current {
+	background: var(--teal-soft);
+}
+.wujuh-cite-ref {
+	min-width: 3.2rem;
+	color: var(--muted);
+	font-size: 0.8rem;
+	font-variant-numeric: tabular-nums;
+}
+.wujuh-cite-text {
+	flex: 1;
+	font-family: var(--arabic);
+	font-size: 1.1rem;
+	line-height: 1.8;
+}
+.wujuh-cite-text mark {
+	background: transparent;
+	color: var(--teal);
+	font-weight: 700;
+}
+.wujuh-none {
+	padding: 0.3rem 0.4rem;
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+.sheet-lexicon .lexicon-drawer {
+	margin-block: 0.55rem;
+}
+.sheet-irab-ref .irab-ref-drawer {
+	margin-block: 0.55rem;
+}
+.irab-ref-citations-box {
+	margin-top: 0.75rem;
+	padding-top: 0.5rem;
+	border-top: 1px dashed var(--line);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	font-size: 0.82rem;
+}
+.irab-ref-citations-label {
+	color: var(--muted);
+	font-weight: 500;
+}
+.irab-ref-citations-list {
+	display: inline-flex;
+	gap: 0.35rem;
+	flex-wrap: wrap;
+}
+.irab-ref-cite-chip {
+	display: inline-flex;
+	padding: 0.15rem 0.45rem;
+	border-radius: 4px;
+	background: var(--bg-2);
+	color: var(--teal);
+	text-decoration: none;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	transition: background 0.15s ease;
+}
+.irab-ref-cite-chip:hover {
+	background: var(--line);
+}
+.irab-ref-cite-more {
+	color: var(--muted);
+	font-size: 0.78rem;
+}
+.irab-citation-intro {
+	color: var(--muted);
+	font-size: 0.88rem;
+	margin: 0 0 0.75rem;
+}
+.irab-citation-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+.irab-citation-card {
+	background: var(--bg-1);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm, 6px);
+	padding: 0.75rem 1rem;
+}
+.irab-citation-head {
+	margin: 0 0 0.5rem;
+	color: var(--ink);
+	font-size: 1.15rem;
+	font-weight: 700;
+}
+.irab-citation-meta {
+	font-size: 0.82rem;
+	color: var(--muted);
+	font-weight: 400;
+}
+.model-irab-sentence {
+	margin-top: 0.75rem;
+	padding-top: 0.5rem;
+	border-top: 1px dashed var(--line);
+	color: var(--ink);
+}
+.model-irab-notes {
+	margin-top: 0.75rem;
+	padding-top: 0.5rem;
+	border-top: 1px solid var(--line);
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+.model-irab-note {
+	color: var(--muted);
+	font-size: 0.82rem;
+	line-height: 1.6;
+}
+.lexicon-prose p {
+	margin: 0 0 0.6rem;
+	line-height: 1.95;
+}
+.lexicon-subhead {
+	margin: 0 0 0.5rem;
+	color: var(--muted);
+	font-size: 0.82rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+/* Lexicon shared card elements */
+.lexicon-card-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.4rem;
+}
+.lexicon-badge {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--sans);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	padding: 0.12rem 0.5rem;
+	border-radius: 999px;
+}
+.lexicon-badge.is-gold {
+	background: color-mix(in srgb, var(--gold) 15%, var(--paper));
+	color: var(--gold-ink);
+	border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+.lexicon-badge.is-teal {
+	background: color-mix(in srgb, var(--teal) 12%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+}
+
+/* Maqāyīs al-Lughah */
+.maqayis-principle-card {
+	background: color-mix(in srgb, var(--gold) 8%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1.1rem;
+	margin: 0 0 0.85rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.maqayis-principle-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.25rem;
+	font-weight: 600;
+	line-height: 1.85;
+	color: var(--ink);
+}
+.maqayis-section {
+	margin: 0 0 0.65rem;
+	line-height: 1.95;
+	font-family: var(--arabic);
+	font-size: 1.08rem;
+}
+.lexicon-branch-lead {
+	color: var(--teal);
+	font-weight: 700;
+	font-family: var(--arabic-ui);
+	font-size: 0.95em;
+}
+
+/* Quranic citations in lexicon */
+.lexicon-quran-wrap {
+	display: inline;
+}
+.lexicon-quran-quote {
+	color: var(--ink);
+	font-family: var(--arabic);
+	font-weight: 600;
+	background: color-mix(in srgb, var(--gold) 14%, transparent);
+	padding: 0.05rem 0.25rem;
+	border-radius: 4px;
+}
+.lexicon-ayah-badge {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--arabic-ui);
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--teal);
+	background: color-mix(in srgb, var(--teal) 10%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+	border-radius: 999px;
+	padding: 0.08rem 0.45rem;
+	margin-inline: 0.25rem;
+	vertical-align: baseline;
+}
+.lexicon-authority {
+	color: var(--ink);
+	font-weight: 700;
+	font-family: var(--arabic-ui);
+	font-size: 0.95em;
+}
+.lexicon-tafsir-lead {
+	color: var(--teal);
+	font-weight: 700;
+	font-family: var(--arabic-ui);
+	font-size: 0.95em;
+}
+
+/* al-Mufradāt */
+.mufradat-lead-card {
+	background: color-mix(in srgb, var(--teal) 7%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1.1rem;
+	margin: 0 0 0.85rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.mufradat-lead-text {
+	margin: 0;
+	font-family: var(--arabic);
+	font-size: 1.18rem;
+	line-height: 1.85;
+	color: var(--ink);
+}
+.mufradat-block {
+	margin: 0 0 0.65rem;
+	padding: 0.65rem 0.85rem;
+	background: var(--bg-1);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 4px);
+	line-height: 1.95;
+	font-family: var(--arabic);
+	font-size: 1.08rem;
+}
+
+/* Lane's Arabic-English Lexicon */
+.lane-entries {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	font-family: var(--serif);
+	font-size: 0.95rem;
+	line-height: 1.65;
+}
+.lane-entry-card {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: calc(var(--radius) - 2px);
+	padding: 0.85rem 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.lane-entry-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.45rem;
+	padding-bottom: 0.45rem;
+	border-bottom: 1px solid var(--line);
+}
+.lane-ar-head {
+	font-family: var(--arabic);
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: var(--ink);
+	unicode-bidi: isolate;
+}
+.lane-form-badge {
+	font-family: var(--sans);
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 0.15rem 0.55rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--teal) 12%, var(--paper));
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+}
+.lane-senses-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+.lane-sense-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+.lane-sense-card + .lane-sense-card {
+	border-top: 1px dashed var(--line);
+	padding-top: 0.65rem;
+}
+.lane-main-sense {
+	display: block;
+	line-height: 1.7;
+}
+.lane-sense-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.6rem;
+	height: 1.4rem;
+	font-family: var(--sans);
+	font-size: 0.75rem;
+	font-weight: 700;
+	border-radius: 4px;
+	background: var(--bg-2);
+	color: var(--muted);
+	margin-right: 0.45rem;
+	vertical-align: middle;
+	user-select: none;
+}
+.lane-subsense {
+	margin: 0.35rem 0 0 1.1rem;
+	padding-left: 0.65rem;
+	border-left: 2px solid color-mix(in srgb, var(--teal) 35%, transparent);
+	font-size: 0.92rem;
+	line-height: 1.65;
+}
+.lane-subsense-badge {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--sans);
+	font-size: 0.72rem;
+	font-weight: 700;
+	color: var(--teal);
+	background: color-mix(in srgb, var(--teal) 8%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 20%, transparent);
+	padding: 0.06rem 0.35rem;
+	border-radius: 4px;
+	margin-right: 0.35rem;
+	vertical-align: middle;
+}
+.lane-source {
+	font-size: 0.82rem;
+	color: var(--muted);
+	font-style: normal;
+	letter-spacing: 0.02em;
+}
+.lane-quran-cite {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--sans);
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--teal);
+	background: color-mix(in srgb, var(--teal) 8%, var(--paper));
+	border: 1px solid color-mix(in srgb, var(--teal) 20%, transparent);
+	padding: 0.08rem 0.4rem;
+	border-radius: 999px;
+	margin: 0 0.25rem;
+	vertical-align: middle;
+}
+.lane-ar {
+	font-family: var(--arabic);
+	font-size: 1.25em;
+	color: var(--ink);
+	font-weight: 600;
+	unicode-bidi: isolate;
+}
+.lane-em {
+	font-style: italic;
+	color: var(--ink);
+}
+.lexicon-more > summary {
+	cursor: pointer;
+	margin-block: 0.25rem 0.6rem;
+	color: var(--teal);
+	font-weight: 600;
+}
+.sheet-count {
+	color: var(--muted);
+	font-size: 0.92rem;
+	font-variant-numeric: tabular-nums;
 }
 .sheet-root-action .fact-metric {
 	font-family: var(--arabic-ui);
@@ -968,6 +1611,40 @@ main {
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 0.75rem;
 }
+.filters-more {
+	display: contents;
+}
+.filters-more[hidden] {
+	display: none;
+}
+.filters-toggle {
+	grid-column: 1 / -1;
+	justify-self: start;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	min-height: 44px;
+	margin-inline-start: -0.6rem;
+	padding: 0.4rem 0.6rem;
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
+	color: var(--teal);
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+.filters-toggle:hover {
+	background: var(--teal-soft);
+}
+.filters-toggle-chevron {
+	width: 14px;
+	height: 14px;
+	transform: rotate(90deg);
+	transition: transform var(--duration-fast) var(--ease-out);
+}
+.filters-toggle[aria-expanded="true"] .filters-toggle-chevron {
+	transform: rotate(-90deg);
+}
 .filters .filter-text {
 	display: grid;
 	gap: 0.25rem;
@@ -1038,12 +1715,20 @@ main {
 	/* Opening near the bottom scrolls the field up to just under the sticky header */
 	scroll-margin-top: 8rem;
 	display: grid;
-	gap: 0.25rem;
+	grid-template-rows: auto 1fr auto;
+	gap: 0.2rem;
 	min-width: 0;
 }
 .combobox-label {
 	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--ink);
+}
+.combobox-hint {
+	font-size: 0.74rem;
 	color: var(--muted);
+	line-height: 1.3;
+	margin-bottom: 0.1rem;
 }
 .combobox-field {
 	position: relative;
@@ -1051,7 +1736,10 @@ main {
 .filters .combobox input {
 	padding-inline-end: 2.6rem;
 }
+/* A chosen value is Arabic, so dir="auto" flips the input to RTL and its own
+ * inline-end moves to the far side; reserve room for the clear button on both. */
 .filters .combobox input.has-value {
+	padding-inline: 2.6rem;
 	font-family: var(--arabic-ui);
 	font-weight: 600;
 	border-color: var(--teal);
@@ -1099,6 +1787,20 @@ main {
 	background: var(--paper);
 	box-shadow: var(--shadow);
 }
+.combobox-group {
+	padding: 0.45rem 0.6rem 0.2rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--muted);
+	text-align: start;
+}
+.combobox-item:not(:first-child) .combobox-group {
+	margin-top: 0.3rem;
+	border-top: 1px solid var(--line);
+	padding-top: 0.55rem;
+}
 .combobox-option {
 	display: grid;
 	gap: 0.1rem;
@@ -1107,6 +1809,20 @@ main {
 	border-radius: 8px;
 	cursor: pointer;
 	text-align: start;
+}
+.combobox-option-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+.combobox-option-group {
+	font-size: 0.7rem;
+	color: var(--muted);
+	background: var(--bg-2);
+	padding: 0.1rem 0.45rem;
+	border-radius: 999px;
+	white-space: nowrap;
 }
 .combobox-option b {
 	font-family: var(--arabic-ui);
@@ -1327,9 +2043,6 @@ main {
 		gap: 1rem;
 		align-items: start;
 	}
-	.sheet-backdrop {
-		display: contents;
-	}
 	.sheet {
 		position: sticky;
 		top: 5.2rem;
@@ -1357,38 +2070,88 @@ main {
 	.results button {
 		grid-template-columns: 1fr;
 	}
-	.sheet-backdrop {
-		position: fixed;
-		inset: 0;
-		z-index: 40;
-		background: rgba(0, 0, 0, 0.45);
-		backdrop-filter: blur(4px);
-		animation: fadeIn 0.15s ease-out;
+	/* The sheet docks without a scrim: the verse above stays readable and
+	 * tappable, and the page keeps room to scroll the ayah clear of it. */
+	.stage.has-sheet .reading {
+		padding-bottom: calc(45vh + var(--dock-h, 0px) + 1.5rem);
 	}
-	.sheet-backdrop.is-closing {
-		animation: fadeOut 0.2s ease-in forwards;
-		pointer-events: none;
+	.verse-line button {
+		scroll-margin-top: calc(var(--topbar-h, 0px) + 1rem);
+		scroll-margin-bottom: calc(45vh + var(--dock-h, 0px) + 1rem);
 	}
+	/* Verse stepping lives in the bottom dock wherever the sheet docks, so
+	 * previous / next stay one thumb-reach away with a word open. */
+	.verse-toolbar {
+		display: none;
+	}
+	.reading {
+		padding-bottom: calc(var(--dock-h, 4rem) + 1.5rem);
+	}
+	.sheet .sheet-head {
+		padding: 0 0 0.2rem;
+	}
+	/* Without a body scroll lock, keep sheet scrolling from chaining to the page. */
+	.sheet {
+		overscroll-behavior: contain;
+	}
+	.sheet .chip {
+		min-height: 44px;
+	}
+	.sheet .chip b {
+		font-size: 1.4rem;
+	}
+	/* Rests on the dock, never under it, and never climbs past the topbar. */
 	.sheet {
 		position: fixed;
 		z-index: 41;
 		left: 0;
 		right: 0;
-		bottom: 0;
+		bottom: var(--dock-h, 0px);
 		height: 45vh;
-		max-height: 45vh;
+		max-height: calc(100vh - var(--topbar-h, 0px) - var(--dock-h, 0px));
 		overflow: auto;
+		background: var(--sheet-bg);
 		border-radius: 22px 22px 0 0;
-		border-bottom: 0;
-		border-left: 0;
-		border-right: 0;
-		box-shadow: var(--shadow);
+		border: 0;
+		border-top: 1px solid var(--sheet-edge);
+		box-shadow: var(--sheet-lift);
 		animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-		padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+		padding-bottom: 1.2rem;
 	}
 	.sheet.is-expanded {
-		height: 88vh;
-		max-height: 88vh;
+		height: calc(100vh - var(--topbar-h, 0px) - var(--dock-h, 0px) - 0.5rem);
+	}
+	/* The grab bar is the way out: it stays pinned however far the sheet
+	 * scrolls, and drags without scrolling the page underneath. */
+	.sheet {
+		padding-top: 0;
+	}
+	.sheet .sheet-handle {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		width: calc(100% + 2rem);
+		height: 44px;
+		min-height: 44px;
+		margin-inline: -1rem;
+		background: var(--sheet-bg);
+		touch-action: none;
+		cursor: grab;
+	}
+	.sheet .sheet-handle:active,
+	.settings-dialog .settings-sheet-handle:active {
+		cursor: grabbing;
+	}
+	/* No visible × when docked; it surfaces only for keyboard focus. */
+	.sheet-head .sheet-close:not(:focus-visible) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		min-width: 0;
+		min-height: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 	.sheet.is-closing {
 		animation: slideDown 0.2s cubic-bezier(0.32, 0, 0.67, 0) forwards;
@@ -1401,47 +2164,87 @@ main {
 .clause-stepper {
 	display: none;
 }
+@media (max-width: 1099px) {
+	.dock {
+		display: flex;
+		justify-content: center;
+	}
+}
+
 @media (max-width: 720px) {
 	.verse-toolbar {
 		display: none;
 	}
+	/* One compact, always-present row (DESIGN.md: mobile navigation stays
+	 * reachable while scrolling). */
 	.topbar {
-		grid-template-columns: minmax(0, 1fr);
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 0.5rem;
+		padding: 0.2rem 0.6rem;
+		background: color-mix(in srgb, var(--bg) 97%, transparent);
+		backdrop-filter: none;
+	}
+	.mark {
+		min-height: 44px;
+		font-size: 1.2rem;
+	}
+	:root[lang="ar"] .mark {
+		font-size: 1.45rem;
 	}
 	.topbar nav {
-		justify-content: start;
-		overflow: auto;
-		gap: 0.5rem;
+		justify-content: flex-start;
+		overflow-x: auto;
+		gap: 0;
 	}
 	.topbar nav a,
 	.topbar nav button {
-		min-height: 48px;
-		padding: 0.55rem 0.75rem;
+		min-height: 44px;
+		padding: 0.5rem 0.6rem;
+		font-size: 0.95rem;
 		flex: 0 0 auto;
 	}
 	.finder:not(.is-open) {
 		display: none;
 	}
-	.dock input {
-		min-height: 48px;
+	.topbar .search-toggle-button {
+		display: inline-grid;
 	}
-	html.is-scrolled .finder {
+	/* If labels outgrow the row, it scrolls from the start instead of
+	 * sliding under the wordmark (end-alignment overflows unreachably). */
+	.topbar nav > :first-child {
+		margin-inline-start: auto;
+	}
+	/* Opened from the topbar icon: a full-width row with its own way out. */
+	.finder.is-open {
+		padding-bottom: 0.4rem;
+		animation: softRiseIn var(--duration-fast) var(--ease-out);
+	}
+	.topbar .finder.is-open input {
+		padding-inline-end: 3.2rem;
+	}
+	.finder .finder-close {
+		display: inline-grid;
+		position: absolute;
+		inset-inline-end: 0;
+		top: 0;
+		min-width: 44px;
+		min-height: 44px;
+	}
+	.finder-kbd {
 		display: none;
 	}
-	html.is-scrolled .topbar {
-		padding-block: 0.3rem;
+	/* The surah index is where verses are looked up, so its finder stays out. */
+	.page-surahs .finder {
+		display: flex;
+		padding-bottom: 0.4rem;
 	}
-	html.is-scrolled .topbar nav {
-		gap: 0.35rem;
-	}
-	html.is-scrolled .topbar nav a,
-	html.is-scrolled .topbar nav button {
-		min-height: 44px;
-		padding: 0.35rem 0.65rem;
-		font-size: 0.88rem;
+	.page-surahs .finder .finder-close,
+	.page-surahs .topbar .search-toggle-button {
+		display: none;
 	}
 	.dock {
-		display: flex;
+		background: color-mix(in srgb, var(--bg) 97%, transparent);
+		backdrop-filter: none;
 	}
 	.clause-outline {
 		display: none;
@@ -1460,6 +2263,21 @@ main {
 	}
 }
 
+@media (max-width: 400px) {
+	.topbar {
+		gap: 0.25rem;
+		padding-inline: 0.4rem;
+	}
+	.topbar nav a,
+	.topbar nav button {
+		padding-inline: 0.42rem;
+		font-size: 0.9rem;
+	}
+	.topbar nav .icon-button {
+		min-width: 40px;
+	}
+}
+
 .result-count strong {
 	display: block;
 	font-family: var(--serif);
@@ -1471,11 +2289,27 @@ main {
 .result-count span {
 	color: var(--muted);
 }
+.facet-groups {
+	display: grid;
+	gap: 0.45rem;
+	margin: 0.45rem 0 0.75rem;
+}
+.facet-group {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem 0.55rem;
+}
+.facet-group-label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--muted);
+	min-width: 4.5rem;
+}
 .facets {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.5rem;
-	margin: 0.45rem 0 0.6rem;
+	gap: 0.4rem;
 }
 .facets button {
 	display: inline-flex;
@@ -1506,6 +2340,37 @@ main {
 }
 .results button {
 	grid-template-columns: 5.5rem minmax(0, 1fr);
+}
+.hit-meta {
+	grid-column: 2;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem 0.45rem;
+	font-size: 0.84rem;
+}
+.hit-tag {
+	display: inline-flex;
+	align-items: baseline;
+	padding: 0.1rem 0.55rem;
+	border-radius: 999px;
+	font-family: var(--arabic-ui);
+	font-size: 0.82rem;
+	line-height: 1.4;
+}
+.hit-tag-pos {
+	background: var(--bg-2);
+	color: var(--ink);
+	border: 1px solid var(--line);
+}
+.hit-tag-rel {
+	background: var(--teal-soft);
+	color: var(--teal);
+	border: 1px solid color-mix(in srgb, var(--teal) 28%, transparent);
+	font-weight: 600;
+}
+.hit-gloss {
+	color: var(--muted);
 }
 .hit-snippet {
 	grid-column: 2;
@@ -1553,18 +2418,6 @@ main {
 .verse-line button {
 	min-height: 48px;
 	min-width: 48px;
-}
-.verse-span {
-	display: inline-flex;
-	flex-wrap: wrap;
-	gap: 0.15rem;
-	border-radius: 12px;
-}
-.verse-span.is-current {
-	background: var(--teal-soft);
-	padding-block: 0.12em;
-	padding-inline: 0.18em;
-	border-radius: 6px;
 }
 .tree-tools {
 	display: flex;
@@ -1630,7 +2483,8 @@ main {
 }
 .dock {
 	position: fixed;
-	z-index: 32;
+	/* Above the word sheet: the sheet rises out from behind it. */
+	z-index: 42;
 	left: 0;
 	right: 0;
 	bottom: 0;
@@ -1660,6 +2514,12 @@ main {
 }
 .dock form {
 	flex: 1;
+	max-width: 22rem;
+}
+.dock input {
+	min-height: 48px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
 }
 .clause-stepper {
 	position: fixed;
@@ -1730,6 +2590,15 @@ main {
 	transform: scaleX(1.1);
 	background: color-mix(in srgb, var(--ink) 55%, transparent);
 }
+:root[data-theme="dark"] .sheet-handle::before {
+	background: color-mix(in srgb, var(--ink) 38%, transparent);
+}
+/* Docked as a sidebar there is nothing to drag. */
+@media (min-width: 1100px) {
+	.sheet-handle {
+		display: none;
+	}
+}
 .icon-button {
 	min-width: 48px;
 	min-height: 48px;
@@ -1767,7 +2636,6 @@ main {
 	pointer-events: none;
 }
 
-:root[data-theme="dark"] .sheet-backdrop,
 :root[data-theme="dark"] .settings-backdrop {
 	background: rgba(0, 0, 0, 0.65);
 }
@@ -1809,6 +2677,14 @@ main {
 	gap: 0.55rem;
 }
 
+.settings-offline {
+	margin: 0;
+	padding: 0.75rem 1.25rem 1.25rem;
+	color: var(--muted);
+	font-size: 0.88rem;
+	font-variant-numeric: tabular-nums;
+}
+
 .settings-section h3 {
 	margin: 0;
 	font-size: 0.78rem;
@@ -1825,7 +2701,7 @@ main {
 
 .segmented-group {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(3, auto);
 	gap: 0.35rem;
 	background: var(--bg-2);
 	padding: 0.25rem;
@@ -2052,29 +2928,51 @@ main {
 		align-items: flex-end;
 		padding: 0;
 	}
+	/* The same bottom sheet as the word sheet: raised plane, lit edge,
+	 * pinned grab bar, and no visible × (it surfaces for keyboard focus). */
 	.settings-dialog {
 		width: 100%;
 		max-width: 100%;
-		border-radius: 20px 20px 0 0;
-		max-height: 85vh;
-		border-bottom: 0;
-		border-left: 0;
-		border-right: 0;
+		max-height: calc(100vh - var(--topbar-h, 0px));
+		background: var(--sheet-bg);
+		border: 0;
+		border-top: 1px solid var(--sheet-edge);
+		border-radius: 22px 22px 0 0;
+		box-shadow: var(--sheet-lift);
 		animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 		padding-bottom: env(safe-area-inset-bottom);
+		overscroll-behavior: contain;
 	}
 	.settings-dialog.is-closing {
 		animation: slideDown 0.2s cubic-bezier(0.32, 0, 0.67, 0) forwards;
 	}
-	.settings-sheet-handle {
+	.settings-dialog .settings-sheet-handle {
 		display: flex;
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		flex: none;
+		background: var(--sheet-bg);
+		touch-action: none;
+	}
+	.settings-dialog .settings-head {
+		padding-top: 0;
+	}
+	.settings-head .sheet-close:not(:focus-visible) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		min-width: 0;
+		min-height: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 }
-
-@media (min-width: 721px) {
-	.library-status {
-		bottom: 1.2rem;
-	}
+/* Dragged off-screen already: don't replay the exit keyframes from the top. */
+.sheet[data-drag-dismissed],
+.settings-dialog[data-drag-dismissed] {
+	animation: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2087,12 +2985,9 @@ main {
 	.settings-dialog.is-closing,
 	.sheet,
 	.sheet.is-closing,
-	.sheet-backdrop,
-	.sheet-backdrop.is-closing,
 	.quiz-wizard-pane.anim-forward,
 	.quiz-wizard-pane.anim-backward,
-	.anim-soft-enter,
-	.library-status {
+	.anim-soft-enter {
 		transform: none !important;
 		animation: none !important;
 		opacity: 1 !important;
@@ -2102,6 +2997,11 @@ main {
 	.skeleton span {
 		animation: none !important;
 		background: var(--bg-2) !important;
+	}
+
+	.verse-ref-chevron,
+	.filters-toggle-chevron {
+		transition: none !important;
 	}
 }
 
@@ -3399,10 +4299,11 @@ main {
 .verse-title-header-row {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 0.75rem 1rem;
-	margin-bottom: 0.35rem;
+	align-items: center;
+	gap: 0.25rem 0.6rem;
+}
+.verse-title-header-row .asbab-badge-button {
+	margin-inline-start: auto;
 }
 
 /* Unified Reader Verse Meaning & Commentary Tab */
@@ -3458,7 +4359,7 @@ main {
 }
 
 .maqasid-goal-text {
-	margin: 0.35rem 0 0;
+	margin: 0;
 	font-family: var(--arabic);
 	font-size: 1.05rem;
 	line-height: 1.7;
@@ -3468,13 +4369,6 @@ main {
 /* ==========================================================================
    Verse Header Action Buttons (Asbāb badge & deep links)
    ========================================================================== */
-.verse-actions-header {
-	display: flex;
-	align-items: center;
-	gap: 0.6rem;
-	flex-wrap: wrap;
-}
-
 .asbab-badge-button {
 	display: inline-flex;
 	align-items: center;
@@ -5004,6 +5898,7 @@ main {
 	font-size: 1.12rem;
 	line-height: 1.8;
 	color: var(--ink);
+	white-space: pre-line;
 }
 
 .exegesis-text-en {
@@ -5011,6 +5906,7 @@ main {
 	font-size: 0.85rem;
 	line-height: 1.6;
 	color: var(--ink-soft);
+	white-space: pre-line;
 }
 
 .settings-section-hint {
@@ -5034,4 +5930,33 @@ main {
 	display: flex;
 	flex-direction: column;
 	gap: 0.85rem;
+}
+
+/* Tabs: the word sheet's two views and the verse iʿrāb views */
+.tabs {
+	display: flex;
+	gap: 0.25rem;
+	margin: 0.4rem 0 0.9rem;
+	padding: 0.25rem;
+	border-radius: 12px;
+	background: var(--bg-2);
+}
+.tabs button {
+	flex: 1;
+	min-height: 44px;
+	border: 0;
+	border-radius: 9px;
+	background: transparent;
+	color: var(--muted);
+	font-weight: 600;
+	cursor: pointer;
+}
+.tabs button.is-on {
+	background: var(--paper);
+	color: var(--ink);
+	box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+.tabs button:focus-visible {
+	outline: 2px solid var(--teal);
+	outline-offset: 1px;
 }

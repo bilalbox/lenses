@@ -58,6 +58,18 @@ export default defineConfig({
 						},
 					},
 					{
+						// One dictionary file per root, fetched when a word sheet
+						// opens; kept apart so they never evict the surah layers.
+						urlPattern: ({ url }) =>
+							url.pathname.startsWith("/data/quran/lexicon/"),
+						handler: "StaleWhileRevalidate",
+						options: {
+							cacheName: "lenses-quran-lexicon",
+							cacheableResponse: { statuses: [200] },
+							expiration: { maxEntries: 300 },
+						},
+					},
+					{
 						// Opt-in per-surah layers (syntax, qirāʾāt, mutashabih),
 						// cached as they are opened. Sized above 4 × 114 files.
 						urlPattern: ({ url }) => url.pathname.startsWith("/data/quran/"),

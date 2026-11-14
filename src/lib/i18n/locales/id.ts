@@ -3,10 +3,10 @@ import type { Translations } from "../types";
 
 export const id: Translations = {
 	common: {
-		appNameAr: "عدسات",
-		appNameEn: "Lenses",
+		appName: "Lensa",
 		searchPlaceholder: "Surah:ayat, atau kata",
 		searchAria: "Cari ayat",
+		closeSearchAria: "Tutup pencarian",
 		versesCount: (count: number) => `${formatNum(count, "id")} ayat`,
 		noVersesMatch: "Tidak ada ayat yang cocok.",
 		surahsNav: "Surah",
@@ -85,6 +85,8 @@ export const id: Translations = {
 			submitButton: "Periksa",
 			placesHeading: "Letak setiap lafaz",
 			thisAyah: "ayat ini",
+			dabtHeading: "Kaidah / Rumus Hafalan (Dzabit)",
+			tawjihHeading: "Tawjih Balaghah & Perbedaan",
 		},
 		sarf: {
 			rootQuestion: (wordAr: string) =>
@@ -112,19 +114,6 @@ export const id: Translations = {
 		themeSection: "Tampilan",
 		themeLight: "Terang",
 		themeDark: "Gelap",
-		quizSection: "Kuis",
-		quizPrefs: {
-			hideDiacritics: {
-				label: "Sembunyikan harakat di kuis",
-				description:
-					"Tampilkan ayat Al-Qur'an tanpa harakat untuk tantangan yang lebih sulit.",
-			},
-			extendedRoles: {
-				label: "Kedudukan i'rab tambahan",
-				description:
-					"Tambahkan jar majrur (syibhul jumlah), zharaf, mustatsna, maf'ul li ajlih, dan taukid ke pilihan i'rab, dan tanyakan ayat yang memuatnya.",
-			},
-		},
 		readerSection: "Lapisan pembaca",
 		readerSectionHint:
 			"Sembunyikan lapisan yang tidak Anda pelajari. Lapisan yang dimatikan hilang dari tampilan ayat dan tidak diunduh sebelum diaktifkan.",
@@ -135,6 +124,8 @@ export const id: Translations = {
 			mutashabih: "Kesamaan verbal",
 			asbab: "Sebab turun",
 			qiraat: "Sepuluh qira'at di lembar kata",
+			wujuh: "Ragam makna ad-Damaghani di lembar kata",
+			khatib: "Referensi tata bahasa & iʿrāb (al-Khatib)",
 		},
 		sourcesLink: "Sumber Data",
 		sourcesDescription: "Jelajahi sumber data korpus dan lisensi",
@@ -145,7 +136,6 @@ export const id: Translations = {
 		meccan: "Makkiyah",
 		madinan: "Madaniyah",
 		verseMeaningTitle: "Makna Ayat",
-		verseMeaningSub: "Terjemahan Sabiq & Al-Mukhtasar · QuranEnc",
 		translationBadge: "Terjemahan Makna",
 		tafsirBadge: "Tafsir (Al-Mukhtasar)",
 		mukhtasarEnTitle: "Al-Mukhtasar",
@@ -161,6 +151,7 @@ export const id: Translations = {
 		noTreeTitle: "Belum ada pohon ketergantungan untuk ayat ini.",
 		classicalIrabShort: "I'rab",
 		surahGoalLabel: "Tujuan Surah",
+		surahDetails: "Detail surah",
 		revelationOrder: (seq: number) => `Urutan Turun #${formatNum(seq, "id")}`,
 		asbabBadge: (count: number) => `Sebab Turun (${formatNum(count, "id")})`,
 		asbabDrawerTitle: "Sebab-Sebab Turunnya Ayat (Asbabun Nuzul)",
@@ -168,6 +159,9 @@ export const id: Translations = {
 		usulBadge: (count: number) => `Dalil Ushul (${formatNum(count, "id")})`,
 		usulSectionTitle: "Ushul Fikih & Dalalat al-Alfaz",
 		nahwTabTitle: "Nahwu & Pohon Sintaksis",
+		irabViewsAria: "Tampilan i'rab",
+		irabDiagram: "Diagram",
+		irabClassical: "I'rab klasik",
 		treebankNoorBayan: "Treebank Al-Qur'an NoorBayan",
 		mutashabihBadge: (count: number) =>
 			`Kemiripan Redaksi (${formatNum(count, "id")})`,
@@ -193,6 +187,15 @@ export const id: Translations = {
 		mutashabihEmptyState:
 			"Tidak ada ayat mutasyabih lafzhi yang tercatat untuk ayat ini.",
 		mutashabihReturnToAyah: (coord: string) => `Kembali ke ${coord}`,
+		irabModel: "I'rab Teladan (Ya'qub)",
+		irabModelTitle: "I'rab Teladan Rinci",
+		irabModelSource: "Lampiran Al-Mu'jam al-Mufassal · Dr. Émile Badīʿ Yaʿqūb",
+		irabCitationTitle: "Rujukan I'rab (al-Khatib)",
+		irabCitationBadge: (count: number) => `${formatNum(count, "id")} entri`,
+		irabCitationSource:
+			"Al-Mu'jam al-Mufassal fi al-I'rab · Tahir Yusuf al-Khatib",
+		irabCitationIntro: (verseRef: string) =>
+			`Ayat ini (${verseRef}) dijadikan dalil tata bahasa pada entri-entri berikut:`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -202,8 +205,40 @@ export const id: Translations = {
 		collapseAria: "Kecilkan analisis",
 		classicalIrab: "I'rab klasik",
 		sarf: "Sharaf",
+		irabReferenceTitle: "Referensi Tata Bahasa (al-Khatib)",
+		irabReferenceSource: (page: number) =>
+			`Al-Mu'jam al-Mufassal fi al-I'rab · hlm. ${formatNum(page, "id")}`,
+		irabReferenceBab: (bab: string) => bab,
+		irabReferenceCitations: (count: number) =>
+			`${formatNum(count, "id")} rujukan Al-Qur'an`,
 		wordMeaning: "Arti kata",
 		searchThisRoot: "Cari akar kata ini",
+		searchThisWord: "Cari kata ini",
+		inQuran: "Dalam Al-Qur'an",
+		occurrences: (count: number, verses: number, surahs: number) =>
+			`${formatNum(count, "id")} kali dalam ${formatNum(verses, "id")} ayat di ${formatNum(surahs, "id")} surah`,
+		wordGlossSource: "Bahasa Inggris · Quranic Arabic Corpus",
+		dictionaries: "Kamus",
+		maqayisTitle: "Maqayis al-Lughah · Ibnu Faris",
+		mufradatTitle: "Al-Mufradat · Ar-Raghib al-Ashfahani",
+		laneTitle: "Kamus Arab–Inggris Lane",
+		laneThisWord: "Kata ini",
+		laneOtherEntries: (count: number) =>
+			`${formatNum(count, "id")} entri lain untuk akar kata ini`,
+		lanePage: (page: number) => `hlm. ${formatNum(page, "id")}`,
+		tabsAria: "Analisis kata",
+		tabHere: "Dalam ayat ini",
+		tabAcross: "Di seluruh Al-Qur'an",
+		wujuhTitle: "Ragam makna dalam Al-Qur'an · ad-Damaghani",
+		wujuhSeparator: " · ",
+		wujuhInThisVerse: "Dalam ayat ini",
+		wujuhSenseOf: (sense: number, total: number) =>
+			`makna ke-${formatNum(sense, "id")} dari ${formatNum(total, "id")}`,
+		wujuhNotCited: (total: number) =>
+			`${formatNum(total, "id")} makna. Ayat ini tidak termasuk contoh yang disebut ad-Damaghani.`,
+		wujuhThisVerse: "ayat ini",
+		wujuhUnnamedSense: (sense: number) => `Makna ke-${formatNum(sense, "id")}`,
+		wujuhNoVerses: "Ayat contoh untuk makna ini belum dapat dipetakan.",
 		qiraatTitle: "Sepuluh Qira'at Mutawatirah",
 		qiraatIsolation: "Saat Berhenti (Waqaf)",
 		qiraatWasl: "Saat Bersambung (Washal)",
@@ -214,8 +249,10 @@ export const id: Translations = {
 		pageTitle: "Jelajahi Al-Qur'an",
 	},
 	examples: {
+		rootPlaceholder: "علم atau Elm",
+		lemmaPlaceholder: "hal",
 		pageTitle: "Temukan pola",
-		lead: "Cari dalam korpus berdasarkan akar kata, bentuk dasar, jenis kata, wazan verba, atau relasi sintaksis.",
+		lead: "Cari dalam korpus berdasarkan akar kata, bentuk dasar, jenis kata (isim, fi'il, huruf), wazan verba, atau peran sintaksisnya dalam klausa.",
 		presetHal: "Pertanyaan hal",
 		presetAfala: "Af'ala dari n-z-l",
 		presetFaala: "Fa''ala dari 'a-l-m",
@@ -224,8 +261,24 @@ export const id: Translations = {
 		filterRoot: "Akar kata",
 		filterLemma: "Bentuk dasar",
 		filterPos: "Jenis kata",
+		posHint: "Kategori kata: isim, fi'il, huruf, atau imbuhan melekat",
+		posGroups: {
+			word: "Kelas kata utama",
+			particle: "Partikel & huruf",
+			clitic: "Awalan & akhiran melekat",
+		},
 		filterForm: "Wazan verba",
-		filterRelation: "Relasi",
+		filterRelation: "Peran sintaksis (I'rab)",
+		relationHint: "Fungsi dalam kalimat: fa'il, hal, tamyiz…",
+		relationGroups: {
+			core: "Unsur inti klausa",
+			nom: "Pelengkap & penjelas",
+			clause: "Penghubung & klausa",
+		},
+		facetPos: "Jenis kata",
+		facetForm: "Wazan",
+		facetLemma: "Bentuk dasar",
+		facetRelation: "Peran",
 		anyOption: "Semua",
 		noOptionMatch: "Tidak ada yang cocok",
 		clearFilter: (label: string) => `Hapus ${label}`,
@@ -234,7 +287,9 @@ export const id: Translations = {
 		noWordsMatch: "Tidak ada kata yang cocok dengan kombinasi ini.",
 		showMore: "Tampilkan lebih banyak",
 		chooseCriteriaHint:
-			"Pilih akar kata, bentuk dasar, jenis kata, wazan, atau relasi.",
+			"Pilih akar kata, bentuk dasar, jenis kata, wazan, atau peran sintaksis.",
+		moreFilters: "Filter lainnya",
+		fewerFilters: "Lebih sedikit filter",
 	},
 	sources: {
 		pageTitle: "Sumber edisi ini dibangun",
@@ -242,7 +297,7 @@ export const id: Translations = {
 			"Lenses adalah pembaca untuk analisis yang dipublikasikan secara terbuka. Teks Al-Qur'an bahasa Arab disimpan tanpa perubahan. Lapisan tata bahasa diatribusikan ke sumber aslinya.",
 		coverageHeading: "Cakupan Korpus & Lapisan Analisis",
 		coverageBody: (stats) =>
-			`Morfologi serta i'rab klasik, sharaf, dan makna kata dari Markaz Tafsir mencakup seluruh ${formatNum(stats.words, "id")} kata di 114 surah (${formatNum(stats.syntaxVerses, "id")} ayat), bersama maqashid surah dan tafsir Al-Mukhtashar dalam bahasa Arab, Inggris, dan Indonesia. Pohon sintaksis NoorBayan mencakup seluruh ${formatNum(stats.syntaxVerses, "id")} ayat (${formatNum(stats.syntaxGraphs, "id")} pohon klausa), Qira'at Asyrah mencakup ${formatNum(stats.qiraatWords ?? 0, "id")} kata pada ${formatNum(stats.qiraatVerses ?? 0, "id")} ayat, mutasyabih lafzhi menghubungkan ${formatNum(stats.mutashabihPairs ?? 0, "id")} pasangan pada ${formatNum(stats.mutashabihVerses ?? 0, "id")} ayat, dan asbabun nuzul terverifikasi mencakup ${formatNum(stats.asbabVerses ?? 0, "id")} ayat.`,
+			`Morfologi serta i'rab klasik, sharaf, dan makna kata dari Markaz Tafsir mencakup seluruh ${formatNum(stats.words, "id")} kata di 114 surah (${formatNum(stats.syntaxVerses, "id")} ayat), bersama maqashid surah dan tafsir Al-Mukhtashar dalam bahasa Arab, Inggris, dan Indonesia. Pohon sintaksis NoorBayan mencakup seluruh ${formatNum(stats.syntaxVerses, "id")} ayat (${formatNum(stats.syntaxGraphs, "id")} pohon klausa), Qira'at Asyrah mencakup ${formatNum(stats.qiraatWords ?? 0, "id")} kata pada ${formatNum(stats.qiraatVerses ?? 0, "id")} ayat, mutasyabih lafzhi menghubungkan ${formatNum(stats.mutashabihPairs ?? 0, "id")} pasangan pada ${formatNum(stats.mutashabihVerses ?? 0, "id")} ayat, dan asbabun nuzul terverifikasi mencakup ${formatNum(stats.asbabVerses ?? 0, "id")} ayat. Wujuh ad-Damaghani mencatat ragam makna ${formatNum(stats.wujuhRoots ?? 0, "id")} akar kata.`,
 		licenseLabel: "Lisensi:",
 		kinds: {
 			morphology: "Morfologi",
@@ -254,8 +309,58 @@ export const id: Translations = {
 			asbab: "Asbabun Nuzul",
 			qiraat: "Qira'at Asyrah",
 			mutashabih: "Kesamaan Verbal",
+			"word-translation": "Terjemahan Per Kata",
+			dictionary: "Kamus",
 		},
 		items: {
+			"khatib-irab": {
+				title: "Al-Mu'jam al-Mufassal fi al-I'rab (al-Khatib)",
+				attribution:
+					"Tahir Yusuf al-Khatib, ditinjau dan diberi pengantar oleh Dr. Émile Badīʿ Yaʿqūb (Dar al-Kutub al-Ilmiyyah, Beirut)",
+				description:
+					"Kamus referensi alfabetis partikel tata bahasa Arab, kata fungsional, dan kaidah i'rab dengan dalil ayat Al-Qur'an serta i'rab teladan.",
+				license: "Penggunaan edukasi publik; edisi digital via thahabi.org",
+			},
+			"openiti-wujuh": {
+				title: "Ishlah al-Wujuh wa an-Nazha'ir (ad-Damaghani)",
+				attribution:
+					"Al-Husain bin Muhammad ad-Damaghani (w. 478 H); teks digital dari korpus OpenITI (tahqiq 'Abd al-'Aziz Sayyid al-Ahl)",
+				description:
+					"Ragam makna setiap kata Al-Qur'an beserta ayat contohnya, dipetakan ke posisi kata.",
+				license: "CC BY-NC-SA 4.0 (rilis korpus OpenITI)",
+			},
+			"qac-word-by-word": {
+				title: "Terjemahan per kata bahasa Inggris Quranic Arabic Corpus",
+				attribution:
+					"Kais Dukes dan Quranic Arabic Corpus, dari karya Shehnaz Shaikh dan Kausar Khatri",
+				description:
+					"Terjemahan bahasa Inggris untuk setiap kata Al-Qur'an, ditampilkan apa adanya di kartu kata.",
+				license:
+					"GPL, dengan ketentuan korpus: salinan apa adanya dan korpus disebutkan sebagai sumber.",
+			},
+			"lane-lexicon": {
+				title: "Kamus Arab–Inggris Lane",
+				attribution:
+					"Edward William Lane (1863-1893). Text provided by Perseus Digital Library, with funding from The U.S. Department of Education and The Max Planck Society.",
+				description:
+					"Entri kamus Lane untuk setiap akar kata Al-Qur'an, dengan transliterasi Perseus diubah ke huruf Arab.",
+				license:
+					"Ketentuan Perseus: bebas disebarkan dengan menyebut Perseus, mempertahankan pernyataan ketersediaan, dan menawarkan perubahan kepada Perseus.",
+			},
+			"openiti-maqayis": {
+				title: "Mu'jam Maqayis al-Lughah (Ibnu Faris)",
+				attribution:
+					"Ibnu Faris (w. 395 H); teks digital dari korpus OpenITI (tahqiq 'Abd al-Salam Harun, 1979)",
+				description: "Makna pokok setiap akar kata, hanya teks utama.",
+				license: "CC BY-NC-SA 4.0 (rilis korpus OpenITI)",
+			},
+			"openiti-mufradat": {
+				title: "Al-Mufradat fi Gharib al-Qur'an (Ar-Raghib al-Ashfahani)",
+				attribution:
+					"Ar-Raghib al-Ashfahani (w. 502 H); teks digital dari korpus OpenITI (tahqiq Shafwan al-Dawudi)",
+				description: "Makna Qur'ani setiap akar kata, hanya teks utama.",
+				license: "CC BY-NC-SA 4.0 (rilis korpus OpenITI)",
+			},
 			"qac-morphology": {
 				title: "Morfologi Quranic Arabic Corpus 0.4",
 				attribution: "Kais Dukes dan Quranic Arabic Corpus",

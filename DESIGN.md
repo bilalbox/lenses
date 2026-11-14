@@ -19,7 +19,7 @@ neutral-surface-alt: "#e7e0d2"
 neutral-surface-alt-dark: "#1b221e"
 text-ink: "#1c1915"
 text-ink-dark: "#f4efe6"
-text-muted: "#6f675e"
+text-muted: "#685f56"
 text-muted-dark: "#b7aea2"
 border-line: "#e3d9c8"
 border-line-dark: "#2d3832"
@@ -132,7 +132,7 @@ The Modern Semantic Studio palette draws inspiration from classical botanical in
 - **Warm Canvas** (`#f3efe6` in light, `#101311` in dark): Root application canvas carrying a subtle ambient radial gradient.
 - **Muted Studio Surface** (`#e7e0d2` in light, `#1b221e` in dark): Subtle pill backgrounds, filter badges, and secondary action tabs.
 - **Text Ink** (`#1c1915` in light, `#f4efe6` in dark): Primary high-contrast reading text for Quranic verses and translations.
-- **Text Muted** (`#6f675e` in light, `#b7aea2` in dark): Metalinguistic labels, transliterations, chapter numbers, and attributions.
+- **Text Muted** (`#685f56` in light, `#b7aea2` in dark): Metalinguistic labels, transliterations, chapter numbers, and attributions. Holds ≥4.5:1 on every light surface, including the tinted `--bg-2`.
 - **Border Line** (`#e3d9c8` in light, `#2d3832` in dark): 1px structural hairpins defining card boundaries and tab dividers.
 
 ### Named Rules
@@ -166,7 +166,11 @@ The Modern Semantic Studio palette draws inspiration from classical botanical in
 
 The spatial model prioritizes undisturbed reading while providing instant access to analytical depth on demand:
 - **Two-Column Reading Stage (Desktop):** The central reading viewport hosts the verse toolbar, Quranic ayah, interactive dependency tree, and commentary tabs (max-width 1180px, centered). Word inspection slides smoothly into a sticky 360px sidebar sheet without obstructing the verse.
-- **Fluid Single-Column Stack (Mobile):** On viewports under 1100px, the word sheet transforms into an accessible bottom sheet modal. On viewports under 720px, the top navigation remains persistent as a compact single-row strip while reading controls dock neatly at the bottom (`.dock`).
+- **Fluid Single-Column Stack (Mobile):** On viewports under 1100px, verse stepping (previous · `sura:verse` · next) lives in the bottom dock (`.dock`) on the reader, and the word sheet docks as a non-blocking bottom sheet (45vh, expandable) that rests _on_ the dock, never over it, and never climbs past the topbar. No scrim: the verse above stays readable and tappable, and tapping the open word again puts it away. The open sheet reads as a raised plane (`--sheet-bg`, a teal-lit top edge `--sheet-edge`, an upward `--sheet-lift` shadow).
+- **One Bottom-Sheet Behavior:** Every bottom sheet (word sheet, settings under 720px) shares one gesture set (`useSheetDrag`): a pinned grab bar that tracks the finger, drag down or flick to dismiss, drag up to expand where a taller state exists, and a tap outside to dismiss. No visible ×; it surfaces only for keyboard focus, and Escape always closes. Settings stays modal (scrim, focus trap); the word sheet stays non-blocking. The desktop word sidebar keeps a quiet × since it has no grab bar.
+- **Wordmark:** One name in the interface language, in teal: **Lenses** (Literata), **Lensa** (Indonesian), **عدسات** (Scheherazade). On viewports under 720px the top navigation is a compact single-row strip (wordmark, sections, search, settings).
+- **One Search, Everywhere:** The verse finder lives in the topbar on every page. Under 720px it collapses to a search icon that opens a full-width row with its own close button; results drop above the sheet and dock. `/` or Ctrl/⌘+K focuses it from anywhere.
+- **Progressive Disclosure:** The reader opens on the surah name, a `sura:verse` toggle, and the ayah. Surah facts (revelation, order, class, surah goal) sit behind that toggle; analytical layers sit in collapsed drawers whose headers carry only their title or a count, with source credits inside. Example Search shows presets and Root first, with the finer filters behind "More filters".
 - **Dependency Tree Canvas:** Scaled vector graphics (`<svg>`) rendered with `userSpaceOnUse` markers, natural arc curvatures directed toward syntactic heads, and dashed lines for implied pronouns or cross-verse boundaries.
 
 ## Elevation & Depth
@@ -178,7 +182,7 @@ Depth is established primarily through tonal planes and fine hairline borders ra
 ### Shadow Vocabulary
 
 - **Ambient Soft (`--shadow-soft`):** `0 1px 2px rgba(60, 42, 20, 0.05), 0 6px 14px -4px rgba(60, 42, 20, 0.08)` (Dark mode: `0 1px 2px rgba(0, 0, 0, 0.22), 0 6px 14px -4px rgba(0, 0, 0, 0.35)`). Applied to elevated cards and floating search results.
-- **Elevated Dialog (`--shadow`):** `0 1px 2px rgba(60, 42, 20, 0.05), 0 10px 28px -6px rgba(60, 42, 20, 0.1)` (Dark mode: `0 1px 2px rgba(0, 0, 0, 0.2), 0 12px 32px -6px rgba(0, 0, 0, 0.45)`). Applied to modal dialogs (`SettingsModal`, mobile `WordSheet`).
+- **Elevated Dialog (`--shadow`):** `0 1px 2px rgba(60, 42, 20, 0.05), 0 10px 28px -6px rgba(60, 42, 20, 0.1)` (Dark mode: `0 1px 2px rgba(0, 0, 0, 0.2), 0 12px 32px -6px rgba(0, 0, 0, 0.45)`). Applied to modal dialogs (`SettingsModal`) and the docked mobile `WordSheet`.
 
 ## Shapes
 

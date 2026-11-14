@@ -11,7 +11,7 @@ export interface WordingChoice {
 	/** Uthmani words; empty when the ayah has no word at the blank. */
 	text: string;
 	/** The ayahs that read this wording at the blank. */
-	refs: { sura: number; verse: number; phonetic: string }[];
+	refs: { sura: number; verse: number; name: string; phonetic: string }[];
 }
 
 export interface MutashabihQuestion {
@@ -28,6 +28,12 @@ export interface MutashabihQuestion {
 	/** Index into `wordings` of the ayah's own wording. */
 	answer: number;
 	surahs: SurahChoice[];
+	/** Classical memorization rule / trick (ḍābiṭ), if available. */
+	dabt?: string;
+	/** Classical rhetorical explanation (tawjīh), if available. */
+	tawjih?: string;
+	/** English mnemonic / difference note, if available. */
+	noteEn?: string;
 }
 
 /** The quiz bank with surah names from the manifest; entries naming an unknown surah are dropped. */
@@ -59,11 +65,15 @@ export function toMutashabihQuestions(
 					refs: o.refs.map(([sura, verse]) => ({
 						sura,
 						verse,
+						name: byNumber.get(sura)?.name ?? "",
 						phonetic: byNumber.get(sura)?.phonetic ?? "",
 					})),
 				})),
 				answer: q.ans,
 				surahs: surahs as SurahChoice[],
+				dabt: q.dabt,
+				tawjih: q.tawjih,
+				noteEn: q.noteEn,
 			},
 		];
 	});

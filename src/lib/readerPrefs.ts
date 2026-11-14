@@ -4,9 +4,11 @@ export type ReaderLayerKey =
 	| "nahw"
 	| "mutashabih"
 	| "asbab"
-	| "qiraat";
+	| "qiraat"
+	| "wujuh"
+	| "khatib";
 
-/** The reader's layer switches; every pref is one layer under the ayah. */
+/** The reader's layer switches. Each one is a layer under the ayah or in the word sheet. */
 export type ReaderPrefs = Record<ReaderLayerKey, boolean>;
 
 export const READER_LAYER_KEYS: ReaderLayerKey[] = [
@@ -16,6 +18,8 @@ export const READER_LAYER_KEYS: ReaderLayerKey[] = [
 	"mutashabih",
 	"asbab",
 	"qiraat",
+	"wujuh",
+	"khatib",
 ];
 
 export const DEFAULT_READER_PREFS: ReaderPrefs = {
@@ -25,6 +29,8 @@ export const DEFAULT_READER_PREFS: ReaderPrefs = {
 	mutashabih: false,
 	asbab: false,
 	qiraat: false,
+	wujuh: false,
+	khatib: false,
 };
 
 const STORAGE_KEY = "lenses-reader-prefs";

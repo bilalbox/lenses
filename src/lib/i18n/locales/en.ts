@@ -3,10 +3,10 @@ import type { Translations } from "../types";
 
 export const en: Translations = {
 	common: {
-		appNameAr: "عدسات",
-		appNameEn: "Lenses",
+		appName: "Lenses",
 		searchPlaceholder: "Surah:verse, or word",
 		searchAria: "Search verses",
+		closeSearchAria: "Close search",
 		versesCount: (count: number) =>
 			`${formatNum(count, "en")} ${count === 1 ? "verse" : "verses"}`,
 		noVersesMatch: "No verses match.",
@@ -83,6 +83,8 @@ export const en: Translations = {
 			submitButton: "Check",
 			placesHeading: "Where each wording occurs",
 			thisAyah: "this ayah",
+			dabtHeading: "Memorization Rule (Ḍabṭ)",
+			tawjihHeading: "Rhetorical Exegesis (Tawjīh)",
 		},
 		sarf: {
 			rootQuestion: (wordAr: string) =>
@@ -111,19 +113,6 @@ export const en: Translations = {
 		themeSection: "Appearance",
 		themeLight: "Light",
 		themeDark: "Dark",
-		quizSection: "Quiz",
-		quizPrefs: {
-			hideDiacritics: {
-				label: "Hide diacritics in quizzes",
-				description:
-					"Show Quran verses without harakat for a harder challenge.",
-			},
-			extendedRoles: {
-				label: "Extended iʿrāb roles",
-				description:
-					"Add jārr wa-majrūr (prepositional phrases), ẓarf, mustathnā, mafʿūl li-ajlih and tawkīd to the iʿrāb roles, and ask the ayahs that have them.",
-			},
-		},
 		readerSection: "Reader layers",
 		readerSectionHint:
 			"Hide layers you are not studying. Disabled layers leave the verse reader entirely and are not downloaded until enabled.",
@@ -134,6 +123,8 @@ export const en: Translations = {
 			mutashabih: "Verbal similarities",
 			asbab: "Causes of revelation",
 			qiraat: "Ten readings (qirāʾāt) in the word sheet",
+			wujuh: "Qurʾānic senses (al-Dāmaghānī) in the word sheet",
+			khatib: "Grammar & parse reference (al-Khaṭīb)",
 		},
 		sourcesLink: "Data Sources",
 		sourcesDescription: "Explore corpus data sources and licenses.",
@@ -144,7 +135,6 @@ export const en: Translations = {
 		meccan: "Meccan",
 		madinan: "Madinan",
 		verseMeaningTitle: "Verse Meaning",
-		verseMeaningSub: "Saheeh International & Al-Mukhtasar · QuranEnc",
 		translationBadge: "Translation",
 		tafsirBadge: "Commentary (Al-Mukhtasar)",
 		mukhtasarEnTitle: "Al-Mukhtasar",
@@ -160,6 +150,7 @@ export const en: Translations = {
 		noTreeTitle: "No dependency tree for this verse.",
 		classicalIrabShort: "Iʿrāb",
 		surahGoalLabel: "Surah Goal",
+		surahDetails: "Surah details",
 		revelationOrder: (seq: number) => `Revelation #${formatNum(seq, "en")}`,
 		asbabBadge: (count: number) =>
 			`Cause of Revelation (${formatNum(count, "en")})`,
@@ -169,6 +160,9 @@ export const en: Translations = {
 			`Usul & Legal Semantics (${formatNum(count, "en")})`,
 		usulSectionTitle: "Usul al-Fiqh & Legal Semantics",
 		nahwTabTitle: "Nahw & Syntax Tree",
+		irabViewsAria: "Iʿrāb views",
+		irabDiagram: "Diagram",
+		irabClassical: "Classical iʿrāb",
 		treebankNoorBayan: "NoorBayan Quranic Treebank",
 		mutashabihBadge: (count: number) =>
 			`Verbal Similarities (${formatNum(count, "en")})`,
@@ -194,6 +188,17 @@ export const en: Translations = {
 		mutashabihEmptyState:
 			"No verbal similarities (mutashābihāt) are recorded for this verse.",
 		mutashabihReturnToAyah: (coord: string) => `Return to ${coord}`,
+		irabModel: "Model parse (Yaʿqūb)",
+		irabModelTitle: "Detailed Model Parsing",
+		irabModelSource:
+			"Al-Muʿjam al-Mufaṣṣal (Appendix) · Dr. Émile Badīʿ Yaʿqūb",
+		irabCitationTitle: "Grammar Citations (al-Khatib)",
+		irabCitationBadge: (count: number) =>
+			`${formatNum(count, "en")} ${count === 1 ? "entry" : "entries"}`,
+		irabCitationSource:
+			"Al-Muʿjam al-Mufaṣṣal fī al-Iʿrāb · Ṭāhir Yūsuf al-Khaṭīb",
+		irabCitationIntro: (verseRef: string) =>
+			`This ayah (${verseRef}) is cited as a grammatical proof text under the following entries:`,
 	},
 	sheet: {
 		analysisAria: (wordNumber: number) =>
@@ -203,8 +208,40 @@ export const en: Translations = {
 		collapseAria: "Collapse analysis",
 		classicalIrab: "Classical iʿrāb",
 		sarf: "Ṣarf",
+		irabReferenceTitle: "Grammar Reference (al-Khatib)",
+		irabReferenceSource: (page: number) =>
+			`Al-Muʿjam al-Mufaṣṣal fī al-Iʿrāb · p. ${formatNum(page, "en")}`,
+		irabReferenceBab: (bab: string) => bab,
+		irabReferenceCitations: (count: number) =>
+			`${formatNum(count, "en")} Quranic citation${count === 1 ? "" : "s"}`,
 		wordMeaning: "Word meaning",
 		searchThisRoot: "Search this root",
+		searchThisWord: "Search this word",
+		inQuran: "In the Qurʾān",
+		occurrences: (count: number, verses: number, surahs: number) =>
+			`${formatNum(count, "en")} ${count === 1 ? "time" : "times"} in ${formatNum(verses, "en")} ${verses === 1 ? "verse" : "verses"} across ${formatNum(surahs, "en")} ${surahs === 1 ? "surah" : "surahs"}`,
+		wordGlossSource: "English · Quranic Arabic Corpus",
+		dictionaries: "Dictionaries",
+		maqayisTitle: "Maqāyīs al-Lugha · Ibn Fāris",
+		mufradatTitle: "al-Mufradāt · al-Rāghib al-Iṣfahānī",
+		laneTitle: "Lane's Arabic–English Lexicon",
+		laneThisWord: "This word",
+		laneOtherEntries: (count: number) =>
+			`${formatNum(count, "en")} more ${count === 1 ? "entry" : "entries"} for the root`,
+		lanePage: (page: number) => `p. ${formatNum(page, "en")}`,
+		tabsAria: "Word analysis",
+		tabHere: "In this verse",
+		tabAcross: "Across the Qurʾān",
+		wujuhTitle: "Senses in the Qurʾān · al-Dāmaghānī",
+		wujuhSeparator: " · ",
+		wujuhInThisVerse: "In this verse",
+		wujuhSenseOf: (sense: number, total: number) =>
+			`sense ${formatNum(sense, "en")} of ${formatNum(total, "en")}`,
+		wujuhNotCited: (total: number) =>
+			`${formatNum(total, "en")} ${total === 1 ? "sense" : "senses"}. This verse is not among al-Dāmaghānī's examples.`,
+		wujuhThisVerse: "this verse",
+		wujuhUnnamedSense: (sense: number) => `Sense ${formatNum(sense, "en")}`,
+		wujuhNoVerses: "No cited verse could be placed for this sense.",
 		qiraatTitle: "Ten Canonical Readings (Al-Qirāʾāt al-ʿAshr)",
 		qiraatIsolation: "In Isolation / Waqf",
 		qiraatWasl: "In Continuous Speech / Waṣl",
@@ -215,18 +252,36 @@ export const en: Translations = {
 		pageTitle: "Browse the Quran",
 	},
 	examples: {
+		rootPlaceholder: "علم or Elm",
+		lemmaPlaceholder: "hal",
 		pageTitle: "Find the pattern",
-		lead: "Search the corpus by root, lemma, part of speech, verb form, or the syntactic relation the word fills.",
+		lead: "Search the corpus by root, lemma, word type (what the word is), verb form, or grammatical role (how it functions in the clause).",
 		presetHal: "Interrogative hal",
 		presetAfala: "Form IV of n-z-l",
 		presetFaala: "Form II of ʿ-l-m",
 		presetFail: "Subject (Fāʿil)",
-		presetHalState: "Circumstantial (Ḥāl)",
+		presetHalState: "Circumstantial role (Ḥāl)",
 		filterRoot: "Root",
 		filterLemma: "Lemma",
-		filterPos: "Part of speech",
+		filterPos: "Word type (POS)",
+		posHint: "What the word is (noun, verb, particle…)",
+		posGroups: {
+			word: "Word classes",
+			particle: "Particles",
+			clitic: "Attached prefixes & suffixes",
+		},
 		filterForm: "Verb form",
-		filterRelation: "Relation",
+		filterRelation: "Grammatical role",
+		relationHint: "Its function in the clause (fāʿil, ḥāl…)",
+		relationGroups: {
+			core: "Core clause roles",
+			nom: "Complements & modifiers",
+			clause: "Clause links & structure",
+		},
+		facetPos: "Word type",
+		facetForm: "Verb form",
+		facetLemma: "Lemma",
+		facetRelation: "Role",
 		anyOption: "Any",
 		noOptionMatch: "No matches",
 		clearFilter: (label: string) => `Clear ${label}`,
@@ -235,7 +290,9 @@ export const en: Translations = {
 		noWordsMatch: "No words match this combination.",
 		showMore: "Show more",
 		chooseCriteriaHint:
-			"Choose a root, a lemma, a part of speech, a form, or a relation.",
+			"Choose a root, a lemma, a word type, a verb form, or a grammatical role.",
+		moreFilters: "More filters",
+		fewerFilters: "Fewer filters",
 	},
 	sources: {
 		pageTitle: "What this edition is built from",
@@ -243,7 +300,7 @@ export const en: Translations = {
 			"Lenses is a reader for analyses other people published. The Arabic Quranic text is stored verbatim. Grammatical layers stay attributed to their sources, and a verse can show more than one of them at once.",
 		coverageHeading: "Corpus & Layer Coverage",
 		coverageBody: (stats) =>
-			`Morphology and Tafsir Center classical iʿrāb, ṣarf, and word meanings cover all ${formatNum(stats.words, "en")} words across all 114 surahs (${formatNum(stats.syntaxVerses, "en")} verses), alongside surah maqāṣid and verse commentary in Arabic, English, and Indonesian. The NoorBayan treebank spans all ${formatNum(stats.syntaxVerses, "en")} verses (${formatNum(stats.syntaxGraphs, "en")} clause trees). Canonical qirāʾāt cover ${formatNum(stats.qiraatWords ?? 0, "en")} words in ${formatNum(stats.qiraatVerses ?? 0, "en")} verses, verbal similarities link ${formatNum(stats.mutashabihPairs ?? 0, "en")} verse pairs across ${formatNum(stats.mutashabihVerses ?? 0, "en")} verses, and authenticated asbāb al-nuzūl cover ${formatNum(stats.asbabVerses ?? 0, "en")} verses.`,
+			`Morphology and Tafsir Center classical iʿrāb, ṣarf, and word meanings cover all ${formatNum(stats.words, "en")} words across all 114 surahs (${formatNum(stats.syntaxVerses, "en")} verses), alongside surah maqāṣid and verse commentary in Arabic, English, and Indonesian. The NoorBayan treebank spans all ${formatNum(stats.syntaxVerses, "en")} verses (${formatNum(stats.syntaxGraphs, "en")} clause trees). Canonical qirāʾāt cover ${formatNum(stats.qiraatWords ?? 0, "en")} words in ${formatNum(stats.qiraatVerses ?? 0, "en")} verses, verbal similarities link ${formatNum(stats.mutashabihPairs ?? 0, "en")} verse pairs across ${formatNum(stats.mutashabihVerses ?? 0, "en")} verses, and authenticated asbāb al-nuzūl cover ${formatNum(stats.asbabVerses ?? 0, "en")} verses. Al-Dāmaghānī's wujūh record the senses of ${formatNum(stats.wujuhRoots ?? 0, "en")} roots.`,
 		licenseLabel: "License:",
 		kinds: {
 			morphology: "Morphology",
@@ -255,6 +312,8 @@ export const en: Translations = {
 			asbab: "Causes of Revelation",
 			qiraat: "Ten Readings (Qirāʾāt)",
 			mutashabih: "Verbal Similarities",
+			"word-translation": "Word-by-word Translation",
+			dictionary: "Dictionary",
 		},
 		items: {},
 	},

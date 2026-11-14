@@ -111,22 +111,18 @@ function UsulAyahWords({
 	question: q,
 	step,
 	pickedWord,
-	show,
 	onSelectWord,
 }: {
 	question: UsulQuestion;
 	step: number;
 	pickedWord: number | null;
-	show: (text: string) => string;
 	onSelectWord: (wordNum: number) => void;
 }) {
 	const words = q.verse.w;
 	if (!words || words.length === 0) {
 		return (
 			<p className="quiz-wizard-ayah" dir="rtl" lang="ar">
-				<span className="quiz-word is-target">
-					{show(q.shahid.shahidPhraseAr)}
-				</span>
+				<span className="quiz-word is-target">{q.shahid.shahidPhraseAr}</span>
 			</p>
 		);
 	}
@@ -155,7 +151,7 @@ function UsulAyahWords({
 						onClick={() => onSelectWord(w.n)}
 						aria-label={w.a}
 					>
-						{show(w.a)}
+						{w.a}
 					</button>
 				);
 			})}
@@ -167,20 +163,16 @@ function UsulStepPrompt({
 	title,
 	subtitle,
 	phrase,
-	show,
 }: {
 	title: string;
 	subtitle?: string;
 	phrase?: string;
-	show: (text: string) => string;
 }) {
 	return (
 		<div className="usul-drill-question-box">
 			<h3 className="usul-drill-prompt">{title}</h3>
 			{subtitle && <p className="quiz-wizard-pick-hint">{subtitle}</p>}
-			{phrase && (
-				<div className="usul-drill-phrase-quote">﴿{show(phrase)}﴾</div>
-			)}
+			{phrase && <div className="usul-drill-phrase-quote">﴿{phrase}﴾</div>}
 		</div>
 	);
 }
@@ -330,7 +322,7 @@ function UsulReviewStep({
 }
 
 export function UsulLens(props: LensProps<UsulQuestion>) {
-	const { question: q, session, dispatch, show } = props;
+	const { question: q, session, dispatch } = props;
 	const { t } = useI18n();
 	const draft = session.drafts.usul;
 	const step = currentStep(session);
@@ -451,11 +443,15 @@ export function UsulLens(props: LensProps<UsulQuestion>) {
 					question={q}
 					step={step}
 					pickedWord={draft.pickedWord}
-					show={show}
 					onSelectWord={handleTokenClick}
 				/>
 			}
-			place={{ phonetic: q.suraPhonetic, sura: q.sura, verse: q.verse.v }}
+			place={{
+				name: q.suraName,
+				phonetic: q.suraPhonetic,
+				sura: q.sura,
+				verse: q.verse.v,
+			}}
 			onOpenReader={() =>
 				props.onOpenInReader(q.sura, q.verse.v, q.shahid.wordStart)
 			}
@@ -467,7 +463,6 @@ export function UsulLens(props: LensProps<UsulQuestion>) {
 							title="الخطوة الأولى: عيّن موضع الشاهد الأصولي"
 							subtitle="انقر على الكلمة في مربع الآية الكريمة بالأعلى لتحديد موضع الشاهد لقاعدة الدلالة."
 							phrase={q.shahid.shahidPhraseAr}
-							show={show}
 						/>
 						<div
 							className="usul-drill-action-row"
@@ -497,7 +492,6 @@ export function UsulLens(props: LensProps<UsulQuestion>) {
 							title="الخطوة الثانية: حدّد نوع الدلالة الأصولية"
 							subtitle="ما نوع الدلالة الأصولية لهذا الموضع المختار؟"
 							phrase={q.shahid.shahidPhraseAr}
-							show={show}
 						/>
 						<UsulStepOptionsList
 							options={dalalahOptions}
@@ -513,7 +507,6 @@ export function UsulLens(props: LensProps<UsulQuestion>) {
 							title="الخطوة الثالثة: فحص القرينة الصارفة ومجرى الدلالة"
 							subtitle="هل عريت الصيغة عن القرائن الصارفة أم صرفت عن مقتضاها الأصلي؟"
 							phrase={q.shahid.shahidPhraseAr}
-							show={show}
 						/>
 						<UsulStepOptionsList
 							options={qarinahOptions}
@@ -533,7 +526,6 @@ export function UsulLens(props: LensProps<UsulQuestion>) {
 									: "ما هو الحكم الفقهي المستنبط من مقتضى هذه الدلالة؟"
 							}
 							phrase={q.shahid.shahidPhraseAr}
-							show={show}
 						/>
 						<UsulStepOptionsList
 							options={rulingOptions}

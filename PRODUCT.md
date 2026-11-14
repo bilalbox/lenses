@@ -40,7 +40,7 @@ Unlike single-source lookup tools that isolate either computational treebanks (s
 
 ## Brand Commitments
 
-- **Name:** Bilingual identity—**عدسات** (Arabic) and **Lenses** (English).
+- **Name:** Trilingual identity—**عدسات** (Arabic), **Lenses** (English), and **Lensa** (Indonesian); the wordmark shows the one matching the interface language.
 - **Default Opening Verse:** Opens to Surah Al-Hashr `59:18` when no prior reading position is stored in `localStorage`.
 
 ## Evidence on Hand

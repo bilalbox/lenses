@@ -1497,7 +1497,9 @@
     "qiraatWords": 29605,
     "qiraatVerses": 5948,
     "mutashabihVerses": 2602,
-    "mutashabihPairs": 6838
+    "mutashabihPairs": 6838,
+    "lexiconRoots": 1622,
+    "wujuhRoots": 427
   },
   "sources": [
     {
@@ -1574,11 +1576,11 @@
     },
     {
       "id": "indonesian-sabiq",
-      "title": "Terjemahan Al-Qur'an Bahasa Indonesia (PT. Sabiq)",
+      "title": "Indonesian translation of the Qur'an (PT. Sabiq)",
       "kind": "translation",
-      "attribution": "PT. Sabiq (di bawah pengawasan Pusat Penerjemahan Rowwad), via QuranEnc.com (indonesian_sabiq)",
-      "description": "Terjemahan makna Al-Qur'an bahasa Indonesia yang ringkas dan lugas, ditelaah secara berkala.",
-      "license": "Distribusi terbuka / QuranEnc republication terms.",
+      "attribution": "PT. Sabiq (supervised by the Rowwad Translation Center), via QuranEnc.com (indonesian_sabiq)",
+      "description": "A concise, plain Indonesian translation of the meanings of the Qur'an, revised periodically.",
+      "license": "QuranEnc republication terms: verbatim text with attribution.",
       "url": "https://quranenc.com/en/browse/indonesian_sabiq"
     },
     {
@@ -1616,6 +1618,60 @@
       "description": "Classical Ḍabṭ mnemonic anchors and Tawjīh rhetorical difference exegeses.",
       "license": "Free to use inside apps and research tools with attribution",
       "url": "https://quranpedia.net/"
+    },
+    {
+      "id": "qac-word-by-word",
+      "title": "Quranic Arabic Corpus word-by-word English",
+      "kind": "word-translation",
+      "attribution": "Kais Dukes and the Quranic Arabic Corpus, from work compiled by Shehnaz Shaikh and Kausar Khatri",
+      "description": "An English gloss for each word of the Qur'an, shown verbatim in the word sheet.",
+      "license": "GPL, with the corpus terms of use: verbatim copies, and the corpus is credited",
+      "url": "https://corpus.quran.com/wordbyword.jsp"
+    },
+    {
+      "id": "lane-lexicon",
+      "title": "Lane's Arabic-English Lexicon",
+      "kind": "dictionary",
+      "attribution": "Edward William Lane (1863-1893). Text provided by Perseus Digital Library, with funding from The U.S. Department of Education and The Max Planck Society.",
+      "description": "Lane's entries for each Quranic root, with Perseus's Arabic transliteration converted to Arabic script.",
+      "license": "Perseus availability terms: free to distribute with credit to Perseus, the availability statement kept, and changes offered to Perseus",
+      "url": "https://github.com/laneslexicon/lexicon_xml"
+    },
+    {
+      "id": "openiti-maqayis",
+      "title": "Muʿjam Maqāyīs al-Lugha (Ibn Fāris)",
+      "kind": "dictionary",
+      "attribution": "Ibn Fāris (d. 395 AH); digital text from the OpenITI corpus (ed. ʿAbd al-Salām Hārūn, 1979)",
+      "description": "The core meaning of each root, main text only.",
+      "license": "CC BY-NC-SA 4.0 (OpenITI corpus release)",
+      "url": "https://github.com/OpenITI/0400AH"
+    },
+    {
+      "id": "openiti-mufradat",
+      "title": "al-Mufradāt fī Gharīb al-Qurʾān (al-Rāghib al-Iṣfahānī)",
+      "kind": "dictionary",
+      "attribution": "al-Rāghib al-Iṣfahānī (d. 502 AH); digital text from the OpenITI corpus (ed. Ṣafwān al-Dāwūdī)",
+      "description": "The Qur'anic senses of each root, main text only.",
+      "license": "CC BY-NC-SA 4.0 (OpenITI corpus release)",
+      "url": "https://github.com/OpenITI/0525AH"
+    },
+    {
+      "id": "openiti-wujuh",
+      "title": "Iṣlāḥ al-Wujūh wa-l-Naẓāʾir (al-Dāmaghānī)",
+      "kind": "dictionary",
+      "attribution": "al-Ḥusayn ibn Muḥammad al-Dāmaghānī (d. 478 AH); digital text from the OpenITI corpus (ed. ʿAbd al-ʿAzīz Sayyid al-Ahl)",
+      "description": "The senses each Qur'anic word carries and the verses al-Dāmaghānī cites for each, mapped to word positions.",
+      "license": "CC BY-NC-SA 4.0 (OpenITI corpus release)",
+      "url": "https://github.com/OpenITI/0500AH"
+    },
+    {
+      "id": "khatib-irab",
+      "title": "Al-Mu'jam al-Mufassal fi al-I'rab (al-Khatib)",
+      "kind": "classical-irab",
+      "attribution": "Tahir Yusuf al-Khatib, with review and introduction by Dr. Emil Badi' Ya'qub",
+      "description": "Alphabetical reference dictionary of Arabic grammatical particles, functional words, and syntactic rules with model parsing and Quranic citations, plus model parsing of Surah al-Fatihah and Surah al-Baqarah (1-25).",
+      "license": "Public educational use; digitized via thahabi.org (book 20680)",
+      "url": "https://thahabi.org/book/20680"
     }
   ]
 }

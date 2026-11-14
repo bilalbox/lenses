@@ -15,16 +15,17 @@ import {
 	type QuizPools,
 	type UsulQuestion,
 } from "../../lib/quizBank";
-import { rolesFor } from "../../lib/quizCatalog";
+import { QUIZ_ROLES } from "../../lib/quizCatalog";
 import type { Manifest, MutashabihQuizFile, SurahFile } from "../../lib/types";
 import type { UsuliShahid } from "../../lib/usulTypes";
 
 const NO_GRAMMAR: GrammarPools = { irab: [], sarf: [] };
+const OFFERED_ROLES = new Set(QUIZ_ROLES.map((role) => role.code));
 
-export function useQuizPools(
-	manifest: Manifest,
-	extendedRoles: boolean,
-): { pools: QuizPools; loading: boolean } {
+export function useQuizPools(manifest: Manifest): {
+	pools: QuizPools;
+	loading: boolean;
+} {
 	const [loadedFiles, setLoadedFiles] = useState<SurahFile[]>([]);
 	const [grammarBank, setGrammarBank] = useState<QuizBankFile | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -104,16 +105,15 @@ export function useQuizPools(
 	}, [usulBank, surah2]);
 
 	const pools = useMemo<QuizPools>(() => {
-		const offered = new Set(rolesFor(extendedRoles).map((r) => r.code));
 		return {
 			...grammarPools,
-			irab: grammarPools.irab.filter((q) => offered.has(q.relation)),
+			irab: grammarPools.irab.filter((q) => OFFERED_ROLES.has(q.relation)),
 			mutashabih: mutashabihBank
 				? toMutashabihQuestions(mutashabihBank, manifest.units)
 				: [],
 			usul: usulPool,
 		};
-	}, [grammarPools, extendedRoles, mutashabihBank, manifest.units, usulPool]);
+	}, [grammarPools, mutashabihBank, manifest.units, usulPool]);
 
 	return { pools, loading };
 }

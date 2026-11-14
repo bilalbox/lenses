@@ -66,6 +66,10 @@ def are_neighbours(a: Key, b: Key) -> bool:
     return a[0] == b[0] and abs(a[1] - b[1]) <= NEIGHBOUR_GAP
 
 
+def make_pair_key(a: Key, b: Key) -> tuple[Key, Key]:
+    return (a, b) if a <= b else (b, a)
+
+
 @dataclass
 class Variant:
     """One wording for a blank and the ayahs that use it."""
@@ -79,6 +83,7 @@ class Corpus:
     rasm: dict[Key, list[str]]
     uthmani: dict[Key, list[str]]
     partners: dict[Key, set[Key]]
+    notes: dict[tuple[Key, Key], dict[str, str]] = field(default_factory=dict)
 
     def by_text(self) -> dict[tuple[str, ...], list[Key]]:
         index: dict[tuple[str, ...], list[Key]] = defaultdict(list)
@@ -153,6 +158,55 @@ def _surah_options(
     return [target[0], *others[: MAX_SURAH_OPTIONS - 1]]
 
 
+def _question_notes(
+    target: Key,
+    options: list[Variant],
+    slot_partners: list[Key],
+    notes: dict[tuple[Key, Key], dict[str, str]],
+) -> dict[str, str]:
+    """Gather classical ḍabṭ, tawjīh, and English notes distinguishing this ayah from counterparts."""
+    distractor_refs: list[Key] = []
+    for opt in options:
+        for r in opt.refs:
+            rk = (r[0], r[1])
+            if rk != target and rk not in distractor_refs:
+                distractor_refs.append(rk)
+
+    check_partners = distractor_refs + [p for p in slot_partners if p not in distractor_refs]
+    dabts: list[str] = []
+    tawjihs: list[str] = []
+    note_ens: list[str] = []
+    seen_dabt: set[str] = set()
+    seen_tawjih: set[str] = set()
+    seen_note_en: set[str] = set()
+
+    for p in check_partners:
+        p_notes = notes.get(make_pair_key(target, p))
+        if not p_notes:
+            continue
+        d = p_notes.get("dabt")
+        if d and d not in seen_dabt:
+            seen_dabt.add(d)
+            dabts.append(d)
+        t = p_notes.get("tawjih")
+        if t and t not in seen_tawjih:
+            seen_tawjih.add(t)
+            tawjihs.append(t)
+        ne = p_notes.get("noteEn")
+        if ne and ne not in seen_note_en:
+            seen_note_en.add(ne)
+            note_ens.append(ne)
+
+    out: dict[str, str] = {}
+    if dabts:
+        out["dabt"] = "\n\n".join(dabts)
+    if tawjihs:
+        out["tawjih"] = "\n\n".join(tawjihs)
+    if note_ens:
+        out["noteEn"] = "\n\n".join(note_ens)
+    return out
+
+
 def build_questions(corpus: Corpus) -> list[dict[str, Any]]:
     copies = corpus.by_text()
     questions: list[dict[str, Any]] = []
@@ -172,19 +226,19 @@ def build_questions(corpus: Corpus) -> list[dict[str, Any]]:
             answer = options[0]
             rng.shuffle(options)
             rng.shuffle(surahs)
-            questions.append(
-                {
-                    "id": qid,
-                    "s": target[0],
-                    "v": target[1],
-                    "w": corpus.uthmani[target],
-                    "at": i1,
-                    "len": i2 - i1,
-                    "opts": [{"a": o.text, "refs": [list(r) for r in o.refs]} for o in options],
-                    "ans": options.index(answer),
-                    "surahs": surahs,
-                }
-            )
+            q_data: dict[str, Any] = {
+                "id": qid,
+                "s": target[0],
+                "v": target[1],
+                "w": corpus.uthmani[target],
+                "at": i1,
+                "len": i2 - i1,
+                "opts": [{"a": o.text, "refs": [list(r) for r in o.refs]} for o in options],
+                "ans": options.index(answer),
+                "surahs": surahs,
+            }
+            q_data.update(_question_notes(target, options, slot_partners, corpus.notes))
+            questions.append(q_data)
     return questions
 
 
@@ -193,6 +247,7 @@ def load_corpus() -> Corpus:
     rasm = {(int(r[0]), int(r[1])): str(r[2]).split() for r in rows}
     uthmani: dict[Key, list[str]] = {}
     partners: dict[Key, set[Key]] = defaultdict(set)
+    notes: dict[tuple[Key, Key], dict[str, str]] = {}
     for sura in range(1, 115):
         surah = json.loads(surah_path("surah", sura).read_text(encoding="utf-8"))
         for verse in surah["verses"]:
@@ -208,7 +263,17 @@ def load_corpus() -> Corpus:
                 dst = (int(match["sura"]), int(match["ayah"]))
                 partners[src].add(dst)
                 partners[dst].add(src)
-    return Corpus(rasm, uthmani, dict(partners))
+                pair_key = make_pair_key(src, dst)
+                entry_notes = notes.setdefault(pair_key, {})
+                for field_name in ("dabt", "tawjih", "noteEn"):
+                    val = match.get(field_name)
+                    if val and field_name not in entry_notes:
+                        cleaned = "\n".join(
+                            line.rstrip() for line in str(val).replace("\r\n", "\n").splitlines()
+                        ).strip()
+                        if cleaned:
+                            entry_notes[field_name] = cleaned
+    return Corpus(rasm, uthmani, dict(partners), notes)
 
 
 def main() -> None:
